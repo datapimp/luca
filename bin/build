@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler'
+
+Bundler.require
+
+ROOT = File.join( File.dirname(__FILE__), '..') 
+SOURCE_DIR = File.join( ROOT, 'src' )
+JAVASCRIPT = File.join( ROOT, 'lib', 'luca.js' )
+CSS = File.join( ROOT, 'lib', 'luca.css' )
+
+sprockets = Sprockets::Environment.new( ROOT ) do |env|
+
+end
+
+sprockets.append_path( File.join(SOURCE_DIR, 'coffeescripts') )
+sprockets.append_path( File.join(SOURCE_DIR, 'stylesheets') )
+
+File.open( JAVASCRIPT, 'w+') do |fh|
+  fh.puts sprockets['luca.js'].to_s
+end
+
+File.open( CSS, 'w+') do |fh|
+  fh.puts sprockets['luca.css'].to_s
+end
+

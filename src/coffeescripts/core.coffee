@@ -1,0 +1,3 @@
+window.Luca =
+  util: {}
+  components: {}
