@@ -10,6 +10,11 @@ SOURCE_DIR = File.join( ROOT, 'src' )
 JAVASCRIPT = File.join( ROOT, 'lib', 'luca.js' )
 CSS = File.join( ROOT, 'lib', 'luca.css' )
 
+# examples
+EXAMPLES_DIR = File.join( ROOT, 'examples' )
+JAVASCRIPT_EXAMPLES = File.join( ROOT, 'examples', 'javascripts' )
+CSS_EXAMPLES = File.join( ROOT, 'examples', 'stylesheets' )
+
 sprockets = Sprockets::Environment.new( ROOT ) do |env|
 
 end
@@ -18,10 +23,13 @@ sprockets.append_path( File.join(SOURCE_DIR, 'coffeescripts') )
 sprockets.append_path( File.join(SOURCE_DIR, 'stylesheets') )
 
 File.open( JAVASCRIPT, 'w+') do |fh|
-  fh.puts sprockets['luca.js'].to_s
+  fh.puts sprockets['build.js'].to_s
 end
 
 File.open( CSS, 'w+') do |fh|
-  fh.puts sprockets['luca.css'].to_s
+  fh.puts sprockets['build.css'].to_s
 end
+
+FileUtils.cp JAVASCRIPT, JAVASCRIPT_EXAMPLES
+FileUtils.cp CSS, CSS_EXAMPLES
 
