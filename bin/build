@@ -33,3 +33,8 @@ end
 FileUtils.cp JAVASCRIPT, JAVASCRIPT_EXAMPLES
 FileUtils.cp CSS, CSS_EXAMPLES
 
+File.open( File.join(ROOT,'examples','javascripts','examples.js'), 'w+' ) do |fh|
+  fh.puts sprockets['examples.coffee'].to_s
+end
+
+

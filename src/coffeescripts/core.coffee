@@ -1,3 +1,5 @@
 window.Luca =
-  util: {}
+  base: {}
   components: {}
+  layouts: {}
+  util: {}

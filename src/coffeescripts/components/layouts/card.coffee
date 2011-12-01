@@ -1,10 +1,27 @@
-Luca.components.CardLayout = Luca.components.Layout.extend 
+Luca.layouts.CardLayout = Luca.components.Layout.extend 
+
+  initialize: (@options={})->
+    @render() unless not @deferredRender
+
   activeItem: 0
-  
-  items: []
 
-  setActiveItem: (item)->
-    console.log "Setting Active Item"
+  component_type: 'card_layout'
 
-  initialize: (@options)->
-    console.log("Creating a Card Layout", @options)
+  deferredRender: false
+
+  setActiveItem: (index)->
+    @trigger "cardchange", index, @items[ index ] 
+    @activeItem = index
+
+  getActiveItem: ()-> @items[ @activeItem ]
+
+  render: ()->
+    console.log "Rendering Card Layout to #{ @el }"
+    _( @items ).each (item) =>
+      item_id = if item.css_id? then item.css_id else "element-#{ _.uniqueId() }"
+      item.el = "##{ item_id }"
+
+      $(@el).append("<div id='#{ item_id }' class='luca-card' style='display:none;'></div>")
+
+
+
