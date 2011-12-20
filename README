@@ -1,5 +1,0 @@
-Luca is a framework for creating UI Components such as forms, and grids, similar to the ExtJS framework but with backbone as the underlying library.
-
-Luca has containers, which can have a configurable layout.  Each container has an array of items which are organized according to the layout.
-
-Inspired by backbone-forms, and extjs
