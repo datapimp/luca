@@ -1,5 +1,3 @@
-#= require_tree ./views/
-
 Sandbox.Main = Luca.containers.ColumnView.extend
   el: '#viewport'
   
