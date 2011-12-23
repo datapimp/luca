@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Sinatra with Sprockets 2 (Asset Pipeline)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="<%= asset_path('styles.css') %>">
+    <script src="<%= asset_path('application.js') %>"></script>
+    
+  </head>
+  <body>
+    <img src="<%= asset_path('rails.png') %>">
+  </body>
+</html>

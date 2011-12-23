@@ -1,0 +1,2 @@
+window.Sandbox =
+  views: {}
