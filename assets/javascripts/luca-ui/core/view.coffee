@@ -24,19 +24,18 @@ Luca.View.extend = (definition)->
   # then it will make sure that the render method doesn't get called
   # until.
 
-  if definition.render?
-    __original_render = definition.render
+  __original_render = definition.render || (()->)
 
-    definition.render = ()->
-      if @deferrable
-        @deferrable.bind @deferrable_event, ()=>
-          @trigger "before:render", @
-          __original_render.apply @, arguments
-          @trigger "after:render", @
-      else
+  definition.render = ()->
+    if @deferrable
+      @deferrable.bind @deferrable_event, ()=>
         @trigger "before:render", @
         __original_render.apply @, arguments
         @trigger "after:render", @
+    else
+      @trigger "before:render", @
+      __original_render.apply @, arguments
+      @trigger "after:render", @
 
   Luca.View.original_extend.apply @, [definition]
 

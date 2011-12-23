@@ -15,6 +15,9 @@ class App < Sinatra::Base
   set :assets_prefix, 'assets'
   set :assets_path, File.join(root, 'public', assets_prefix)
   
+  require "#{ root }/lib/sprockets/luca_template.rb"
+  sprockets.register_engine '.luca', Sprockets::LucaTemplate
+
   configure do
     sprockets.append_path(File.join(root, 'assets', 'stylesheets'))
     sprockets.append_path(File.join(root, 'assets', 'javascripts'))
