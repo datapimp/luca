@@ -1,3 +1,4 @@
+#### Container
 Luca.core.Container = Luca.View.extend 
   hooks:[
     "before:components",
