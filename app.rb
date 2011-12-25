@@ -1,6 +1,9 @@
 require 'bundler'
 Bundler.require
 
+require 'rubygems'
+require 'faker'
+
 module AssetHelpers
   def asset_path(source)
     "/assets/" + settings.sprockets.find_asset(source).digest_path
@@ -38,6 +41,8 @@ class App < Sinatra::Base
 
   get "/sandbox/api" do
     content_type :json
-    [{name:"Jonathan",location:"Chicago"},{name:"Luca",location:"Barrington"}].to_json
+    100.times.collect {
+      {name:"#{ Faker::Name.first_name } #{ Faker::Name.last_name}",location:Faker::Address.city,email:Faker::Internet.email,website:"www.#{ Faker::Internet.domain_name }"} 
+    }.to_json
   end
 end

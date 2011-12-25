@@ -12,6 +12,12 @@ Sandbox.Main = Luca.containers.ColumnView.extend
     ,
       header: "Location"
       data: "location"
+    ,
+      header: "Email",
+      data: "email"
+    ,
+      header: "Website"
+      data: 'website'
     ]
   ]
 

@@ -9,6 +9,8 @@ GEM
     ejs (1.0.0)
     execjs (1.2.13)
       multi_json (~> 1.0)
+    faker (0.9.5)
+      i18n (~> 0.4)
     ffi (1.0.11)
     growl_notify (0.0.3)
       rb-appscript
@@ -20,6 +22,7 @@ GEM
       sprockets (~> 2.0)
     haml (3.1.4)
     hike (1.2.1)
+    i18n (0.6.0)
     method_source (0.6.7)
       ruby_parser (>= 2.3.1)
     multi_json (1.0.4)
@@ -58,6 +61,7 @@ PLATFORMS
 DEPENDENCIES
   coffee-script (>= 2.2.0)
   ejs
+  faker
   growl_notify
   guard-sprockets2
   haml
