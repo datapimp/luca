@@ -83,23 +83,21 @@
 
   Luca.View.extend = function(definition) {
     var __original_render;
-    if (definition.render != null) {
-      __original_render = definition.render;
-      definition.render = function() {
-        var _this = this;
-        if (this.deferrable) {
-          return this.deferrable.bind(this.deferrable_event, function() {
-            _this.trigger("before:render", _this);
-            __original_render.apply(_this, arguments);
-            return _this.trigger("after:render", _this);
-          });
-        } else {
-          this.trigger("before:render", this);
-          __original_render.apply(this, arguments);
-          return this.trigger("after:render", this);
-        }
-      };
-    }
+    __original_render = definition.render || (function() {});
+    definition.render = function() {
+      var _this = this;
+      if (this.deferrable) {
+        return this.deferrable.bind(this.deferrable_event, function() {
+          _this.trigger("before:render", _this);
+          __original_render.apply(_this, arguments);
+          return _this.trigger("after:render", _this);
+        });
+      } else {
+        this.trigger("before:render", this);
+        __original_render.apply(this, arguments);
+        return this.trigger("after:render", this);
+      }
+    };
     return Luca.View.original_extend.apply(this, [definition]);
   };
 
@@ -471,11 +469,15 @@
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-ui/templates/containers/card"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('%div{:class=>"', cssClass ,'",:id=>"', cssId ,'",:style=>"', cssStyles ,'"}\n');}return __p.join('');};
+  this.JST["luca-ui/templates/containers/card"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', cssClass ,'\' id=\'', cssId ,'\' style=\'', cssStyles ,'\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-ui/templates/containers/column"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('%div{:class=>"', cssClass ,'",:id=>"', cssId ,'",:style=>"width:', width ,'%;', cssStyles ,'"}\n');}return __p.join('');};
+  this.JST["luca-ui/templates/containers/column"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', cssClass ,'\' id=\'', cssId ,'\' style=\'width:', width ,'%;', cssStyles ,'\'></div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-ui/templates/containers/sample"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); for(var i=0; i < 5; i++) { __p.push('\n<div>\n  ', i ,'\n</div>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 
 

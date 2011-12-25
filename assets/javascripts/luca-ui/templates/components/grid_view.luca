@@ -1,0 +1,8 @@
+.luca-ui-grid-view-wrapper
+  .grid-view-header
+  .grid-view-body
+    %table.luca-ui-grid-view
+      %thead
+      %tbody
+      %tfoot
+  .grid-view-footer

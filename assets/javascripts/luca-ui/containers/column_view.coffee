@@ -28,7 +28,7 @@ Luca.containers.ColumnView = Luca.core.Container.extend
         columnIndex: columnIndex 
         cssId: "#{ @cid }-#{ columnIndex }" 
 
-      $(@el).append(JST["luca-ui/templates/containers/column"](column))
+      $(@el).append(Luca.templates["containers/column"](column))
 
       column
 

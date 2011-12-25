@@ -8,4 +8,4 @@ Sandbox.views.Navigation = Backbone.View.extend
     @getParent().getContentView().activate $(me).data('dashboard')
 
   render: ()->
-    $(@el).html JST["sandbox/templates/navigation"]({navigation_title: @navigation_title })
+    $(@el).html JST["navigation"]({navigation_title: @navigation_title })

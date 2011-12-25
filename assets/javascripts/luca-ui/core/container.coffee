@@ -63,7 +63,6 @@ Luca.core.Container = Luca.View.extend
   # this view handles its layout tasks and creates whatever structural DOM elements are needed
   # to display the views
   render_components: ()->
-    #@index_components()
     _(@components).each (component)=> 
       component.getParent = ()=> @ 
       component.render()

@@ -24,7 +24,7 @@ Luca.containers.CardView = Luca.core.Container.extend
         cardIndex: cardIndex
         cssId: "#{ @cid }-#{ cardIndex }"
       
-      $(@el).append JST["luca-ui/templates/containers/card"]( card ) 
+      $(@el).append Luca.templates["containers/card"]( card ) 
 
       card
 

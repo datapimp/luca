@@ -35,4 +35,9 @@ class App < Sinatra::Base
   get "/" do
     erb :index
   end
+
+  get "/sandbox/api" do
+    content_type :json
+    [{name:"Jonathan",location:"Chicago"},{name:"Luca",location:"Barrington"}].to_json
+  end
 end

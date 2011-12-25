@@ -22,5 +22,5 @@ Sandbox.views.Dashboard = Backbone.View.extend
     @getParent().cycle()
 
   render: ()->
-    $(@el).html JST["sandbox/templates/dashboard"](dashboard_name: @dashboard_name)
+    $(@el).html JST["dashboard"](dashboard_name: @dashboard_name)
 

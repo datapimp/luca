@@ -2,6 +2,11 @@ require 'tilt'
 
 module Sprockets
   class LucaTemplate < Tilt::Template
+    attr_accessor :namespace
+    def self.default_mime_type
+      'application/javascript'
+    end
+
     def self.engine_initialized?
       defined? ::EJS
       defined? ::Haml
@@ -15,12 +20,30 @@ module Sprockets
     def prepare
       options = @options.merge(:filename => eval_file, :line => line, :escape_attrs => false)
       @engine = ::Haml::Engine.new(data, options)
+      self.namespace = "Luca.templates"
     end
 
     def evaluate(scope, locals, &block)
       compiled = @engine.render(scope, locals, &block)
-      EJS.compile compiled 
+      code = EJS.compile(compiled)
+      tmpl = scope.logical_path 
+
+      tmpl.gsub! /^.*\/templates\//, ''
+
+      <<-JST
+(function() {
+  #{namespace} || (#{namespace} = {});
+  #{namespace}[#{ tmpl.inspect }] = #{indent(code)};
+}).call(this);
+      JST
     end
+
+    private
+
+      def indent(string)
+        string.gsub(/$(.)/m, "\\1  ").strip
+      end
+
   end
 end
 

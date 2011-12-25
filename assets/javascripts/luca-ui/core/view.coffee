@@ -28,10 +28,13 @@ Luca.View.extend = (definition)->
 
   definition.render = ()->
     if @deferrable
+      console.log "Deferrable Render", @deferrable, @deferrable_event
       @deferrable.bind @deferrable_event, ()=>
         @trigger "before:render", @
         __original_render.apply @, arguments
         @trigger "after:render", @
+
+      @deferrable.fetch()
     else
       @trigger "before:render", @
       __original_render.apply @, arguments
@@ -46,6 +49,8 @@ _.extend Luca.View.prototype,
     "before:render",
     "after:render"
   ]
+  
+  deferrable_event: "reset"
 
   initialize: (@options={})->
     #### View Caching
