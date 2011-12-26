@@ -6,6 +6,7 @@ Luca.containers.ColumnView = Luca.containers.SplitView.extend
   components: []
 
   initialize: (@options)->
+    _.extend @, @options
     Luca.containers.SplitView.prototype.initialize.apply @,arguments
   
   panelClass: 'luca-ui-column'

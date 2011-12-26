@@ -1,4 +1,6 @@
 Luca.containers.SplitView = Luca.core.Container.extend 
+  layout: '100'
+
   component_type: 'split_view'
 
   className: 'luca-ui-split-view' 
@@ -14,14 +16,12 @@ Luca.containers.SplitView = Luca.core.Container.extend
   panelClass: 'luca-ui-panel'
 
   panel_config: (panel, panelIndex)->
-    config = 
-      class: @panelClass
-      id: "#{ @cid }-#{ panelIndex }"
+    class: @panelClass
+    id: "#{ @cid }-#{ panelIndex }"
 
   prepare_layout: ()->
     _( @component_containers ).each (container)=>
-      markup = "<div id='#{ container.id }' class='#{ container.class }' style='#{ container.style }' />"
-      $(@el).append( markup )
+      $(@el).append "<div id='#{ container.id }' class='#{ container.class }' style='#{ container.style }' />"
 
   prepare_components: ()-> @assign_containers()
 
@@ -32,6 +32,4 @@ Luca.containers.SplitView = Luca.core.Container.extend
       object.parentEl = @el
       object
 
-# register for lazy creation later
 Luca.register 'split_view', "Luca.containers.SplitView"
-

@@ -1,12 +1,3 @@
-Luca.components.FilterableCollection = (config, initial_set=[])->
-  base = 
-    model: config.model
-    url: ()-> config.base_url
-
-  Collection = Backbone.Collection.extend(base)
-
-  new Collection(config, initial_set)
-
 Luca.components.GridView = Luca.View.extend
   initialize: (@options={})->
     _.extend @, @options
@@ -16,7 +7,12 @@ Luca.components.GridView = Luca.View.extend
     @configure_store()
 
   configure_store: ()->
-    @deferrable = @collection = Luca.components.FilterableCollection( @store, @store.initial_set )
+    store = @store
+    _.extend @store,
+      url: ()->
+        store.url
+        
+    @deferrable = @collection = new Luca.components.FilterableCollection( @store.initial_set, @store )
   
   beforeRender: _.once ()->
     $(@el).html Luca.templates["components/grid_view"]()
