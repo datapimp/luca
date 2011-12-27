@@ -1,5 +1,6 @@
 #### Luca Base View
-Luca.View = Backbone.View
+Luca.View = Backbone.View.extend
+  base: 'Luca.View'
 
 # The Luca.View class adds some very commonly used patterns
 # and functionality to the stock Backbone.View class. Features
@@ -7,7 +8,7 @@ Luca.View = Backbone.View
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
 
-Luca.View.original_extend = Luca.View.extend
+Luca.View.original_extend = Backbone.View.extend
 
 # By overriding Backbone.View.extend we are able to intercept
 # some method definitions and add special behavior around them
@@ -41,8 +42,12 @@ Luca.View.extend = (definition)->
 
   Luca.View.original_extend.apply @, [definition]
 
-
 _.extend Luca.View.prototype,
+  trigger: (@event)->
+    console.log "Triggering ", arguments, @cid if @debugMode is "verbose"
+
+    Backbone.View.prototype.trigger.apply @, arguments
+
   hooks:[
     "after:initialize",
     "before:render",
@@ -52,6 +57,8 @@ _.extend Luca.View.prototype,
   deferrable_event: "reset"
 
   initialize: (@options={})->
+    _.extend @, @options
+
     #### View Caching
     #
     # Luca.View(s) which get created get stored in a global cache by their
@@ -77,7 +84,7 @@ _.extend Luca.View.prototype,
   # after:initialize  : afterInitialize()
   setupHooks: (set)->
     set ||= @hooks
-
+    
     _(set).each (event)=>
       parts = event.split(':')
       prefix = parts.shift()

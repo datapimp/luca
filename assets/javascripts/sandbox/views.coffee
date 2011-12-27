@@ -1,44 +1,14 @@
-Sandbox.Main = Luca.containers.SplitView.extend
+Sandbox.Main = Luca.containers.ColumnView.extend
   el: '#viewport'
   name : 'viewport'
-  layout: '100'
+  layout: '20/80'
   components:[
-    height: 125
-    ctype: 'form_view'
-    fields:[
-      type: 'select' 
-      label: 'Sample Select'
-      name: 'select'
-      valueField: 'id'
-      displayField: 'name'
-      store:
-        base_url: "/sandbox/api"
-        base_params: 
-          limit: 10
-    ,
-      type: 'checkbox'
-      name: 'checkbox'
-      label: 'Sample Checkbox'
-    ]
+    ctype: 'navigation'
   ,
-    ctype: 'grid_view'
-    store:
-      base_url: "/sandbox/api"
-      base_params:
-        limit: 50
-    columns:[
-      header: "Name"
-      data: "name"
-    ,
-      header: "Location"
-      data: "location"
-    ,
-      header: "Email",
-      data: "email"
-    ,
-      header: "Website"
-      data: 'website'
+    ctype: 'card_view',
+    components:[
+      ctype: 'column_demo'
     ]
   ]
 
-Luca.registry.addNamespace('Sandbox.views')
+Luca.registry.addNamespace 'Sandbox.views'

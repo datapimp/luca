@@ -35,18 +35,29 @@ Luca.core.Container = Luca.View.extend
     @render_components()
     @trigger "after:components", @, @components
 
-  prepare_layout: ()-> true
+  prepare_layout: ()-> 
+    console.log @component_type, "should implement its own prepare layout"
   
-  prepare_components: ()-> true
+  prepare_components: ()->
+    console.log @component_type, "should implement its own prepare components method"
   
   create_components: ()->
-    @components = _( @components ).map (object, index)->
+    @components = _( @components ).map (object, index)=>
       component = if _.isObject( object ) and object.ctype? then Luca.util.LazyObject( object ) else object
+
+      # if we're using base backbone views, then they don't extend themselves
+      # with their passed options, so this is a workaround
+      if !component.renderTo and component.options.renderTo
+        component.container = component.renderTo = component.options.renderTo
+
+      component
   
   render_components: ()->
     _(@components).each (component)=> 
       component.getParent = ()=> @ 
       component.render()
+      if component.renderTo and $( component.renderTo ).html() is "" and $( component.el ).html isnt ""
+        $( component.renderTo ).append $(component.el)
   
   beforeRender: ()->
     @do_layout() 

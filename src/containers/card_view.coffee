@@ -15,25 +15,23 @@ Luca.containers.CardView = Luca.core.Container.extend
   initialize: (@options)->
     Luca.core.Container.prototype.initialize.apply @,arguments
     @setupHooks(@hooks)
-
-  prepare_layout: ()->
+  
+  beforeLayout: ()->
     @cards = _(@components).map (card,cardIndex) =>
-      card = 
-        cssClass: 'luca-ui-card'
-        cssStyles: "display:#{ (if cardIndex is @activeCard then 'block' else 'none' )}"
-        cardIndex: cardIndex
-        cssId: "#{ @cid }-#{ cardIndex }"
-      
-      $(@el).append Luca.templates["containers/card"]( card ) 
-
-      card
+      class: 'luca-ui-card'
+      style: "display:#{ (if cardIndex is @activeCard then 'block' else 'none' )}"
+      id: "#{ @cid }-#{ cardIndex }"
+ 
+  prepare_layout: ()->
+    _( @cards ).each (card)=>
+      $(@el).append "<div id='#{ card.id }' style='#{ card.style }' class='#{ card.class }' />"
 
   prepare_components: ()-> @assignToCards()
   
   assignToCards: ()->
     @components = _( @components ).map (object,index)=>
       card = @cards[index]
-      object.el = object.renderTo = "##{ card.cssId }"
+      object.container = object.renderTo = "##{ card.id }"
       object.parentEl = @el
       object
   

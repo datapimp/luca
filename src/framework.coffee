@@ -118,3 +118,11 @@ Luca.register = (component, constructor_class)->
     throw "Can not register component with the signature #{ component }. Already exists"
   else
     Luca.registry.classes[component] = constructor_class
+
+Luca.available_templates = (filter="")->
+  available = _( Luca.templates ).keys()
+
+  if filter.length > 0
+    _( available ).select (tmpl)-> tmpl.match(filter)
+  else
+    available

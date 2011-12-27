@@ -1,11 +1,16 @@
 Sandbox.views.Navigation = Backbone.View.extend
-  events:
-    "click .dashboardSelector li" : "selectDashboard"
-  
-  selectDashboard: (e)->
+  className: '.navigation'
+  tagName: 'ul'
+
+  events: 
+    "click .navigation li.cardswitch" : "navigate"
+    "click .modal" : "modal"
+
+  navigate: (e)->
     me = my = $(e.currentTarget)
-    
-    @getParent().getContentView().activate $(me).data('dashboard')
+    slide = my.data('slide')
+
+  modal: ()->
 
   render: ()->
-    $(@el).html JST["navigation"]({navigation_title: @navigation_title })
+    $(@el).html Luca.templates["navigation"]()

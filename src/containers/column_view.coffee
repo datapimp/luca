@@ -1,12 +1,11 @@
 Luca.containers.ColumnView = Luca.containers.SplitView.extend
   component_type: 'column_view'
 
-  class_name: 'luca-ui-column-view'
+  className: 'luca-ui-column-view'
 
   components: []
 
-  initialize: (@options)->
-    _.extend @, @options
+  initialize: (@options={})->
     Luca.containers.SplitView.prototype.initialize.apply @,arguments
   
   panelClass: 'luca-ui-column'
@@ -14,9 +13,18 @@ Luca.containers.ColumnView = Luca.containers.SplitView.extend
   autoLayout: ()-> 
     _( @components.length ).times ()=> parseInt( 100 / @components.length )
 
+  setColumnWidths: ()->
+    @columnWidths = if @layout? 
+      _( @layout.split('/') ).map((v)-> parseInt(v) ) 
+    else 
+      @autoLayout()
+
+    @columnWidths = _( @columnWidths ).map (val)-> "#{ val }%"
+
   beforeLayout: ()->
-    @columnWidths = if @layout? then _( @layout.split('/') ).map((v)-> parseInt(v)) else @autoLayout()
+    @setColumnWidths()
+
     _(@columnWidths).each (width,index) =>
-      @component_containers[index].style = "float:left; width: #{ width }px;" 
+      @component_containers[index].style = "float:left; width: #{ width };" 
 
 Luca.register 'column_view', "Luca.containers.ColumnView"
