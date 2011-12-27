@@ -1,4 +1,5 @@
 Sandbox.views.Navigation = Backbone.View.extend
+  name: "sandbox_navigation"
   className: '.navigation'
   tagName: 'ul'
 

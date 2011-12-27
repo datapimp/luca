@@ -1,4 +1,6 @@
 Sandbox.views.CardDemo = Luca.containers.CardView.extend
+  name: 'card_demo'
+
   activeItem: 0
 
   events:

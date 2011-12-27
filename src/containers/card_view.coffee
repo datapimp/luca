@@ -26,7 +26,8 @@ Luca.containers.CardView = Luca.core.Container.extend
     _( @cards ).each (card)=>
       $(@el).append "<div id='#{ card.id }' style='#{ card.style }' class='#{ card.class }' />"
 
-  prepare_components: ()-> @assignToCards()
+  prepare_components: ()-> 
+    @assignToCards()
   
   assignToCards: ()->
     @components = _( @components ).map (object,index)=>
