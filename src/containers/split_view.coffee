@@ -16,8 +16,15 @@ Luca.containers.SplitView = Luca.core.Container.extend
   panelClass: 'luca-ui-panel'
 
   panel_config: (panel, panelIndex)->
-    class: @panelClass
-    id: "#{ @cid }-#{ panelIndex }"
+    style_declarations = []
+    
+    style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height
+    style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width
+    
+    config = 
+      class: @panelClass
+      id: "#{ @cid }-#{ panelIndex }"
+      style: style_declarations.join(';')
 
   prepare_layout: ()->
     _( @component_containers ).each (container)=>
@@ -28,7 +35,7 @@ Luca.containers.SplitView = Luca.core.Container.extend
   assign_containers: ()->
     @components = _( @components ).map (object, index) =>
       panel = @component_containers[ index ]
-      object.el = object.renderTo = "##{ panel.id }"
+      object.container = object.renderTo = "##{ panel.id }"
       object.parentEl = @el
       object
 

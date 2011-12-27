@@ -6,3 +6,7 @@ Luca.components.FilterableCollection = Backbone.Collection.extend
     Backbone.Collection.prototype.initialize.apply @, arguments
 
   applyFilter: (@params={})->
+
+  fetch: (options)->
+    @trigger "before:fetch"
+    Backbone.Collection.prototype.fetch.apply @, arguments

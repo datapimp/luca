@@ -28,7 +28,6 @@ Luca.View.extend = (definition)->
 
   definition.render = ()->
     if @deferrable
-      console.log "Deferrable Render", @deferrable, @deferrable_event
       @deferrable.bind @deferrable_event, ()=>
         @trigger "before:render", @
         __original_render.apply @, arguments

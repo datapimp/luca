@@ -1,4 +1,8 @@
 Luca.components.GridView = Luca.View.extend
+  className: 'luca-ui-grid-view'
+
+  scrollable: true
+
   initialize: (@options={})->
     _.extend @, @options
 
@@ -10,11 +14,13 @@ Luca.components.GridView = Luca.View.extend
     store = @store
     _.extend @store,
       url: ()->
-        store.url
+        store.base_url
         
     @deferrable = @collection = new Luca.components.FilterableCollection( @store.initial_set, @store )
   
   beforeRender: _.once ()->
+    $(@el).addClass 'scrollable-grid-view' if @scrollable
+
     $(@el).html Luca.templates["components/grid_view"]()
 
     @table  = $('table.luca-ui-grid-view', @el)
@@ -24,6 +30,8 @@ Luca.components.GridView = Luca.View.extend
 
     @render_header()
 
+    $(@container).append $(@el)
+  
   render: ()-> 
     @collection.each (model,index)=> 
       @render_row.apply(@, [model,index])

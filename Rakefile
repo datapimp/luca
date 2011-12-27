@@ -6,6 +6,10 @@ end
 namespace :assets do
   desc "Compile all the assets"
   task :precompile => :environment do
+    File.open( File.join(App.root,'release','luca-ui.css'), 'w+' ) do |fh|
+      fh.puts(App.sprockets["luca-ui.css"].to_s)
+    end
+
     File.open( File.join(App.root,'release','luca-ui.js'), 'w+' ) do |fh|
       fh.puts(App.sprockets["luca-ui.js"].to_s)
     end

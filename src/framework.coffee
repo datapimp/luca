@@ -42,6 +42,7 @@ window.Luca =
   core: {}
   containers: {}
   components: {}
+  fields: {}
   util: {}
   registry:
     classes: {}

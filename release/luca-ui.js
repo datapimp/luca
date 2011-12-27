@@ -87,11 +87,13 @@
     definition.render = function() {
       var _this = this;
       if (this.deferrable) {
-        return this.deferrable.bind(this.deferrable_event, function() {
+        console.log("Deferrable Render", this.deferrable, this.deferrable_event);
+        this.deferrable.bind(this.deferrable_event, function() {
           _this.trigger("before:render", _this);
           __original_render.apply(_this, arguments);
           return _this.trigger("after:render", _this);
         });
+        return this.deferrable.fetch();
       } else {
         this.trigger("before:render", this);
         __original_render.apply(this, arguments);
@@ -103,6 +105,7 @@
 
   _.extend(Luca.View.prototype, {
     hooks: ["after:initialize", "before:render", "after:render"],
+    deferrable_event: "reset",
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.cache(this.cid, this);
@@ -199,6 +202,86 @@
 }).call(this);
 (function() {
 
+  Luca.containers.SplitView = Luca.core.Container.extend({
+    layout: '100',
+    component_type: 'split_view',
+    className: 'luca-ui-split-view',
+    components: [],
+    initialize: function(options) {
+      var view,
+        _this = this;
+      this.options = options;
+      Luca.core.Container.prototype.initialize.apply(this, arguments);
+      view = this;
+      return this.component_containers = _(this.components).map(function(component, componentIndex) {
+        return _this.panel_config.apply(view, [component, componentIndex]);
+      });
+    },
+    panelClass: 'luca-ui-panel',
+    panel_config: function(panel, panelIndex) {
+      return {
+        "class": this.panelClass,
+        id: "" + this.cid + "-" + panelIndex
+      };
+    },
+    prepare_layout: function() {
+      var _this = this;
+      return _(this.component_containers).each(function(container) {
+        return $(_this.el).append("<div id='" + container.id + "' class='" + container["class"] + "' style='" + container.style + "' />");
+      });
+    },
+    prepare_components: function() {
+      return this.assign_containers();
+    },
+    assign_containers: function() {
+      var _this = this;
+      return this.components = _(this.components).map(function(object, index) {
+        var panel;
+        panel = _this.component_containers[index];
+        object.el = object.renderTo = "#" + panel.id;
+        object.parentEl = _this.el;
+        return object;
+      });
+    }
+  });
+
+  Luca.register('split_view', "Luca.containers.SplitView");
+
+}).call(this);
+(function() {
+
+  Luca.containers.ColumnView = Luca.containers.SplitView.extend({
+    component_type: 'column_view',
+    class_name: 'luca-ui-column-view',
+    components: [],
+    initialize: function(options) {
+      this.options = options;
+      _.extend(this, this.options);
+      return Luca.containers.SplitView.prototype.initialize.apply(this, arguments);
+    },
+    panelClass: 'luca-ui-column',
+    autoLayout: function() {
+      var _this = this;
+      return _(this.components.length).times(function() {
+        return parseInt(100 / _this.components.length);
+      });
+    },
+    beforeLayout: function() {
+      var _this = this;
+      this.columnWidths = this.layout != null ? _(this.layout.split('/')).map(function(v) {
+        return parseInt(v);
+      }) : this.autoLayout();
+      return _(this.columnWidths).each(function(width, index) {
+        return _this.component_containers[index].style = "float:left; width: " + width + "px;";
+      });
+    }
+  });
+
+  Luca.register('column_view', "Luca.containers.ColumnView");
+
+}).call(this);
+(function() {
+
   Luca.containers.CardView = Luca.core.Container.extend({
     component_type: 'card_view',
     className: 'luca-ui-card-view',
@@ -219,7 +302,7 @@
           cardIndex: cardIndex,
           cssId: "" + _this.cid + "-" + cardIndex
         };
-        $(_this.el).append(JST["luca-ui/templates/containers/card"](card));
+        $(_this.el).append(Luca.templates["containers/card"](card));
         return card;
       });
     },
@@ -268,56 +351,19 @@
 }).call(this);
 (function() {
 
-  Luca.containers.ColumnView = Luca.core.Container.extend({
-    component_type: 'column_view',
-    className: 'luca-ui-column-view',
-    components: [],
+  Luca.containers.FieldsetView = Luca.View.extend({
+    component_type: 'fieldset',
+    tagName: 'fieldset',
+    className: 'luca-ui-fieldset',
     initialize: function(options) {
-      this.options = options;
-      return Luca.core.Container.prototype.initialize.apply(this, arguments);
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      Luca.core.Container.prototype.initialize.apply(this, arguments);
+      return this.components || (this.components = this.fields);
     },
-    layout: void 0,
-    prepare_layout: function() {
-      var _this = this;
-      this.columnWidths = this.layout != null ? _(this.layout.split('/')).map(function(v) {
-        return parseInt(v);
-      }) : this.autoLayout();
-      return this.columns = _(this.columnWidths).map(function(width, columnIndex) {
-        var column;
-        column = {
-          cssClass: 'luca-ui-column',
-          cssStyles: 'float:left;',
-          width: width,
-          columnIndex: columnIndex,
-          cssId: "" + _this.cid + "-" + columnIndex
-        };
-        $(_this.el).append(JST["luca-ui/templates/containers/column"](column));
-        return column;
-      });
-    },
-    autoLayout: function() {
-      var _this = this;
-      return _(this.components.length).times(function() {
-        return parseInt(100 / _this.components.length);
-      });
-    },
-    prepare_components: function() {
-      return this.assignColumns();
-    },
-    assignColumns: function() {
-      var _this = this;
-      this.components = _(this.components).map(function(object, index) {
-        var column;
-        column = _this.columns[index];
-        object.el = object.renderTo = "#" + column.cssId;
-        object.parentEl = _this.el;
-        return object;
-      });
-      return this.trigger("after:components", this, this.components);
-    }
+    prepare_layout: function() {},
+    prepare_components: function() {}
   });
-
-  Luca.register('column_view', "Luca.containers.ColumnView");
 
 }).call(this);
 (function() {
@@ -410,57 +456,84 @@
 }).call(this);
 (function() {
 
-  Luca.components.FilterableCollection = function(config, initial_set) {
-    var Collection, base;
-    if (initial_set == null) initial_set = [];
-    base = {
-      model: config.model,
-      url: function() {
-        return config.base_url;
-      }
-    };
-    Collection = Backbone.Collection.extend(base);
-    return new Collection(config, initial_set);
-  };
+  Luca.components.FilterableCollection = Backbone.Collection.extend({
+    url: function() {},
+    initialize: function(models, options) {
+      if (options == null) options = {};
+      _.extend(this, options);
+      return Backbone.Collection.prototype.initialize.apply(this, arguments);
+    },
+    applyFilter: function(params) {
+      this.params = params != null ? params : {};
+    }
+  });
 
-  Luca.components.GridRow = function(columns) {
-    var defaultRenderer, public,
-      _this = this;
-    this.columns = columns != null ? columns : [];
-    defaultRenderer = function(model, column, index) {
-      return "Value";
-    };
-    return public = {
-      render: function(model, index, grid) {
-        return _(_this.columns).each(function(column, index) {
-          return console.log(_this.columns);
-        });
-      }
-    };
-  };
+}).call(this);
+(function() {
+
+
+
+}).call(this);
+(function() {
 
   Luca.components.GridView = Luca.View.extend({
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
-      this.configure_store();
-      return this.render_columns();
+      Luca.View.prototype.initialize.apply(this, arguments);
+      return this.configure_store();
     },
     configure_store: function() {
-      return this.deferrable = this.collection = Luca.components.FilterableCollection(this.store, this.store.initial_set);
+      var store;
+      store = this.store;
+      _.extend(this.store, {
+        url: function() {
+          return store.url;
+        }
+      });
+      return this.deferrable = this.collection = new Luca.components.FilterableCollection(this.store.initial_set, this.store);
     },
+    beforeRender: _.once(function() {
+      $(this.el).html(Luca.templates["components/grid_view"]());
+      this.table = $('table.luca-ui-grid-view', this.el);
+      this.header = $("thead", this.table);
+      this.body = $("tbody", this.table);
+      this.footer = $("tfoot", this.table);
+      return this.render_header();
+    }),
     render: function() {
-      var grid;
-      grid = this;
+      var _this = this;
       return this.collection.each(function(model, index) {
-        return this.column_renderer.render.apply(this.column_renderer, [model, index, grid]);
+        return _this.render_row.apply(_this, [model, index]);
       });
     },
     refresh: function() {
       return this.render();
     },
-    render_columns: function() {
-      return this.column_renderer = Luca.components.GridRow(this.columns);
+    render_header: function() {
+      var headers,
+        _this = this;
+      headers = _(this.columns).map(function(column, column_index) {
+        return "<th class='column-" + column_index + "'>" + column.header + "</th>";
+      });
+      return this.header.append("<tr>" + headers + "</tr>");
+    },
+    render_row: function(row, row_index) {
+      var cells,
+        _this = this;
+      cells = _(this.columns).map(function(column, col_index) {
+        var value;
+        value = _this.cell_renderer(row, column, col_index);
+        return "<td class='column-" + col_index + "'>" + value + "</td>";
+      });
+      return this.body.append("<tr data-row-index='" + row_index + "' class='grid-view-row' id='row-" + row_index + "'>" + cells + "</tr>");
+    },
+    cell_renderer: function(row, column, columnIndex) {
+      if (_.isFunction(column.renderer)) {
+        return col.renderer.apply(this, [row, column, columnIndex]);
+      } else {
+        return (typeof row.get === "function" ? row.get(column.data) : void 0) || row[column.data];
+      }
     }
   });
 
@@ -468,22 +541,11 @@
 
 }).call(this);
 (function() {
-  this.JST || (this.JST = {});
-  this.JST["luca-ui/templates/containers/card"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', cssClass ,'\' id=\'', cssId ,'\' style=\'', cssStyles ,'\'></div>\n');}return __p.join('');};
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'></div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
-  this.JST || (this.JST = {});
-  this.JST["luca-ui/templates/containers/column"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', cssClass ,'\' id=\'', cssId ,'\' style=\'width:', width ,'%;', cssStyles ,'\'></div>\n');}return __p.join('');};
+
+
+
 }).call(this);
-(function() {
-  this.JST || (this.JST = {});
-  this.JST["luca-ui/templates/containers/sample"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); for(var i=0; i < 5; i++) { __p.push('\n<div>\n  ', i ,'\n</div>\n'); } __p.push('\n');}return __p.join('');};
-}).call(this);
-
-
-
-//
-
-
-
-;

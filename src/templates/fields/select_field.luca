@@ -1,0 +1,3 @@
+%label{:for=>"<%= input_id %>"}
+  <%= label %>
+%select{:id=>"<%= input_id %>",:name=>"<%= input_name %>"}
