@@ -7,8 +7,15 @@ $ do ->
       ctype: 'navigation'
       name:'demo_navigation'
     ,
-      ctype: 'card_demo'
-      name: 'card_demo'
+      ctype: 'card_view'
+      name: 'demo_container',
+      components:[
+        ctype : 'card_demo'
+      ,
+        ctype : 'column_demo'
+      ,
+        ctype : 'split_demo'
+      ]
     ]
 
   main.render()

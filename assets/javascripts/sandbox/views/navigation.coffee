@@ -1,6 +1,6 @@
 Sandbox.views.Navigation = Backbone.View.extend
   name: "sandbox_navigation"
-  className: '.navigation'
+  className: 'navigation'
   tagName: 'ul'
 
   events: 
@@ -10,8 +10,15 @@ Sandbox.views.Navigation = Backbone.View.extend
   navigate: (e)->
     me = my = $(e.currentTarget)
     slide = my.data('slide')
+    
+    console.log "Navigating To #{ slide }"
+    @demo_container().activate( slide )
 
   modal: ()->
+    alert 'Coming Soon'
+
+  demo_container: ()->
+    Luca.cache('demo_container')
 
   render: ()->
     $(@el).html Luca.templates["navigation"]()
