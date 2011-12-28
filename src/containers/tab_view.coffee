@@ -1,12 +1,11 @@
 Luca.containers.TabView = Luca.containers.CardView.extend
   component_type: 'tab_view'
 
-  className: 'luca-ui-tab-view'
+  className: 'luca-ui-tab-view-wrapper'
 
   components: []
 
-  initialize: (@options={})->
-    _.extend @, @options
-    Luca.containers.CardView.prototype.initialize.apply @, arguments
+  component_class: 'luca-ui-tab-panel'
 
-  afterComponents: ()->
+  initialize: (@options={})->
+    Luca.containers.CardView.prototype.initialize.apply @, arguments

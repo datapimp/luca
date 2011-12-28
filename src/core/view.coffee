@@ -25,27 +25,42 @@ Luca.View.extend = (definition)->
   # then it will make sure that the render method doesn't get called
   # until.
 
-  __original_render = definition.render || (()->)
+  _original = definition.render
+
+  _default = ()->
+    console.log $(@container), $(@el), $(@el).html(), $(@container).html() if @debugMode is "verbose"
+
+    if !$(@container).length > 0
+      console.log "We have no container at #{ @container }" if @debugMode is "verbose"
+
+    return unless $(@container) and $(@el) 
+      if $(@el).html() isnt "" and $(@container).html() is ""
+        console.log "Appending", @cid, $(@container), $(@el) if @debugMode is "verbose"
+        $(@container).append( $(@el) )
+
+  _base = _original || _default
 
   definition.render = ()->
     if @deferrable
       @deferrable.bind @deferrable_event, ()=>
         @trigger "before:render", @
-        __original_render.apply @, arguments
+        console.log "Deferrable Render", @cid if @debugMode is "verbose"
+        _base.apply(@, arguments)
         @trigger "after:render", @
 
       @deferrable.fetch()
     else
       @trigger "before:render", @
-      __original_render.apply @, arguments
+      do ()=>
+        console.log "Normal Render", @cid if @debugMode is "verbose"
+        _base.apply(@, arguments)
       @trigger "after:render", @
 
   Luca.View.original_extend.apply @, [definition]
 
 _.extend Luca.View.prototype,
   trigger: (@event)->
-    console.log "Triggering ", arguments, @cid if @debugMode is "verbose"
-
+    console.log "Triggering", @event, @cid if @debugMode is "verbose"
     Backbone.View.prototype.trigger.apply @, arguments
 
   hooks:[
@@ -57,6 +72,8 @@ _.extend Luca.View.prototype,
   deferrable_event: "reset"
 
   initialize: (@options={})->
+    @cid = _.uniqueId(@name) if @name?
+
     _.extend @, @options
 
     #### View Caching

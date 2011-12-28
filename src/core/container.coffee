@@ -10,9 +10,11 @@ Luca.core.Container = Luca.View.extend
 
   rendered: false
   
-  deferredRender: true
-  
+  component_class: 'luca-ui-panel'
+
   components: []
+
+  component_elements: ()-> $(".#{ @component_class }", @el)
 
   initialize: (@options={})->
     _.extend @, @options
@@ -20,8 +22,6 @@ Luca.core.Container = Luca.View.extend
     @setupHooks( Luca.core.Container.prototype.hooks )
 
     Luca.View.prototype.initialize.apply @, arguments
-
-    @render() unless @deferredRender
   
   do_layout: ()->
     @trigger "before:layout", @
@@ -52,12 +52,11 @@ Luca.core.Container = Luca.View.extend
 
       component
   
-  render_components: ()->
+  render_components: (@debugMode="")->
     _(@components).each (component)=> 
       component.getParent = ()=> @ 
+      $(component.renderTo).append $(component.el)
       component.render()
-      if component.renderTo and $( component.renderTo ).html() is "" and $( component.el ).html isnt ""
-        $( component.renderTo ).append $(component.el)
   
   beforeRender: ()->
     @do_layout() 

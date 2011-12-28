@@ -1,3 +1,3 @@
-Sandbox.views.Slide = Backbone.View.extend
+Sandbox.views.Slide = Luca.View.extend 
   render: ()->
-    $(@el).html Luca.templates["content/slide"]()
+    $(@el).html Luca.templates["content/slide"](@)

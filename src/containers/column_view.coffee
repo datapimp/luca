@@ -8,7 +8,7 @@ Luca.containers.ColumnView = Luca.containers.SplitView.extend
   initialize: (@options={})->
     Luca.containers.SplitView.prototype.initialize.apply @,arguments
   
-  panelClass: 'luca-ui-column'
+  component_class: 'luca-ui-column'
 
   autoLayout: ()-> 
     _( @components.length ).times ()=> parseInt( 100 / @components.length )

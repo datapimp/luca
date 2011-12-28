@@ -64,7 +64,7 @@ Luca.containers.ModalView = Luca.core.Container.extend
 
   prepare_components: ()->
     @components = _(@components).map (object,index) =>
-      object.el =  @el
+      object.container =  @el
       object
 
   afterInitialize: ()-> 

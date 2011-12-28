@@ -1,7 +1,7 @@
 Luca.containers.CardView = Luca.core.Container.extend 
   component_type: 'card_view'
 
-  className: 'luca-ui-card-view'
+  className: 'luca-ui-card-view-wrapper'
 
   activeCard: 0
 
@@ -16,9 +16,11 @@ Luca.containers.CardView = Luca.core.Container.extend
     Luca.core.Container.prototype.initialize.apply @,arguments
     @setupHooks(@hooks)
   
+  component_class: 'luca-ui-card'
+
   beforeLayout: ()->
     @cards = _(@components).map (card,cardIndex) =>
-      class: 'luca-ui-card'
+      class: @component_class 
       style: "display:#{ (if cardIndex is @activeCard then 'block' else 'none' )}"
       id: "#{ @cid }-#{ cardIndex }"
  
@@ -33,7 +35,6 @@ Luca.containers.CardView = Luca.core.Container.extend
     @components = _( @components ).map (object,index)=>
       card = @cards[index]
       object.container = object.renderTo = "##{ card.id }"
-      object.parentEl = @el
       object
   
   activeComponent: ()-> 
@@ -44,22 +45,19 @@ Luca.containers.CardView = Luca.core.Container.extend
     @activate( nextIndex ) 
 
   activate: (index)->
+    console.log "Activating #{ index }"
     return if index is @activeCard
 
     previous = @activeComponent()
     nowActive = @getComponent(index)
 
     @trigger "before:card:switch", previous, nowActive 
-
-    previous?.trigger? "deactivation", previous, nowActive
+    
+    $('.luca-ui-card', @el).hide()
+    $( nowActive.container ).show()
 
     @activeCard = index
 
-    $('.luca-ui-card', @el ).hide()
-    $( nowActive.el ).show()
-
     @trigger "after:card:switch", previous, nowActive 
-
-    nowActive?.trigger? "activation", previous
 
 Luca.register 'card_view', "Luca.containers.CardView"

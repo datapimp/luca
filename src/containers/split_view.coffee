@@ -4,7 +4,7 @@ Luca.containers.SplitView = Luca.core.Container.extend
   component_type: 'split_view'
 
   className: 'luca-ui-split-view' 
-
+  
   components: []
   
   initialize: (@options)->
@@ -13,7 +13,7 @@ Luca.containers.SplitView = Luca.core.Container.extend
     @component_containers = _( @components ).map (component, componentIndex) =>
       @apply_panel_config.apply @, [ component, componentIndex ]
   
-  panelClass: 'luca-ui-panel'
+  component_class: 'luca-ui-panel'
 
   apply_panel_config: (panel, panelIndex)->
     style_declarations = []
@@ -22,7 +22,7 @@ Luca.containers.SplitView = Luca.core.Container.extend
     style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width
     
     config = 
-      class: @panelClass
+      class: @component_class
       id: "#{ @cid }-#{ panelIndex }"
       style: style_declarations.join(';')
 
