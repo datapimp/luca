@@ -25,20 +25,12 @@ Luca.View.extend = (definition)->
   # then it will make sure that the render method doesn't get called
   # until.
 
-  _original = definition.render
+  _base = definition.render
 
-  _default = ()->
-    console.log $(@container), $(@el), $(@el).html(), $(@container).html() if @debugMode is "verbose"
-
-    if !$(@container).length > 0
-      console.log "We have no container at #{ @container }" if @debugMode is "verbose"
-
+  _base ||= ()->
     return unless $(@container) and $(@el) 
       if $(@el).html() isnt "" and $(@container).html() is ""
-        console.log "Appending", @cid, $(@container), $(@el) if @debugMode is "verbose"
         $(@container).append( $(@el) )
-
-  _base = _original || _default
 
   definition.render = ()->
     if @deferrable
