@@ -9,6 +9,7 @@ Sandbox.Main = Luca.containers.ColumnView.extend
     name: 'demo_container'
     components:[
       ctype: 'column_demo'
+      debugMode: 'verbose'
     ]
   ]
 
