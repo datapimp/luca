@@ -15,6 +15,13 @@ $ do ->
         ctype : 'column_demo'
       ,
         ctype : 'split_demo'
+      ,
+        ctype : 'tabbed_demo'
+      ,
+        ctype: 'grid_demo'
+      ,
+        ctype : 'form_demo'
+
       ]
     ]
 

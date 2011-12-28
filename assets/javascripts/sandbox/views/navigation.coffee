@@ -1,4 +1,4 @@
-Sandbox.views.Navigation = Backbone.View.extend
+Sandbox.views.Navigation = Luca.View.extend 
   name: "sandbox_navigation"
   className: 'navigation'
   tagName: 'ul'

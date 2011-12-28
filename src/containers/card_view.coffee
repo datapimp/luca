@@ -25,8 +25,9 @@ Luca.containers.CardView = Luca.core.Container.extend
       id: "#{ @cid }-#{ cardIndex }"
  
   prepare_layout: ()->
-    _( @cards ).each (card)=>
+    @card_containers = _( @cards ).map (card, index)=>
       $(@el).append "<div id='#{ card.id }' style='#{ card.style }' class='#{ card.class }' />"
+      $("##{ card.id }")
 
   prepare_components: ()-> 
     @assignToCards()
@@ -44,6 +45,9 @@ Luca.containers.CardView = Luca.core.Container.extend
     nextIndex = if @activeCard < @components.length - 1 then @activeCard + 1 else 0
     @activate( nextIndex ) 
 
+  hide_components: ()->
+    _( @components ).pluck('container')
+
   activate: (index)->
     console.log "Activating #{ index }"
     return if index is @activeCard
@@ -53,7 +57,8 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     @trigger "before:card:switch", previous, nowActive 
     
-    $('.luca-ui-card', @el).hide()
+    _( @card_containers ).each (container)-> container.hide()
+
     $( nowActive.container ).show()
 
     @activeCard = index
