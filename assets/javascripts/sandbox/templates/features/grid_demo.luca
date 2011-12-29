@@ -1,0 +1,2 @@
+%h3 Grid View
+%p The Grid View is a more advanced component which accepts a configuration of columns, and a store which is a reference to an Backbone.Collection class.  When you pass the store to the grid view, it gets set as a 'deferrable' which means it won't render the content of the view until the deferrable_event is triggered.  ( 'reset' by default ).  The grid by default is set to be scrollable which fixes the height of the content, and then scrolls to display over flow.

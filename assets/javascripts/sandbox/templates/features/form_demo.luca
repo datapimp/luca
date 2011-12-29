@@ -1,0 +1,2 @@
+%h3 Form View
+%p The form view is a psuedo-container which uses other Luca containers to organize fieldsets, which themselves include Field views such as checkbox, text, select, etc.  

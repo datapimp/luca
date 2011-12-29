@@ -1,0 +1,2 @@
+%h3 Split View
+%p The Split Container is a container used to display two or more views in a vertically split layout.  You can specify the height of each component.

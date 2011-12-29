@@ -1,0 +1,2 @@
+%h3 Column Container
+%p The Column Container provides a way to display two or more views side by side.  You can configure the width of the columns by specifying a layout parameter such as '50/50' or '30/30/40'

@@ -10,9 +10,12 @@ Sandbox.views.Navigation = Luca.View.extend
   navigate: (e)->
     me = my = $(e.currentTarget)
     slide = my.data('slide')
-    
-    console.log "Navigating To #{ slide }"
+     
     @demo_container().activate( slide )
+  
+  activeDemo: ()-> @demo_container().getActiveComponent()
+
+  debugMode: 'verbose'
 
   modal: ()->
     alert 'Coming Soon'

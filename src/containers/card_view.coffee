@@ -61,7 +61,6 @@ Luca.containers.CardView = Luca.core.Container.extend
     $( nowActive.container ).show()
 
     @activeCard = index
-
     @trigger "after:card:switch", previous, nowActive 
 
 Luca.register 'card_view', "Luca.containers.CardView"
