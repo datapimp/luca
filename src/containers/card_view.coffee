@@ -49,7 +49,6 @@ Luca.containers.CardView = Luca.core.Container.extend
     _( @components ).pluck('container')
 
   activate: (index)->
-    console.log "Activating #{ index }"
     return if index is @activeCard
 
     previous = @activeComponent()

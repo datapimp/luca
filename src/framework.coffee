@@ -126,3 +126,6 @@ Luca.available_templates = (filter="")->
     _( available ).select (tmpl)-> tmpl.match(filter)
   else
     available
+
+$ do ->
+  $('body').addClass('luca-ui-enabled')

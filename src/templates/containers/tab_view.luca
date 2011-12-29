@@ -1,0 +1,3 @@
+%div{:id=>"<%= cid %>-tab-container",:class=>"luca-ui-tab-container"}
+  %ul
+%div{:id=>"<%= cid %>-tab-panel-container",:class=>"luca-ui-tab-panel-container"}
