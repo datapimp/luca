@@ -235,8 +235,9 @@ new Luca.components.GridView
   
   # This will create Luca.components.FilterableCollection
   store:
-    base_url: '/api/v1/admin/content_packages'
-    base_params: ()-> CourseManager.base_params()
+    base_url: '/api/endpoint'
+    # convenient way of parsing an API who returns
+    # the results in a nested array
     root: 'results'
   
   columns:[
@@ -256,11 +257,5 @@ new Luca.components.GridView
     # which will pass you the model, column config, and index
     renderer: (row, column, columnIndex)->
       row.get("subject")?.name
-  ,
-    header: "Publishing Status"
-    data: "state"
-  ,
-    header: "Marketing Status"
-    data: "marketing_status"
   ]
 ```
