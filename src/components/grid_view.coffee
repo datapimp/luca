@@ -32,8 +32,7 @@ Luca.components.GridView = Luca.View.extend
 
     $(@container).append $(@el)
   
-  render: ()-> 
-    console.log "Blah"
+  afterRender: ()-> 
     @collection.each (model,index)=> 
       @render_row.apply(@, [model,index])
 
