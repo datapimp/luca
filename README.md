@@ -82,7 +82,7 @@ One thing to keep in mind, is any Luca.View subclass ( and in general
 you should be doing this anyway ) should call its super class'
 initialize method like such.
 
-```
+```coffeescript
   MyView = Luca.View.extend
     initialize: ()->
       # important to remember
@@ -105,7 +105,7 @@ Every Luca.View subclass which defines a hooks property,
 will automatically bind functions named according to a
 CamelCaseConvention when these hooks are triggered.  For example
 
-```
+```coffeescript
 Luca.components.GridView = Luca.View.extend
   hooks:[
     "before:grid:render" 
@@ -128,7 +128,7 @@ column_view, and the SplitView has a "ctype" of split_view
 This allows us to build complex, nested configurations of
 containers like such:
 
-```
+```coffeescript
   new Luca.containers.Viewport
     components:[
       layout: '50/50',
@@ -146,7 +146,7 @@ created until they are needed.
 
 To register a component in the registry, you can do
 
-``` 
+```coffeescript
 Luca.register "my_component", "Luca.components.MyComponent"
 ```
 
@@ -159,7 +159,7 @@ Component Namespaces
 --------------------
 To add your own views to the component registry, 
 
-``` 
+```coffeescript
   MyApp.views.CustomView = Backbone.View.extend
     ...
 
@@ -174,7 +174,7 @@ Component Caching
 By defining a component with a 'name' attribute, that component will
 be accessible by 
 
-```
+``coffeescript
 Luca.cache("my_component_name")
 ```
 
@@ -187,7 +187,7 @@ ejs.
 
 This allows you to do something client side like:
 
-```
+```haml
   %h1 Welcome To Luca
   <% if(include_list) { %>
   %ul
