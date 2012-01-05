@@ -95,8 +95,6 @@
 }).call(this);
 (function() {
 
-  console.log("Initializing Luca");
-
   Luca.View = Backbone.View.extend({
     base: 'Luca.View'
   });
