@@ -1,3 +1,5 @@
+What Is Luca?
+-------------
 Luca is a component / container library for Backbone.js which
 encompasses all of the best practices for laying out a large
 app with many nested views and containers.
@@ -8,6 +10,36 @@ To run the sandbox:
 * `rackup`
 
 visit http://localhost:9292
+
+Using it with Rails
+-------------------
+In your gemfile:
+
+```
+# Gemfile
+gem 'luca', :git => "https://github.com/datapimp/luca.git" 
+
+# javascript manifest
+//= require luca-ui
+
+# stylesheet manifest
+/*
+ *= require luca-ui
+*/
+```
+
+What does it get me?
+--------------------
+If nothing else, JST/HAML/EJS templates using the .luca file extension.
+Simply load up a bunch of .luca files in the Rails 3.1 Asset Pipeline
+and you can have HAML views client side, with JST style <%=
+interpolation %> and <% if(conditional_logic) %>
+
+But in actuality, a standard component / container library for easily
+handling layout, rendering, state tracking and switching for Backbone
+Views.
+
+And a whole hell of a lot more best practices for Backbone.JS apps.
 
 Container Library
 -----------------------------
