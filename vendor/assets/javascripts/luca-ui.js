@@ -91,6 +91,7 @@
   };
 
   $((function() {
+    console.log("Enabling Luca-UI");
     return $('body').addClass('luca-ui-enabled');
   })());
 
