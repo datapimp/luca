@@ -9,6 +9,41 @@ To run the sandbox:
 
 visit http://localhost:9292
 
+The Base View Class.  Luca.View
+-------------------------------
+Luca.View adds a bunch of functionality to the stock Backbone.View.  
+
+One thing to keep in mind, is any Luca.View subclass ( and in general
+you should be doing this anyway ) should call its super class'
+initialize method like such.
+
+```
+  MyView = Luca.View.extend
+    initialize: ()->
+      # important to remember
+      Luca.View.prototype.initialize.apply @, arguments
+```
+
+Hooks
+-----
+Every Luca.View subclass which defines a hooks property, 
+will automatically bind functions named according to a
+CamelCaseConvention when these hooks are triggered.  For example
+
+```
+Luca.components.GridView = Luca.View.extend
+  hooks:[
+    "before:grid:render" 
+  ]
+
+...
+
+MyGridView = Luca.components.GridView.extend
+  ...
+  beforeGridRender: ()->
+    console.log "We get called automatically"
+```
+
 Component Registry
 ------------------
 Component views in Luca register themselves with the Component Registry,
@@ -47,8 +82,7 @@ namespaces for 'MyUnregisteredComponent'
 
 Component Namespaces
 --------------------
-To add your own views to the component registry, to take advantage of
-this feature, you can register your own view namespace.
+To add your own views to the component registry, 
 
 ``` 
   MyApp.views.CustomView = Backbone.View.extend
@@ -56,6 +90,9 @@ this feature, you can register your own view namespace.
 
   Luca.registry.addNamespace "MyApp.views"
 ```
+
+This will allow you to use the "ctype" of "custom_view" to nest
+this view within a container.
 
 Component Caching
 -----------------
