@@ -9,6 +9,41 @@ To run the sandbox:
 
 visit http://localhost:9292
 
+Container Library
+-----------------------------
+- split_view.  
+  - horizontally split layout.
+- column_view. 
+  - vertically split layout  
+  - configurable widths via layout parameter
+  - example: layout: '25/25/25/25' for 25% width
+- card_view
+  - gives you a wizard style layout
+  - one active view at a time
+- modal_view
+  - simplemodal based container.
+- tab_view
+  - similar to card view, but with an automatically rendered tab
+    selector widget
+- viewport
+  - for full screen views
+
+Component Library
+-----------------
+- grid_view
+  - configurable headers / columns
+  - custom renderers for cells
+  - scrollable grid component.
+  - automatically renders a backbone collection to a table
+  - deferrable rendering through a Backbone.Collection or
+    Luca.FilterableCollection
+
+- form_view
+  - build a complex form using any of the containers
+  - bind to model
+  - validation
+  - text, checkbox, radio, select fields
+
 The Base View Class.  Luca.View
 -------------------------------
 Luca.View adds a bunch of functionality to the stock Backbone.View.  
@@ -23,6 +58,16 @@ initialize method like such.
       # important to remember
       Luca.View.prototype.initialize.apply @, arguments
 ```
+
+Rendering
+---------
+Any Luca.View subclass, has special handling around the render() method.
+You automatically get beforeRender, afterRender binding for free.
+
+If you pass a deferrable property, which references a
+Backbone.Collection, it will automatically bind the render() method you
+define to the 'reset' event on the Collection, and will automatically
+call fetch() for you
 
 Hooks
 -----
