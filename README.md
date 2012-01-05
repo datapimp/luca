@@ -13,14 +13,20 @@ visit http://localhost:9292
 
 Using it with Rails
 -------------------
-```
+```ruby
 # Gemfile
 gem 'luca', :git => "https://github.com/datapimp/luca.git" 
+```
 
-# javascript manifest
+javascript manifest
+
+```javascript
 //= require luca-ui
+```
 
-# stylesheet manifest
+stylesheet manifest
+
+```css
 /*
  *= require luca-ui
 */
