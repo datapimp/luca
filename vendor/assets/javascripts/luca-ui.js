@@ -757,7 +757,7 @@
     },
     className: 'luca-ui-grid-view',
     scrollable: true,
-    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:doublclick", "row:click"],
+    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click"],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
@@ -833,7 +833,7 @@
       me = my = $(e.currentTarget);
       rowIndex = my.data('row-index');
       record = this.collection.at(rowIndex);
-      return this.trigger("row:doubleclick", this, record, rowIndex);
+      return this.trigger("row:double:click", this, record, rowIndex);
     },
     click_handler: function(e) {
       var me, my, record, rowIndex;

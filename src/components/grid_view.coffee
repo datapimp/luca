@@ -12,7 +12,7 @@ Luca.components.GridView = Luca.View.extend
     "before:render:header",
     "before:render:row",
     "after:grid:render",
-    "row:doublclick",
+    "row:double:click",
     "row:click"
   ]
 
@@ -90,7 +90,7 @@ Luca.components.GridView = Luca.View.extend
     me = my = $( e.currentTarget )
     rowIndex = my.data('row-index')
     record = @collection.at( rowIndex ) 
-    @trigger "row:doubleclick", @, record, rowIndex
+    @trigger "row:double:click", @, record, rowIndex
 
   click_handler: (e)->
     me = my = $( e.currentTarget )

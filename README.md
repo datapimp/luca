@@ -203,3 +203,64 @@ This allows you to do something client side like:
 
 if you include this markup in sample.luca, you will have available to
 you a function in the window.JST object.
+
+The Grid View
+-------------
+The GridView provides a convenient way of turning a Backbone.Collection
+into a scrollable table.  An example config:
+
+```coffeescript
+new Luca.components.GridView
+  # default is true, but you can disable
+  # the scrollable overflow component by passing false
+  scrollable: true
+
+  # you can set the height of the scrollable area
+  height: 300
+
+  # you can also set the width
+  width: 500
+
+  # This will make the component accessible by
+  # Luca.cache('sample_grid')
+  name: 'sample_grid'
+
+  # handle the double click event on the row
+  rowDoubleclick: (grid, record, rowIndex)->
+    console.log "A row was double clicked"
+  
+  # handle a single click event on the row
+  rowClick: (grid, record, rowIndex)->
+    console.log "A row was single clicked"
+  
+  # This will create Luca.components.FilterableCollection
+  store:
+    base_url: '/api/v1/admin/content_packages'
+    base_params: ()-> CourseManager.base_params()
+    root: 'results'
+  
+  columns:[
+    header: "Title"
+    # by default, data will access the 'title' attribute on the model
+    data: "title"
+  ,
+    header: "Publisher"
+
+    # you can even access nested attributes
+    data: 'publisher.name'
+  ,
+    header: "Subject"
+    data: "subject"
+
+    # or you can supply a custom renderer
+    # which will pass you the model, column config, and index
+    renderer: (row, column, columnIndex)->
+      row.get("subject")?.name
+  ,
+    header: "Publishing Status"
+    data: "state"
+  ,
+    header: "Marketing Status"
+    data: "marketing_status"
+  ]
+```
