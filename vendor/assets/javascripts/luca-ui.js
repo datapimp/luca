@@ -37,19 +37,19 @@
     return Luca.component_cache.cid_index[lookup_id];
   };
 
+  Luca.util.nestedValue = function(accessor, source_object) {
+    return _(accessor.split(/\./)).inject(function(obj, key) {
+      return obj = obj[key];
+    }, source_object);
+  };
+
   Luca.registry.lookup = function(ctype) {
-    var c, className, nestedLookup, parents;
+    var c, className, parents;
     c = Luca.registry.classes[ctype];
     if (c != null) return c;
-    nestedLookup = function(namespace) {
-      var parent;
-      return parent = _(namespace.split(/\./)).inject(function(obj, key) {
-        return obj = obj[key];
-      }, window);
-    };
     className = _.camelize(_.capitalize(ctype));
     parents = _(Luca.registry.namespaces).map(function(namespace) {
-      return nestedLookup(namespace);
+      return Luca.util.nestedValue(namespace, window);
     });
     return _.first(_.compact(_(parents).map(function(parent) {
       return parent[className];
@@ -673,18 +673,27 @@
 (function() {
 
   Luca.components.FilterableCollection = Backbone.Collection.extend({
-    url: function() {},
     initialize: function(models, options) {
       if (options == null) options = {};
       _.extend(this, options);
-      return Backbone.Collection.prototype.initialize.apply(this, arguments);
+      Backbone.Collection.prototype.initialize.apply(this, arguments);
+      if (_.isFunction(this.beforeFetch)) {
+        return this.bind("before:fetch", this.beforeFetch);
+      }
+    },
+    fetch: function(options) {
+      this.trigger("before:fetch", this);
+      return Backbone.Collection.prototype.fetch.apply(this, arguments);
     },
     applyFilter: function(params) {
       this.params = params != null ? params : {};
     },
-    fetch: function(options) {
-      this.trigger("before:fetch");
-      return Backbone.Collection.prototype.fetch.apply(this, arguments);
+    parse: function(response) {
+      if (this.root != null) {
+        return response[this.root];
+      } else {
+        return response;
+      }
     }
   });
 
@@ -742,13 +751,18 @@
 (function() {
 
   Luca.components.GridView = Luca.View.extend({
+    events: {
+      "dblclick .grid-view-row": "double_click_handler",
+      "click .grid-view-row": "click_handler"
+    },
     className: 'luca-ui-grid-view',
     scrollable: true,
-    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render"],
+    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:doublclick", "row:click"],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
+      _.bindAll(this, "rowDoubleClick", "rowClick");
       return this.configure_store();
     },
     configure_store: function() {
@@ -792,7 +806,7 @@
       return this.header.append("<tr>" + headers + "</tr>");
     },
     render_row: function(row, row_index) {
-      var cells,
+      var alt_class, cells,
         _this = this;
       this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
@@ -800,14 +814,35 @@
         value = _this.cell_renderer(row, column, col_index);
         return "<td class='column-" + col_index + "'>" + value + "</td>";
       });
-      return this.body.append("<tr data-row-index='" + row_index + "' class='grid-view-row' id='row-" + row_index + "'>" + cells + "</tr>");
+      alt_class = row_index % 2 === 0 ? "even" : "odd";
+      return this.body.append("<tr data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>");
     },
     cell_renderer: function(row, column, columnIndex) {
+      var source;
       if (_.isFunction(column.renderer)) {
-        return col.renderer.apply(this, [row, column, columnIndex]);
+        return column.renderer.apply(this, [row, column, columnIndex]);
+      } else if (column.data.match(/\w+\.\w+/)) {
+        source = row.attributes || row;
+        return Luca.util.nestedValue(column.data, source);
       } else {
         return (typeof row.get === "function" ? row.get(column.data) : void 0) || row[column.data];
       }
+    },
+    double_click_handler: function(e) {
+      var me, my, record, rowIndex;
+      me = my = $(e.currentTarget);
+      rowIndex = my.data('row-index');
+      record = this.collection.at(rowIndex);
+      return this.trigger("row:doubleclick", this, record, rowIndex);
+    },
+    click_handler: function(e) {
+      var me, my, record, rowIndex;
+      me = my = $(e.currentTarget);
+      rowIndex = my.data('row-index');
+      record = this.collection.at(rowIndex);
+      this.trigger("row:click", this, record, rowIndex);
+      $('.grid-view-row', this.body).removeClass('selected-row');
+      return me.addClass('selected-row');
     }
   });
 

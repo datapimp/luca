@@ -78,6 +78,13 @@ Luca.cache = (needle, component)->
 
   Luca.component_cache.cid_index[ lookup_id ]
 
+# Takes an string like "deep.nested.value" and an object like window
+# and returns the value of window.deep.nested.value
+Luca.util.nestedValue = (accessor, source_object)->
+  _( accessor.split(/\./) ).inject (obj,key)->
+    obj = obj[key]
+  , source_object
+
 # Lookup a component in the Luca component registry
 # by it's ctype identifier.  If it doesn't exist,
 # check any other registered namespace
@@ -86,14 +93,9 @@ Luca.registry.lookup = (ctype)->
 
   return c if c?
 
-  nestedLookup = (namespace)->
-    parent = _( namespace.split(/\./) ).inject (obj,key)->
-      obj = obj[key]
-    , window
-
   className = _.camelize _.capitalize( ctype )
 
-  parents = _( Luca.registry.namespaces ).map (namespace)-> nestedLookup(namespace)
+  parents = _( Luca.registry.namespaces ).map (namespace)-> Luca.util.nestedValue(namespace, window)
   
   _.first _.compact _( parents ).map (parent)-> parent[className]
 
