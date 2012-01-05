@@ -60,7 +60,9 @@
     var component_class, constructor, ctype;
     ctype = config.ctype;
     component_class = Luca.registry.lookup(ctype);
-    if (!component_class) throw "Invalid Component Type: " + ctype;
+    if (!component_class) {
+      throw "Invalid Component Type: " + ctype + ".  Did you forget to register it?";
+    }
     constructor = eval(component_class);
     return new constructor(config);
   };

@@ -104,7 +104,7 @@ Luca.util.LazyObject = (config)->
   
   component_class = Luca.registry.lookup( ctype )
 
-  throw "Invalid Component Type: #{ ctype }" unless component_class
+  throw "Invalid Component Type: #{ ctype }.  Did you forget to register it?" unless component_class
 
   constructor = eval( component_class )
 
@@ -127,5 +127,4 @@ Luca.available_templates = (filter="")->
   else
     available
 
-$ do ->
-  $('body').addClass('luca-ui-enabled')
+$ do -> $('body').addClass('luca-ui-enabled')
