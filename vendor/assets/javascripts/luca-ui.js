@@ -143,7 +143,7 @@
   _.extend(Luca.View.prototype, {
     trigger: function(event) {
       this.event = event;
-      if (this.debugMode === "verbose") {
+      if (this.debugMode === "very-verbose") {
         console.log("Triggering", this.event, this.cid);
       }
       return Backbone.View.prototype.trigger.apply(this, arguments);
@@ -156,6 +156,7 @@
       _.extend(this, this.options);
       Luca.cache(this.cid, this);
       if (this.options.hooks) this.setupHooks(this.options.hooks);
+      if (this.hooks && !this.options.hooks) this.setupHooks(this.hooks);
       this.setupHooks(Luca.View.prototype.hooks);
       return this.trigger("after:initialize", this);
     },
@@ -743,6 +744,7 @@
   Luca.components.GridView = Luca.View.extend({
     className: 'luca-ui-grid-view',
     scrollable: true,
+    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render"],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
@@ -760,6 +762,7 @@
       return this.deferrable = this.collection = new Luca.components.FilterableCollection(this.store.initial_set, this.store);
     },
     beforeRender: _.once(function() {
+      this.trigger("before:grid:render", this);
       if (this.scrollable) $(this.el).addClass('scrollable-grid-view');
       $(this.el).html(Luca.templates["components/grid_view"]());
       this.table = $('table.luca-ui-grid-view', this.el);
@@ -771,9 +774,10 @@
     }),
     afterRender: function() {
       var _this = this;
-      return this.collection.each(function(model, index) {
+      this.collection.each(function(model, index) {
         return _this.render_row.apply(_this, [model, index]);
       });
+      return this.trigger("after:grid:render", this);
     },
     refresh: function() {
       return this.render();
@@ -781,6 +785,7 @@
     render_header: function() {
       var headers,
         _this = this;
+      this.trigger("before:render:header");
       headers = _(this.columns).map(function(column, column_index) {
         return "<th class='column-" + column_index + "'>" + column.header + "</th>";
       });
@@ -789,6 +794,7 @@
     render_row: function(row, row_index) {
       var cells,
         _this = this;
+      this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
         var value;
         value = _this.cell_renderer(row, column, col_index);

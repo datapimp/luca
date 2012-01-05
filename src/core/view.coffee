@@ -51,7 +51,7 @@ Luca.View.extend = (definition)->
 
 _.extend Luca.View.prototype,
   trigger: (@event)->
-    console.log "Triggering", @event, @cid if @debugMode is "verbose"
+    console.log "Triggering", @event, @cid if @debugMode is "very-verbose"
     Backbone.View.prototype.trigger.apply @, arguments
 
   hooks:[
@@ -72,8 +72,9 @@ _.extend Luca.View.prototype,
     # Luca.View(s) which get created get stored in a global cache by their
     # component id.  This allows us to re-use views when it makes sense
     Luca.cache( @cid, @ )
-
+    
     @setupHooks( @options.hooks ) if @options.hooks
+    @setupHooks( @hooks ) if @hooks and !@options.hooks
     @setupHooks Luca.View.prototype.hooks
 
     @trigger "after:initialize", @
@@ -98,8 +99,6 @@ _.extend Luca.View.prototype,
       prefix = parts.shift()
       
       parts = _( parts ).map (p)-> _.capitalize(p)
-
       fn = prefix + parts.join('')
       
-      @bind event, ()=>
-        @[fn].apply @, arguments if @[fn]
+      @bind event, ()=> @[fn].apply @, arguments if @[fn]

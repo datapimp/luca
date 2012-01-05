@@ -2,6 +2,13 @@ Luca.components.GridView = Luca.View.extend
   className: 'luca-ui-grid-view'
 
   scrollable: true
+  
+  hooks:[
+    "before:grid:render",
+    "before:render:header",
+    "before:render:row",
+    "after:grid:render"
+  ]
 
   initialize: (@options={})->
     _.extend @, @options
@@ -19,6 +26,8 @@ Luca.components.GridView = Luca.View.extend
     @deferrable = @collection = new Luca.components.FilterableCollection( @store.initial_set, @store )
   
   beforeRender: _.once ()->
+    @trigger "before:grid:render", @
+
     $(@el).addClass 'scrollable-grid-view' if @scrollable
 
     $(@el).html Luca.templates["components/grid_view"]()
@@ -35,17 +44,23 @@ Luca.components.GridView = Luca.View.extend
   afterRender: ()-> 
     @collection.each (model,index)=> 
       @render_row.apply(@, [model,index])
+    
+    @trigger "after:grid:render", @
 
   refresh: ()-> 
     @render()
   
   render_header: ()->
+    @trigger "before:render:header"
+
     headers = _(@columns).map (column,column_index) => 
       "<th class='column-#{ column_index }'>#{ column.header}</th>"
     
     @header.append("<tr>#{ headers }</tr>")
 
   render_row: (row,row_index)->
+    @trigger "before:render:row", row, row_index
+
     cells = _( @columns ).map (column,col_index) => 
       value = @cell_renderer(row, column, col_index)
       "<td class='column-#{ col_index }'>#{ value }</td>"
