@@ -20,6 +20,6 @@ Gem::Specification.new do |s|
 
   s.files        = `git ls-files`.split("\n")
   s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}
-  s.require_path = 'lib'
+  s.require_paths = ['lib']
 end
 

@@ -14,7 +14,6 @@ Luca.View.original_extend = Backbone.View.extend
 # some method definitions and add special behavior around them
 # mostly related to render()
 Luca.View.extend = (definition)->
-
   #### Rendering 
   #
   # Our base view class wraps the defined render() method
