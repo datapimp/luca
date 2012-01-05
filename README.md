@@ -13,8 +13,6 @@ visit http://localhost:9292
 
 Using it with Rails
 -------------------
-In your gemfile:
-
 ```
 # Gemfile
 gem 'luca', :git => "https://github.com/datapimp/luca.git" 
