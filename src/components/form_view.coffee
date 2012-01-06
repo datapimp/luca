@@ -5,19 +5,21 @@ Luca.components.FormView = Luca.View.extend
     "before:submit"
   ]
 
-  container: 'split_view'
+  container_type: 'column_view'
 
   initialize: (@options={})->
     _.extend @, @options
     Luca.View.prototype.initialize.apply @, arguments
-    @setupHooks( @hooks )
     
     @components ||= @fields
 
   beforeRender: ()->
-    console.log "Before Render On Form View"
+
     $(@el).append("<form />")
+
     @form = $('form', @el )
+    
+    @form.addClass( @form_class ) if @form_class
 
     @check_for_fieldsets()
     
@@ -25,8 +27,6 @@ Luca.components.FormView = Luca.View.extend
       fieldset.renderTo = fieldset.container = @form
       fieldset.id = "#{ @cid }-#{ index }"
       new Luca.containers.FieldsetView(fieldset)
-
-    console.log "Components On Form View", @components
 
   fieldsets_present : ()-> 
     _( @components ).detect (obj)-> obj.ctype is "fieldset"
@@ -36,10 +36,10 @@ Luca.components.FormView = Luca.View.extend
       @components = [ 
         ctype: 'fieldset_view'
         components: @components
+        container_type: @container_type
       ]
 
   afterRender: ()->
-    console.log "Rendering Form View"
     _( @components ).each (component)-> 
       component.render()
 

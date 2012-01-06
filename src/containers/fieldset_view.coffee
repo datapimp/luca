@@ -16,7 +16,7 @@ Luca.containers.FieldsetView = Luca.View.extend
   beforeRender: ()->
     _( @components ).each (component)=> 
       component.renderTo = component.container = @el
-      component.render_field()
+      component.render()
 
   render: ()->
     $(@el).addClass "label-align-#{ @labelAlign }" 

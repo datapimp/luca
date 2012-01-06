@@ -18,21 +18,23 @@ Luca.components.GridView = Luca.View.extend
 
   initialize: (@options={})->
     _.extend @, @options
+    _.extend @, Luca.modules.Deferrable
 
     Luca.View.prototype.initialize.apply @, arguments
 
     _.bindAll @, "rowDoubleClick", "rowClick"
+    
+    # move away from calling them stores
+    # let's stick with the backbone nomenclature
+    @collection ||= @store
 
-    @configure_store()
+    # since this is what it is, allow for this type
+    # of configuration parameter as well
+    @collection ||= @filterable_collection
 
-  configure_store: ()->
-    store = @store
-    _.extend @store,
-      url: ()->
-        store.base_url
-        
-    @deferrable = @collection = new Luca.components.FilterableCollection( @store.initial_set, @store )
-  
+    @configure_collection()
+
+ 
   beforeRender: _.once ()->
     @trigger "before:grid:render", @
 

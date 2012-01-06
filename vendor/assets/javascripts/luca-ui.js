@@ -6,6 +6,7 @@
     core: {},
     containers: {},
     components: {},
+    modules: {},
     fields: {},
     util: {},
     registry: {
@@ -106,6 +107,24 @@
 }).call(this);
 (function() {
 
+  Luca.modules.Deferrable = {
+    configure_collection: function() {
+      var collection;
+      collection = this.collection || this.store || this.filterable_collection;
+      if (collection && collection.base_url) {
+        _.extend(collection, {
+          url: function() {
+            return collection.base_url;
+          }
+        });
+        return this.deferrable = this.collection = new Luca.components.FilterableCollection(collection.initial_set, collection);
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+
   Luca.View = Backbone.View.extend({
     base: 'Luca.View'
   });
@@ -125,8 +144,8 @@
     definition.render = function() {
       var _this = this;
       if (this.deferrable) {
+        this.trigger("before:render", this);
         this.deferrable.bind(this.deferrable_event, function() {
-          _this.trigger("before:render", _this);
           if (_this.debugMode === "verbose") {
             console.log("Deferrable Render", _this.cid);
           }
@@ -198,13 +217,10 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
-      return this.setupHooks(this.hooks);
-    },
-    afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       return this.input_name || (this.input_name = this.name);
     },
-    render_field: function() {
+    beforeRender: function() {
       $(this.el).html(Luca.templates[this.template](this));
       return $(this.container).append($(this.el));
     }
@@ -471,7 +487,7 @@
       var _this = this;
       return _(this.components).each(function(component) {
         component.renderTo = component.container = _this.el;
-        return component.render_field();
+        return component.render();
       });
     },
     render: function() {
@@ -663,7 +679,38 @@
 
   Luca.fields.SelectField = Luca.core.Field.extend({
     className: 'luca-ui-select-field luca-ui-field',
-    template: "fields/select_field"
+    template: "fields/select_field",
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      _.extend(this, Luca.modules.Deferrable);
+      Luca.core.Field.prototype.initialize.apply(this, arguments);
+      return this.configure_collection();
+    },
+    select_el: function() {
+      return $("select", this.el);
+    },
+    includeBlank: true,
+    blankValue: '',
+    blankText: 'Select One',
+    afterRender: function() {
+      var _ref,
+        _this = this;
+      this.select_el().html('');
+      if (this.includeBlank) {
+        this.select_el().append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
+      }
+      if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
+        return this.collection.each(function(model) {
+          var display, option, selected, value;
+          value = model.get(_this.valueField);
+          display = model.get(_this.displayField);
+          if (_this.selected && value === _this.selected) selected = "selected";
+          option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
+          return _this.select_el().append(option);
+        });
+      }
+    }
   });
 
   Luca.register("select_field", "Luca.fields.SelectField");
@@ -676,6 +723,13 @@
   });
 
   Luca.register("text_field", "Luca.fields.TextField");
+
+}).call(this);
+(function() {
+
+  Luca.fields.TypeAheadField = Luca.fields.TextField.extend({
+    className: 'luca-ui-field'
+  });
 
 }).call(this);
 (function() {
@@ -711,26 +765,24 @@
   Luca.components.FormView = Luca.View.extend({
     className: 'luca-ui-form-view',
     hooks: ["before:submit"],
-    container: 'split_view',
+    container_type: 'column_view',
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
-      this.setupHooks(this.hooks);
       return this.components || (this.components = this.fields);
     },
     beforeRender: function() {
       var _this = this;
-      console.log("Before Render On Form View");
       $(this.el).append("<form />");
       this.form = $('form', this.el);
+      if (this.form_class) this.form.addClass(this.form_class);
       this.check_for_fieldsets();
-      this.components = _(this.components).map(function(fieldset, index) {
+      return this.components = _(this.components).map(function(fieldset, index) {
         fieldset.renderTo = fieldset.container = _this.form;
         fieldset.id = "" + _this.cid + "-" + index;
         return new Luca.containers.FieldsetView(fieldset);
       });
-      return console.log("Components On Form View", this.components);
     },
     fieldsets_present: function() {
       return _(this.components).detect(function(obj) {
@@ -742,13 +794,13 @@
         return this.components = [
           {
             ctype: 'fieldset_view',
-            components: this.components
+            components: this.components,
+            container_type: this.container_type
           }
         ];
       }
     },
     afterRender: function() {
-      console.log("Rendering Form View");
       _(this.components).each(function(component) {
         return component.render();
       });
@@ -772,19 +824,12 @@
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
+      _.extend(this, Luca.modules.Deferrable);
       Luca.View.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "rowDoubleClick", "rowClick");
-      return this.configure_store();
-    },
-    configure_store: function() {
-      var store;
-      store = this.store;
-      _.extend(this.store, {
-        url: function() {
-          return store.base_url;
-        }
-      });
-      return this.deferrable = this.collection = new Luca.components.FilterableCollection(this.store.initial_set, this.store);
+      this.collection || (this.collection = this.store);
+      this.collection || (this.collection = this.filterable_collection);
+      return this.configure_collection();
     },
     beforeRender: _.once(function() {
       this.trigger("before:grid:render", this);

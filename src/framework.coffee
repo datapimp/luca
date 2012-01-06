@@ -1,47 +1,10 @@
-#### Luca
-# 
-# A Backbone.View framework which encapsulates common
-# design patterns and best practices for containers, layouts,
-# and components.
-#
-#### Lazy Rendering and Configuration
-#
-#   Using a registry of Component Types ( a.k.a ctype )
-#   allows us to nest view definition in JSON.  It won't
-#   create the view until it is needed / rendered 
-#
-#### Container Views
-#
-#   A common pattern in Backbone is that you have views which
-#   contain other views, and organizes them in some sort of 
-#   layout.  The contained views themselves are typically the
-#   views which are bound to models and collections, while the 
-#   container usually handles more structural DOM components.
-#
-#   Luca simplifies this by providing container templates which
-#   are fully nestable.  You can have a ColumnView contain two
-#   CardViews and each CardView contain a SplitView.  The whole thing
-#   can be contained by a ModalView.
-#
-#   We provide nestable containers such as:
-#
-#   CardView: A collection of views where only one view
-#   will be visible at any given time, and where showing
-#   one hides another.
-#
-#   ColumnView: A view which organizes views along horizontally
-#   split columns
-#
-#   SplitView: A view which organizes other views in vertical space 
-#
-#   ModalView: A jQuery simple modal view
-#
 _.mixin( _.string )
 
 window.Luca =
   core: {}
   containers: {}
   components: {}
+  modules: {}
   fields: {}
   util: {}
   registry:

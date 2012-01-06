@@ -13,12 +13,9 @@ Luca.core.Field = Luca.View.extend
   initialize: (@options={})->
     _.extend @, @options
     Luca.View.prototype.initialize.apply(@, arguments)
-    @setupHooks( @hooks )
-  
-  afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
     
-  render_field: ()->
+  beforeRender: ()->
     $(@el).html Luca.templates[ @template ]( @ )
     $( @container ).append( $(@el) )

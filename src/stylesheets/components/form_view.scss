@@ -1,0 +1,28 @@
+.luca-ui-form-view {
+  width: 100%;
+  float: left;
+  display: block;
+  clear: both;
+
+  fieldset {
+    border: 0px;
+  }
+
+  fieldset.label-align-top {
+    label {
+      margin: 5px 0px;
+    }
+
+    label, input, select {
+      display: block;
+    }
+  }
+
+  form.column-view {
+    .luca-ui-field {
+      float: left;
+      margin-right: 10px;
+      padding-right: 5px;
+    }
+  }
+}
