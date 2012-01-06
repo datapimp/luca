@@ -8,10 +8,15 @@ Luca.containers.FieldsetView = Luca.View.extend
   labelAlign: 'top'
   
   afterInitialize: ()->
+    return if @initialized is true
+
     @components = _( @components ).map (component, index)=>
       component.id = "#{ @cid }-#{ index }"
       component.ctype ||= component.type + '_field'
       Luca.util.LazyObject(component)
+    
+    # HACK.  Why is double initialization happening in the first place?
+    @initialized = true
   
   beforeRender: ()->
     _( @components ).each (component)=> 

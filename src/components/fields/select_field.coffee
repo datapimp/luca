@@ -1,4 +1,11 @@
 Luca.fields.SelectField = Luca.core.Field.extend
+  events:
+    "change select" : "change_handler"
+  
+  hooks:[
+    "after:select"
+  ]
+
   className: 'luca-ui-select-field luca-ui-field'
 
   template: "fields/select_field"
@@ -6,10 +13,15 @@ Luca.fields.SelectField = Luca.core.Field.extend
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
+    _.bindAll @, "change_handler"
 
     Luca.core.Field.prototype.initialize.apply @, arguments
 
     @configure_collection()
+
+  change_handler: (e)->
+    me = my = $( e.currentTarget )
+    console.log "Selected", me
   
   select_el: ()-> 
     $("select", @el)

@@ -558,11 +558,13 @@
     labelAlign: 'top',
     afterInitialize: function() {
       var _this = this;
-      return this.components = _(this.components).map(function(component, index) {
+      if (this.initialized === true) return;
+      this.components = _(this.components).map(function(component, index) {
         component.id = "" + _this.cid + "-" + index;
         component.ctype || (component.ctype = component.type + '_field');
         return Luca.util.LazyObject(component);
       });
+      return this.initialized = true;
     },
     beforeRender: function() {
       var _this = this;
@@ -759,14 +761,24 @@
 (function() {
 
   Luca.fields.SelectField = Luca.core.Field.extend({
+    events: {
+      "change select": "change_handler"
+    },
+    hooks: ["after:select"],
     className: 'luca-ui-select-field luca-ui-field',
     template: "fields/select_field",
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
+      _.bindAll(this, "change_handler");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       return this.configure_collection();
+    },
+    change_handler: function(e) {
+      var me, my;
+      me = my = $(e.currentTarget);
+      return console.log("Selected", me);
     },
     select_el: function() {
       return $("select", this.el);
@@ -810,7 +822,21 @@
 (function() {
 
   Luca.fields.TextField = Luca.core.Field.extend({
-    template: 'fields/text_field'
+    events: {
+      "keydown input": "keydown_handler"
+    },
+    template: 'fields/text_field',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      console.log("Initializing Text Field", this.cid);
+      _.bindAll(this, "keydown_handler");
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+    },
+    keydown_handler: function(e) {
+      var me, my;
+      me = my = $(e.currentTarget);
+      return console.log("keydown", me);
+    }
   });
 
   Luca.register("text_field", "Luca.fields.TextField");
@@ -865,9 +891,11 @@
     },
     beforeRender: function() {
       var _this = this;
+      console.log("Before Render On The Form View");
       $(this.el).append("<form />");
       this.form = $('form', this.el);
       if (this.form_class) this.form.addClass(this.form_class);
+      console.log("Checking For Fieldsets", this.fieldsets_present());
       this.check_for_fieldsets();
       return this.components = _(this.components).map(function(fieldset, index) {
         fieldset.renderTo = fieldset.container = _this.form;
@@ -877,21 +905,24 @@
     },
     fieldsets_present: function() {
       return _(this.components).detect(function(obj) {
-        return obj.ctype === "fieldset";
+        return obj.ctype === "fieldset_view";
       });
     },
     check_for_fieldsets: function() {
       if (!this.fieldsets_present()) {
-        return this.components = [
+        console.log("Fieldsets Not Present", this.components);
+        this.components = [
           {
             ctype: 'fieldset_view',
             components: this.components,
             container_type: this.container_type
           }
         ];
+        return console.log("How about now?", this.fieldsets_present(), this.components);
       }
     },
     afterRender: function() {
+      console.log("After Render On The Form View");
       _(this.components).each(function(component) {
         return component.render();
       });
