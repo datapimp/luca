@@ -20,13 +20,11 @@
   /* define width of table. IE browsers only                 */
   .grid-view-body table {
     float: left;
-    width: 740px
   }
 
   /* define width of table. Add 16px to width for scrollbar.           */
   /* All other non-IE browsers.                                        */
   .grid-view-body table {
-    width: 756px
   }
 
   /* set table header to a fixed position. WinIE 6.x only                                       */

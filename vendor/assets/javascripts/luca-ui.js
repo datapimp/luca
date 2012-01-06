@@ -721,14 +721,16 @@
     },
     beforeRender: function() {
       var _this = this;
+      console.log("Before Render On Form View");
       $(this.el).append("<form />");
       this.form = $('form', this.el);
       this.check_for_fieldsets();
-      return this.components = _(this.components).map(function(fieldset, index) {
+      this.components = _(this.components).map(function(fieldset, index) {
         fieldset.renderTo = fieldset.container = _this.form;
         fieldset.id = "" + _this.cid + "-" + index;
         return new Luca.containers.FieldsetView(fieldset);
       });
+      return console.log("Components On Form View", this.components);
     },
     fieldsets_present: function() {
       return _(this.components).detect(function(obj) {
@@ -745,7 +747,8 @@
         ];
       }
     },
-    render: function() {
+    afterRender: function() {
+      console.log("Rendering Form View");
       _(this.components).each(function(component) {
         return component.render();
       });
@@ -791,8 +794,8 @@
       this.header = $("thead", this.table);
       this.body = $("tbody", this.table);
       this.footer = $("tfoot", this.table);
-      this.render_header();
       if (this.scrollable) this.setDimensions();
+      this.render_header();
       return $(this.container).append($(this.el));
     }),
     setDimensions: function() {
@@ -800,7 +803,28 @@
       $('.grid-view-body', this.el).height(this.height);
       $('tbody.scrollable', this.el).height(this.height - 23);
       this.width || (this.width = 756);
-      return $('.grid-view-body', this.el).width(this.width);
+      $('.grid-view-body', this.el).width(this.width);
+      $('.grid-view-body table', this.el).width(this.width);
+      return this.set_default_column_widths();
+    },
+    pad_last_column: function() {
+      var configured_column_widths, unused_width;
+      configured_column_widths = _(this.columns).inject(function(sum, column) {
+        return sum = column.width + sum;
+      }, 0);
+      unused_width = this.width - configured_column_widths;
+      if (unused_width > 0) return this.last_column().width += unused_width;
+    },
+    set_default_column_widths: function() {
+      var default_column_width;
+      default_column_width = this.columns.length > 0 ? this.width / this.columns.length : 200;
+      _(this.columns).each(function(column) {
+        return column.width || (column.width = default_column_width);
+      });
+      return this.pad_last_column();
+    },
+    last_column: function() {
+      return this.columns[this.columns.length - 1];
     },
     afterRender: function() {
       var _this = this;
@@ -818,7 +842,6 @@
       this.trigger("before:render:header");
       headers = _(this.columns).map(function(column, column_index) {
         var style;
-        if (column.last && column.width) column.width = column.width + 16;
         style = column.width ? "width:" + column.width + "px;" : "";
         return "<th style='" + style + "' class='column-" + column_index + "'>" + column.header + "</th>";
       });

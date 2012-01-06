@@ -45,9 +45,9 @@ Luca.components.GridView = Luca.View.extend
     @body   = $("tbody", @table) 
     @footer = $("tfoot", @table) 
 
-    @render_header()
-    
     @setDimensions() if @scrollable
+
+    @render_header()
 
     $(@container).append $(@el)
  
@@ -59,7 +59,27 @@ Luca.components.GridView = Luca.View.extend
 
     @width ||= 756
     $('.grid-view-body', @el).width( @width )
+    $('.grid-view-body table', @el).width( @width )
+    
+    @set_default_column_widths()
 
+  pad_last_column: ()->
+    configured_column_widths = _(@columns).inject (sum, column)->
+      sum = (column.width) + sum
+    , 0
+
+    unused_width = @width - configured_column_widths
+
+    if unused_width > 0
+      @last_column().width += unused_width 
+  
+  set_default_column_widths: ()->
+    default_column_width = if @columns.length > 0 then @width / @columns.length else 200
+    _( @columns ).each (column)-> column.width ||= default_column_width
+    @pad_last_column()
+
+  last_column: ()->
+    @columns[ @columns.length - 1 ]
 
   afterRender: ()-> 
     @collection.each (model,index)=> 
@@ -75,9 +95,6 @@ Luca.components.GridView = Luca.View.extend
 
     headers = _(@columns).map (column,column_index) => 
       # temporary hack for scrollable grid dimensions.
-      if column.last and column.width
-        column.width = column.width + 16
-
       style = if column.width then "width:#{ column.width }px;" else ""
 
       "<th style='#{ style }' class='column-#{ column_index }'>#{ column.header}</th>"

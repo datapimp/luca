@@ -15,6 +15,7 @@ Luca.components.FormView = Luca.View.extend
     @components ||= @fields
 
   beforeRender: ()->
+    console.log "Before Render On Form View"
     $(@el).append("<form />")
     @form = $('form', @el )
 
@@ -24,6 +25,8 @@ Luca.components.FormView = Luca.View.extend
       fieldset.renderTo = fieldset.container = @form
       fieldset.id = "#{ @cid }-#{ index }"
       new Luca.containers.FieldsetView(fieldset)
+
+    console.log "Components On Form View", @components
 
   fieldsets_present : ()-> 
     _( @components ).detect (obj)-> obj.ctype is "fieldset"
@@ -35,7 +38,8 @@ Luca.components.FormView = Luca.View.extend
         components: @components
       ]
 
-  render: ()->
+  afterRender: ()->
+    console.log "Rendering Form View"
     _( @components ).each (component)-> 
       component.render()
 

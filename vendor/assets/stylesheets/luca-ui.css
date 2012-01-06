@@ -47,10 +47,7 @@ html.luca-ui-fullscreen {
   .scrollable-grid-view .grid-view-body {
     overflow: hidden; }
   .scrollable-grid-view .grid-view-body table {
-    float: left;
-    width: 740px; }
-  .scrollable-grid-view .grid-view-body table {
-    width: 756px; }
+    float: left; }
   .scrollable-grid-view thead.fixed tr {
     position: relative; }
   .scrollable-grid-view thead.fixed tr {
