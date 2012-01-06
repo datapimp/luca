@@ -792,8 +792,16 @@
       this.body = $("tbody", this.table);
       this.footer = $("tfoot", this.table);
       this.render_header();
+      if (this.scrollable) this.setDimensions();
       return $(this.container).append($(this.el));
     }),
+    setDimensions: function() {
+      this.height || (this.height = 285);
+      $('.grid-view-body', this.el).height(this.height);
+      $('tbody.scrollable', this.el).height(this.height - 23);
+      this.width || (this.width = 756);
+      return $('.grid-view-body', this.el).width(this.width);
+    },
     afterRender: function() {
       var _this = this;
       this.collection.each(function(model, index) {
@@ -809,7 +817,10 @@
         _this = this;
       this.trigger("before:render:header");
       headers = _(this.columns).map(function(column, column_index) {
-        return "<th class='column-" + column_index + "'>" + column.header + "</th>";
+        var style;
+        if (column.last && column.width) column.width = column.width + 16;
+        style = column.width ? "width:" + column.width + "px;" : "";
+        return "<th style='" + style + "' class='column-" + column_index + "'>" + column.header + "</th>";
       });
       return this.header.append("<tr>" + headers + "</tr>");
     },
@@ -818,9 +829,10 @@
         _this = this;
       this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
-        var value;
+        var style, value;
         value = _this.cell_renderer(row, column, col_index);
-        return "<td class='column-" + col_index + "'>" + value + "</td>";
+        style = column.width ? "width:" + column.width + "px;" : "";
+        return "<td style='" + style + "' class='column-" + col_index + "'>" + value + "</td>";
       });
       alt_class = row_index % 2 === 0 ? "even" : "odd";
       return this.body.append("<tr data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>");

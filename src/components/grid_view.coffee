@@ -46,9 +46,21 @@ Luca.components.GridView = Luca.View.extend
     @footer = $("tfoot", @table) 
 
     @render_header()
+    
+    @setDimensions() if @scrollable
 
     $(@container).append $(@el)
-  
+ 
+  setDimensions: ()->
+    @height ||= 285
+
+    $('.grid-view-body', @el).height( @height )
+    $('tbody.scrollable', @el).height( @height - 23 )
+
+    @width ||= 756
+    $('.grid-view-body', @el).width( @width )
+
+
   afterRender: ()-> 
     @collection.each (model,index)=> 
       @render_row.apply(@, [model,index])
@@ -62,7 +74,13 @@ Luca.components.GridView = Luca.View.extend
     @trigger "before:render:header"
 
     headers = _(@columns).map (column,column_index) => 
-      "<th class='column-#{ column_index }'>#{ column.header}</th>"
+      # temporary hack for scrollable grid dimensions.
+      if column.last and column.width
+        column.width = column.width + 16
+
+      style = if column.width then "width:#{ column.width }px;" else ""
+
+      "<th style='#{ style }' class='column-#{ column_index }'>#{ column.header}</th>"
     
     @header.append("<tr>#{ headers }</tr>")
 
@@ -71,7 +89,9 @@ Luca.components.GridView = Luca.View.extend
     
     cells = _( @columns ).map (column,col_index) => 
       value = @cell_renderer(row, column, col_index)
-      "<td class='column-#{ col_index }'>#{ value }</td>"
+      style = if column.width then "width:#{ column.width }px;" else ""
+
+      "<td style='#{ style }' class='column-#{ col_index }'>#{ value }</td>"
     
     alt_class = if row_index % 2 is 0 then "even" else "odd"
 

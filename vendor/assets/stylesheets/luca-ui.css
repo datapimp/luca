@@ -43,12 +43,9 @@ html.luca-ui-fullscreen {
     background-color: #e3e3e3; }
   .scrollable-grid-view .grid-view-body {
     clear: both;
-    height: 285px;
-    overflow: auto;
-    width: 756px; }
+    overflow: auto; }
   .scrollable-grid-view .grid-view-body {
-    overflow: hidden;
-    width: 756px; }
+    overflow: hidden; }
   .scrollable-grid-view .grid-view-body table {
     float: left;
     width: 740px; }
@@ -73,23 +70,12 @@ html.luca-ui-fullscreen {
     width: 100%; }
   .scrollable-grid-view tbody.scrollable {
     display: block;
-    height: 262px;
     overflow: auto;
     width: 100%; }
   .scrollable-grid-view thead.fixed th {
-    padding: 5px;
-    width: 200px; }
-  .scrollable-grid-view thead.fixed th + th {
-    width: 240px; }
-  .scrollable-grid-view thead.fixed th + th + th {
-    width: 316px; }
+    padding: 5px; }
   .scrollable-grid-view tbody.scrollable td {
-    padding: 5px;
-    width: 200px; }
-  .scrollable-grid-view tbody.scrollable td + td {
-    width: 240px; }
-  .scrollable-grid-view tbody.scrollable td + td + td {
-    width: 300px; }
+    padding: 5px; }
 .luca-ui-tab-view-wrapper .luca-ui-tab-container ul {
   padding: 0;
   margin: 0; }

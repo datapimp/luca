@@ -9,15 +9,12 @@
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
   .grid-view-body {
     clear: both;
-    height: 285px;
     overflow: auto;
-    width: 756px
   }
 
   /* Reset overflow value to hidden for all non-IE browsers. */
   .grid-view-body {
     overflow: hidden;
-    width: 756px
   }
 
   /* define width of table. IE browsers only                 */
@@ -75,7 +72,6 @@
   /* induced side effect is that child TDs no longer accept width: auto                     */
   tbody.scrollable {
     display: block;
-    height: 262px;
     overflow: auto;
     width: 100%
   }
@@ -85,15 +81,6 @@
   /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
   thead.fixed th {
     padding: 5px;
-    width: 200px
-  }
-
-  thead.fixed th + th {
-    width: 240px
-  }
-
-  thead.fixed th + th + th {
-    width: 316px
   }
 
   /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
@@ -101,14 +88,6 @@
   /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
   tbody.scrollable td {
     padding: 5px;
-    width: 200px
   }
 
-  tbody.scrollable td + td {
-    width: 240px
-  }
-
-  tbody.scrollable td + td + td {
-    width: 300px
-  }
 }
