@@ -45,7 +45,7 @@ Luca.cache = (needle, component)->
 # and returns the value of window.deep.nested.value
 Luca.util.nestedValue = (accessor, source_object)->
   _( accessor.split(/\./) ).inject (obj,key)->
-    obj = obj[key]
+    obj = obj?[key]
   , source_object
 
 # Lookup a component in the Luca component registry

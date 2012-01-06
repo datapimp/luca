@@ -40,7 +40,7 @@
 
   Luca.util.nestedValue = function(accessor, source_object) {
     return _(accessor.split(/\./)).inject(function(obj, key) {
-      return obj = obj[key];
+      return obj = obj != null ? obj[key] : void 0;
     }, source_object);
   };
 
@@ -701,10 +701,20 @@
         this.select_el().append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
       if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
-        return this.collection.each(function(model) {
+        this.collection.each(function(model) {
           var display, option, selected, value;
           value = model.get(_this.valueField);
           display = model.get(_this.displayField);
+          if (_this.selected && value === _this.selected) selected = "selected";
+          option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
+          return _this.select_el().append(option);
+        });
+      }
+      if (this.collection.data) {
+        return _(this.collection.data).each(function(pair) {
+          var display, option, selected, value;
+          value = pair[0];
+          display = pair[1];
           if (_this.selected && value === _this.selected) selected = "selected";
           option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
           return _this.select_el().append(option);
@@ -897,10 +907,11 @@
         _this = this;
       this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
-        var style, value;
+        var display, style, value;
         value = _this.cell_renderer(row, column, col_index);
         style = column.width ? "width:" + column.width + "px;" : "";
-        return "<td style='" + style + "' class='column-" + col_index + "'>" + value + "</td>";
+        display = _.isUndefined(value) ? "" : value;
+        return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
       alt_class = row_index % 2 === 0 ? "even" : "odd";
       return this.body.append("<tr data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>");

@@ -109,8 +109,10 @@ Luca.components.GridView = Luca.View.extend
     cells = _( @columns ).map (column,col_index) => 
       value = @cell_renderer(row, column, col_index)
       style = if column.width then "width:#{ column.width }px;" else ""
+      
+      display = if _.isUndefined(value) then "" else value
 
-      "<td style='#{ style }' class='column-#{ col_index }'>#{ value }</td>"
+      "<td style='#{ style }' class='column-#{ col_index }'>#{ display }</td>"
     
     alt_class = if row_index % 2 is 0 then "even" else "odd"
 
