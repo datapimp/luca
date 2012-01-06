@@ -259,3 +259,19 @@ new Luca.components.GridView
       row.get("subject")?.name
   ]
 ```
+
+Websocket Abstraction
+---------------------
+Luca.SocketManager is an abstraction
+around various websocket services such as
+faye.js, socket.io, now.js, etc.
+
+It provides a common interface for adding
+push / async functionality to Collections, 
+Models, and the like, regardless of the
+transport mechanism used.  
+
+Simply bind to it, and any message that comes 
+across the channel you subscribe to, will be
+bubbled up as a Backbone.Event with the message
+contents as your argument

@@ -129,6 +129,12 @@ Luca.available_templates = (filter="")->
   else
     available
 
+Luca.util.isIE = ()->
+  try
+    Object.defineProperty({}, '', {})
+    return false
+  catch e
+    return true
+
 $ do -> 
-  console.log "Enabling Luca-UI"
   $('body').addClass('luca-ui-enabled')

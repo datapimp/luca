@@ -90,8 +90,16 @@
     }
   };
 
+  Luca.util.isIE = function() {
+    try {
+      Object.defineProperty({}, '', {});
+      return false;
+    } catch (e) {
+      return true;
+    }
+  };
+
   $((function() {
-    console.log("Enabling Luca-UI");
     return $('body').addClass('luca-ui-enabled');
   })());
 
