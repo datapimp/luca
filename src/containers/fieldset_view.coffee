@@ -23,7 +23,7 @@ Luca.containers.FieldsetView = Luca.View.extend
       component.renderTo = component.container = @el
       component.render()
 
-  render: ()->
+  afterRender: ()->
     $(@el).addClass "label-align-#{ @labelAlign }" 
     $(@el).append("<legend>#{ @legend }</legend>") if @legend
     $( @container ).append( $(@el) ) 

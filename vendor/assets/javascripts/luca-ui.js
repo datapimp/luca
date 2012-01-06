@@ -573,7 +573,7 @@
         return component.render();
       });
     },
-    render: function() {
+    afterRender: function() {
       $(this.el).addClass("label-align-" + this.labelAlign);
       if (this.legend) $(this.el).append("<legend>" + this.legend + "</legend>");
       return $(this.container).append($(this.el));
