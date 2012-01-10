@@ -34,11 +34,24 @@ Luca.View.extend = (definition)->
   definition.render = ()->
     if @deferrable
       @trigger "before:render", @
+      
       @deferrable.bind @deferrable_event, ()=>
         _base.apply(@, arguments)
         @trigger "after:render", @
+     
+      # we might not want to fetch immediately upon 
+      # rendering, so we can pass a deferrable_trigger
+      # event and not fire the fetch until this event
+      # occurs
+      @deferrable_trigger ||= "deferrable-trigger-immediately"
+      
+      @bind @deferrable_trigger, ()=>
+        @deferrable.fetch()
+      
+      # the default behavior is to just render / fetch immediately
+      if @deferrable_trigger is "deferrable-trigger-immediately"
+        @trigger(@deferrable_trigger)
 
-      @deferrable.fetch()
     else
       @trigger "before:render", @
       do ()=>

@@ -231,7 +231,13 @@
           _base.apply(_this, arguments);
           return _this.trigger("after:render", _this);
         });
-        return this.deferrable.fetch();
+        this.deferrable_trigger || (this.deferrable_trigger = "deferrable-trigger-immediately");
+        this.bind(this.deferrable_trigger, function() {
+          return _this.deferrable.fetch();
+        });
+        if (this.deferrable_trigger === "deferrable-trigger-immediately") {
+          return this.trigger(this.deferrable_trigger);
+        }
       } else {
         this.trigger("before:render", this);
         (function() {
