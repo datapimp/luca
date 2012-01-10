@@ -19,14 +19,24 @@ Luca.containers.FieldsetView = Luca.View.extend
     @initialized = true
   
   beforeRender: ()->
+    return if @beforeRenderCalled
+
     _( @components ).each (component)=> 
       component.renderTo = component.container = @el
       component.render()
+    
+    # HACK.  Why is double initialization happening in the first place?
+    @beforeRenderCalled = true
 
   afterRender: ()->
+    return if @afterRenderCalled
+
     $(@el).addClass "label-align-#{ @labelAlign }" 
     $(@el).append("<legend>#{ @legend }</legend>") if @legend
     $( @container ).append( $(@el) ) 
+
+    # HACK.  Why is double initialization happening in the first place?
+    @afterRenderCalled = true
 
   initialize: (@options={})->
     _.extend @, @options

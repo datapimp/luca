@@ -31,6 +31,7 @@ Luca.components.FormView = Luca.View.extend
     @fieldsets = @components = _( @components ).map (fieldset, index)=>
       fieldset.renderTo = fieldset.container = @form
       fieldset.id = "#{ @cid }-#{ index }"
+      fieldset.legend = @legend if @legend and index is 0
       new Luca.containers.FieldsetView(fieldset)
 
   fieldsets_present : ()-> 
@@ -43,7 +44,7 @@ Luca.components.FormView = Luca.View.extend
         components: @components
         container_type: @container_type
       ]
-
+      
   afterRender: ()->
     _( @components ).each (component)-> 
       component.render()

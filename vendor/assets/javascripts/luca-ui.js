@@ -238,9 +238,7 @@
         if (this.immediate_trigger === true) {
           return this.deferrable.fetch();
         } else {
-          console.log("Binding to " + this.deferrable_trigger + " on " + this.cid);
           return this.bind(this.deferrable_trigger, function() {
-            console.log("Deferrable Triggered on", _this);
             return _this.deferrable.fetch();
           });
         }
@@ -618,15 +616,19 @@
     },
     beforeRender: function() {
       var _this = this;
-      return _(this.components).each(function(component) {
+      if (this.beforeRenderCalled) return;
+      _(this.components).each(function(component) {
         component.renderTo = component.container = _this.el;
         return component.render();
       });
+      return this.beforeRenderCalled = true;
     },
     afterRender: function() {
+      if (this.afterRenderCalled) return;
       $(this.el).addClass("label-align-" + this.labelAlign);
       if (this.legend) $(this.el).append("<legend>" + this.legend + "</legend>");
-      return $(this.container).append($(this.el));
+      $(this.container).append($(this.el));
+      return this.afterRenderCalled = true;
     },
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -1031,6 +1033,7 @@
       return this.fieldsets = this.components = _(this.components).map(function(fieldset, index) {
         fieldset.renderTo = fieldset.container = _this.form;
         fieldset.id = "" + _this.cid + "-" + index;
+        if (_this.legend && index === 0) fieldset.legend = _this.legend;
         return new Luca.containers.FieldsetView(fieldset);
       });
     },
