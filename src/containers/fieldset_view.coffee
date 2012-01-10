@@ -33,3 +33,5 @@ Luca.containers.FieldsetView = Luca.View.extend
     Luca.View.prototype.initialize.apply @, arguments
     @components ||= @fields
 
+  getFields: ()->
+    _( @components ).select (component)-> component.form_field is true

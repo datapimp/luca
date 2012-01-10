@@ -2,7 +2,12 @@ Luca.components.FormView = Luca.View.extend
   className: 'luca-ui-form-view'
 
   hooks:[
-    "before:submit"
+    "before:submit",
+    "before:clear",
+    "before:load",
+    "after:submit",
+    "after:clear",
+    "after:load"
   ]
 
   container_type: 'column_view'
@@ -22,7 +27,7 @@ Luca.components.FormView = Luca.View.extend
     
     @check_for_fieldsets()
     
-    @components = _( @components ).map (fieldset, index)=>
+    @fieldsets = @components = _( @components ).map (fieldset, index)=>
       fieldset.renderTo = fieldset.container = @form
       fieldset.id = "#{ @cid }-#{ index }"
       new Luca.containers.FieldsetView(fieldset)
@@ -43,6 +48,33 @@ Luca.components.FormView = Luca.View.extend
       component.render()
 
     $(@container).append $(@el)
+  
+  getFields: ()->
+    _.flatten _.compact _( @fieldsets ).map (fs)-> 
+      fs?.getFields?.apply(fs)
 
+  loadModel: (@current_model)->
+    form = @
+    fields = @getFields()
+    
+    @trigger "before:load", @, @current_model
+
+    _( fields ).each (field) =>
+      field_name = field.input_name || field.name
+      value = if _.isFunction(@current_model[ field_name ]) then @current_model[field_name].apply(@, form) else @current_model.get( field_name ) 
+      field?.setValue( value )
+
+    @trigger "after:load", @, @current_model
+
+  clear: ()->
+    @trigger "before:clear", @
+
+    @current_model = undefined
+    _( @getFields() ).each (field)-> field.setValue()
+
+    @trigger "after:clear", @
+
+  currentModel: ()-> 
+    @current_model
 
 Luca.register 'form_view', 'Luca.components.FormView'

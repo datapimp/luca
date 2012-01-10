@@ -1,4 +1,6 @@
 Luca.fields.CheckboxField = Luca.core.Field.extend
+  form_field: true
+
   events:
     "change input" : "change_handler"
 
@@ -20,12 +22,16 @@ Luca.fields.CheckboxField = Luca.core.Field.extend
 
     Luca.core.Field.prototype.initialize.apply @, arguments
 
-
-
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
     @input_value ||= 1
     @label ||= @name
+
+  setValue: (checked)->
+    @input.attr('checked', checked)
+
+  getValue:()->
+    @input.attr('checked') is true
 
 Luca.register "checkbox_field", "Luca.fields.CheckboxField"

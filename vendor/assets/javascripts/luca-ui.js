@@ -294,7 +294,14 @@
     },
     beforeRender: function() {
       $(this.el).html(Luca.templates[this.template](this));
-      return $(this.container).append($(this.el));
+      $(this.container).append($(this.el));
+      return this.input = $('input', this.el);
+    },
+    setValue: function(value) {
+      return this.input.attr('value', value);
+    },
+    getValue: function() {
+      return this.input.attr('value');
     }
   });
 
@@ -609,6 +616,11 @@
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
       return this.components || (this.components = this.fields);
+    },
+    getFields: function() {
+      return _(this.components).select(function(component) {
+        return component.form_field === true;
+      });
     }
   });
 
@@ -770,6 +782,7 @@
 (function() {
 
   Luca.fields.CheckboxField = Luca.core.Field.extend({
+    form_field: true,
     events: {
       "change input": "change_handler"
     },
@@ -795,6 +808,12 @@
       this.input_name || (this.input_name = this.name);
       this.input_value || (this.input_value = 1);
       return this.label || (this.label = this.name);
+    },
+    setValue: function(checked) {
+      return this.input.attr('checked', checked);
+    },
+    getValue: function() {
+      return this.input.attr('checked') === true;
     }
   });
 
@@ -804,6 +823,7 @@
 (function() {
 
   Luca.fields.SelectField = Luca.core.Field.extend({
+    form_field: true,
     events: {
       "change select": "change_handler"
     },
@@ -827,18 +847,22 @@
       var me, my;
       return me = my = $(e.currentTarget);
     },
-    select_el: function() {
-      return $("select", this.el);
-    },
     includeBlank: true,
     blankValue: '',
     blankText: 'Select One',
+    beforeRender: function() {
+      var _ref;
+      if ((_ref = Luca.core.Field.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      return this.input = $('select', this.el);
+    },
     afterRender: function() {
-      var _ref,
+      var _ref, _ref2,
         _this = this;
-      this.select_el().html('');
+      this.input.html('');
       if (this.includeBlank) {
-        this.select_el().append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
+        this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
       if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
         this.collection.each(function(model) {
@@ -847,17 +871,17 @@
           display = model.get(_this.displayField);
           if (_this.selected && value === _this.selected) selected = "selected";
           option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-          return _this.select_el().append(option);
+          return _this.input.append(option);
         });
       }
-      if (this.collection.data) {
+      if ((_ref2 = this.collection) != null ? _ref2.data : void 0) {
         return _(this.collection.data).each(function(pair) {
           var display, option, selected, value;
           value = pair[0];
           display = pair[1];
           if (_this.selected && value === _this.selected) selected = "selected";
           option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-          return _this.select_el().append(option);
+          return _this.input.append(option);
         });
       }
     }
@@ -869,6 +893,7 @@
 (function() {
 
   Luca.fields.TextField = Luca.core.Field.extend({
+    form_field: true,
     events: {
       "keydown input": "keydown_handler",
       "blur input": "blur_handler",
@@ -946,7 +971,7 @@
 
   Luca.components.FormView = Luca.View.extend({
     className: 'luca-ui-form-view',
-    hooks: ["before:submit"],
+    hooks: ["before:submit", "before:clear", "before:load", "after:submit", "after:clear", "after:load"],
     container_type: 'column_view',
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -960,7 +985,7 @@
       this.form = $('form', this.el);
       if (this.form_class) this.form.addClass(this.form_class);
       this.check_for_fieldsets();
-      return this.components = _(this.components).map(function(fieldset, index) {
+      return this.fieldsets = this.components = _(this.components).map(function(fieldset, index) {
         fieldset.renderTo = fieldset.container = _this.form;
         fieldset.id = "" + _this.cid + "-" + index;
         return new Luca.containers.FieldsetView(fieldset);
@@ -987,6 +1012,38 @@
         return component.render();
       });
       return $(this.container).append($(this.el));
+    },
+    getFields: function() {
+      return _.flatten(_.compact(_(this.fieldsets).map(function(fs) {
+        var _ref;
+        return fs != null ? (_ref = fs.getFields) != null ? _ref.apply(fs) : void 0 : void 0;
+      })));
+    },
+    loadModel: function(current_model) {
+      var fields, form,
+        _this = this;
+      this.current_model = current_model;
+      form = this;
+      fields = this.getFields();
+      this.trigger("before:load", this, this.current_model);
+      _(fields).each(function(field) {
+        var field_name, value;
+        field_name = field.input_name || field.name;
+        value = _.isFunction(_this.current_model[field_name]) ? _this.current_model[field_name].apply(_this, form) : _this.current_model.get(field_name);
+        return field != null ? field.setValue(value) : void 0;
+      });
+      return this.trigger("after:load", this, this.current_model);
+    },
+    clear: function() {
+      this.trigger("before:clear", this);
+      this.current_model = void 0;
+      _(this.getFields()).each(function(field) {
+        return field.setValue();
+      });
+      return this.trigger("after:clear", this);
+    },
+    currentModel: function() {
+      return this.current_model;
     }
   });
 

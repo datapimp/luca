@@ -19,3 +19,10 @@ Luca.core.Field = Luca.View.extend
   beforeRender: ()->
     $(@el).html Luca.templates[ @template ]( @ )
     $( @container ).append( $(@el) )
+    @input = $('input', @el)
+
+  setValue: (value)-> 
+    @input.attr('value', value)
+
+  getValue: ()-> 
+    @input.attr('value')

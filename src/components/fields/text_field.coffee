@@ -1,4 +1,6 @@
 Luca.fields.TextField = Luca.core.Field.extend
+  form_field: true
+
   events:
     "keydown input" : "keydown_handler"
     "blur input" : "blur_handler"
