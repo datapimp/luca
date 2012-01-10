@@ -736,10 +736,21 @@
     tab_container: function() {
       return $("#" + this.cid + "-tab-container>ul");
     },
+    tab_position: 'top',
     beforeLayout: function() {
-      $(this.el).append(Luca.templates["containers/tab_view"](this));
+      $(this.el).addClass("tab-position-" + this.tab_position);
+      if (this.tab_position === "top" || this.tab_position === "left") {
+        $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
+        $(this.el).append(Luca.templates["containers/tab_view"](this));
+      } else {
+        $(this.el).append(Luca.templates["containers/tab_view"](this));
+        $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
+      }
       this.create_tab_selectors();
       return Luca.containers.CardView.prototype.beforeLayout.apply(this, arguments);
+    },
+    tab_selectors: function() {
+      return $('li.tab-selector', this.tab_container());
     },
     create_tab_selectors: function() {
       var _this = this;
@@ -747,7 +758,7 @@
         var title;
         component.renderTo = "#" + _this.cid + "-tab-panel-container";
         title = component.title || ("Tab " + (index + 1));
-        return _this.tab_container().append("<li data-target-tab='" + index + "'>" + title + "</li>");
+        return _this.tab_container().append("<li class='tab-selector' data-target-tab='" + index + "'>" + title + "</li>");
       });
     }
   });
@@ -991,6 +1002,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
+      this.setupHooks(this.hooks);
       return this.components || (this.components = this.fields);
     },
     beforeRender: function() {
@@ -1158,7 +1170,7 @@
       return this.header.append("<tr>" + headers + "</tr>");
     },
     render_row: function(row, row_index) {
-      var alt_class, cells,
+      var alt_class, cells, _ref,
         _this = this;
       this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
@@ -1169,7 +1181,7 @@
         return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
       alt_class = row_index % 2 === 0 ? "even" : "odd";
-      return this.body.append("<tr data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>");
+      return (_ref = this.body) != null ? _ref.append("<tr data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
     },
     cell_renderer: function(row, column, columnIndex) {
       var source;
@@ -1219,7 +1231,11 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-container\' id=\'', cid ,'-tab-container\'>\n  <ul></ul>\n</div>\n<div class=\'luca-ui-tab-panel-container\' id=\'', cid ,'-tab-panel-container\'></div>\n');}return __p.join('');};
+  Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-container\' id=\'', cid ,'-tab-container\'>\n  <ul></ul>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-panel-container\' id=\'', cid ,'-tab-panel-container\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

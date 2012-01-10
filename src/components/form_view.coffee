@@ -15,6 +15,7 @@ Luca.components.FormView = Luca.View.extend
   initialize: (@options={})->
     _.extend @, @options
     Luca.View.prototype.initialize.apply @, arguments
+    @setupHooks( @hooks )
     
     @components ||= @fields
 
@@ -63,7 +64,7 @@ Luca.components.FormView = Luca.View.extend
       field_name = field.input_name || field.name
       value = if _.isFunction(@current_model[ field_name ]) then @current_model[field_name].apply(@, form) else @current_model.get( field_name ) 
       field?.setValue( value )
-
+    
     @trigger "after:load", @, @current_model
 
   clear: ()->

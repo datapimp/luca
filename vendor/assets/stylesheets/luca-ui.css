@@ -88,14 +88,35 @@ html.luca-ui-fullscreen {
     padding: 5px; }
   .scrollable-grid-view tbody.scrollable td {
     padding: 5px; }
-.luca-ui-tab-view-wrapper .luca-ui-tab-container ul {
-  padding: 0;
-  margin: 0; }
-  .luca-ui-tab-view-wrapper .luca-ui-tab-container ul li {
-    display: inline;
-    list-style-type: none;
-    padding: 0;
-    margin: 0; }
+.luca-ui-tab-view-wrapper {
+  float: left;
+  clear: both;
+  display: block; }
+  .luca-ui-tab-view-wrapper .luca-ui-tab-container {
+    display: block; }
+  .luca-ui-tab-view-wrapper .luca-ui-tab-container {
+    display: block; }
+    .luca-ui-tab-view-wrapper .luca-ui-tab-container ul {
+      padding: 0;
+      margin: 0; }
+      .luca-ui-tab-view-wrapper .luca-ui-tab-container ul li {
+        display: inline;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer; }
+
+.luca-ui-tab-view-wrapper.tab-position-top .luca-ui-tab-container {
+  clear: both;
+  width: 100%; }
+  .luca-ui-tab-view-wrapper.tab-position-top .luca-ui-tab-container ul li {
+    padding: 5px 10px;
+    margin-right: 5px; }
+.luca-ui-tab-view-wrapper.tab-position-top .luca-ui-tab-panel-container {
+  width: 100%; }
+
+.luca-ui-tab-view-wrapper.tab-position-left .luca-ui-tab-container, .luca-ui-tab-view-wrapper.tab-position-left .luca-ui-tab-panel-container {
+  float: left; }
 /* normalize.css 2011-11-04T15:38 UTC - http://github.com/necolas/normalize.css */
 /* =============================================================================
    HTML5 display definitions

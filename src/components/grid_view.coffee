@@ -125,7 +125,7 @@ Luca.components.GridView = Luca.View.extend
     
     alt_class = if row_index % 2 is 0 then "even" else "odd"
 
-    @body.append("<tr data-row-index='#{ row_index }' class='grid-view-row #{ alt_class }' id='row-#{ row_index }'>#{ cells }</tr>")
+    @body?.append("<tr data-row-index='#{ row_index }' class='grid-view-row #{ alt_class }' id='row-#{ row_index }'>#{ cells }</tr>")
 
   cell_renderer: (row, column, columnIndex )->
     if _.isFunction column.renderer
