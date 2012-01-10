@@ -45,8 +45,7 @@ Luca.containers.CardView = Luca.core.Container.extend
     nextIndex = if @activeCard < @components.length - 1 then @activeCard + 1 else 0
     @activate( nextIndex ) 
 
-  hide_components: ()->
-    _( @components ).pluck('container')
+  findCard: (name)-> @findComponentByName(name,true)
 
   activate: (index)->
     return if index is @activeCard
