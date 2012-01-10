@@ -19,6 +19,11 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
     @configure_collection()
 
+  afterInitialize: ()->
+    @input_id ||= _.uniqueId('field') 
+    @input_name ||= @name 
+    @label ||= @name
+
   change_handler: (e)->
     me = my = $( e.currentTarget )
     console.log "Selected", me
