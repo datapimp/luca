@@ -26,7 +26,6 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
   change_handler: (e)->
     me = my = $( e.currentTarget )
-    console.log "Selected", me
   
   select_el: ()-> 
     $("select", @el)

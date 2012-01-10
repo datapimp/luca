@@ -7,7 +7,6 @@ Luca.fields.TextField = Luca.core.Field.extend
   template: 'fields/text_field'
 
   initialize: (@options={})->
-    console.log "Initializing Text Field", @cid
     _.bindAll @, "keydown_handler"
     Luca.core.Field.prototype.initialize.apply @, arguments
 

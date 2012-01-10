@@ -825,8 +825,7 @@
     },
     change_handler: function(e) {
       var me, my;
-      me = my = $(e.currentTarget);
-      return console.log("Selected", me);
+      return me = my = $(e.currentTarget);
     },
     select_el: function() {
       return $("select", this.el);
@@ -878,7 +877,6 @@
     template: 'fields/text_field',
     initialize: function(options) {
       this.options = options != null ? options : {};
-      console.log("Initializing Text Field", this.cid);
       _.bindAll(this, "keydown_handler");
       return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
