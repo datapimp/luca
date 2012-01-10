@@ -71,7 +71,7 @@ Luca.components.FormView = Luca.View.extend
     @trigger "before:clear", @
 
     @current_model = undefined
-    _( @getFields() ).each (field)-> field.setValue()
+    _( @getFields() ).each (field)-> field.setValue('')
 
     @trigger "after:clear", @
 

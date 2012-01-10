@@ -3,6 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
+    VERSION: "0.2.6",
     core: {},
     containers: {},
     components: {},
@@ -1064,7 +1065,7 @@
       this.trigger("before:clear", this);
       this.current_model = void 0;
       _(this.getFields()).each(function(field) {
-        return field.setValue();
+        return field.setValue('');
       });
       return this.trigger("after:clear", this);
     },
