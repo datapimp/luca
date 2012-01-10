@@ -52,6 +52,10 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     previous = @activeComponent()
     nowActive = @getComponent(index)
+     
+    if nowActive and not nowActive.previously_activated
+      nowActive.trigger "first:activated"
+      nowActive.previously_activated = true
 
     @trigger "before:card:switch", previous, nowActive 
     

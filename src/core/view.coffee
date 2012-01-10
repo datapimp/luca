@@ -50,7 +50,7 @@ Luca.View.extend = (definition)->
       
       # the default behavior is to just render / fetch immediately
       if @deferrable_trigger is "deferrable-trigger-immediately"
-        @trigger(@deferrable_trigger)
+        @trigger( @deferrable_trigger )
 
     else
       @trigger "before:render", @
