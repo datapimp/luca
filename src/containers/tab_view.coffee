@@ -20,7 +20,6 @@ Luca.containers.TabView = Luca.containers.CardView.extend
   
   select: (e)->
     me = my = $( e.currentTarget )
-    console.log "Selected A Tab", my
     @activate my.data('target-tab')
 
   tab_container: ()->

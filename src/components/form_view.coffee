@@ -14,14 +14,12 @@ Luca.components.FormView = Luca.View.extend
     @components ||= @fields
 
   beforeRender: ()->
-    console.log "Before Render On The Form View"
     $(@el).append("<form />")
 
     @form = $('form', @el )
     
     @form.addClass( @form_class ) if @form_class
     
-    console.log "Checking For Fieldsets", @fieldsets_present()
     @check_for_fieldsets()
     
     @components = _( @components ).map (fieldset, index)=>
@@ -34,16 +32,13 @@ Luca.components.FormView = Luca.View.extend
 
   check_for_fieldsets: ()->
     unless @fieldsets_present()
-      console.log "Fieldsets Not Present", @components
       @components = [ 
         ctype: 'fieldset_view'
         components: @components
         container_type: @container_type
       ]
-      console.log "How about now?", @fieldsets_present(), @components
 
   afterRender: ()->
-    console.log "After Render On The Form View"
     _( @components ).each (component)-> 
       component.render()
 

@@ -227,9 +227,6 @@
       if (this.deferrable) {
         this.trigger("before:render", this);
         this.deferrable.bind(this.deferrable_event, function() {
-          if (_this.debugMode === "verbose") {
-            console.log("Deferrable Render", _this.cid);
-          }
           _base.apply(_this, arguments);
           return _this.trigger("after:render", _this);
         });
@@ -237,9 +234,6 @@
       } else {
         this.trigger("before:render", this);
         (function() {
-          if (_this.debugMode === "verbose") {
-            console.log("Normal Render", _this.cid);
-          }
           return _base.apply(_this, arguments);
         })();
         return this.trigger("after:render", this);
@@ -251,9 +245,6 @@
   _.extend(Luca.View.prototype, {
     trigger: function(event) {
       this.event = event;
-      if (this.debugMode === "very-verbose") {
-        console.log("Triggering", this.event, this.cid);
-      }
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
     hooks: ["after:initialize", "before:render", "after:render"],
@@ -675,7 +666,6 @@
       return modal.data.show();
     },
     onModalClose: function(modal, view) {
-      console.log(arguments);
       return $.modal.close();
     },
     prepare_layout: function() {
@@ -729,7 +719,6 @@
     select: function(e) {
       var me, my;
       me = my = $(e.currentTarget);
-      console.log("Selected A Tab", my);
       return this.activate(my.data('target-tab'));
     },
     tab_container: function() {
@@ -773,7 +762,6 @@
       return true;
     },
     render: function() {
-      console.log("Rendering Viewport");
       return $(this.el).addClass('luca-ui-viewport');
     }
   });
@@ -970,11 +958,9 @@
     },
     beforeRender: function() {
       var _this = this;
-      console.log("Before Render On The Form View");
       $(this.el).append("<form />");
       this.form = $('form', this.el);
       if (this.form_class) this.form.addClass(this.form_class);
-      console.log("Checking For Fieldsets", this.fieldsets_present());
       this.check_for_fieldsets();
       return this.components = _(this.components).map(function(fieldset, index) {
         fieldset.renderTo = fieldset.container = _this.form;
@@ -989,19 +975,16 @@
     },
     check_for_fieldsets: function() {
       if (!this.fieldsets_present()) {
-        console.log("Fieldsets Not Present", this.components);
-        this.components = [
+        return this.components = [
           {
             ctype: 'fieldset_view',
             components: this.components,
             container_type: this.container_type
           }
         ];
-        return console.log("How about now?", this.fieldsets_present(), this.components);
       }
     },
     afterRender: function() {
-      console.log("After Render On The Form View");
       _(this.components).each(function(component) {
         return component.render();
       });

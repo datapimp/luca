@@ -35,7 +35,6 @@ Luca.View.extend = (definition)->
     if @deferrable
       @trigger "before:render", @
       @deferrable.bind @deferrable_event, ()=>
-        console.log "Deferrable Render", @cid if @debugMode is "verbose"
         _base.apply(@, arguments)
         @trigger "after:render", @
 
@@ -43,7 +42,6 @@ Luca.View.extend = (definition)->
     else
       @trigger "before:render", @
       do ()=>
-        console.log "Normal Render", @cid if @debugMode is "verbose"
         _base.apply(@, arguments)
       @trigger "after:render", @
 
@@ -51,7 +49,6 @@ Luca.View.extend = (definition)->
 
 _.extend Luca.View.prototype,
   trigger: (@event)->
-    console.log "Triggering", @event, @cid if @debugMode is "very-verbose"
     Backbone.View.prototype.trigger.apply @, arguments
 
   hooks:[

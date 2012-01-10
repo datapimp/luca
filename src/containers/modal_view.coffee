@@ -56,7 +56,6 @@ Luca.containers.ModalView = Luca.core.Container.extend
 
   # this will be called within the context of the simple modal object
   onModalClose: (modal, view)->
-    console.log arguments
     $.modal.close()
 
   prepare_layout: ()->
