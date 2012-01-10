@@ -322,6 +322,7 @@
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
+      _.bindAll(this, "index_components");
       this.setupHooks(Luca.core.Container.prototype.hooks);
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
@@ -344,15 +345,49 @@
       return console.log(this.component_type, "should implement its own prepare components method");
     },
     create_components: function() {
-      var _this = this;
+      var map,
+        _this = this;
+      map = this.component_index = {
+        name_index: {},
+        cid_index: {}
+      };
       return this.components = _(this.components).map(function(object, index) {
         var component;
         component = _.isObject(object) && (object.ctype != null) ? Luca.util.LazyObject(object) : object;
         if (!component.renderTo && component.options.renderTo) {
           component.container = component.renderTo = component.options.renderTo;
         }
+        if (map && (component.cid != null)) map.cid_index[component.cid] = index;
+        if (map && (component.name != null)) {
+          map.name_index[component.name] = index;
+        }
         return component;
       });
+    },
+    findComponentByName: function(name, deep) {
+      if (deep == null) deep = false;
+      return this.findComponent(name, "name_index", deep);
+    },
+    findComponentById: function(id, deep) {
+      if (deep == null) deep = false;
+      return this.findComponent(id, "cid_index", deep);
+    },
+    findComponent: function(needle, haystack, deep) {
+      var component, position, sub_container;
+      if (haystack == null) haystack = "name";
+      if (deep == null) deep = false;
+      position = this.component_index[haystack][needle];
+      component = this.components[position];
+      if (component) return component;
+      if (deep === true) {
+        sub_container = _(this.components).detect(function(component) {
+          return component != null ? typeof component.findComponent === "function" ? component.findComponent(needle, haystack, true) : void 0 : void 0;
+        });
+        return typeof sub_container.findComponent === "function" ? sub_container.findComponent(needle, haystack, true) : void 0;
+      }
+    },
+    component_names: function() {
+      return _(this.component_index.name_index).keys();
     },
     render_components: function(debugMode) {
       var _this = this;
@@ -528,8 +563,8 @@
       nextIndex = this.activeCard < this.components.length - 1 ? this.activeCard + 1 : 0;
       return this.activate(nextIndex);
     },
-    hide_components: function() {
-      return _(this.components).pluck('container');
+    find: function(name) {
+      return this.findComponentByName(name, true);
     },
     activate: function(index) {
       var nowActive, previous;
@@ -719,7 +754,8 @@
 }).call(this);
 (function() {
 
-  Luca.containers.Viewport = Luca.core.Container.extend({
+  Luca.containers.Viewport = Luca.containers.CardView.extend({
+    activeItem: 0,
     className: 'luca-ui-viewport',
     fullscreen: true,
     initialize: function(options) {
@@ -746,12 +782,31 @@
 (function() {
 
   Luca.fields.CheckboxField = Luca.core.Field.extend({
+    events: {
+      "change input": "change_handler"
+    },
+    change_handler: function(e) {
+      var me, my;
+      me = my = $(e.currentTarget);
+      if (me.checked === true) {
+        return this.trigger("checked");
+      } else {
+        return this.trigger("unchecked");
+      }
+    },
     className: 'luca-ui-checkbox-field luca-ui-field',
     template: 'fields/checkbox_field',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      _.bindAll(this, "change_handler");
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+    },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
-      return this.input_value || (this.input_value = 1);
+      this.input_value || (this.input_value = 1);
+      return this.label || (this.label = this.name);
     }
   });
 
@@ -774,6 +829,11 @@
       _.bindAll(this, "change_handler");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       return this.configure_collection();
+    },
+    afterInitialize: function() {
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      return this.label || (this.label = this.name);
     },
     change_handler: function(e) {
       var me, my;
@@ -823,7 +883,9 @@
 
   Luca.fields.TextField = Luca.core.Field.extend({
     events: {
-      "keydown input": "keydown_handler"
+      "keydown input": "keydown_handler",
+      "blur input": "blur_handler",
+      "focus input": "focus_handler"
     },
     template: 'fields/text_field',
     initialize: function(options) {
@@ -832,10 +894,22 @@
       _.bindAll(this, "keydown_handler");
       return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
+    afterInitialize: function() {
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      return this.label || (this.label = this.name);
+    },
     keydown_handler: function(e) {
       var me, my;
-      me = my = $(e.currentTarget);
-      return console.log("keydown", me);
+      return me = my = $(e.currentTarget);
+    },
+    blur_handler: function(e) {
+      var me, my;
+      return me = my = $(e.currentTarget);
+    },
+    focus_handler: function(e) {
+      var me, my;
+      return me = my = $(e.currentTarget);
     }
   });
 
@@ -845,7 +919,12 @@
 (function() {
 
   Luca.fields.TypeAheadField = Luca.fields.TextField.extend({
-    className: 'luca-ui-field'
+    className: 'luca-ui-field',
+    afterInitialize: function() {
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      return this.label || (this.label = this.name);
+    }
   });
 
 }).call(this);
