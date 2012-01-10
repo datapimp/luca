@@ -13,7 +13,8 @@ Luca.components.GridView = Luca.View.extend
     "before:render:row",
     "after:grid:render",
     "row:double:click",
-    "row:click"
+    "row:click",
+    "after:collection:load"
   ]
 
   initialize: (@options={})->
@@ -34,7 +35,15 @@ Luca.components.GridView = Luca.View.extend
 
     @configure_collection()
 
- 
+    @collection?.bind "reset", (collection) =>
+      @trigger "after:collection:load", collection
+
+  ifLoaded: (fn, scope)->
+    scope ||= @
+    fn ||= ()-> true
+
+    @collection.ifLoaded(fn,scope)
+   
   beforeRender: _.once ()->
     @trigger "before:grid:render", @
 
@@ -141,6 +150,5 @@ Luca.components.GridView = Luca.View.extend
 
     $('.grid-view-row', @body ).removeClass('selected-row')
     me.addClass('selected-row')
-
 
 Luca.register "grid_view","Luca.components.GridView"

@@ -943,16 +943,30 @@
 
   Luca.components.FilterableCollection = Backbone.Collection.extend({
     initialize: function(models, options) {
+      var _this = this;
       if (options == null) options = {};
       _.extend(this, options);
       Backbone.Collection.prototype.initialize.apply(this, arguments);
       if (_.isFunction(this.beforeFetch)) {
-        return this.bind("before:fetch", this.beforeFetch);
+        this.bind("before:fetch", this.beforeFetch);
       }
+      return this.bind("reset", function() {
+        return _this.fetching = false;
+      });
     },
     fetch: function(options) {
       this.trigger("before:fetch", this);
+      this.fetching = true;
       return Backbone.Collection.prototype.fetch.apply(this, arguments);
+    },
+    ifLoaded: function(fn, scope) {
+      var _this = this;
+      if (scope == null) scope = this;
+      if (this.models.length > 0 && !this.fetching) fn.apply(scope, this);
+      this.bind("reset", function(collection) {
+        return fn.apply(scope, [collection]);
+      });
+      if (!this.fetching) return this.fetch();
     },
     applyFilter: function(params) {
       this.params = params != null ? params : {};
@@ -1059,8 +1073,10 @@
     },
     className: 'luca-ui-grid-view',
     scrollable: true,
-    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click"],
+    hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click", "after:collection:load"],
     initialize: function(options) {
+      var _ref,
+        _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
@@ -1068,7 +1084,17 @@
       _.bindAll(this, "rowDoubleClick", "rowClick");
       this.collection || (this.collection = this.store);
       this.collection || (this.collection = this.filterable_collection);
-      return this.configure_collection();
+      this.configure_collection();
+      return (_ref = this.collection) != null ? _ref.bind("reset", function(collection) {
+        return _this.trigger("after:collection:load", collection);
+      }) : void 0;
+    },
+    ifLoaded: function(fn, scope) {
+      scope || (scope = this);
+      fn || (fn = function() {
+        return true;
+      });
+      return this.collection.ifLoaded(fn, scope);
     },
     beforeRender: _.once(function() {
       this.trigger("before:grid:render", this);
