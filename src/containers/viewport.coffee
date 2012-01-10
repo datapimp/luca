@@ -1,4 +1,6 @@
-Luca.containers.Viewport = Luca.core.Container.extend
+Luca.containers.Viewport = Luca.containers.CardView.extend
+  activeItem: 0
+
   className: 'luca-ui-viewport'
 
   fullscreen: true
