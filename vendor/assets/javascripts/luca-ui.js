@@ -231,12 +231,18 @@
           _base.apply(_this, arguments);
           return _this.trigger("after:render", _this);
         });
-        this.deferrable_trigger || (this.deferrable_trigger = "deferrable-trigger-immediately");
-        this.bind(this.deferrable_trigger, function() {
-          return _this.deferrable.fetch();
-        });
-        if (this.deferrable_trigger === "deferrable-trigger-immediately") {
-          return this.trigger(this.deferrable_trigger);
+        if (!this.deferrable_trigger) {
+          this.immediate_trigger = true;
+          this.deferrable_trigger || (this.deferrable_trigger = "deferrable-trigger-immediately");
+        }
+        if (this.immediate_trigger === true) {
+          return this.deferrable.fetch();
+        } else {
+          console.log("Binding to " + this.deferrable_trigger + " on " + this.cid);
+          return this.bind(this.deferrable_trigger, function() {
+            console.log("Deferrable Triggered on", _this);
+            return _this.deferrable.fetch();
+          });
         }
       } else {
         this.trigger("before:render", this);
@@ -580,6 +586,10 @@
       _(this.card_containers).each(function(container) {
         return container.hide();
       });
+      if (nowActive && !nowActive.previously_activated) {
+        nowActive.trigger("first:activation");
+        nowActive.previously_activated = true;
+      }
       $(nowActive.container).show();
       this.activeCard = index;
       return this.trigger("after:card:switch", previous, nowActive);

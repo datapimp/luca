@@ -21,7 +21,7 @@ Luca.components.GridView = Luca.View.extend
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
 
-    Luca.View.prototype.initialize.apply @, arguments
+    Luca.View.prototype.initialize.apply( @, arguments )
 
     _.bindAll @, "rowDoubleClick", "rowClick"
     

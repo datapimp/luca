@@ -45,21 +45,22 @@ Luca.containers.CardView = Luca.core.Container.extend
     nextIndex = if @activeCard < @components.length - 1 then @activeCard + 1 else 0
     @activate( nextIndex ) 
 
-  find: (name)-> @findComponentByName(name,true)
-
+  find: (name)-> 
+    @findComponentByName(name,true)
+  
   activate: (index)->
     return if index is @activeCard
 
     previous = @activeComponent()
     nowActive = @getComponent(index)
      
-    if nowActive and not nowActive.previously_activated
-      nowActive.trigger "first:activated"
-      nowActive.previously_activated = true
-
     @trigger "before:card:switch", previous, nowActive 
     
     _( @card_containers ).each (container)-> container.hide()
+
+    if nowActive and not nowActive.previously_activated
+        nowActive.trigger "first:activation"
+        nowActive.previously_activated = true
 
     $( nowActive.container ).show()
 
