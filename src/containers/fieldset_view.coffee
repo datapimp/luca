@@ -6,10 +6,10 @@ Luca.containers.FieldsetView = Luca.View.extend
   className: 'luca-ui-fieldset'
 
   labelAlign: 'top'
-  
+
   afterInitialize: ()->
     return if @initialized is true
-
+    
     @components = _( @components ).map (component, index)=>
       component.id = "#{ @cid }-#{ index }"
       component.ctype ||= component.type + '_field'
