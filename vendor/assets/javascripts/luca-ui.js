@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.2.6",
+    VERSION: "0.2.9",
     core: {},
     containers: {},
     components: {},
@@ -811,6 +811,43 @@
 }).call(this);
 (function() {
 
+  Luca.fields.ButtonField = Luca.core.Field.extend({
+    form_field: true,
+    readOnly: true,
+    events: {
+      "click input": "click_handler"
+    },
+    hooks: ["button:click"],
+    className: 'luca-ui-field luca-ui-button-field',
+    template: 'fields/button_field',
+    click_handler: function(e) {
+      var me, my;
+      me = my = $(e.currentTarget);
+      return this.trigger("button:click");
+    },
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      _.extend(this.options);
+      _.bindAll(this, "click_handler");
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+    },
+    afterInitialize: function() {
+      this.input_id || (this.input_id = _.uniqueId('button'));
+      this.input_name || (this.input_name = this.name);
+      this.input_value || (this.input_value = this.label || (this.label = this.text));
+      this.input_type || (this.input_type = "button");
+      return this.input_class || (this.input_class = "luca-button");
+    },
+    setValue: function() {
+      return true;
+    }
+  });
+
+  Luca.register("button_field", "Luca.fields.ButtonField");
+
+}).call(this);
+(function() {
+
   Luca.fields.CheckboxField = Luca.core.Field.extend({
     form_field: true,
     events: {
@@ -980,9 +1017,18 @@
       if (_.isFunction(this.beforeFetch)) {
         this.bind("before:fetch", this.beforeFetch);
       }
-      return this.bind("reset", function() {
+      this.bind("reset", function() {
         return _this.fetching = false;
       });
+      this.url || (this.url = this.base_url);
+      if (_.isFunction(this.url)) {
+        return this.url = _.wrap(this.url, function(original) {});
+      } else {
+        this.base_url = this.url;
+        return this.url = function() {
+          return this.base_url;
+        };
+      }
     },
     fetch: function(options) {
       this.trigger("before:fetch", this);
@@ -998,8 +1044,14 @@
       });
       if (!this.fetching) return this.fetch();
     },
-    applyFilter: function(params) {
+    applyFilter: function(params, autoFetch) {
+      var base;
       this.params = params != null ? params : {};
+      if (autoFetch == null) autoFetch = true;
+      if (_.isFunction(this.baseParams)) base = this.baseParams.apply(this);
+      if (_.isObject(this.baseParams)) base || (base = this.baseParams);
+      _.extend(this.params, base);
+      if (this.autoFetch) return this.fetch();
     },
     parse: function(response) {
       if (this.root != null) {
@@ -1015,14 +1067,19 @@
 
   Luca.components.FormView = Luca.View.extend({
     className: 'luca-ui-form-view',
-    hooks: ["before:submit", "before:clear", "before:load", "after:submit", "after:clear", "after:load"],
+    hooks: ["before:submit", "before:reset", "before:load", "after:submit", "after:reset", "after:load"],
+    events: {
+      "click .submit-button": "submit_handler",
+      "click .reset-button": "reset_handler"
+    },
     container_type: 'column_view',
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
       this.setupHooks(this.hooks);
-      return this.components || (this.components = this.fields);
+      this.components || (this.components = this.fields);
+      return _.bindAll(this, "submit_handler", "reset_handler");
     },
     beforeRender: function() {
       var _this = this;
@@ -1031,7 +1088,7 @@
       if (this.form_class) this.form.addClass(this.form_class);
       this.check_for_fieldsets();
       return this.fieldsets = this.components = _(this.components).map(function(fieldset, index) {
-        fieldset.renderTo = fieldset.container = _this.form;
+        fieldset.renderTo = fieldset.container = fieldset.form = _this.form;
         fieldset.id = "" + _this.cid + "-" + index;
         if (_this.legend && index === 0) fieldset.legend = _this.legend;
         return new Luca.containers.FieldsetView(fieldset);
@@ -1076,17 +1133,50 @@
         var field_name, value;
         field_name = field.input_name || field.name;
         value = _.isFunction(_this.current_model[field_name]) ? _this.current_model[field_name].apply(_this, form) : _this.current_model.get(field_name);
-        return field != null ? field.setValue(value) : void 0;
+        if (field.readOnly !== true) {
+          return field != null ? field.setValue(value) : void 0;
+        }
       });
       return this.trigger("after:load", this, this.current_model);
     },
     clear: function() {
-      this.trigger("before:clear", this);
+      return this.reset();
+    },
+    reset: function() {
+      console.log("Form Reset");
+      this.trigger("before:reset", this);
       this.current_model = void 0;
       _(this.getFields()).each(function(field) {
         return field.setValue('');
       });
-      return this.trigger("after:clear", this);
+      return this.trigger("after:reset", this);
+    },
+    getValues: function(reject_blank, skip_buttons) {
+      if (reject_blank == null) reject_blank = false;
+      if (skip_buttons == null) skip_buttons = true;
+      return _(this.getFields()).inject(function(memo, field) {
+        var value;
+        value = field.getValue();
+        if (!((skip_buttons && field.ctype === "button_field") || (reject_blank && _.isBlank(value)))) {
+          memo[field.input_name || name] = value;
+        }
+        return memo;
+      }, {});
+    },
+    submit: function() {
+      this.trigger("before:submit", this);
+      console.log("Form Submit");
+      return this.trigger("after:submit", this);
+    },
+    reset_handler: function(e) {
+      var me, my;
+      me = my = $(e.currentTarget);
+      return this.reset();
+    },
+    submit_handler: function(e) {
+      var me, my;
+      me = my = $(e.currentTarget);
+      return this.submit();
     },
     currentModel: function() {
       return this.current_model;
@@ -1117,9 +1207,14 @@
       this.collection || (this.collection = this.store);
       this.collection || (this.collection = this.filterable_collection);
       this.configure_collection();
-      return (_ref = this.collection) != null ? _ref.bind("reset", function(collection) {
-        return _this.trigger("after:collection:load", collection);
-      }) : void 0;
+      if ((_ref = this.collection) != null) {
+        _ref.bind("reset", function(collection) {
+          return _this.trigger("after:collection:load", collection);
+        });
+      }
+      if (_.isFunction(this.current_content_package_id)) {
+        return this.collection.current_content_package_id = this.current_content_package_id;
+      }
     },
     ifLoaded: function(fn, scope) {
       scope || (scope = this);
@@ -1127,6 +1222,9 @@
         return true;
       });
       return this.collection.ifLoaded(fn, scope);
+    },
+    applyFilter: function(values) {
+      return this.collection.applyFilter(values, true);
     },
     beforeRender: _.once(function() {
       this.trigger("before:grid:render", this);
@@ -1256,6 +1354,10 @@
 (function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-panel-container\' id=\'', cid ,'-tab-panel-container\'></div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'', input_class ,'\' id=\'', input_id ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
