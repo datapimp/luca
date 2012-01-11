@@ -1148,9 +1148,25 @@
 
   Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend({
     className: 'luca-ui-form-toolbar',
+    position: 'bottom',
+    includeReset: false,
     initialize: function(options) {
       this.options = options != null ? options : {};
-      return Luca.components.Toolbar.prototype.initialize.apply(this, arguments);
+      Luca.components.Toolbar.prototype.initialize.apply(this, arguments);
+      this.components = [
+        {
+          ctype: 'button_field',
+          label: 'Submit',
+          "class": 'submit-button'
+        }
+      ];
+      if (this.includeReset) {
+        return this.components.push({
+          ctype: 'button_field',
+          label: 'Reset',
+          "class": 'reset-button'
+        });
+      }
     },
     afterInitialize: function() {
       var _ref;
@@ -1159,27 +1175,12 @@
       }
       return this.container = "" + this.id + "-wrapper";
     },
-    position: 'bottom',
-    components: [
-      {
-        ctype: 'button_field',
-        label: 'Submit',
-        "class": 'submit-button'
-      }, {
-        ctype: 'button_field',
-        label: 'Reset',
-        "class": 'reset-button'
-      }
-    ],
     prepare_components: function() {
       var _this = this;
       return _(this.components).each(function(component) {
         return component.container = component.renderTo = _this.el;
       });
-    }
-  });
-
-  ({
+    },
     prepare_layout: function() {
       return true;
     },
@@ -1220,7 +1221,8 @@
             ctype: 'form_button_toolbar',
             position: 'bottom',
             id: "" + this.name + "-toolbar-0",
-            name: "" + this.name + "_toolbar"
+            name: "" + this.name + "_toolbar",
+            includeReset: true
           }
         ];
       }

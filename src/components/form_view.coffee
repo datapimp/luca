@@ -29,6 +29,7 @@ Luca.components.FormView = Luca.View.extend
         position: 'bottom'
         id: "#{ @name }-toolbar-0"
         name: "#{ @name }_toolbar"
+        includeReset: true
       ]
 
     _.bindAll @, "submit_handler", "reset_handler" 
