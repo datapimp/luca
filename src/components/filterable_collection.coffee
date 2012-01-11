@@ -1,11 +1,24 @@
 Luca.components.FilterableCollection = Backbone.Collection.extend
   initialize: (models, options={})->
     _.extend @, options
+
     Backbone.Collection.prototype.initialize.apply @, arguments
 
     @bind "before:fetch", @beforeFetch if _.isFunction(@beforeFetch)
 
-    @bind "reset", ()=> @fetching = false
+    @bind "reset", ()=> 
+      @fetching = false
+    
+    # DEPRECATED
+    @url ||= @base_url
+
+    if _.isFunction( @url )
+      @url = _.wrap @url, (original)=>
+    else
+      @base_url = @url
+
+      @url = ()-> 
+        @base_url
 
   fetch: (options)->
     @trigger "before:fetch", @
@@ -22,6 +35,12 @@ Luca.components.FilterableCollection = Backbone.Collection.extend
     unless @fetching
       @fetch()
 
-  applyFilter: (@params={})->
+  applyFilter: (@params={}, autoFetch=true)->
+    base = @baseParams.apply(@) if _.isFunction( @baseParams )
+    base ||= @baseParams if _.isObject( @baseParams )
+
+    _.extend @params, base
+
+    @fetch() if @autoFetch
 
   parse: (response)-> if @root? then response[ @root ] else response

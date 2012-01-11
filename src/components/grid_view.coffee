@@ -38,11 +38,16 @@ Luca.components.GridView = Luca.View.extend
     @collection?.bind "reset", (collection) =>
       @trigger "after:collection:load", collection
 
+    @collection.current_content_package_id = @current_content_package_id if _.isFunction(@current_content_package_id)
+
   ifLoaded: (fn, scope)->
     scope ||= @
     fn ||= ()-> true
 
     @collection.ifLoaded(fn,scope)
+
+  applyFilter: (values)->
+    @collection.applyFilter(values, true)
    
   beforeRender: _.once ()->
     @trigger "before:grid:render", @
