@@ -1274,16 +1274,9 @@
       Luca.View.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "rowDoubleClick", "rowClick");
       this.configure_collection();
-      console.log("Created Collection", this.collection);
-      if ((_ref = this.collection) != null) {
-        _ref.bind("reset", function(collection) {
-          console.log("Collection Reset");
-          return _this.trigger("after:collection:load", collection);
-        });
-      }
-      if (_.isFunction(this.current_content_package_id)) {
-        return this.collection.current_content_package_id = this.current_content_package_id;
-      }
+      return (_ref = this.collection) != null ? _ref.bind("reset", function(collection) {
+        return _this.trigger("after:collection:load", collection);
+      }) : void 0;
     },
     ifLoaded: function(fn, scope) {
       scope || (scope = this);

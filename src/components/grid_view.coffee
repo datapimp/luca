@@ -25,16 +25,10 @@ Luca.components.GridView = Luca.View.extend
 
     _.bindAll @, "rowDoubleClick", "rowClick"
     
-    # move away from calling them stores
     @configure_collection()
-    
-    console.log "Created Collection", @collection
 
     @collection?.bind "reset", (collection) =>
-      console.log "Collection Reset"
       @trigger "after:collection:load", collection
-
-    @collection.current_content_package_id = @current_content_package_id if _.isFunction(@current_content_package_id)
 
   ifLoaded: (fn, scope)->
     scope ||= @
