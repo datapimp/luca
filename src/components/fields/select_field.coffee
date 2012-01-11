@@ -22,7 +22,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
     try
       @configure_collection()
     catch e
-      console.log "Error Configuring Collection", @, e
+      console.log "Error Configuring Collection", @, e.message
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 
