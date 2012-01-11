@@ -23,14 +23,6 @@ Luca.components.FormView = Luca.View.extend
     
     @components ||= @fields
 
-    if @toolbar and !@toolbars
-      @toolbars = [
-        ctype: 'form_button_toolbar'
-        position: 'bottom'
-        id: "#{ @name }-toolbar-0"
-        name: "#{ @name }_toolbar"
-      ]
-
     _.bindAll @, "submit_handler", "reset_handler" 
 
   beforeRender: ()->
@@ -47,28 +39,6 @@ Luca.components.FormView = Luca.View.extend
       fieldset.id = "#{ @cid }-#{ index }"
       fieldset.legend = @legend if @legend and index is 0
       new Luca.containers.FieldsetView(fieldset)
-     
-  afterRender: ()->
-    _( @components ).each (component)-> 
-      component.render()
-
-    @prepare_toolbars() if @toolbars?.length > 0
-  
-    $(@container).append $(@el)
-
-    @render_toolbars() if @toolbars?.length > 0
-
-  prepare_toolbars: ()->
-    @toolbars = _( @toolbars ).map (toolbar)=>
-      toolbar = Luca.util.LazyObject( toolbar )
-      $(@el)[ toolbar.position_action() ] Luca.templates["containers/toolbar_wrapper"](id:@name+'-toolbar-wrapper')
-      toolbar.container = toolbar.renderTo = $("##{@name}-toolbar-wrapper")
-      toolbar
-
-  render_toolbars: ()->
-    _(@toolbars).each (toolbar)=>
-      toolbar.render()
-
 
   fieldsets_present : ()-> 
     _( @components ).detect (obj)-> obj.ctype is "fieldset_view"
@@ -80,21 +50,16 @@ Luca.components.FormView = Luca.View.extend
         components: @components
         container_type: @container_type
       ]
- 
-  getFields: (attr,value)->
-    fields = _.flatten _.compact _( @fieldsets ).map (fs)-> 
-      fs?.getFields?.apply(fs)
-    
-    # if an optional attribute and value pair is passed
-    # then you can limit the array of fields even further
-    if fields.length > 0 and attr and value
-      fields = fields.select (field)->
-        property = field[ attr ]
-        return false unless property?
-        propvalue = if _.isFunction(property) then property() else property
-        value is propvalue
+      
+  afterRender: ()->
+    _( @components ).each (component)-> 
+      component.render()
 
-    fields
+    $(@container).append $(@el)
+  
+  getFields: ()->
+    _.flatten _.compact _( @fieldsets ).map (fs)-> 
+      fs?.getFields?.apply(fs)
 
   loadModel: (@current_model)->
     form = @
@@ -112,8 +77,10 @@ Luca.components.FormView = Luca.View.extend
   clear: ()-> @reset()
 
   reset: ()->
+
     @current_model = undefined
     _( @getFields() ).each (field)-> field.setValue('')
+
 
   getValues: (reject_blank=false,skip_buttons=true)->
     _( @getFields() ).inject (memo,field)->
@@ -124,6 +91,7 @@ Luca.components.FormView = Luca.View.extend
     , {}
 
   submit: ()->
+    true
 
   reset_handler: (e)->
     me = my = $( e.currentTarget )
@@ -138,8 +106,5 @@ Luca.components.FormView = Luca.View.extend
     @trigger "after:submit", @
 
   currentModel: ()-> @current_model
-
-  setLegend: (@legend)->
-    $('fieldset legend', @el).first().html(@legend)
 
 Luca.register 'form_view', 'Luca.components.FormView'
