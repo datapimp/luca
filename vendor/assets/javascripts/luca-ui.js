@@ -111,15 +111,8 @@
   Luca.modules.Deferrable = {
     configure_collection: function() {
       var collection;
-      collection = this.collection || this.store || this.filterable_collection;
-      if (collection && collection.base_url) {
-        _.extend(collection, {
-          url: function() {
-            return collection.base_url;
-          }
-        });
-        return this.deferrable = this.collection = new Luca.components.FilterableCollection(collection.initial_set, collection);
-      }
+      collection = this.collection || this.store || this.filterable_collection || this.deferrable;
+      return this.deferrable = this.collection = new Luca.components.FilterableCollection(collection.initial_set, collection);
     }
   };
 
@@ -285,6 +278,63 @@
           if (_this[fn]) return _this[fn].apply(_this, arguments);
         });
       });
+    }
+  });
+
+}).call(this);
+(function() {
+
+  Luca.Collection = Backbone.Collection.extend({
+    base: 'Luca.Collection'
+  });
+
+  Luca.Collection.original_extend = Backbone.Collection.extend;
+
+  Luca.Collection.extend = function(definition) {
+    return Luca.Collection.original_extend.apply(this, [definition]);
+  };
+
+  Luca.Collection._baseParams = {};
+
+  Luca.Collection.baseParams = function(obj) {
+    if (obj) Luca.Collection._baseParams = obj;
+    if (obj) return;
+    if (_.isFunction(Luca.Collection._baseParams)) {
+      return Luca.Collection._baseParams.call();
+    }
+    if (_.isObject(Luca.Collection._baseParams)) {
+      return Luca.Collection._baseParams;
+    }
+  };
+
+  _.extend(Luca.Collection.prototype, {
+    fetch: function(options) {
+      var url;
+      this.trigger("before:fetch", this);
+      this.fetching = true;
+      url = _.isFunction(this.url) ? this.url() : this.url;
+      if (!(url && url.length > 1)) return true;
+      try {
+        return Backbone.Collection.prototype.fetch.apply(this, arguments);
+      } catch (e) {
+        return console.log("Error in Collection.fetch", e);
+      }
+    },
+    ifLoaded: function(fn, scope) {
+      var _this = this;
+      if (scope == null) scope = this;
+      if (this.models.length > 0 && !this.fetching) fn.apply(scope, this);
+      this.bind("reset", function(collection) {
+        return fn.apply(scope, [collection]);
+      });
+      if (!this.fetching) return this.fetch();
+    },
+    parse: function(response) {
+      if (this.root != null) {
+        return response[this.root];
+      } else {
+        return response;
+      }
     }
   });
 
@@ -889,6 +939,26 @@
 }).call(this);
 (function() {
 
+  Luca.fields.HiddenField = Luca.core.Field.extend({
+    form_field: true,
+    template: 'fields/hidden_field',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+    },
+    afterInitialize: function() {
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      this.input_value || (this.input_value = this.value);
+      return this.label || (this.label = this.name);
+    }
+  });
+
+  Luca.register("hidden_field", "Luca.fields.HiddenField");
+
+}).call(this);
+(function() {
+
   Luca.fields.SelectField = Luca.core.Field.extend({
     form_field: true,
     events: {
@@ -903,7 +973,11 @@
       _.extend(this, Luca.modules.Deferrable);
       _.bindAll(this, "change_handler");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
-      return this.configure_collection();
+      try {
+        return this.configure_collection();
+      } catch (e) {
+        return console.log("Error Configuring Collection", this, e.message);
+      }
     },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
@@ -1008,57 +1082,44 @@
 }).call(this);
 (function() {
 
-  Luca.components.FilterableCollection = Backbone.Collection.extend({
+  Luca.components.FilterableCollection = Luca.Collection.extend({
     initialize: function(models, options) {
-      var _this = this;
-      if (options == null) options = {};
-      _.extend(this, options);
-      Backbone.Collection.prototype.initialize.apply(this, arguments);
-      if (_.isFunction(this.beforeFetch)) {
-        this.bind("before:fetch", this.beforeFetch);
-      }
-      this.bind("reset", function() {
-        return _this.fetching = false;
-      });
+      var params, url,
+        _this = this;
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      Luca.Collection.prototype.initialize.apply(this, arguments);
       this.url || (this.url = this.base_url);
+      if (this.base_url) console.log("The use of base_url is deprecated");
+      this.filter = Luca.Collection.baseParams();
       if (_.isFunction(this.url)) {
-        return this.url = _.wrap(this.url, function(original) {});
+        return this.url = _.wrap(this.url, function(fn) {
+          var val;
+          val = fn.apply(_this);
+          return "" + val + "?" + (_this.queryString());
+        });
       } else {
-        this.base_url = this.url;
-        return this.url = function() {
-          return this.base_url;
-        };
+        url = this.url;
+        params = this.queryString();
+        return this.url = _([url, params]).compact().join("?");
       }
     },
-    fetch: function(options) {
-      this.trigger("before:fetch", this);
-      this.fetching = true;
-      return Backbone.Collection.prototype.fetch.apply(this, arguments);
+    queryString: function() {
+      var parts,
+        _this = this;
+      parts = _(this.filter).inject(function(memo, value, key) {
+        var str;
+        str = "" + key + "=" + value;
+        memo.push(str);
+        return memo;
+      }, []);
+      return parts.join("&");
     },
-    ifLoaded: function(fn, scope) {
-      var _this = this;
-      if (scope == null) scope = this;
-      if (this.models.length > 0 && !this.fetching) fn.apply(scope, this);
-      this.bind("reset", function(collection) {
-        return fn.apply(scope, [collection]);
-      });
-      if (!this.fetching) return this.fetch();
-    },
-    applyFilter: function(params, autoFetch) {
-      var base;
-      this.params = params != null ? params : {};
+    applyFilter: function(filter, autoFetch) {
+      if (filter == null) filter = {};
       if (autoFetch == null) autoFetch = true;
-      if (_.isFunction(this.baseParams)) base = this.baseParams.apply(this);
-      if (_.isObject(this.baseParams)) base || (base = this.baseParams);
-      _.extend(this.params, base);
+      _.extend(this.filter, filter);
       if (this.autoFetch) return this.fetch();
-    },
-    parse: function(response) {
-      if (this.root != null) {
-        return response[this.root];
-      } else {
-        return response;
-      }
     }
   });
 
@@ -1116,11 +1177,22 @@
       });
       return $(this.container).append($(this.el));
     },
-    getFields: function() {
-      return _.flatten(_.compact(_(this.fieldsets).map(function(fs) {
+    getFields: function(attr, value) {
+      var fields;
+      fields = _.flatten(_.compact(_(this.fieldsets).map(function(fs) {
         var _ref;
         return fs != null ? (_ref = fs.getFields) != null ? _ref.apply(fs) : void 0 : void 0;
       })));
+      if (fields.length > 0 && attr && value) {
+        fields = fields.select(function(field) {
+          var property, propvalue;
+          property = field[attr];
+          if (property == null) return false;
+          propvalue = _.isFunction(property) ? property() : property;
+          return value === propvalue;
+        });
+      }
+      return fields;
     },
     loadModel: function(current_model) {
       var fields, form,
@@ -1143,13 +1215,10 @@
       return this.reset();
     },
     reset: function() {
-      console.log("Form Reset");
-      this.trigger("before:reset", this);
       this.current_model = void 0;
-      _(this.getFields()).each(function(field) {
+      return _(this.getFields()).each(function(field) {
         return field.setValue('');
       });
-      return this.trigger("after:reset", this);
     },
     getValues: function(reject_blank, skip_buttons) {
       if (reject_blank == null) reject_blank = false;
@@ -1163,20 +1232,20 @@
         return memo;
       }, {});
     },
-    submit: function() {
-      this.trigger("before:submit", this);
-      console.log("Form Submit");
-      return this.trigger("after:submit", this);
-    },
+    submit: function() {},
     reset_handler: function(e) {
       var me, my;
       me = my = $(e.currentTarget);
-      return this.reset();
+      this.trigger("before:reset", this);
+      this.reset();
+      return this.trigger("after:reset", this);
     },
     submit_handler: function(e) {
       var me, my;
       me = my = $(e.currentTarget);
-      return this.submit();
+      this.trigger("before:submit", this);
+      this.submit();
+      return this.trigger("after:submit", this);
     },
     currentModel: function() {
       return this.current_model;
@@ -1204,11 +1273,11 @@
       _.extend(this, Luca.modules.Deferrable);
       Luca.View.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "rowDoubleClick", "rowClick");
-      this.collection || (this.collection = this.store);
-      this.collection || (this.collection = this.filterable_collection);
       this.configure_collection();
+      console.log("Created Collection", this.collection);
       if ((_ref = this.collection) != null) {
         _ref.bind("reset", function(collection) {
+          console.log("Collection Reset");
           return _this.trigger("after:collection:load", collection);
         });
       }
@@ -1226,7 +1295,7 @@
     applyFilter: function(values) {
       return this.collection.applyFilter(values, true);
     },
-    beforeRender: _.once(function() {
+    beforeRender: function() {
       this.trigger("before:grid:render", this);
       if (this.scrollable) $(this.el).addClass('scrollable-grid-view');
       $(this.el).html(Luca.templates["components/grid_view"]());
@@ -1237,7 +1306,7 @@
       if (this.scrollable) this.setDimensions();
       this.render_header();
       return $(this.container).append($(this.el));
-    }),
+    },
     setDimensions: function() {
       this.height || (this.height = 285);
       $('.grid-view-body', this.el).height(this.height);
@@ -1362,6 +1431,10 @@
 (function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input name=\'', input_name ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/hidden_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'hidden\' value=\'', input_value ,'\' />\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

@@ -1,0 +1,1 @@
+%input{:id=>"<%= input_id %>",:type=>"hidden",:name=>"<%= input_name %>",:value=>"<%= input_value %>"}

@@ -26,16 +26,12 @@ Luca.components.GridView = Luca.View.extend
     _.bindAll @, "rowDoubleClick", "rowClick"
     
     # move away from calling them stores
-    # let's stick with the backbone nomenclature
-    @collection ||= @store
-
-    # since this is what it is, allow for this type
-    # of configuration parameter as well
-    @collection ||= @filterable_collection
-
     @configure_collection()
+    
+    console.log "Created Collection", @collection
 
     @collection?.bind "reset", (collection) =>
+      console.log "Collection Reset"
       @trigger "after:collection:load", collection
 
     @collection.current_content_package_id = @current_content_package_id if _.isFunction(@current_content_package_id)
@@ -49,7 +45,7 @@ Luca.components.GridView = Luca.View.extend
   applyFilter: (values)->
     @collection.applyFilter(values, true)
    
-  beforeRender: _.once ()->
+  beforeRender: ()->
     @trigger "before:grid:render", @
 
     $(@el).addClass 'scrollable-grid-view' if @scrollable

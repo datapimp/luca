@@ -57,9 +57,20 @@ Luca.components.FormView = Luca.View.extend
 
     $(@container).append $(@el)
   
-  getFields: ()->
-    _.flatten _.compact _( @fieldsets ).map (fs)-> 
+  getFields: (attr,value)->
+    fields = _.flatten _.compact _( @fieldsets ).map (fs)-> 
       fs?.getFields?.apply(fs)
+    
+    # if an optional attribute and value pair is passed
+    # then you can limit the array of fields even further
+    if fields.length > 0 and attr and value
+      fields = fields.select (field)->
+        property = field[ attr ]
+        return false unless property?
+        propvalue = if _.isFunction(property) then property() else property
+        value is propvalue
+
+    fields
 
   loadModel: (@current_model)->
     form = @
@@ -77,13 +88,8 @@ Luca.components.FormView = Luca.View.extend
   clear: ()-> @reset()
 
   reset: ()->
-    console.log "Form Reset"
-    @trigger "before:reset", @
-
     @current_model = undefined
     _( @getFields() ).each (field)-> field.setValue('')
-
-    @trigger "after:reset", @
 
   getValues: (reject_blank=false,skip_buttons=true)->
     _( @getFields() ).inject (memo,field)->
@@ -94,17 +100,18 @@ Luca.components.FormView = Luca.View.extend
     , {}
 
   submit: ()->
-    @trigger "before:submit", @
-    console.log "Form Submit"
-    @trigger "after:submit", @
 
   reset_handler: (e)->
     me = my = $( e.currentTarget )
+    @trigger "before:reset", @
     @reset()
+    @trigger "after:reset", @
 
   submit_handler: (e)->
     me = my = $( e.currentTarget )
+    @trigger "before:submit", @
     @submit()
+    @trigger "after:submit", @
 
   currentModel: ()-> @current_model
 

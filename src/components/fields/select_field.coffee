@@ -18,8 +18,11 @@ Luca.fields.SelectField = Luca.core.Field.extend
     _.bindAll @, "change_handler"
 
     Luca.core.Field.prototype.initialize.apply @, arguments
-
-    @configure_collection()
+    
+    try
+      @configure_collection()
+    catch e
+      console.log "Error Configuring Collection", @, e.message
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 

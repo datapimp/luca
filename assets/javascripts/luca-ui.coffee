@@ -1,6 +1,7 @@
 #= require ./luca-ui/framework
 #= require_tree ./luca-ui/modules
 #= require ./luca-ui/core/view
+#= require ./luca-ui/core/collection
 #= require ./luca-ui/core/field
 #= require ./luca-ui/core/container
 #= require ./luca-ui/containers/split_view

@@ -1,46 +1,37 @@
-Luca.components.FilterableCollection = Backbone.Collection.extend
-  initialize: (models, options={})->
-    _.extend @, options
-
-    Backbone.Collection.prototype.initialize.apply @, arguments
-
-    @bind "before:fetch", @beforeFetch if _.isFunction(@beforeFetch)
-
-    @bind "reset", ()=> 
-      @fetching = false
+Luca.components.FilterableCollection = Luca.Collection.extend 
+  initialize: (models, @options={})->
+    _.extend @, @options
+    Luca.Collection.prototype.initialize.apply @, arguments
     
-    # DEPRECATED
     @url ||= @base_url
+    
+    if @base_url
+      console.log "The use of base_url is deprecated"
 
-    if _.isFunction( @url )
-      @url = _.wrap @url, (original)=>
+    @filter = Luca.Collection.baseParams()
+
+    if _.isFunction(@url)
+      @url = _.wrap @url, (fn)=>
+        val = fn.apply @ 
+        "#{ val }?#{ @queryString() }"
+
     else
-      @base_url = @url
+      url = @url
+      params = @queryString()
 
-      @url = ()-> 
-        @base_url
-
-  fetch: (options)->
-    @trigger "before:fetch", @
-    @fetching = true
-    Backbone.Collection.prototype.fetch.apply @, arguments
+      @url = _([url,params]).compact().join("?")
   
-  ifLoaded: (fn, scope=@)->
-    if @models.length > 0 and not @fetching
-      fn.apply scope, @
+  queryString: ()->
+    parts = _( @filter ).inject (memo, value, key)=>
+      str = "#{ key }=#{ value }"
+      memo.push(str)
+      memo
+    , [] 
 
-    @bind "reset", (collection)=>
-      fn.apply scope, [collection]
+    parts.join("&")
 
-    unless @fetching
-      @fetch()
-
-  applyFilter: (@params={}, autoFetch=true)->
-    base = @baseParams.apply(@) if _.isFunction( @baseParams )
-    base ||= @baseParams if _.isObject( @baseParams )
-
-    _.extend @params, base
+  applyFilter: (filter={}, autoFetch=true)->
+    _.extend @filter, filter
 
     @fetch() if @autoFetch
 
-  parse: (response)-> if @root? then response[ @root ] else response
