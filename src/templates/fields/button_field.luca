@@ -1,0 +1,2 @@
+%label &nbsp
+%input{:class=>"<%= input_class %>",:value=>"<%= input_value %>",:type=>"<%= input_type %>",:id=>"<%= input_id %>"}
