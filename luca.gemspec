@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "bundler", "~> 1.0.0"
   s.add_development_dependency "rails",   "~> 3.1"
 
-  s.files        = `git ls-files`.split("\n")
-  s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}
+  s.files        = Dir.glob("**/*") 
+  s.executables  = Dir.glob("bin/*") 
   s.require_paths = ['lib']
 end
 
