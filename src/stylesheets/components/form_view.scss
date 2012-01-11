@@ -3,9 +3,15 @@
   float: left;
   display: block;
   clear: both;
+  margin: 10px 0px;
 
   fieldset {
-    border: 0px;
+    border: 1px solid #ddd;
+    legend {
+      text-align: left;
+      padding: 5px;
+      font-size: 0.8em;
+    }
   }
 
   fieldset.label-align-top {

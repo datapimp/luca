@@ -17,9 +17,14 @@ html.luca-ui-fullscreen {
   width: 100%;
   float: left;
   display: block;
-  clear: both; }
+  clear: both;
+  margin: 10px 0px; }
   .luca-ui-form-view fieldset {
-    border: 0px; }
+    border: 1px solid #ddd; }
+    .luca-ui-form-view fieldset legend {
+      text-align: left;
+      padding: 5px;
+      font-size: 0.8em; }
   .luca-ui-form-view fieldset.label-align-top label {
     margin: 5px 0px; }
   .luca-ui-form-view fieldset.label-align-top label, .luca-ui-form-view fieldset.label-align-top input, .luca-ui-form-view fieldset.label-align-top select {
@@ -88,6 +93,8 @@ html.luca-ui-fullscreen {
     padding: 5px; }
   .scrollable-grid-view tbody.scrollable td {
     padding: 5px; }
+.luca-ui-card {
+  padding: 5px; }
 .luca-ui-tab-view-wrapper {
   float: left;
   clear: both;

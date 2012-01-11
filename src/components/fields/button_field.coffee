@@ -26,10 +26,10 @@ Luca.fields.ButtonField = Luca.core.Field.extend
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('button')
-    @input_name ||= @name
+    @input_name ||= @name ||= @input_id
     @input_value ||= @label ||= @text
     @input_type ||= "button"
-    @input_class ||= "luca-button"
+    @input_class ||= @class || "luca-button"
 
   setValue: ()-> true
 

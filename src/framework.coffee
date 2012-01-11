@@ -100,5 +100,13 @@ Luca.util.isIE = ()->
   catch e
     return true
 
+Luca.util.is_renderable = (component={})->
+  if Luca.registry.lookup(component.ctype)
+    return true
+  if _.isFunction(component.render)
+    return true
+
+
+
 $ do -> 
   $('body').addClass('luca-ui-enabled')

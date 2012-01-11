@@ -23,6 +23,14 @@ Luca.components.FormView = Luca.View.extend
     
     @components ||= @fields
 
+    if @toolbar and !@toolbars
+      @toolbars = [
+        ctype: 'form_button_toolbar'
+        position: 'bottom'
+        id: "#{ @name }-toolbar-0"
+        name: "#{ @name }_toolbar"
+      ]
+
     _.bindAll @, "submit_handler", "reset_handler" 
 
   beforeRender: ()->
@@ -39,6 +47,28 @@ Luca.components.FormView = Luca.View.extend
       fieldset.id = "#{ @cid }-#{ index }"
       fieldset.legend = @legend if @legend and index is 0
       new Luca.containers.FieldsetView(fieldset)
+     
+  afterRender: ()->
+    _( @components ).each (component)-> 
+      component.render()
+
+    @prepare_toolbars() if @toolbars?.length > 0
+  
+    $(@container).append $(@el)
+
+    @render_toolbars() if @toolbars?.length > 0
+
+  prepare_toolbars: ()->
+    @toolbars = _( @toolbars ).map (toolbar)=>
+      toolbar = Luca.util.LazyObject( toolbar )
+      $(@el)[ toolbar.position_action() ] Luca.templates["containers/toolbar_wrapper"](id:@name+'-toolbar-wrapper')
+      toolbar.container = toolbar.renderTo = $("##{@name}-toolbar-wrapper")
+      toolbar
+
+  render_toolbars: ()->
+    _(@toolbars).each (toolbar)=>
+      toolbar.render()
+
 
   fieldsets_present : ()-> 
     _( @components ).detect (obj)-> obj.ctype is "fieldset_view"
@@ -50,13 +80,7 @@ Luca.components.FormView = Luca.View.extend
         components: @components
         container_type: @container_type
       ]
-      
-  afterRender: ()->
-    _( @components ).each (component)-> 
-      component.render()
-
-    $(@container).append $(@el)
-  
+ 
   getFields: (attr,value)->
     fields = _.flatten _.compact _( @fieldsets ).map (fs)-> 
       fs?.getFields?.apply(fs)
@@ -114,5 +138,8 @@ Luca.components.FormView = Luca.View.extend
     @trigger "after:submit", @
 
   currentModel: ()-> @current_model
+
+  setLegend: (@legend)->
+    $('fieldset legend', @el).first().html(@legend)
 
 Luca.register 'form_view', 'Luca.components.FormView'

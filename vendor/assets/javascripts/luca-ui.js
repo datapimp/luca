@@ -101,6 +101,12 @@
     }
   };
 
+  Luca.util.is_renderable = function(component) {
+    if (component == null) component = {};
+    if (Luca.registry.lookup(component.ctype)) return true;
+    if (_.isFunction(component.render)) return true;
+  };
+
   $((function() {
     return $('body').addClass('luca-ui-enabled');
   })());
@@ -861,6 +867,20 @@
 }).call(this);
 (function() {
 
+  Luca.components.Toolbar = Luca.core.Container.extend({
+    className: 'luca-ui-toolbar',
+    component_type: 'toolbar',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      return Luca.core.Container.prototype.initialize.apply(this, arguments);
+    }
+  });
+
+  Luca.register("toolbar", "Luca.components.Toolbar");
+
+}).call(this);
+(function() {
+
   Luca.fields.ButtonField = Luca.core.Field.extend({
     form_field: true,
     readOnly: true,
@@ -883,10 +903,10 @@
     },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('button'));
-      this.input_name || (this.input_name = this.name);
+      this.input_name || (this.input_name = this.name || (this.name = this.input_id));
       this.input_value || (this.input_value = this.label || (this.label = this.text));
       this.input_type || (this.input_type = "button");
-      return this.input_class || (this.input_class = "luca-button");
+      return this.input_class || (this.input_class = this["class"] || "luca-button");
     },
     setValue: function() {
       return true;
@@ -1126,6 +1146,60 @@
 }).call(this);
 (function() {
 
+  Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend({
+    className: 'luca-ui-form-toolbar',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      return Luca.components.Toolbar.prototype.initialize.apply(this, arguments);
+    },
+    afterInitialize: function() {
+      var _ref;
+      if ((_ref = Luca.components.Toolbar.prototype.afterInitialize) != null) {
+        _ref.apply(this, arguments);
+      }
+      return this.container = "" + this.id + "-wrapper";
+    },
+    position: 'bottom',
+    components: [
+      {
+        ctype: 'button_field',
+        label: 'Submit',
+        "class": 'submit-button'
+      }, {
+        ctype: 'button_field',
+        label: 'Reset',
+        "class": 'reset-button'
+      }
+    ],
+    prepare_components: function() {
+      var _this = this;
+      return _(this.components).each(function(component) {
+        return component.container = component.renderTo = _this.el;
+      });
+    }
+  });
+
+  ({
+    prepare_layout: function() {
+      return true;
+    },
+    render: function() {
+      return $(this.container).append(this.el);
+    },
+    position_action: function() {
+      if (this.position === "top") {
+        return "prepend";
+      } else {
+        return "append";
+      }
+    }
+  });
+
+  Luca.register("form_button_toolbar", "Luca.components.FormButtonToolbar");
+
+}).call(this);
+(function() {
+
   Luca.components.FormView = Luca.View.extend({
     className: 'luca-ui-form-view',
     hooks: ["before:submit", "before:reset", "before:load", "after:submit", "after:reset", "after:load"],
@@ -1140,6 +1214,16 @@
       Luca.View.prototype.initialize.apply(this, arguments);
       this.setupHooks(this.hooks);
       this.components || (this.components = this.fields);
+      if (this.toolbar && !this.toolbars) {
+        this.toolbars = [
+          {
+            ctype: 'form_button_toolbar',
+            position: 'bottom',
+            id: "" + this.name + "-toolbar-0",
+            name: "" + this.name + "_toolbar"
+          }
+        ];
+      }
       return _.bindAll(this, "submit_handler", "reset_handler");
     },
     beforeRender: function() {
@@ -1153,6 +1237,36 @@
         fieldset.id = "" + _this.cid + "-" + index;
         if (_this.legend && index === 0) fieldset.legend = _this.legend;
         return new Luca.containers.FieldsetView(fieldset);
+      });
+    },
+    afterRender: function() {
+      var _ref, _ref2;
+      _(this.components).each(function(component) {
+        return component.render();
+      });
+      if (((_ref = this.toolbars) != null ? _ref.length : void 0) > 0) {
+        this.prepare_toolbars();
+      }
+      $(this.container).append($(this.el));
+      if (((_ref2 = this.toolbars) != null ? _ref2.length : void 0) > 0) {
+        return this.render_toolbars();
+      }
+    },
+    prepare_toolbars: function() {
+      var _this = this;
+      return this.toolbars = _(this.toolbars).map(function(toolbar) {
+        toolbar = Luca.util.LazyObject(toolbar);
+        $(_this.el)[toolbar.position_action()](Luca.templates["containers/toolbar_wrapper"]({
+          id: _this.name + '-toolbar-wrapper'
+        }));
+        toolbar.container = toolbar.renderTo = $("#" + _this.name + "-toolbar-wrapper");
+        return toolbar;
+      });
+    },
+    render_toolbars: function() {
+      var _this = this;
+      return _(this.toolbars).each(function(toolbar) {
+        return toolbar.render();
       });
     },
     fieldsets_present: function() {
@@ -1170,12 +1284,6 @@
           }
         ];
       }
-    },
-    afterRender: function() {
-      _(this.components).each(function(component) {
-        return component.render();
-      });
-      return $(this.container).append($(this.el));
     },
     getFields: function(attr, value) {
       var fields;
@@ -1249,6 +1357,10 @@
     },
     currentModel: function() {
       return this.current_model;
+    },
+    setLegend: function(legend) {
+      this.legend = legend;
+      return $('fieldset legend', this.el).first().html(this.legend);
     }
   });
 
@@ -1416,6 +1528,10 @@
 (function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-panel-container\' id=\'', cid ,'-tab-panel-container\'></div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["containers/toolbar_wrapper"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-toolbar-wrapper\' id=\'', id ,'\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
