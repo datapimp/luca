@@ -1,15 +1,9 @@
 Luca.Collection = Backbone.Collection.extend
   base: 'Luca.Collection'
 
-Luca.Collection.original_extend = Backbone.Collection.extend
-
-Luca.Collection.extend = (definition)->
-  Luca.Collection.original_extend.apply @, [definition]
-
 Luca.Collection._baseParams = {}
 Luca.Collection.baseParams = (obj)->
-  Luca.Collection._baseParams = obj if obj
-  return if obj 
+  return Luca.Collection._baseParams = obj if obj
 
   if _.isFunction( Luca.Collection._baseParams )
     return Luca.Collection._baseParams.call()
@@ -17,19 +11,45 @@ Luca.Collection.baseParams = (obj)->
   if _.isObject( Luca.Collection._baseParams )
     Luca.Collection._baseParams
 
+Luca.Collection._models_cache = {}
+
+Luca.Collection.bootstrap = (obj)->
+  _.extend Luca.Collection._models_cache, obj
+
+Luca.Collection.cache = (key, models)->
+  return Luca.Collection._models_cache[ key ] = models if models
+  Luca.Collection._models_cache[ key ] || []
+
 _.extend Luca.Collection.prototype,
- fetch: (options)->
-   @trigger "before:fetch", @
-   @fetching = true
-  
-   url = if _.isFunction(@url) then @url() else @url
+  initialize: (models, @options={})->
+    _.extend @, @options
 
-   return true unless url and url.length > 1
+    if @cached
+      @model_cache_key = if _.isFunction( @cached ) then @cached() else @cached  
 
-   try
-     Backbone.Collection.prototype.fetch.apply @, arguments
-   catch e
-     console.log "Error in Collection.fetch", e
+    Backbone.Collection.prototype.initialize.apply @, [models, @options] 
+
+  load_from_cache: ()->
+    return unless @model_cache_key
+    @reset @cached_models()
+
+  cached_models: ()->
+    Luca.Collection.cache( @model_cache_key )
+
+  fetch: (options={})->
+    @trigger "before:fetch", @
+    @fetching = true
+    
+    return @load_from_cache() if @cached_models().length and not options.refresh
+
+    url = if _.isFunction(@url) then @url() else @url
+
+    return true unless url and url.length > 1
+
+    try
+      Backbone.Collection.prototype.fetch.apply @, arguments
+    catch e
+      console.log "Error in Collection.fetch", e
 
   ifLoaded: (fn, scope=@)->
     if @models.length > 0 and not @fetching
@@ -41,5 +61,5 @@ _.extend Luca.Collection.prototype,
     unless @fetching
       @fetch()
 
-  parse: (response)-> if @root? then response[ @root ] else response
-
+  parse: (response)-> 
+    if @root? then response[ @root ] else response

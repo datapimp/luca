@@ -45,7 +45,6 @@ Luca.View.extend = (definition)->
       # occurs
       if !@deferrable_trigger
         @immediate_trigger = true
-        @deferrable_trigger ||= "deferrable-trigger-immediately"
       
       if @immediate_trigger is true
         @deferrable.fetch()

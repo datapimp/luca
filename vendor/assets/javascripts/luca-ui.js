@@ -230,10 +230,7 @@
           _base.apply(_this, arguments);
           return _this.trigger("after:render", _this);
         });
-        if (!this.deferrable_trigger) {
-          this.immediate_trigger = true;
-          this.deferrable_trigger || (this.deferrable_trigger = "deferrable-trigger-immediately");
-        }
+        if (!this.deferrable_trigger) this.immediate_trigger = true;
         if (this.immediate_trigger === true) {
           return this.deferrable.fetch();
         } else {
@@ -294,17 +291,10 @@
     base: 'Luca.Collection'
   });
 
-  Luca.Collection.original_extend = Backbone.Collection.extend;
-
-  Luca.Collection.extend = function(definition) {
-    return Luca.Collection.original_extend.apply(this, [definition]);
-  };
-
   Luca.Collection._baseParams = {};
 
   Luca.Collection.baseParams = function(obj) {
-    if (obj) Luca.Collection._baseParams = obj;
-    if (obj) return;
+    if (obj) return Luca.Collection._baseParams = obj;
     if (_.isFunction(Luca.Collection._baseParams)) {
       return Luca.Collection._baseParams.call();
     }
@@ -313,11 +303,41 @@
     }
   };
 
+  Luca.Collection._models_cache = {};
+
+  Luca.Collection.bootstrap = function(obj) {
+    return _.extend(Luca.Collection._models_cache, obj);
+  };
+
+  Luca.Collection.cache = function(key, models) {
+    if (models) return Luca.Collection._models_cache[key] = models;
+    return Luca.Collection._models_cache[key] || [];
+  };
+
   _.extend(Luca.Collection.prototype, {
+    initialize: function(models, options) {
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      if (this.cached) {
+        this.model_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
+      }
+      return Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
+    },
+    load_from_cache: function() {
+      if (!this.model_cache_key) return;
+      return this.reset(this.cached_models());
+    },
+    cached_models: function() {
+      return Luca.Collection.cache(this.model_cache_key);
+    },
     fetch: function(options) {
       var url;
+      if (options == null) options = {};
       this.trigger("before:fetch", this);
       this.fetching = true;
+      if (this.cached_models().length && !options.refresh) {
+        return this.load_from_cache();
+      }
       url = _.isFunction(this.url) ? this.url() : this.url;
       if (!(url && url.length > 1)) return true;
       try {
@@ -450,6 +470,11 @@
         });
         return sub_container != null ? typeof sub_container.findComponent === "function" ? sub_container.findComponent(needle, haystack, true) : void 0 : void 0;
       }
+    },
+    indexOf: function(name) {
+      var names;
+      names = _(this.components).pluck('name');
+      return _(names).indexOf(name);
     },
     component_names: function() {
       return _(this.component_index.name_index).keys();
@@ -631,22 +656,28 @@
     find: function(name) {
       return this.findComponentByName(name, true);
     },
-    activate: function(index) {
-      var nowActive, previous;
+    activate: function(index, silent) {
+      var current, previous;
+      if (silent == null) silent = false;
       if (index === this.activeCard) return;
       previous = this.activeComponent();
-      nowActive = this.getComponent(index);
-      this.trigger("before:card:switch", previous, nowActive);
+      current = this.getComponent(index);
+      if (!current) {
+        index = this.indexOf(index);
+        current = this.getComponent(index);
+      }
+      if (!current) return;
+      if (!silent) this.trigger("before:card:switch", previous, current);
       _(this.card_containers).each(function(container) {
         return container.hide();
       });
-      if (nowActive && !nowActive.previously_activated) {
-        nowActive.trigger("first:activation");
-        nowActive.previously_activated = true;
+      if (current && !current.previously_activated) {
+        if (!silent) current.trigger("first:activation");
+        current.previously_activated = true;
       }
-      $(nowActive.container).show();
+      $(current.container).show();
       this.activeCard = index;
-      return this.trigger("after:card:switch", previous, nowActive);
+      if (!silent) return this.trigger("after:card:switch", previous, current);
     }
   });
 
