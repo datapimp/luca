@@ -1226,6 +1226,7 @@
           }
         ];
       }
+      this.state || (this.state = new Backbone.Model);
       return _.bindAll(this, "submit_handler", "reset_handler");
     },
     beforeRender: function() {
@@ -1417,10 +1418,14 @@
       return $(this.container).append($(this.el));
     },
     setDimensions: function() {
+      var _this = this;
       this.height || (this.height = 285);
       $('.grid-view-body', this.el).height(this.height);
       $('tbody.scrollable', this.el).height(this.height - 23);
-      this.width || (this.width = 756);
+      this.container_width = (function() {
+        return $(_this.container).width();
+      })();
+      this.width || (this.width = this.container_width > 0 ? this.container_width : 756);
       $('.grid-view-body', this.el).width(this.width);
       $('.grid-view-body table', this.el).width(this.width);
       return this.set_default_column_widths();

@@ -31,6 +31,8 @@ Luca.components.FormView = Luca.View.extend
         name: "#{ @name }_toolbar"
         includeReset: true
       ]
+    
+    @state ||= new Backbone.Model
 
     _.bindAll @, "submit_handler", "reset_handler" 
 

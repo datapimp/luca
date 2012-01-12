@@ -93,6 +93,17 @@ html.luca-ui-fullscreen {
     padding: 5px; }
   .scrollable-grid-view tbody.scrollable td {
     padding: 5px; }
+.luca-ui-toolbar-wrapper {
+  clear: both;
+  display: block;
+  float: left;
+  width: 100%; }
+  .luca-ui-toolbar-wrapper .luca-ui-form-toolbar, .luca-ui-toolbar-wrapper .luca-ui-toolbar {
+    clear: both;
+    margin: 5px auto; }
+    .luca-ui-toolbar-wrapper .luca-ui-form-toolbar .luca-ui-field, .luca-ui-toolbar-wrapper .luca-ui-toolbar .luca-ui-field {
+      float: left;
+      margin: 5px; }
 .luca-ui-card {
   padding: 5px; }
 .luca-ui-tab-view-wrapper {

@@ -62,8 +62,10 @@ Luca.components.GridView = Luca.View.extend
 
     $('.grid-view-body', @el).height( @height )
     $('tbody.scrollable', @el).height( @height - 23 )
-
-    @width ||= 756
+    
+    @container_width = do => $(@container).width()
+    @width ||= if @container_width > 0 then @container_width else 756
+    
     $('.grid-view-body', @el).width( @width )
     $('.grid-view-body table', @el).width( @width )
     
