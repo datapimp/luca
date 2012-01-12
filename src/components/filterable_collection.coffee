@@ -30,8 +30,8 @@ Luca.components.FilterableCollection = Luca.Collection.extend
 
     parts.join("&")
 
-  applyFilter: (filter={}, autoFetch=true)->
+  applyFilter: (filter={}, options={auto:true,refresh:true})->
     _.extend @filter, filter
 
-    @fetch() if @autoFetch
+    @fetch(options) unless not options.auto
 

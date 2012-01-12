@@ -7,6 +7,8 @@ Luca.components.GridView = Luca.View.extend
 
   scrollable: true
   
+  emptyText: 'No Results To display'
+
   hooks:[
     "before:grid:render",
     "before:render:header",
@@ -27,7 +29,9 @@ Luca.components.GridView = Luca.View.extend
     
     @configure_collection()
 
-    @collection?.bind "reset", (collection) =>
+    @collection.bind "reset", (collection) =>
+      console.log "Collection Reset", @
+      @refresh()
       @trigger "after:collection:load", collection
 
   ifLoaded: (fn, scope)->
@@ -36,8 +40,9 @@ Luca.components.GridView = Luca.View.extend
 
     @collection.ifLoaded(fn,scope)
 
-  applyFilter: (values)->
-    @collection.applyFilter(values, true)
+  applyFilter: (values, options={auto:true,refresh:true})->
+    console.log "Gridview Applying Filter", values
+    @collection.applyFilter(values, options)
    
   beforeRender: ()->
     @trigger "before:grid:render", @
@@ -90,13 +95,19 @@ Luca.components.GridView = Luca.View.extend
     @columns[ @columns.length - 1 ]
 
   afterRender: ()-> 
-    @collection.each (model,index)=> 
-      @render_row.apply(@, [model,index])
-    
+    @refresh()   
     @trigger "after:grid:render", @
+  
+  emptyMessage: ()->
+    @body.append("<tr><td colspan='#{ @columns.length + 1 }'>#{ @emptyText }</td></tr>")
 
   refresh: ()-> 
-    @render()
+    @body.html('')
+    @collection.each (model,index)=> 
+      @render_row.apply(@, [model,index])
+
+    if @collection.models.length == 0
+      @emptyMessage()
   
   render_header: ()->
     @trigger "before:render:header"

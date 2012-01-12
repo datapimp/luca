@@ -226,10 +226,10 @@
       var _this = this;
       if (this.deferrable) {
         this.trigger("before:render", this);
-        this.deferrable.bind(this.deferrable_event, function() {
+        this.deferrable.bind(this.deferrable_event, _.once(function() {
           _base.apply(_this, arguments);
           return _this.trigger("after:render", _this);
-        });
+        }));
         if (!this.deferrable_trigger) this.immediate_trigger = true;
         if (this.immediate_trigger === true) {
           return this.deferrable.fetch();
@@ -1166,11 +1166,16 @@
       }, []);
       return parts.join("&");
     },
-    applyFilter: function(filter, autoFetch) {
+    applyFilter: function(filter, options) {
       if (filter == null) filter = {};
-      if (autoFetch == null) autoFetch = true;
+      if (options == null) {
+        options = {
+          auto: true,
+          refresh: true
+        };
+      }
       _.extend(this.filter, filter);
-      if (this.autoFetch) return this.fetch();
+      if (!!options.auto) return this.fetch(options);
     }
   });
 
@@ -1412,19 +1417,21 @@
     },
     className: 'luca-ui-grid-view',
     scrollable: true,
+    emptyText: 'No Results To display',
     hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click", "after:collection:load"],
     initialize: function(options) {
-      var _ref,
-        _this = this;
+      var _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
       Luca.View.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "rowDoubleClick", "rowClick");
       this.configure_collection();
-      return (_ref = this.collection) != null ? _ref.bind("reset", function(collection) {
+      return this.collection.bind("reset", function(collection) {
+        console.log("Collection Reset", _this);
+        _this.refresh();
         return _this.trigger("after:collection:load", collection);
-      }) : void 0;
+      });
     },
     ifLoaded: function(fn, scope) {
       scope || (scope = this);
@@ -1433,8 +1440,15 @@
       });
       return this.collection.ifLoaded(fn, scope);
     },
-    applyFilter: function(values) {
-      return this.collection.applyFilter(values, true);
+    applyFilter: function(values, options) {
+      if (options == null) {
+        options = {
+          auto: true,
+          refresh: true
+        };
+      }
+      console.log("Gridview Applying Filter", values);
+      return this.collection.applyFilter(values, options);
     },
     beforeRender: function() {
       this.trigger("before:grid:render", this);
@@ -1481,14 +1495,19 @@
       return this.columns[this.columns.length - 1];
     },
     afterRender: function() {
+      this.refresh();
+      return this.trigger("after:grid:render", this);
+    },
+    emptyMessage: function() {
+      return this.body.append("<tr><td colspan='" + (this.columns.length + 1) + "'>" + this.emptyText + "</td></tr>");
+    },
+    refresh: function() {
       var _this = this;
+      this.body.html('');
       this.collection.each(function(model, index) {
         return _this.render_row.apply(_this, [model, index]);
       });
-      return this.trigger("after:grid:render", this);
-    },
-    refresh: function() {
-      return this.render();
+      if (this.collection.models.length === 0) return this.emptyMessage();
     },
     render_header: function() {
       var headers,
