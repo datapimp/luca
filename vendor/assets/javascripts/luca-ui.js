@@ -448,7 +448,7 @@
         sub_container = _(this.components).detect(function(component) {
           return component != null ? typeof component.findComponent === "function" ? component.findComponent(needle, haystack, true) : void 0 : void 0;
         });
-        return typeof sub_container.findComponent === "function" ? sub_container.findComponent(needle, haystack, true) : void 0;
+        return sub_container != null ? typeof sub_container.findComponent === "function" ? sub_container.findComponent(needle, haystack, true) : void 0 : void 0;
       }
     },
     component_names: function() {
@@ -1294,7 +1294,7 @@
         return fs != null ? (_ref = fs.getFields) != null ? _ref.apply(fs) : void 0 : void 0;
       })));
       if (fields.length > 0 && attr && value) {
-        fields = fields.select(function(field) {
+        fields = _(fields).select(function(field) {
           var property, propvalue;
           property = field[attr];
           if (property == null) return false;
@@ -1321,10 +1321,10 @@
       });
       return this.trigger("after:load", this, this.current_model);
     },
-    clear: function() {
-      return this.reset();
-    },
     reset: function() {
+      return this.loadModel(this.current_model);
+    },
+    clear: function() {
       this.current_model = void 0;
       return _(this.getFields()).each(function(field) {
         return field.setValue('');
@@ -1342,7 +1342,9 @@
         return memo;
       }, {});
     },
-    submit: function() {},
+    submit: function() {
+      return this.current_model.set(this.getValues());
+    },
     reset_handler: function(e) {
       var me, my;
       me = my = $(e.currentTarget);

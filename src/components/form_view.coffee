@@ -70,7 +70,6 @@ Luca.components.FormView = Luca.View.extend
     _(@toolbars).each (toolbar)=>
       toolbar.render()
 
-
   fieldsets_present : ()-> 
     _( @components ).detect (obj)-> obj.ctype is "fieldset_view"
 
@@ -89,7 +88,7 @@ Luca.components.FormView = Luca.View.extend
     # if an optional attribute and value pair is passed
     # then you can limit the array of fields even further
     if fields.length > 0 and attr and value
-      fields = fields.select (field)->
+      fields = _(fields).select (field)->
         property = field[ attr ]
         return false unless property?
         propvalue = if _.isFunction(property) then property() else property
@@ -102,7 +101,7 @@ Luca.components.FormView = Luca.View.extend
     fields = @getFields()
     
     @trigger "before:load", @, @current_model
-
+    
     _( fields ).each (field) =>
       field_name = field.input_name || field.name
       value = if _.isFunction(@current_model[ field_name ]) then @current_model[field_name].apply(@, form) else @current_model.get( field_name ) 
@@ -110,9 +109,10 @@ Luca.components.FormView = Luca.View.extend
     
     @trigger "after:load", @, @current_model
   
-  clear: ()-> @reset()
+  reset: ()-> 
+    @loadModel( @current_model )
 
-  reset: ()->
+  clear: ()->
     @current_model = undefined
     _( @getFields() ).each (field)-> field.setValue('')
 
@@ -124,7 +124,7 @@ Luca.components.FormView = Luca.View.extend
       memo
     , {}
 
-  submit: ()->
+  submit: ()-> @current_model.set( @getValues() )
 
   reset_handler: (e)->
     me = my = $( e.currentTarget )

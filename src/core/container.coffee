@@ -75,7 +75,7 @@ Luca.core.Container = Luca.View.extend
     
     if deep is true
       sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
-      sub_container.findComponent?(needle, haystack, true)
+      sub_container?.findComponent?(needle, haystack, true)
 
   component_names: ()->
     _( @component_index.name_index ).keys()
