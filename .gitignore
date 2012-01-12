@@ -1,3 +1,5 @@
 .sass-cache
 .DS_Store
 luca.gemspec
+vendor/assets/luca-ui.js
+vendor/assets/luca-ui.css
