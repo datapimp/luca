@@ -1084,6 +1084,53 @@
 }).call(this);
 (function() {
 
+  Luca.fields.TextAreaField = Luca.core.Field.extend({
+    form_field: true,
+    events: {
+      "keydown input": "keydown_handler",
+      "blur input": "blur_handler",
+      "focus input": "focus_handler"
+    },
+    template: 'fields/text_area_field',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      _.bindAll(this, "keydown_handler");
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+    },
+    afterInitialize: function() {
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      this.label || (this.label = this.name);
+      return this.input_class || (this.input_class = this["class"]);
+    },
+    setValue: function(value) {
+      return this.field().html(value);
+    },
+    getValue: function() {
+      return this.field().html();
+    },
+    field: function() {
+      return $("textarea#" + this.input_id, this.el);
+    },
+    keydown_handler: function(e) {
+      var me, my;
+      return me = my = $(e.currentTarget);
+    },
+    blur_handler: function(e) {
+      var me, my;
+      return me = my = $(e.currentTarget);
+    },
+    focus_handler: function(e) {
+      var me, my;
+      return me = my = $(e.currentTarget);
+    }
+  });
+
+  Luca.register("text_area_field", "Luca.fields.TextAreaField");
+
+}).call(this);
+(function() {
+
   Luca.fields.TextField = Luca.core.Field.extend({
     form_field: true,
     events: {
@@ -1577,6 +1624,25 @@
 
 }).call(this);
 (function() {
+
+  Luca.components.Template = Luca.View.extend({
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      Luca.View.prototype.initialize.apply(this, arguments);
+      if (!(this.template || this.markup)) {
+        throw "Templates must specify which template / markup to use";
+      }
+    },
+    render: function() {
+      console.log("Rendering Template", $(this.el), this.markup, this.container);
+      return $(this.el).html(this.markup || JST[this.template](this.options));
+    }
+  });
+
+  Luca.register("template", "Luca.components.Template");
+
+}).call(this);
+(function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'></div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
@@ -1607,6 +1673,10 @@
 (function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<select id=\'', input_id ,'\' name=\'', input_name ,'\'></select>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\'></textarea>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
