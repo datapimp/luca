@@ -26,6 +26,9 @@ _.extend Luca.Collection.prototype,
 
     if @cached
       @model_cache_key = if _.isFunction( @cached ) then @cached() else @cached  
+    
+    if _.isArray(@data) and @data.length > 0
+      @local = true
 
     Backbone.Collection.prototype.initialize.apply @, [models, @options] 
 
@@ -38,9 +41,11 @@ _.extend Luca.Collection.prototype,
 
   fetch: (options={})->
     @trigger "before:fetch", @
-    @fetching = true
+    return @reset(@data) if @local is true
     
     return @load_from_cache() if @cached_models().length and not options.refresh
+
+    @fetching = true
 
     url = if _.isFunction(@url) then @url() else @url
 
@@ -53,7 +58,8 @@ _.extend Luca.Collection.prototype,
 
   ifLoaded: (fn, scope=@)->
     if @models.length > 0 and not @fetching
-      fn.apply scope, @
+      fn.apply scope, [@]
+      return
 
     @bind "reset", (collection)=>
       fn.apply scope, [collection]

@@ -321,6 +321,7 @@
       if (this.cached) {
         this.model_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
       }
+      if (_.isArray(this.data) && this.data.length > 0) this.local = true;
       return Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
     },
     load_from_cache: function() {
@@ -334,10 +335,11 @@
       var url;
       if (options == null) options = {};
       this.trigger("before:fetch", this);
-      this.fetching = true;
+      if (this.local === true) return this.reset(this.data);
       if (this.cached_models().length && !options.refresh) {
         return this.load_from_cache();
       }
+      this.fetching = true;
       url = _.isFunction(this.url) ? this.url() : this.url;
       if (!(url && url.length > 1)) return true;
       try {
@@ -349,7 +351,10 @@
     ifLoaded: function(fn, scope) {
       var _this = this;
       if (scope == null) scope = this;
-      if (this.models.length > 0 && !this.fetching) fn.apply(scope, this);
+      if (this.models.length > 0 && !this.fetching) {
+        fn.apply(scope, [this]);
+        return;
+      }
       this.bind("reset", function(collection) {
         return fn.apply(scope, [collection]);
       });
@@ -1019,11 +1024,17 @@
     className: 'luca-ui-select-field luca-ui-field',
     template: "fields/select_field",
     initialize: function(options) {
+      var _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
       _.bindAll(this, "change_handler");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
+      if ((_ref = this.collection) != null ? _ref.data : void 0) {
+        this.valueField || (this.valueField = "id");
+        this.displayField || (this.displayField = "name");
+        this.parseData();
+      }
       try {
         return this.configure_collection();
       } catch (e) {
@@ -1034,6 +1045,17 @@
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       return this.label || (this.label = this.name);
+    },
+    parseData: function() {
+      var _this = this;
+      return this.collection.data = _(this.collection.data).map(function(record) {
+        var hash;
+        if (!_.isArray(record)) return record;
+        hash = {};
+        hash[_this.valueField] = record[0];
+        hash[_this.displayField] = record[1];
+        return hash;
+      });
     },
     change_handler: function(e) {
       var me, my;
@@ -1050,27 +1072,17 @@
       return this.input = $('select', this.el);
     },
     afterRender: function() {
-      var _ref, _ref2,
+      var _ref,
         _this = this;
       this.input.html('');
       if (this.includeBlank) {
         this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
       if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
-        this.collection.each(function(model) {
+        return this.collection.each(function(model) {
           var display, option, selected, value;
           value = model.get(_this.valueField);
           display = model.get(_this.displayField);
-          if (_this.selected && value === _this.selected) selected = "selected";
-          option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-          return _this.input.append(option);
-        });
-      }
-      if ((_ref2 = this.collection) != null ? _ref2.data : void 0) {
-        return _(this.collection.data).each(function(pair) {
-          var display, option, selected, value;
-          value = pair[0];
-          display = pair[1];
           if (_this.selected && value === _this.selected) selected = "selected";
           option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
           return _this.input.append(option);
