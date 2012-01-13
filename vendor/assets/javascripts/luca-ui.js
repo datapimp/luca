@@ -1534,6 +1534,22 @@
       $('.grid-view-body table', this.el).width(this.width);
       return this.set_default_column_widths();
     },
+    resize: function(newWidth) {
+      var difference, distribution,
+        _this = this;
+      difference = newWidth - this.width;
+      this.width = newWidth;
+      $('.grid-view-body', this.el).width(this.width);
+      $('.grid-view-body table', this.el).width(this.width);
+      if (this.columns.length > 0) {
+        distribution = difference / this.columns.length;
+        return _(this.columns).each(function(col, index) {
+          var column;
+          column = $(".column-" + index, _this.el);
+          return column.width(col.width + distribution);
+        });
+      }
+    },
     pad_last_column: function() {
       var configured_column_widths, unused_width;
       configured_column_widths = _(this.columns).inject(function(sum, column) {

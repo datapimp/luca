@@ -76,6 +76,20 @@ Luca.components.GridView = Luca.View.extend
     
     @set_default_column_widths()
 
+  resize: (newWidth)->
+    difference = newWidth - @width
+    @width = newWidth
+    
+    $('.grid-view-body', @el).width( @width )
+    $('.grid-view-body table', @el).width( @width )
+
+    if @columns.length > 0
+      distribution = difference / @columns.length 
+
+      _(@columns).each (col,index)=>
+        column = $(".column-#{ index }", @el )
+        column.width( col.width + distribution )
+
   pad_last_column: ()->
     configured_column_widths = _(@columns).inject (sum, column)->
       sum = (column.width) + sum
