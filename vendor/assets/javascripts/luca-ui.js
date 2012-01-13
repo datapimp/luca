@@ -661,7 +661,7 @@
     find: function(name) {
       return this.findComponentByName(name, true);
     },
-    activate: function(index, silent) {
+    activate: function(index, silent, callback) {
       var current, previous;
       if (silent == null) silent = false;
       if (index === this.activeCard) return;
@@ -682,7 +682,10 @@
       }
       $(current.container).show();
       this.activeCard = index;
-      if (!silent) return this.trigger("after:card:switch", previous, current);
+      if (!silent) this.trigger("after:card:switch", previous, current);
+      if (_.isFunction(callback)) {
+        return callback.apply(this, [this, previous, current]);
+      }
     }
   });
 

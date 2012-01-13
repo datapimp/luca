@@ -48,7 +48,7 @@ Luca.containers.CardView = Luca.core.Container.extend
   find: (name)-> 
     @findComponentByName(name,true)
   
-  activate: (index, silent=false)->
+  activate: (index, silent=false, callback)->
     return if index is @activeCard
 
     previous = @activeComponent()
@@ -72,5 +72,8 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     @activeCard = index
     @trigger "after:card:switch", previous, current unless silent
+
+    if _.isFunction(callback)
+      callback.apply @, [@,previous,current]
 
 Luca.register 'card_view', "Luca.containers.CardView"
