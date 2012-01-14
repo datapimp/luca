@@ -206,6 +206,304 @@
 }).call(this);
 (function() {
 
+  (function(window, document, undefined_) {
+    var Spinner, addAnimation, animations, createEl, css, defaults, ins, merge, pos, prefixes, proto, sheet, useCssAnimations, vendor;
+    createEl = function(tag, prop) {
+      var el, n;
+      el = document.createElement(tag || "div");
+      n = void 0;
+      for (n in prop) {
+        el[n] = prop[n];
+      }
+      return el;
+    };
+    ins = function(parent, child1, child2) {
+      if (child2 && !child2.parentNode) ins(parent, child2);
+      parent.insertBefore(child1, child2 || null);
+      return parent;
+    };
+    addAnimation = function(alpha, trail, i, lines) {
+      var name, pre, prefix, start, z;
+      name = ["opacity", trail, ~~(alpha * 100), i, lines].join("-");
+      start = 0.01 + i / lines * 100;
+      z = Math.max(1 - (1 - alpha) / trail * (100 - start), alpha);
+      prefix = useCssAnimations.substring(0, useCssAnimations.indexOf("Animation")).toLowerCase();
+      pre = prefix && "-" + prefix + "-" || "";
+      if (!animations[name]) {
+        sheet.insertRule("@" + pre + "keyframes " + name + "{" + "0%{opacity:" + z + "}" + start + "%{opacity:" + alpha + "}" + (start + 0.01) + "%{opacity:1}" + (start + trail) % 100 + "%{opacity:" + alpha + "}" + "100%{opacity:" + z + "}" + "}", 0);
+        animations[name] = 1;
+      }
+      return name;
+    };
+    vendor = function(el, prop) {
+      var i, pp, s;
+      s = el.style;
+      pp = void 0;
+      i = void 0;
+      if (s[prop] !== undefined) return prop;
+      prop = prop.charAt(0).toUpperCase() + prop.slice(1);
+      i = 0;
+      while (i < prefixes.length) {
+        pp = prefixes[i] + prop;
+        if (s[pp] !== undefined) return pp;
+        i++;
+      }
+    };
+    css = function(el, prop) {
+      var n;
+      for (n in prop) {
+        el.style[vendor(el, n) || n] = prop[n];
+      }
+      return el;
+    };
+    merge = function(obj) {
+      var def, i, n;
+      i = 1;
+      while (i < arguments.length) {
+        def = arguments[i];
+        for (n in def) {
+          if (obj[n] === undefined) obj[n] = def[n];
+        }
+        i++;
+      }
+      return obj;
+    };
+    pos = function(el) {
+      var o;
+      o = {
+        x: el.offsetLeft,
+        y: el.offsetTop
+      };
+      while ((el = el.offsetParent)) {
+        o.x += el.offsetLeft;
+        o.y += el.offsetTop;
+      }
+      return o;
+    };
+    prefixes = ["webkit", "Moz", "ms", "O"];
+    animations = {};
+    useCssAnimations = void 0;
+    sheet = (function() {
+      var el;
+      el = createEl("style");
+      ins(document.getElementsByTagName("head")[0], el);
+      return el.sheet || el.styleSheet;
+    })();
+    Spinner = Spinner = function(o) {
+      if (!this.spin) return new Spinner(o);
+      return this.opts = merge(o || {}, Spinner.defaults, defaults);
+    };
+    defaults = Spinner.defaults = {
+      lines: 12,
+      length: 7,
+      width: 5,
+      radius: 10,
+      color: "#000",
+      speed: 1,
+      trail: 100,
+      opacity: 1 / 4,
+      fps: 20
+    };
+    proto = Spinner.prototype = {
+      spin: function(target) {
+        var anim, astep, el, ep, f, fps, i, o, ostep, self, tp;
+        this.stop();
+        self = this;
+        el = self.el = css(createEl(), {
+          position: "relative"
+        });
+        ep = void 0;
+        tp = void 0;
+        if (target) {
+          tp = pos(ins(target, el, target.firstChild));
+          ep = pos(el);
+          css(el, {
+            left: (target.offsetWidth >> 1) - ep.x + tp.x + "px",
+            top: (target.offsetHeight >> 1) - ep.y + tp.y + "px"
+          });
+        }
+        el.setAttribute("aria-role", "progressbar");
+        self.lines(el, self.opts);
+        if (!useCssAnimations) {
+          o = self.opts;
+          i = 0;
+          fps = o.fps;
+          f = fps / o.speed;
+          ostep = (1 - o.opacity) / (f * o.trail / 100);
+          astep = f / o.lines;
+          (anim = function() {
+            var alpha, s;
+            i++;
+            s = o.lines;
+            while (s) {
+              alpha = Math.max(1 - (i + s * astep) % f * ostep, o.opacity);
+              self.opacity(el, o.lines - s, alpha, o);
+              s--;
+            }
+            return self.timeout = self.el && setTimeout(anim, ~~(1000 / fps));
+          })();
+        }
+        return self;
+      },
+      stop: function() {
+        var el;
+        el = this.el;
+        if (el) {
+          clearTimeout(this.timeout);
+          if (el.parentNode) el.parentNode.removeChild(el);
+          this.el = undefined;
+        }
+        return this;
+      }
+    };
+    proto.lines = function(el, o) {
+      var fill, i, seg;
+      fill = function(color, shadow) {
+        return css(createEl(), {
+          position: "absolute",
+          width: (o.length + o.width) + "px",
+          height: o.width + "px",
+          background: color,
+          boxShadow: shadow,
+          transformOrigin: "left",
+          transform: "rotate(" + ~~(360 / o.lines * i) + "deg) translate(" + o.radius + "px" + ",0)",
+          borderRadius: (o.width >> 1) + "px"
+        });
+      };
+      i = 0;
+      seg = void 0;
+      while (i < o.lines) {
+        seg = css(createEl(), {
+          position: "absolute",
+          top: 1 + ~(o.width / 2) + "px",
+          transform: "translate3d(0,0,0)",
+          opacity: o.opacity,
+          animation: useCssAnimations && addAnimation(o.opacity, o.trail, i, o.lines) + " " + 1 / o.speed + "s linear infinite"
+        });
+        if (o.shadow) {
+          ins(seg, css(fill("#000", "0 0 4px " + "#000"), {
+            top: 2 + "px"
+          }));
+        }
+        ins(el, ins(seg, fill(o.color, "0 0 1px rgba(0,0,0,.1)")));
+        i++;
+      }
+      return el;
+    };
+    proto.opacity = function(el, i, val) {
+      if (i < el.childNodes.length) return el.childNodes[i].style.opacity = val;
+    };
+    (function() {
+      var i, s;
+      s = css(createEl("group"), {
+        behavior: "url(#default#VML)"
+      });
+      i = void 0;
+      if (!vendor(s, "transform") && s.adj) {
+        i = 4;
+        while (i--) {
+          sheet.addRule(["group", "roundrect", "fill", "stroke"][i], "behavior:url(#default#VML)");
+        }
+        proto.lines = function(el, o) {
+          var g, grp, margin, r, seg;
+          grp = function() {
+            return css(createEl("group", {
+              coordsize: s + " " + s,
+              coordorigin: -r + " " + -r
+            }), {
+              width: s,
+              height: s
+            });
+          };
+          seg = function(i, dx, filter) {
+            return ins(g, ins(css(grp(), {
+              rotation: 360 / o.lines * i + "deg",
+              left: ~~dx
+            }), ins(css(createEl("roundrect", {
+              arcsize: 1
+            }), {
+              width: r,
+              height: o.width,
+              left: o.radius,
+              top: -o.width >> 1,
+              filter: filter
+            }), createEl("fill", {
+              color: o.color,
+              opacity: o.opacity
+            }), createEl("stroke", {
+              opacity: 0
+            }))));
+          };
+          r = o.length + o.width;
+          s = 2 * r;
+          g = grp();
+          margin = ~(o.length + o.radius + o.width) + "px";
+          i = void 0;
+          if (o.shadow) {
+            i = 1;
+            while (i <= o.lines) {
+              seg(i, -2, "progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)");
+              i++;
+            }
+          }
+          i = 1;
+          while (i <= o.lines) {
+            seg(i);
+            i++;
+          }
+          return ins(css(el, {
+            margin: margin + " 0 0 " + margin,
+            zoom: 1
+          }), g);
+        };
+        return proto.opacity = function(el, i, val, o) {
+          var c;
+          c = el.firstChild;
+          o = o.shadow && o.lines || 0;
+          if (c && i + o < c.childNodes.length) {
+            c = c.childNodes[i + o];
+            c = c && c.firstChild;
+            c = c && c.firstChild;
+            if (c) return c.opacity = val;
+          }
+        };
+      } else {
+        return useCssAnimations = vendor(s, "animation");
+      }
+    })();
+    return window.Spinner = Spinner;
+  })(window, document);
+
+}).call(this);
+(function() {
+
+  Luca.modules.Toolbars = {
+    mixin: function(base) {
+      return _.extend(base, Luca.modules.Toolbars);
+    },
+    prepare_toolbars: function() {
+      var _this = this;
+      return this.toolbars = _(this.toolbars).map(function(toolbar) {
+        toolbar.ctype || (toolbar.ctype = "toolbar");
+        toolbar = Luca.util.LazyObject(toolbar);
+        $(_this.el)[toolbar.position_action()](Luca.templates["containers/toolbar_wrapper"]({
+          id: _this.name + '-toolbar-wrapper'
+        }));
+        toolbar.container = toolbar.renderTo = $("#" + (_this.name || _this.cid) + "-toolbar-wrapper");
+        return toolbar;
+      });
+    },
+    render_toolbars: function() {
+      var _this = this;
+      return _(this.toolbars).each(function(toolbar) {
+        return toolbar.render();
+      });
+    }
+  };
+
+}).call(this);
+(function() {
+
   Luca.View = Backbone.View.extend({
     base: 'Luca.View'
   });
@@ -361,6 +659,7 @@
       if (!this.fetching) return this.fetch();
     },
     parse: function(response) {
+      this.trigger("after:response");
       if (this.root != null) {
         return response[this.root];
       } else {
@@ -908,10 +1207,37 @@
 
   Luca.components.Toolbar = Luca.core.Container.extend({
     className: 'luca-ui-toolbar',
+    position: 'bottom',
     component_type: 'toolbar',
     initialize: function(options) {
       this.options = options != null ? options : {};
       return Luca.core.Container.prototype.initialize.apply(this, arguments);
+    },
+    afterInitialize: function() {
+      var _ref;
+      if ((_ref = Luca.core.Container.prototype.afterInitialize) != null) {
+        _ref.apply(this, arguments);
+      }
+      return this.container = "" + this.id + "-wrapper";
+    },
+    prepare_components: function() {
+      var _this = this;
+      return _(this.components).each(function(component) {
+        return component.container = component.renderTo = _this.el;
+      });
+    },
+    prepare_layout: function() {
+      return true;
+    },
+    render: function() {
+      return $(this.container).append(this.el);
+    },
+    position_action: function() {
+      if (this.position === "top") {
+        return "prepend";
+      } else {
+        return "append";
+      }
     }
   });
 
@@ -1265,32 +1591,6 @@
           "class": 'reset-button'
         });
       }
-    },
-    afterInitialize: function() {
-      var _ref;
-      if ((_ref = Luca.components.Toolbar.prototype.afterInitialize) != null) {
-        _ref.apply(this, arguments);
-      }
-      return this.container = "" + this.id + "-wrapper";
-    },
-    prepare_components: function() {
-      var _this = this;
-      return _(this.components).each(function(component) {
-        return component.container = component.renderTo = _this.el;
-      });
-    },
-    prepare_layout: function() {
-      return true;
-    },
-    render: function() {
-      return $(this.container).append(this.el);
-    },
-    position_action: function() {
-      if (this.position === "top") {
-        return "prepend";
-      } else {
-        return "append";
-      }
     }
   });
 
@@ -1513,6 +1813,7 @@
       return this.collection.applyFilter(values, options);
     },
     beforeRender: function() {
+      var _ref, _ref2;
       this.trigger("before:grid:render", this);
       if (this.scrollable) $(this.el).addClass('scrollable-grid-view');
       $(this.el).html(Luca.templates["components/grid_view"]());
@@ -1522,7 +1823,14 @@
       this.footer = $("tfoot", this.table);
       if (this.scrollable) this.setDimensions();
       this.render_header();
-      return $(this.container).append($(this.el));
+      this.emptyMessage();
+      if (((_ref = this.toolbars) != null ? _ref.length : void 0) > 0) {
+        this.prepare_toolbars();
+      }
+      $(this.container).append($(this.el));
+      if (((_ref2 = this.toolbars) != null ? _ref2.length : void 0) > 0) {
+        return this.render_toolbars();
+      }
     },
     setDimensions: function() {
       var _this = this;
@@ -1549,7 +1857,7 @@
         return _(this.columns).each(function(col, index) {
           var column;
           column = $(".column-" + index, _this.el);
-          return column.width(col.width + distribution);
+          return column.width(col.width = col.width + distribution);
         });
       }
     },
@@ -1576,8 +1884,31 @@
       this.refresh();
       return this.trigger("after:grid:render", this);
     },
-    emptyMessage: function() {
-      return this.body.append("<tr><td colspan='" + (this.columns.length + 1) + "'>" + this.emptyText + "</td></tr>");
+    prepare_toolbars: function() {
+      var _this = this;
+      return this.toolbars = _(this.toolbars).map(function(toolbar) {
+        toolbar = Luca.util.LazyObject(toolbar);
+        $(_this.el)[toolbar.position_action()](Luca.templates["containers/toolbar_wrapper"]({
+          id: _this.name + '-toolbar-wrapper'
+        }));
+        toolbar.container = toolbar.renderTo = $("#" + _this.name + "-toolbar-wrapper");
+        return toolbar;
+      });
+    },
+    render_toolbars: function() {
+      var _this = this;
+      return _(this.toolbars).each(function(toolbar) {
+        return toolbar.render();
+      });
+    },
+    emptyMessage: function(text) {
+      if (text == null) text = "";
+      text || (text = this.emptyText);
+      this.body.html('');
+      return this.body.append(Luca.templates["components/grid_view_empty_text"]({
+        colspan: this.columns.length,
+        text: text
+      }));
     },
     refresh: function() {
       var _this = this;
@@ -1676,6 +2007,10 @@
 (function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'></div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'></div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["components/grid_view_empty_text"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'empty-text-wrapper\'>\n  <p>\n    ', text ,'\n  </p>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

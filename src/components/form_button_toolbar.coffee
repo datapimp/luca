@@ -20,21 +20,4 @@ Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
         label: 'Reset'
         class: 'reset-button'
 
-  afterInitialize: ()->
-    Luca.components.Toolbar.prototype.afterInitialize?.apply @, arguments
-    @container = "#{ @id }-wrapper"
-
-  prepare_components: ()->
-    _( @components ).each (component)=> 
-      component.container = component.renderTo = @el
-
-  prepare_layout: ()-> 
-    true
-
-  render: ()->
-    $(@container).append(@el)
-
-  position_action: ()->
-    if @position is "top" then "prepend" else "append" 
-
 Luca.register "form_button_toolbar", "Luca.components.FormButtonToolbar"

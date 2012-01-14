@@ -60,7 +60,11 @@ Luca.components.GridView = Luca.View.extend
 
     @render_header()
 
+    @emptyMessage()
+
+    @prepare_toolbars() if @toolbars?.length > 0
     $(@container).append $(@el)
+    @render_toolbars() if @toolbars?.length > 0
  
   setDimensions: ()->
     @height ||= 285
@@ -88,7 +92,7 @@ Luca.components.GridView = Luca.View.extend
 
       _(@columns).each (col,index)=>
         column = $(".column-#{ index }", @el )
-        column.width( col.width + distribution )
+        column.width( col.width = col.width + distribution )
 
   pad_last_column: ()->
     configured_column_widths = _(@columns).inject (sum, column)->
@@ -111,9 +115,22 @@ Luca.components.GridView = Luca.View.extend
   afterRender: ()-> 
     @refresh()   
     @trigger "after:grid:render", @
-  
-  emptyMessage: ()->
-    @body.append("<tr><td colspan='#{ @columns.length + 1 }'>#{ @emptyText }</td></tr>")
+
+  prepare_toolbars: ()->
+    @toolbars = _( @toolbars ).map (toolbar)=>
+      toolbar = Luca.util.LazyObject( toolbar )
+      $(@el)[ toolbar.position_action() ] Luca.templates["containers/toolbar_wrapper"](id:@name+'-toolbar-wrapper')
+      toolbar.container = toolbar.renderTo = $("##{@name}-toolbar-wrapper")
+      toolbar
+
+  render_toolbars: ()->
+    _(@toolbars).each (toolbar)=>
+      toolbar.render()
+
+  emptyMessage: (text="")->
+    text ||= @emptyText
+    @body.html('')
+    @body.append Luca.templates["components/grid_view_empty_text"](colspan:@columns.length,text:text)
 
   refresh: ()-> 
     @body.html('')

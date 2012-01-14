@@ -16,7 +16,17 @@
   .grid-view-body {
     overflow: hidden;
   }
-
+  
+  .grid-view-body .empty-text-wrapper {
+    display: block;
+    margin: 10px auto;
+    width: 30%;
+    padding: 50px;
+    text-align: center;
+    p {
+      color: #aaa;
+    }
+  }
   /* define width of table. IE browsers only                 */
   .grid-view-body table {
     float: left;

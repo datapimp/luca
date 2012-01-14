@@ -18,7 +18,9 @@ Luca.components.FormView = Luca.View.extend
 
   initialize: (@options={})->
     _.extend @, @options
+     
     Luca.View.prototype.initialize.apply @, arguments
+
     @setupHooks( @hooks )
     
     @components ||= @fields

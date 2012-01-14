@@ -66,6 +66,14 @@ html.luca-ui-fullscreen {
     overflow: auto; }
   .scrollable-grid-view .grid-view-body {
     overflow: hidden; }
+  .scrollable-grid-view .grid-view-body .empty-text-wrapper {
+    display: block;
+    margin: 10px auto;
+    width: 30%;
+    padding: 50px;
+    text-align: center; }
+    .scrollable-grid-view .grid-view-body .empty-text-wrapper p {
+      color: #aaa; }
   .scrollable-grid-view .grid-view-body table {
     float: left; }
   .scrollable-grid-view thead.fixed tr {

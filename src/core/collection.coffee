@@ -68,4 +68,5 @@ _.extend Luca.Collection.prototype,
       @fetch()
 
   parse: (response)-> 
+    @trigger "after:response"
     if @root? then response[ @root ] else response
