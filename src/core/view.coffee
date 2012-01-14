@@ -8,7 +8,7 @@ Luca.View = Backbone.View.extend
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
 
-Luca.View.original_extend = Backbone.View.extend
+Luca.View.originalExtend = Backbone.View.extend
 
 # By overriding Backbone.View.extend we are able to intercept
 # some method definitions and add special behavior around them
@@ -58,7 +58,7 @@ Luca.View.extend = (definition)->
         _base.apply(@, arguments)
       @trigger "after:render", @
 
-  Luca.View.original_extend.apply @, [definition]
+  Luca.View.originalExtend.apply @, [definition]
 
 _.extend Luca.View.prototype,
   trigger: (@event)->
@@ -101,6 +101,7 @@ _.extend Luca.View.prototype,
   # before:render     : beforeRender()
   # after:render      : afterRender()
   # after:initialize  : afterInitialize()
+  # first:activation  : firstActivation()
   setupHooks: (set)->
     set ||= @hooks
     

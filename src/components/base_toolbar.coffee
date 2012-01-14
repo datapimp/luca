@@ -3,7 +3,7 @@ Luca.components.Toolbar = Luca.core.Container.extend
   
   position: 'bottom'
 
-  component_type: 'toolbar'
+  componentType: 'toolbar'
 
   initialize: (@options={})->
     Luca.core.Container.prototype.initialize.apply @, arguments
@@ -12,11 +12,11 @@ Luca.components.Toolbar = Luca.core.Container.extend
     Luca.core.Container.prototype.afterInitialize?.apply @, arguments
     @container = "#{ @id }-wrapper"
 
-  prepare_components: ()->
+  prepareComponents: ()->
     _( @components ).each (component)=> 
       component.container = component.renderTo = @el
 
-  prepare_layout: ()-> 
+  prepareLayout: ()-> 
     true
 
   render: ()->

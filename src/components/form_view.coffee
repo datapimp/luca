@@ -1,4 +1,6 @@
-Luca.components.FormView = Luca.View.extend
+Luca.components.FormView = Luca.core.Container.extend 
+  tagName: 'form'
+
   className: 'luca-ui-form-view'
 
   hooks:[
@@ -17,13 +19,11 @@ Luca.components.FormView = Luca.View.extend
   container_type: 'column_view'
 
   initialize: (@options={})->
-    _.extend @, @options
-     
-    Luca.View.prototype.initialize.apply @, arguments
+    Luca.core.Container.prototype.initialize.apply @, arguments
+
+    @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
-    
-    @components ||= @fields
 
     if @toolbar and !@toolbars
       @toolbars = [
@@ -33,60 +33,22 @@ Luca.components.FormView = Luca.View.extend
         name: "#{ @name }_toolbar"
         includeReset: true
       ]
-    
-    @state ||= new Backbone.Model
 
     _.bindAll @, "submit_handler", "reset_handler" 
+  
+  prepareLayout: ()->
+    _( @components ).each (component,index)->
+      component.renderTo = component.container = @el
 
   beforeRender: ()->
-    $(@el).append("<form />")
-
-    @form = $('form', @el )
-    
-    @form.addClass( @form_class ) if @form_class
-    
-    @check_for_fieldsets()
-    
-    @fieldsets = @components = _( @components ).map (fieldset, index)=>
-      fieldset.renderTo = fieldset.container = fieldset.form = @form
-      fieldset.id = "#{ @cid }-#{ index }"
-      fieldset.legend = @legend if @legend and index is 0
-      new Luca.containers.FieldsetView(fieldset)
-     
-  afterRender: ()->
-    _( @components ).each (component)-> 
-      component.render()
-
-    @prepare_toolbars() if @toolbars?.length > 0
-  
+    Luca.core.Container.beforeRender?.apply @, arguments
+    @el.addClass( @form_class ) if @form_class
+      
+  render: ()->
     $(@container).append $(@el)
 
-    @render_toolbars() if @toolbars?.length > 0
-
-  prepare_toolbars: ()->
-    @toolbars = _( @toolbars ).map (toolbar)=>
-      toolbar = Luca.util.LazyObject( toolbar )
-      $(@el)[ toolbar.position_action() ] Luca.templates["containers/toolbar_wrapper"](id:@name+'-toolbar-wrapper')
-      toolbar.container = toolbar.renderTo = $("##{@name}-toolbar-wrapper")
-      toolbar
-
-  render_toolbars: ()->
-    _(@toolbars).each (toolbar)=>
-      toolbar.render()
-
-  fieldsets_present : ()-> 
-    _( @components ).detect (obj)-> obj.ctype is "fieldset_view"
-
-  check_for_fieldsets: ()->
-    unless @fieldsets_present()
-      @components = [ 
-        ctype: 'fieldset_view'
-        components: @components
-        container_type: @container_type
-      ]
- 
   getFields: (attr,value)->
-    fields = _.flatten _.compact _( @fieldsets ).map (fs)-> 
+    fields = _.flatten _.compact _( @components ).map (fs)-> 
       fs?.getFields?.apply(fs)
     
     # if an optional attribute and value pair is passed

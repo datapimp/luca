@@ -1,5 +1,5 @@
 Luca.containers.FieldsetView = Luca.View.extend
-  component_type: 'fieldset_view'
+  componentType: 'fieldset_view'
 
   tagName: 'fieldset'
 

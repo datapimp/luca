@@ -1,5 +1,5 @@
 Luca.containers.ModalView = Luca.core.Container.extend 
-  component_type: 'modal_view'
+  componentType: 'modal_view'
 
   className: 'luca-ui-modal-view'
 
@@ -58,10 +58,10 @@ Luca.containers.ModalView = Luca.core.Container.extend
   onModalClose: (modal, view)->
     $.modal.close()
 
-  prepare_layout: ()->
+  prepareLayout: ()->
     $('body').append( $(@el) )
 
-  prepare_components: ()->
+  prepareComponents: ()->
     @components = _(@components).map (object,index) =>
       object.container =  @el
       object

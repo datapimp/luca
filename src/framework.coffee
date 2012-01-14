@@ -68,11 +68,11 @@ Luca.registry.lookup = (ctype)->
 Luca.util.LazyObject = (config)->
   ctype = config.ctype
   
-  component_class = Luca.registry.lookup( ctype )
+  componentClass = Luca.registry.lookup( ctype )
 
-  throw "Invalid Component Type: #{ ctype }.  Did you forget to register it?" unless component_class
+  throw "Invalid Component Type: #{ ctype }.  Did you forget to register it?" unless componentClass
 
-  constructor = eval( component_class )
+  constructor = eval( componentClass )
 
   new constructor(config)
 

@@ -10,11 +10,11 @@ Luca.containers.Viewport = Luca.containers.CardView.extend
 
     $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
 
-  prepare_layout: ()->
+  prepareLayout: ()->
     _( @components ).each (component) =>
       component.renderTo = @el 
 
-  prepare_components: ()-> true
+  prepareComponents: ()-> true
 
   render: ()->
     $(@el).addClass('luca-ui-viewport')
