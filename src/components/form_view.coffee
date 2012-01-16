@@ -54,14 +54,23 @@ Luca.components.FormView = Luca.core.Container.extend
   
   beforeLayout: ()->
     Luca.core.Container.prototype.beforeLayout?.apply @, arguments
-    
+    $(@el).html Luca.templates["components/form_view"]( @ )    
     $(@el).addClass( @fieldLayoutClass ) if @fieldLayoutClass
     $(@el).addClass( "label-align-#{ @labelAlign }")
+
+  prepareComponents: ()->
+    container = $('.form-view-body', @el)
+    _( @components ).each (component)->
+      component.container = container
   
   render: ()->
+    $( @container ).append( $(@el) )
+
+  __render: ()->
     @debug "Rendering Form View #{ @name }"
     wrapper = $(Luca.templates["components/form_view"]( @ ))
-    $('.form-view-body', wrapper).append( $(@el) )
+    
+    $('.form-view-body', wrapper).append( $(@el).html() )
     
     @debug ["Appending ", wrapper, $( @container )]
 
@@ -126,8 +135,18 @@ Luca.components.FormView = Luca.core.Container.extend
         memo[ field.input_name || name ] = value
       memo
     , {}
+  
+  defaultSaveOptions:
+    success: (model, response, xhr)->
+      console.log "Successful Save Response", response
+    error: ()->
+      console.log "Error Save", arguments
 
-  submit: ()-> @current_model.set( @getValues() )
+  submit: (save=true, saveOptions)-> 
+    saveOptions ||= @defaultSaveOptions
+    @current_model.set( @getValues() )
+    return unless save
+    @current_model.save( @current_model.toJSON(), saveOptions )
 
   currentModel: ()-> @current_model
 

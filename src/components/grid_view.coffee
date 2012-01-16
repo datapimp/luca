@@ -51,8 +51,19 @@ Luca.components.GridView = Luca.View.extend
 
     @emptyMessage()
 
+    @renderToolbars()
+
     $(@container).append $(@el)
- 
+  
+  toolbarContainers:(position="bottom")->
+    $(".toolbar-container.#{ position }", @el)
+
+  renderToolbars: ()->
+    _( @toolbars ).each (toolbar)=>
+      toolbar = Luca.util.LazyObject(toolbar)
+      toolbar.container = @toolbarContainers( toolbar.position ) 
+      toolbar.render()
+
   setDimensions: ()->
     @height ||= 285
 

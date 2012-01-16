@@ -1678,14 +1678,25 @@
       if ((_ref = Luca.core.Container.prototype.beforeLayout) != null) {
         _ref.apply(this, arguments);
       }
+      $(this.el).html(Luca.templates["components/form_view"](this));
       if (this.fieldLayoutClass) $(this.el).addClass(this.fieldLayoutClass);
       return $(this.el).addClass("label-align-" + this.labelAlign);
     },
+    prepareComponents: function() {
+      var container;
+      container = $('.form-view-body', this.el);
+      return _(this.components).each(function(component) {
+        return component.container = container;
+      });
+    },
     render: function() {
+      return $(this.container).append($(this.el));
+    },
+    __render: function() {
       var wrapper;
       this.debug("Rendering Form View " + this.name);
       wrapper = $(Luca.templates["components/form_view"](this));
-      $('.form-view-body', wrapper).append($(this.el));
+      $('.form-view-body', wrapper).append($(this.el).html());
       this.debug(["Appending ", wrapper, $(this.container)]);
       return $(this.container).append(wrapper);
     },
@@ -1761,8 +1772,20 @@
         return memo;
       }, {});
     },
-    submit: function() {
-      return this.current_model.set(this.getValues());
+    defaultSaveOptions: {
+      success: function(model, response, xhr) {
+        return console.log("Successful Save Response", response);
+      },
+      error: function() {
+        return console.log("Error Save", arguments);
+      }
+    },
+    submit: function(save, saveOptions) {
+      if (save == null) save = true;
+      saveOptions || (saveOptions = this.defaultSaveOptions);
+      this.current_model.set(this.getValues());
+      if (!save) return;
+      return this.current_model.save(this.current_model.toJSON(), saveOptions);
     },
     currentModel: function() {
       return this.current_model;
@@ -1811,7 +1834,20 @@
       if (this.scrollable) this.setDimensions();
       this.renderHeader();
       this.emptyMessage();
+      this.renderToolbars();
       return $(this.container).append($(this.el));
+    },
+    toolbarContainers: function(position) {
+      if (position == null) position = "bottom";
+      return $(".toolbar-container." + position, this.el);
+    },
+    renderToolbars: function() {
+      var _this = this;
+      return _(this.toolbars).each(function(toolbar) {
+        toolbar = Luca.util.LazyObject(toolbar);
+        toolbar.container = _this.toolbarContainers(toolbar.position);
+        return toolbar.render();
+      });
     },
     setDimensions: function() {
       var _this = this;
@@ -1992,7 +2028,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'>\n    <div class=\'toolbar-container position-top\'></div>\n  </div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'>\n    <div class=\'toolbar-container position-bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'>\n    <div class=\'toolbar-container top\'></div>\n  </div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'>\n    <div class=\'toolbar-container bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
