@@ -489,7 +489,7 @@
         $(_this.el)[toolbar.position_action()](Luca.templates["containers/toolbar_wrapper"]({
           id: _this.name + '-toolbar-wrapper'
         }));
-        toolbar.container = toolbar.renderTo = $("#" + (_this.name || _this.cid) + "-toolbar-wrapper");
+        toolbar.container = $("#" + (_this.name || _this.cid) + "-toolbar-wrapper");
         return toolbar;
       });
     },
@@ -544,6 +544,16 @@
   };
 
   _.extend(Luca.View.prototype, {
+    debug: function() {
+      var message, _i, _len, _results;
+      if (!(this.debugMode || (window.LucaDebugMode != null))) return;
+      _results = [];
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        message = arguments[_i];
+        _results.push(console.log([this.name || this.cid, message]));
+      }
+      return _results;
+    },
     trigger: function(event) {
       this.event = event;
       return Backbone.View.prototype.trigger.apply(this, arguments);
@@ -669,6 +679,7 @@
 
   Luca.core.Field = Luca.View.extend({
     className: 'luca-ui-text-field luca-ui-field',
+    isField: true,
     template: 'fields/text_field',
     labelAlign: 'top',
     hooks: ["before:validation", "after:validation"],
@@ -698,26 +709,29 @@
   Luca.core.Container = Luca.View.extend({
     className: 'luca-ui-container',
     componentClass: 'luca-ui-panel',
+    isContainer: true,
     hooks: ["before:components", "before:layout", "after:components", "after:layout", "first:activation"],
     rendered: false,
     components: [],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
-      _.bindAll(this, "index_components");
       this.setupHooks(Luca.core.Container.prototype.hooks);
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
     beforeRender: function() {
+      this.debug("container before render");
       this.doLayout();
       return this.doComponents();
     },
     doLayout: function() {
+      this.debug("container do layout");
       this.trigger("before:layout", this);
       this.prepareLayout();
       return this.trigger("after:layout", this);
     },
     doComponents: function() {
+      this.debug("container do components");
       this.trigger("before:components", this, this.components);
       this.prepareComponents();
       this.createComponents();
@@ -742,6 +756,7 @@
     },
     prepareLayout: function() {
       var _this = this;
+      this.debug("container prepare layout");
       this.componentContainers = _(this.components).map(function(component, index) {
         return _this.applyPanelConfig.apply(_this, [component, index]);
       });
@@ -751,10 +766,11 @@
     },
     prepareComponents: function() {
       var _this = this;
+      this.debug("container prepare components");
       return this.components = _(this.components).map(function(object, index) {
         var panel;
         panel = _this.componentContainers[index];
-        object.container = object.renderTo = "#" + panel.id;
+        object.container = "#" + panel.id;
         object.parentEl = _this.el;
         return object;
       });
@@ -762,15 +778,16 @@
     createComponents: function() {
       var map,
         _this = this;
+      this.debug("container create components");
       map = this.componentIndex = {
         name_index: {},
         cid_index: {}
       };
-      return this.components = _(this.components).map(function(object, index) {
+      this.components = _(this.components).map(function(object, index) {
         var component;
         component = _.isObject(object) && (object.ctype != null) ? Luca.util.LazyObject(object) : object;
-        if (!component.renderTo && component.options.renderTo) {
-          component.container = component.renderTo = component.options.renderTo;
+        if (!component.container && component.options.container) {
+          component.container = component.options.container;
         }
         if (map && (component.cid != null)) map.cid_index[component.cid] = index;
         if (map && (component.name != null)) {
@@ -778,15 +795,17 @@
         }
         return component;
       });
+      return this.debug("components created", this.components);
     },
     renderComponents: function(debugMode) {
       var _this = this;
       this.debugMode = debugMode != null ? debugMode : "";
+      this.debug("container render components");
       return _(this.components).each(function(component) {
         component.getParent = function() {
           return _this;
         };
-        $(component.renderTo).append($(component.el));
+        $(component.container).append($(component.el));
         return component.render();
       });
     },
@@ -797,6 +816,23 @@
         activator = _this;
         return component != null ? (_ref = component.trigger) != null ? _ref.apply(_this, "first:activation", [component, activator]) : void 0 : void 0;
       });
+    },
+    select: function(attribute, value, deep) {
+      var components;
+      if (deep == null) deep = false;
+      components = _(this.components).map(function(component) {
+        var matches, test;
+        matches = [];
+        test = component[attribute];
+        console.log(attribute, value, test);
+        if (test === value) matches.push(component);
+        if (deep === true && component.isContainer === true) {
+          console.log("Going Deep");
+          matches.push(component.select(attribute, value, true));
+        }
+        return _.compact(matches);
+      });
+      return _.flatten(components);
     },
     findComponentByName: function(name, deep) {
       if (deep == null) deep = false;
@@ -849,6 +885,7 @@
   Luca.containers.SplitView = Luca.core.Container.extend({
     layout: '100',
     componentType: 'split_view',
+    containerTemplate: 'containers/basic',
     className: 'luca-ui-split-view',
     componentClass: 'luca-ui-panel'
   });
@@ -864,14 +901,19 @@
     components: [],
     initialize: function(options) {
       this.options = options != null ? options : {};
-      return Luca.containers.SplitView.prototype.initialize.apply(this, arguments);
+      Luca.core.Container.prototype.initialize.apply(this, arguments);
+      return this.setColumnWidths();
     },
     componentClass: 'luca-ui-column',
+    containerTemplate: "containers/basic",
     autoColumnWidths: function() {
-      var _this = this;
-      return _(this.components.length).times(function() {
-        return parseInt(100 / _this.components.length);
+      var widths,
+        _this = this;
+      widths = [];
+      _(this.components.length).times(function() {
+        return widths.push(parseInt(100 / _this.components.length));
       });
+      return widths;
     },
     setColumnWidths: function() {
       this.columnWidths = this.layout != null ? _(this.layout.split('/')).map(function(v) {
@@ -881,13 +923,21 @@
         return "" + val + "%";
       });
     },
-    afterLayout: function() {
-      var _this = this;
-      this.setColumnWidths();
-      return _(this.columnWidths).each(function(width, index) {
-        _this.componentContainers[index].float = "left";
-        return _this.componentContainers[index].width = width;
+    beforeComponents: function() {
+      this.debug("column_view before components");
+      return _(this.components).each(function(component) {
+        return component.ctype || (component.ctype = "panel_view");
       });
+    },
+    beforeLayout: function() {
+      var _ref,
+        _this = this;
+      this.debug("column_view before layout");
+      _(this.columnWidths).each(function(width, index) {
+        _this.components[index].float = "left";
+        return _this.components[index].width = width;
+      });
+      return (_ref = Luca.core.Container.prototype.beforeLayout) != null ? _ref.apply(this, arguments) : void 0;
     }
   });
 
@@ -926,14 +976,11 @@
       });
     },
     prepareComponents: function() {
-      return this.assignToCards();
-    },
-    assignToCards: function() {
       var _this = this;
       return this.components = _(this.components).map(function(object, index) {
         var card;
         card = _this.cards[index];
-        object.container = object.renderTo = "#" + card.id;
+        object.container = "#" + card.id;
         return object;
       });
     },
@@ -1119,17 +1166,17 @@
         $(this.el).append(Luca.templates["containers/tab_view"](this));
         $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
       }
-      this.create_tab_selectors();
+      this.createTabSelectors();
       return Luca.containers.CardView.prototype.beforeLayout.apply(this, arguments);
     },
     tab_selectors: function() {
       return $('li.tab-selector', this.tab_container());
     },
-    create_tab_selectors: function() {
+    createTabSelectors: function() {
       var _this = this;
       return _(this.components).map(function(component, index) {
         var title;
-        component.renderTo = "#" + _this.cid + "-tab-panel-container";
+        component.container = "#" + _this.cid + "-tab-panel-container";
         title = component.title || ("Tab " + (index + 1));
         return _this.tab_container().append("<li class='tab-selector' data-target-tab='" + index + "'>" + title + "</li>");
       });
@@ -1174,7 +1221,7 @@
     prepareComponents: function() {
       var _this = this;
       return _(this.components).each(function(component) {
-        return component.container = component.renderTo = _this.el;
+        return component.container = _this.el;
       });
     },
     prepareLayout: function() {
@@ -1461,6 +1508,7 @@
 (function() {
 
   Luca.fields.TypeAheadField = Luca.fields.TextField.extend({
+    form_field: true,
     className: 'luca-ui-field',
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
@@ -1561,6 +1609,7 @@
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.core.Container.prototype.initialize.apply(this, arguments);
+      this.debug("form view initialized");
       this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
       return _.bindAll(this, "submitHandler", "resetHandler");
@@ -1580,23 +1629,26 @@
       return this.trigger("after:submit", this);
     },
     beforeLayout: function() {
+      this.debug("form view before layout");
       return $(this.el).html(Luca.templates["components/form_view"](this));
     },
     prepareLayout: function() {
-      var _this = this;
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.core.Container.prototype.prepareLayout) != null) {
+        _ref.apply(this, arguments);
+      }
       return _(this.components).each(function(component) {
         return component.container = $('.form-view-body', _this.el);
       });
     },
     render: function() {
+      this.debug(["form view render", this.container, this.el]);
       return $(this.container).append($(this.el));
     },
     getFields: function(attr, value) {
       var fields;
-      fields = _.flatten(_.compact(_(this.components).map(function(fs) {
-        var _ref;
-        return fs != null ? (_ref = fs.getFields) != null ? _ref.apply(fs) : void 0 : void 0;
-      })));
+      fields = this.select("isField", true, true);
       if (fields.length > 0 && attr && value) {
         fields = _(fields).select(function(field) {
           var property, propvalue;
