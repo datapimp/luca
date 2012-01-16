@@ -20,7 +20,7 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
     @input_name ||= @name 
     @label ||= @name
     @input_class ||= @class
-    @input_style ||= "height:#{ @height };width:#{ @width }"
+    @inputStyles ||= "height:#{ @height };width:#{ @width }"
 
   setValue: (value)->
     @field().html(value)

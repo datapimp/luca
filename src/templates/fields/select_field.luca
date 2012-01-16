@@ -1,5 +1,7 @@
 %label{:for=>"<%= input_id %>"}
   <%= label %>
-%select{:id=>"<%= input_id %>",:name=>"<%= input_name %>"}
+%select{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:name=>"<%= input_name %>"}
+<% if(helperText) { %>
 %span.helper-text
   <%= helperText %>
+<% } %>

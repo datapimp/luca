@@ -26,6 +26,8 @@ Luca.components.FormView = Luca.core.Container.extend
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
+    
+    @legend ||= ""
 
     if @toolbar is true 
       @toolbars = [

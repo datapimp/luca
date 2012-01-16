@@ -19,7 +19,6 @@ Luca.View.extend = (definition)->
   # Our base view class wraps the defined render() method
   # of the views which inherit from it, and does things like
   # trigger the before and after render events automatically.
-  #
   # In addition, if the view has a deferrable property on it
   # then it will make sure that the render method doesn't get called
   # until.

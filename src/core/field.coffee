@@ -20,6 +20,7 @@ Luca.core.Field = Luca.View.extend
     @input_name ||= @name 
     @helperText ||= ""
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
+    @inputStyles ||= ""
     
   beforeRender: ()->
     $(@el).addClass('required') if @required

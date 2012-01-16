@@ -161,10 +161,11 @@ Luca.core.Container = Luca.View.extend
     _(@components).each (component)=> 
       component.getParent = ()=> @ 
       $( component.container ).append $(component.el)
+
       try
         component.render()
       catch e
-        @debug "Error Rendering Component: #{ component.cid }", component
+        throw "Error Rendering Component #{ component.name || component.cid }"
 
   #### Container Activation
   # 

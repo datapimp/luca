@@ -1,7 +1,8 @@
 %label{:for=>"<%= input_id %>"}
   <%= label %>
-%input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>"}
+%input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"file",:name=>"<%= input_name %>"}
 <% if(helperText) { %>
 %span.helper-text
   <%= helperText %>
 <% } %>
+
