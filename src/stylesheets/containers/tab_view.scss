@@ -9,6 +9,13 @@
 
   .luca-ui-tab-container {
     display: block;
+
+    .tab-selector {
+      font-weight: normal;
+    }
+    .tab-selector.active-tab {
+      font-weight: bold;
+    }
     ul {
       padding: 0;
       margin: 0;

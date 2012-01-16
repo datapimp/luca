@@ -1,6 +1,13 @@
 .luca-ui-form-view-wrapper
   .form-view-header
     .toolbar-container.position-top
+  <% if(legend){ %>
+  %fieldset
+    %legend
+      <%= legend %>
+    .form-view-body
+  <% } else { %>
   .form-view-body
+  <% } %>
   .form-view-footer
     .toolbar-container.position-bottom

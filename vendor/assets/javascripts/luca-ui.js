@@ -684,13 +684,19 @@
     labelAlign: 'top',
     hooks: ["before:validation", "after:validation"],
     initialize: function(options) {
+      var _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
-      return this.input_name || (this.input_name = this.name);
+      this.input_name || (this.input_name = this.name);
+      this.helperText || (this.helperText = "");
+      if (this.required && !((_ref = this.label) != null ? _ref.match(/^\*/) : void 0)) {
+        return this.label || (this.label = "*" + this.label);
+      }
     },
     beforeRender: function() {
+      if (this.required) $(this.el).addClass('required');
       $(this.el).html(Luca.templates[this.template](this));
       $(this.container).append($(this.el));
       return this.input = $('input', this.el);
@@ -1145,7 +1151,7 @@
     events: {
       "click .luca-ui-tab-container li": "select"
     },
-    hooks: ["before:select"],
+    hooks: ["before:select", "after:select"],
     componentType: 'tab_view',
     className: 'luca-ui-tab-view-wrapper',
     components: [],
@@ -1153,14 +1159,25 @@
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
-      return _.bindAll(this, "select");
+      _.bindAll(this, "select", "highlightSelectedTab");
+      this.setupHooks(this.hooks);
+      return this.bind("after:card:switch", this.highlightSelectedTab);
     },
     select: function(e) {
       var me, my;
       me = my = $(e.currentTarget);
-      return this.activate(my.data('target-tab'));
+      this.trigger("before:select", this);
+      this.activate(my.data('target-tab'));
+      return this.trigger("after:select", this);
     },
-    tab_container: function() {
+    highlightSelectedTab: function() {
+      this.tabSelectors().removeClass('active-tab');
+      return this.activeTabSelector().addClass('active-tab');
+    },
+    activeTabSelector: function() {
+      return this.tabSelectors().eq(this.activeCard);
+    },
+    tabContainer: function() {
       return $("#" + this.cid + "-tab-container>ul");
     },
     tab_position: 'top',
@@ -1176,8 +1193,8 @@
       this.createTabSelectors();
       return Luca.containers.CardView.prototype.beforeLayout.apply(this, arguments);
     },
-    tab_selectors: function() {
-      return $('li.tab-selector', this.tab_container());
+    tabSelectors: function() {
+      return $('li.tab-selector', this.tabContainer());
     },
     createTabSelectors: function() {
       var _this = this;
@@ -1185,7 +1202,7 @@
         var title;
         component.container = "#" + _this.cid + "-tab-panel-container";
         title = component.title || ("Tab " + (index + 1));
-        return _this.tab_container().append("<li class='tab-selector' data-target-tab='" + index + "'>" + title + "</li>");
+        return _this.tabContainer().append("<li class='tab-selector' data-target-tab='" + index + "'>" + title + "</li>");
       });
     }
   });
@@ -1443,11 +1460,14 @@
       _.bindAll(this, "keydown_handler");
       return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
+    height: "200px",
+    width: "90%",
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
-      return this.input_class || (this.input_class = this["class"]);
+      this.input_class || (this.input_class = this["class"]);
+      return this.input_style || (this.input_style = "height:" + this.height + ";width:" + this.width);
     },
     setValue: function(value) {
       return this.field().html(value);
@@ -1929,7 +1949,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container position-top\'></div>\n  </div>\n  <div class=\'form-view-body\'></div>\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container position-bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container position-top\'></div>\n  </div>\n  '); if(legend){ __p.push('\n  <fieldset>\n    <legend>\n      ', legend ,'\n    </legend>\n    <div class=\'form-view-body\'></div>\n  </fieldset>\n  '); } else { __p.push('\n  <div class=\'form-view-body\'></div>\n  '); } __p.push('\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container position-bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1961,7 +1981,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input name=\'', input_name ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n');}return __p.join('');};
+  Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input name=\'', input_name ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1969,15 +1989,15 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<select id=\'', input_id ,'\' name=\'', input_name ,'\'></select>\n');}return __p.join('');};
+  Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<select id=\'', input_id ,'\' name=\'', input_name ,'\'></select>\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\'></textarea>\n');}return __p.join('');};
+  Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', input_style ,'\'></textarea>\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'text\' />\n');}return __p.join('');};
+  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'text\' />\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

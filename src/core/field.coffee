@@ -15,10 +15,14 @@ Luca.core.Field = Luca.View.extend
   initialize: (@options={})->
     _.extend @, @options
     Luca.View.prototype.initialize.apply(@, arguments)
+
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
+    @helperText ||= ""
+    @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     
   beforeRender: ()->
+    $(@el).addClass('required') if @required
     $(@el).html Luca.templates[ @template ]( @ )
     $( @container ).append( $(@el) )
     @input = $('input', @el)

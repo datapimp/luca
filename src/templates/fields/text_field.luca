@@ -1,3 +1,5 @@
 %label{:for=>"<%= input_id %>"}
   <%= label %>
 %input{:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>"}
+%span.helper-text
+  <%= helperText %>

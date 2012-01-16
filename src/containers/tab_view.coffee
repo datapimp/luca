@@ -4,6 +4,7 @@ Luca.containers.TabView = Luca.containers.CardView.extend
   
   hooks:[
     "before:select"
+    "after:select"
   ]
 
   componentType: 'tab_view'
@@ -16,13 +17,25 @@ Luca.containers.TabView = Luca.containers.CardView.extend
 
   initialize: (@options={})->
     Luca.containers.CardView.prototype.initialize.apply @, arguments
-    _.bindAll @, "select"
-  
+    _.bindAll @, "select", "highlightSelectedTab"
+    @setupHooks( @hooks )
+
+    @bind "after:card:switch", @highlightSelectedTab  
+
   select: (e)->
     me = my = $( e.currentTarget )
+    @trigger "before:select", @
     @activate my.data('target-tab')
+    @trigger "after:select", @
+  
+  highlightSelectedTab: ()->
+    @tabSelectors().removeClass('active-tab')
+    @activeTabSelector().addClass('active-tab')
 
-  tab_container: ()->
+  activeTabSelector: ()->
+    @tabSelectors().eq( @activeCard )
+
+  tabContainer: ()->
     $("##{ @cid }-tab-container>ul")
   
   tab_position: 'top'
@@ -41,10 +54,13 @@ Luca.containers.TabView = Luca.containers.CardView.extend
 
     Luca.containers.CardView.prototype.beforeLayout.apply @, arguments
   
-  tab_selectors: ()-> $( 'li.tab-selector', @tab_container() )
+  tabSelectors: ()-> 
+    $( 'li.tab-selector', @tabContainer() )
 
   createTabSelectors: ()->
     _( @components ).map (component,index)=>
       component.container = "##{ @cid }-tab-panel-container"
       title = component.title || "Tab #{ index + 1 }"
-      @tab_container().append "<li class='tab-selector' data-target-tab='#{ index }'>#{ title }</li>"
+      @tabContainer().append "<li class='tab-selector' data-target-tab='#{ index }'>#{ title }</li>"
+
+

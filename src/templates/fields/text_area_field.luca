@@ -1,4 +1,6 @@
 %label{:for=>"<%= input_id %>"}
   <%= label %>
-%textarea{:id=>"<%= input_id %>",:name=>"<%= input_name %>",:class=>"<%= input_class %>"}
+%textarea{:id=>"<%= input_id %>",:name=>"<%= input_name %>",:class=>"<%= input_class %>",:style=>"<%= input_style %>"}
+%span.helper-text
+  <%= helperText %>
 

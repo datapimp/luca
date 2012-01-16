@@ -119,6 +119,10 @@ html.luca-ui-fullscreen {
     display: block; }
   .luca-ui-tab-view-wrapper .luca-ui-tab-container {
     display: block; }
+    .luca-ui-tab-view-wrapper .luca-ui-tab-container .tab-selector {
+      font-weight: normal; }
+    .luca-ui-tab-view-wrapper .luca-ui-tab-container .tab-selector.active-tab {
+      font-weight: bold; }
     .luca-ui-tab-view-wrapper .luca-ui-tab-container ul {
       padding: 0;
       margin: 0; }
