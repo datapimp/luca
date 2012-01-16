@@ -13,26 +13,23 @@ html.luca-ui-fullscreen {
   list-style-type: none; }
 .luca-ui-viewport li.nav {
   cursor: pointer; }
-.luca-ui-form-view {
+.luca-ui-form-view-wrapper {
   width: 100%;
   float: left;
   display: block;
   clear: both;
   margin: 10px 0px; }
-  .luca-ui-form-view fieldset {
-    border: 1px solid #ddd; }
-    .luca-ui-form-view fieldset legend {
-      text-align: left;
-      padding: 5px;
-      font-size: 0.8em; }
-  .luca-ui-form-view fieldset.label-align-top label {
-    margin: 5px 0px; }
-  .luca-ui-form-view fieldset.label-align-top label, .luca-ui-form-view fieldset.label-align-top input, .luca-ui-form-view fieldset.label-align-top select {
-    display: block; }
-  .luca-ui-form-view form.column-view .luca-ui-field {
-    float: left;
-    margin-right: 10px;
-    padding-right: 5px; }
+
+.luca-ui-form-view .luca-ui-field {
+  margin: 5px;
+  padding: 5px; }
+
+.luca-ui-form-view.label-align-top .luca-ui-field label, .luca-ui-form-view.label-align-top .luca-ui-field input, .luca-ui-form-view.label-align-top .luca-ui-field select, .luca-ui-form-view.label-align-top .luca-ui-field textarea {
+  margin: 5px 0px;
+  display: block; }
+
+.luca-ui-form-view.column-layout .luca-ui-field {
+  float: left; }
 .scrollable-grid-view {
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
   /* Reset overflow value to hidden for all non-IE browsers. */

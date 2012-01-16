@@ -15,6 +15,8 @@ Luca.components.FormView = Luca.core.Container.extend
   events:
     "click .submit-button" : "submitHandler"
     "click .reset-button" : "resetHandler"
+  
+  labelAlign: 'top'
 
   initialize: (@options={})->
     Luca.core.Container.prototype.initialize.apply @, arguments
@@ -40,17 +42,15 @@ Luca.components.FormView = Luca.core.Container.extend
     @trigger "after:submit", @
   
   beforeLayout: ()->
-    @debug "form view before layout"
-    $(@el).html Luca.templates["components/form_view"]( @ )
-
-  prepareLayout: ()->
-    Luca.core.Container.prototype.prepareLayout?.apply @, arguments
-    _( @components ).each (component) =>
-      component.container = $('.form-view-body',@el)
+    Luca.core.Container.prototype.beforeLayout?.apply @, arguments
+    
+    $(@el).addClass( @fieldLayoutClass ) if @fieldLayoutClass
+    $(@el).addClass( "label-align-#{ @labelAlign }")
 
   render: ()->
-    @debug ["form view render", @container, @el]
-    $(@container).append $(@el)
+    wrapper = $(Luca.templates["components/form_view"]( @ ))
+    $('.form-view-body', wrapper).append( $(@el) )
+    $(@container).append( wrapper )
 
   getFields: (attr,value)->
     # do a deep search of all of the nested components

@@ -6,7 +6,8 @@ Luca.containers.PanelView = Luca.core.Container.extend
   
   afterLayout: ()->
     if @template
-      $(@el).html ( Luca.templates || JST )[ @template ]( @ )
+      contents = ( Luca.templates || JST )[ @template ]( @ )
+      $(@el).html(contents) 
 
   render: ()->
     $(@container).append $(@el)

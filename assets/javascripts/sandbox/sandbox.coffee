@@ -6,6 +6,7 @@ $ do ->
     components:[
       name: 'form_view'
       ctype: 'form_view'
+      fieldLayoutClass: 'column-layout'
       components:[
         name: 'column_view'
         debugMode: true
@@ -16,6 +17,10 @@ $ do ->
             ctype: 'text_field'
             label: 'Field One'
             name: 'field_one'
+          ,
+            ctype: 'text_field'
+            label: 'Field THree'
+            name: 'Field THree'
           ]
         ,
           name: 'column_two'

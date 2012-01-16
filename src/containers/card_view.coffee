@@ -20,13 +20,13 @@ Luca.containers.CardView = Luca.core.Container.extend
 
   beforeLayout: ()->
     @cards = _(@components).map (card,cardIndex) =>
-      class: @componentClass 
+      classes: @componentClass 
       style: "display:#{ (if cardIndex is @activeCard then 'block' else 'none' )}"
       id: "#{ @cid }-#{ cardIndex }"
  
   prepareLayout: ()->
     @card_containers = _( @cards ).map (card, index)=>
-      $(@el).append "<div id='#{ card.id }' style='#{ card.style }' class='#{ card.class }' />"
+      $(@el).append Luca.templates["containers/basic"](card) 
       $("##{ card.id }")
 
   prepareComponents: ()-> 

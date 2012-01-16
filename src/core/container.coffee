@@ -117,8 +117,9 @@ Luca.core.Container = Luca.View.extend
     @componentContainers = _( @components ).map (component, index) =>
       @applyPanelConfig.apply @, [ component, index ]
     
-    _( @componentContainers ).each (container)=>
-      $(@el).append Luca.templates["containers/basic"](container) 
+    if @appendContainers
+      _( @componentContainers ).each (container)=>
+        $(@el).append Luca.templates["containers/basic"](container) 
 
   # prepare components is where you would set necessary object
   # attributes on the components themselves.
@@ -126,8 +127,7 @@ Luca.core.Container = Luca.View.extend
     @debug "container prepare components"
     @components = _( @components ).map (object, index) =>
       panel = @componentContainers[ index ]
-      object.container = "##{ panel.id }"
-      object.parentEl = @el
+      object.container = if @appendContainers then "##{ panel.id }" else @el
 
       object
 
@@ -161,7 +161,10 @@ Luca.core.Container = Luca.View.extend
     _(@components).each (component)=> 
       component.getParent = ()=> @ 
       $( component.container ).append $(component.el)
-      component.render()
+      try
+        component.render()
+      catch e
+        @debug "Error Rendering Component: #{ component.cid }", component
 
   #### Container Activation
   # 
@@ -175,20 +178,17 @@ Luca.core.Container = Luca.View.extend
   firstActivation: ()->  
     _( @components ).each (component)=>
       activator = @
-      component?.trigger?.apply @, "first:activation", [component, activator] 
+      #component?.trigger?.apply @, ["first:activation", [component, activator] ]
 
   #### Component Finder Methods
   select: (attribute, value, deep=false)->
     components = _( @components ).map (component)->
       matches = []
       test = component[ attribute ]
-      
-      console.log attribute, value, test
 
       matches.push( component ) if test is value
 
       if deep is true and component.isContainer is true
-        console.log "Going Deep"
         matches.push component.select(attribute, value, true)
 
       _.compact matches
@@ -223,3 +223,5 @@ Luca.core.Container = Luca.View.extend
 
   getRootComponent: ()-> 
     if @rootComponent() then @ else @getParent().getRootComponent()
+
+Luca.register "container", "Luca.core.Container"

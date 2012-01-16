@@ -30,7 +30,6 @@ Luca.components.GridView = Luca.View.extend
     @configure_collection()
 
     @collection.bind "reset", (collection) =>
-      console.log "Collection Reset", @
       @refresh()
       @trigger "after:collection:load", collection
 

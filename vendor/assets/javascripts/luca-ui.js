@@ -760,9 +760,11 @@
       this.componentContainers = _(this.components).map(function(component, index) {
         return _this.applyPanelConfig.apply(_this, [component, index]);
       });
-      return _(this.componentContainers).each(function(container) {
-        return $(_this.el).append(Luca.templates["containers/basic"](container));
-      });
+      if (this.appendContainers) {
+        return _(this.componentContainers).each(function(container) {
+          return $(_this.el).append(Luca.templates["containers/basic"](container));
+        });
+      }
     },
     prepareComponents: function() {
       var _this = this;
@@ -770,8 +772,7 @@
       return this.components = _(this.components).map(function(object, index) {
         var panel;
         panel = _this.componentContainers[index];
-        object.container = "#" + panel.id;
-        object.parentEl = _this.el;
+        object.container = _this.appendContainers ? "#" + panel.id : _this.el;
         return object;
       });
     },
@@ -806,15 +807,18 @@
           return _this;
         };
         $(component.container).append($(component.el));
-        return component.render();
+        try {
+          return component.render();
+        } catch (e) {
+          return _this.debug("Error Rendering Component: " + component.cid, component);
+        }
       });
     },
     firstActivation: function() {
       var _this = this;
       return _(this.components).each(function(component) {
-        var activator, _ref;
-        activator = _this;
-        return component != null ? (_ref = component.trigger) != null ? _ref.apply(_this, "first:activation", [component, activator]) : void 0 : void 0;
+        var activator;
+        return activator = _this;
       });
     },
     select: function(attribute, value, deep) {
@@ -824,10 +828,8 @@
         var matches, test;
         matches = [];
         test = component[attribute];
-        console.log(attribute, value, test);
         if (test === value) matches.push(component);
         if (deep === true && component.isContainer === true) {
-          console.log("Going Deep");
           matches.push(component.select(attribute, value, true));
         }
         return _.compact(matches);
@@ -879,6 +881,8 @@
     }
   });
 
+  Luca.register("container", "Luca.core.Container");
+
 }).call(this);
 (function() {
 
@@ -906,6 +910,7 @@
     },
     componentClass: 'luca-ui-column',
     containerTemplate: "containers/basic",
+    appendContainers: true,
     autoColumnWidths: function() {
       var widths,
         _this = this;
@@ -962,7 +967,7 @@
       var _this = this;
       return this.cards = _(this.components).map(function(card, cardIndex) {
         return {
-          "class": _this.componentClass,
+          classes: _this.componentClass,
           style: "display:" + (cardIndex === _this.activeCard ? 'block' : 'none'),
           id: "" + _this.cid + "-" + cardIndex
         };
@@ -971,7 +976,7 @@
     prepareLayout: function() {
       var _this = this;
       return this.card_containers = _(this.cards).map(function(card, index) {
-        $(_this.el).append("<div id='" + card.id + "' style='" + card.style + "' class='" + card["class"] + "' />");
+        $(_this.el).append(Luca.templates["containers/basic"](card));
         return $("#" + card.id);
       });
     },
@@ -1122,8 +1127,10 @@
       return Luca.core.Container.prototype.initialize.apply(this, arguments);
     },
     afterLayout: function() {
+      var contents;
       if (this.template) {
-        return $(this.el).html((Luca.templates || JST)[this.template](this));
+        contents = (Luca.templates || JST)[this.template](this);
+        return $(this.el).html(contents);
       }
     },
     render: function() {
@@ -1606,6 +1613,7 @@
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
     },
+    labelAlign: 'top',
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.core.Container.prototype.initialize.apply(this, arguments);
@@ -1629,22 +1637,18 @@
       return this.trigger("after:submit", this);
     },
     beforeLayout: function() {
-      this.debug("form view before layout");
-      return $(this.el).html(Luca.templates["components/form_view"](this));
-    },
-    prepareLayout: function() {
-      var _ref,
-        _this = this;
-      if ((_ref = Luca.core.Container.prototype.prepareLayout) != null) {
+      var _ref;
+      if ((_ref = Luca.core.Container.prototype.beforeLayout) != null) {
         _ref.apply(this, arguments);
       }
-      return _(this.components).each(function(component) {
-        return component.container = $('.form-view-body', _this.el);
-      });
+      if (this.fieldLayoutClass) $(this.el).addClass(this.fieldLayoutClass);
+      return $(this.el).addClass("label-align-" + this.labelAlign);
     },
     render: function() {
-      this.debug(["form view render", this.container, this.el]);
-      return $(this.container).append($(this.el));
+      var wrapper;
+      wrapper = $(Luca.templates["components/form_view"](this));
+      $('.form-view-body', wrapper).append($(this.el));
+      return $(this.container).append(wrapper);
     },
     getFields: function(attr, value) {
       var fields;
@@ -1733,7 +1737,6 @@
       _.bindAll(this, "rowDoubleClick", "rowClick");
       this.configure_collection();
       return this.collection.bind("reset", function(collection) {
-        console.log("Collection Reset", _this);
         _this.refresh();
         return _this.trigger("after:collection:load", collection);
       });
@@ -1913,9 +1916,11 @@
         throw "Templates must specify which template / markup to use";
       }
     },
-    render: function() {
-      console.log("Rendering Template", $(this.el), this.markup, this.container);
+    beforeRender: function() {
       return $(this.el).html(this.markup || JST[this.template](this.options));
+    },
+    render: function() {
+      return $(this.container).append(this.el);
     }
   });
 
@@ -1924,7 +1929,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container position-top\'></div>\n  </div>\n  <div class=\'form-view-body\'>\n    <form></form>\n  </div>\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container position-bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container position-top\'></div>\n  </div>\n  <div class=\'form-view-body\'></div>\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container position-bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

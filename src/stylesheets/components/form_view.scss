@@ -1,34 +1,30 @@
-.luca-ui-form-view {
+.luca-ui-form-view-wrapper {
   width: 100%;
   float: left;
   display: block;
   clear: both;
   margin: 10px 0px;
+}
 
-  fieldset {
-    border: 1px solid #ddd;
-    legend {
-      text-align: left;
-      padding: 5px;
-      font-size: 0.8em;
-    }
+.luca-ui-form-view {
+  .luca-ui-field {
+    margin: 5px;
+    padding: 5px;
   }
+}
 
-  fieldset.label-align-top {
-    label {
+.luca-ui-form-view.label-align-top {
+  .luca-ui-field {
+    label, input, select, textarea {
       margin: 5px 0px;
-    }
-
-    label, input, select {
       display: block;
     }
   }
+}
 
-  form.column-view {
-    .luca-ui-field {
-      float: left;
-      margin-right: 10px;
-      padding-right: 5px;
-    }
+.luca-ui-form-view.column-layout {
+  .luca-ui-field {
+    float: left;
   }
 }
+

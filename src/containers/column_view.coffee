@@ -13,6 +13,8 @@ Luca.containers.ColumnView = Luca.core.Container.extend
 
   containerTemplate: "containers/basic"
 
+  appendContainers: true
+
   autoColumnWidths: ()-> 
     widths = []
 
@@ -33,7 +35,7 @@ Luca.containers.ColumnView = Luca.core.Container.extend
     @debug "column_view before components"
     _( @components ).each (component)->
       component.ctype ||= "panel_view"
-
+  
   beforeLayout: ()->
     @debug "column_view before layout"
 

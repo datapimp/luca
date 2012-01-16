@@ -2,6 +2,5 @@
   .form-view-header
     .toolbar-container.position-top
   .form-view-body
-    %form
   .form-view-footer
     .toolbar-container.position-bottom
