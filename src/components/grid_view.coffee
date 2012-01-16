@@ -34,16 +34,6 @@ Luca.components.GridView = Luca.View.extend
       @refresh()
       @trigger "after:collection:load", collection
 
-  ifLoaded: (fn, scope)->
-    scope ||= @
-    fn ||= ()-> true
-
-    @collection.ifLoaded(fn,scope)
-
-  applyFilter: (values, options={auto:true,refresh:true})->
-    console.log "Gridview Applying Filter", values
-    @collection.applyFilter(values, options)
-   
   beforeRender: ()->
     @trigger "before:grid:render", @
 
@@ -58,13 +48,11 @@ Luca.components.GridView = Luca.View.extend
 
     @setDimensions() if @scrollable
 
-    @render_header()
+    @renderHeader()
 
     @emptyMessage()
 
-    @prepare_toolbars() if @toolbars?.length > 0
     $(@container).append $(@el)
-    @render_toolbars() if @toolbars?.length > 0
  
   setDimensions: ()->
     @height ||= 285
@@ -78,7 +66,7 @@ Luca.components.GridView = Luca.View.extend
     $('.grid-view-body', @el).width( @width )
     $('.grid-view-body table', @el).width( @width )
     
-    @set_default_column_widths()
+    @setDefaultColumnWidths()
 
   resize: (newWidth)->
     difference = newWidth - @width
@@ -94,7 +82,7 @@ Luca.components.GridView = Luca.View.extend
         column = $(".column-#{ index }", @el )
         column.width( col.width = col.width + distribution )
 
-  pad_last_column: ()->
+  padLastColumn: ()->
     configured_column_widths = _(@columns).inject (sum, column)->
       sum = (column.width) + sum
     , 0
@@ -102,30 +90,19 @@ Luca.components.GridView = Luca.View.extend
     unused_width = @width - configured_column_widths
 
     if unused_width > 0
-      @last_column().width += unused_width 
+      @lastColumn().width += unused_width 
   
-  set_default_column_widths: ()->
+  setDefaultColumnWidths: ()->
     default_column_width = if @columns.length > 0 then @width / @columns.length else 200
     _( @columns ).each (column)-> column.width ||= default_column_width
-    @pad_last_column()
+    @padLastColumn()
 
-  last_column: ()->
+  lastColumn: ()->
     @columns[ @columns.length - 1 ]
 
   afterRender: ()-> 
     @refresh()   
     @trigger "after:grid:render", @
-
-  prepare_toolbars: ()->
-    @toolbars = _( @toolbars ).map (toolbar)=>
-      toolbar = Luca.util.LazyObject( toolbar )
-      $(@el)[ toolbar.position_action() ] Luca.templates["containers/toolbar_wrapper"](id:@name+'-toolbar-wrapper')
-      toolbar.container = toolbar.renderTo = $("##{@name}-toolbar-wrapper")
-      toolbar
-
-  render_toolbars: ()->
-    _(@toolbars).each (toolbar)=>
-      toolbar.render()
 
   emptyMessage: (text="")->
     text ||= @emptyText
@@ -139,8 +116,17 @@ Luca.components.GridView = Luca.View.extend
 
     if @collection.models.length == 0
       @emptyMessage()
+
+  ifLoaded: (fn, scope)->
+    scope ||= @
+    fn ||= ()-> true
+
+    @collection.ifLoaded(fn,scope)
+
+  applyFilter: (values, options={auto:true,refresh:true})->
+    @collection.applyFilter(values, options)
   
-  render_header: ()->
+  renderHeader: ()->
     @trigger "before:render:header"
 
     headers = _(@columns).map (column,column_index) => 

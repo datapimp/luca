@@ -13,44 +13,50 @@ Luca.components.FormView = Luca.core.Container.extend
   ]
 
   events:
-    "click .submit-button" : "submit_handler"
-    "click .reset-button" : "reset_handler"
-
-  container_type: 'column_view'
+    "click .submit-button" : "submitHandler"
+    "click .reset-button" : "resetHandler"
 
   initialize: (@options={})->
     Luca.core.Container.prototype.initialize.apply @, arguments
+    
+    @debug "form view initialized"
 
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
 
-    if @toolbar and !@toolbars
-      @toolbars = [
-        ctype: 'form_button_toolbar'
-        position: 'bottom'
-        id: "#{ @name }-toolbar-0"
-        name: "#{ @name }_toolbar"
-        includeReset: true
-      ]
+    _.bindAll @, "submitHandler", "resetHandler" 
 
-    _.bindAll @, "submit_handler", "reset_handler" 
+  resetHandler: (e)->
+    me = my = $( e.currentTarget )
+    @trigger "before:reset", @
+    @reset()
+    @trigger "after:reset", @
+
+  submitHandler: (e)->
+    me = my = $( e.currentTarget )
+    @trigger "before:submit", @
+    @submit()
+    @trigger "after:submit", @
   
-  prepareLayout: ()->
-    _( @components ).each (component,index)->
-      component.renderTo = component.container = @el
+  beforeLayout: ()->
+    @debug "form view before layout"
+    $(@el).html Luca.templates["components/form_view"]( @ )
 
-  beforeRender: ()->
-    Luca.core.Container.beforeRender?.apply @, arguments
-    @el.addClass( @form_class ) if @form_class
-      
+  prepareLayout: ()->
+    Luca.core.Container.prototype.prepareLayout?.apply @, arguments
+    _( @components ).each (component) =>
+      component.container = $('.form-view-body',@el)
+
   render: ()->
+    @debug ["form view render", @container, @el]
     $(@container).append $(@el)
 
   getFields: (attr,value)->
-    fields = _.flatten _.compact _( @components ).map (fs)-> 
-      fs?.getFields?.apply(fs)
-    
+    # do a deep search of all of the nested components
+    # to find the fields
+    fields = @select("isField", true, true)
+
     # if an optional attribute and value pair is passed
     # then you can limit the array of fields even further
     if fields.length > 0 and attr and value
@@ -91,18 +97,6 @@ Luca.components.FormView = Luca.core.Container.extend
     , {}
 
   submit: ()-> @current_model.set( @getValues() )
-
-  reset_handler: (e)->
-    me = my = $( e.currentTarget )
-    @trigger "before:reset", @
-    @reset()
-    @trigger "after:reset", @
-
-  submit_handler: (e)->
-    me = my = $( e.currentTarget )
-    @trigger "before:submit", @
-    @submit()
-    @trigger "after:submit", @
 
   currentModel: ()-> @current_model
 

@@ -12,7 +12,7 @@ Luca.modules.Toolbars =
       toolbar.ctype ||= "toolbar"
       toolbar = Luca.util.LazyObject( toolbar )
       $(@el)[ toolbar.position_action() ] Luca.templates["containers/toolbar_wrapper"](id:@name+'-toolbar-wrapper')
-      toolbar.container = toolbar.renderTo = $("##{@name || @cid}-toolbar-wrapper")
+      toolbar.container = $("##{@name || @cid}-toolbar-wrapper")
       toolbar
 
   render_toolbars: ()->

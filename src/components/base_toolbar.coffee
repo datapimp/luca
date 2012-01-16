@@ -14,7 +14,7 @@ Luca.components.Toolbar = Luca.core.Container.extend
 
   prepareComponents: ()->
     _( @components ).each (component)=> 
-      component.container = component.renderTo = @el
+      component.container = @el
 
   prepareLayout: ()-> 
     true

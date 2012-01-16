@@ -1,8 +1,10 @@
 Luca.core.Field = Luca.View.extend
   className: 'luca-ui-text-field luca-ui-field'
   
+  isField: true
+
   template: 'fields/text_field'
-  
+   
   labelAlign: 'top'
 
   hooks:[

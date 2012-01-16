@@ -30,12 +30,9 @@ Luca.containers.CardView = Luca.core.Container.extend
       $("##{ card.id }")
 
   prepareComponents: ()-> 
-    @assignToCards()
-  
-  assignToCards: ()->
     @components = _( @components ).map (object,index)=>
       card = @cards[index]
-      object.container = object.renderTo = "##{ card.id }"
+      object.container = "##{ card.id }"
       object
   
   activeComponent: ()-> 

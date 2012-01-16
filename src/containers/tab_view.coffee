@@ -37,14 +37,14 @@ Luca.containers.TabView = Luca.containers.CardView.extend
       $(@el).append Luca.templates["containers/tab_view"](@)
       $(@el).append Luca.templates["containers/tab_selector_container"](@)
     
-    @create_tab_selectors()
+    @createTabSelectors()
 
     Luca.containers.CardView.prototype.beforeLayout.apply @, arguments
   
   tab_selectors: ()-> $( 'li.tab-selector', @tab_container() )
 
-  create_tab_selectors: ()->
+  createTabSelectors: ()->
     _( @components ).map (component,index)=>
-      component.renderTo = "##{ @cid }-tab-panel-container"
+      component.container = "##{ @cid }-tab-panel-container"
       title = component.title || "Tab #{ index + 1 }"
       @tab_container().append "<li class='tab-selector' data-target-tab='#{ index }'>#{ title }</li>"

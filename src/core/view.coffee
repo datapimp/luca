@@ -28,8 +28,7 @@ Luca.View.extend = (definition)->
 
   _base ||= ()->
     return unless $(@container) and $(@el) 
-      if $(@el).html() isnt "" and $(@container).html() is ""
-        $(@container).append( $(@el) )
+      $(@container).append( $(@el) )
 
   definition.render = ()->
     if @deferrable
@@ -54,13 +53,16 @@ Luca.View.extend = (definition)->
 
     else
       @trigger "before:render", @
-      do ()=>
-        _base.apply(@, arguments)
+      _base.apply(@, arguments)
       @trigger "after:render", @
 
   Luca.View.originalExtend.apply @, [definition]
 
 _.extend Luca.View.prototype,
+  debug: ()->
+    return unless @debugMode or window.LucaDebugMode?
+    console.log [(@name || @cid),message] for message in arguments
+
   trigger: (@event)->
     Backbone.View.prototype.trigger.apply @, arguments
 

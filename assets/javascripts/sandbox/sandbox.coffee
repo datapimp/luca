@@ -4,38 +4,28 @@ $ do ->
     name: 'viewport'
     fullscreen: false
     components:[
-      ctype: 'column_view'
-      layout: '20/80'
+      name: 'form_view'
+      ctype: 'form_view'
       components:[
-        ctype: 'navigation'
-        name:'demo_navigation'
-      ,
-        ctype: 'card_view'
-        name: 'demo_container',
-        afterCardSwitch: (previous,active)->
-          console.log "Switched To", @activeComponent().ctype
-          if ctype = @activeComponent().ctype 
-            content = Luca.templates[ "features/#{ ctype }" ]?()
-            $('#feature-explanation').html(content).show()
-
-        afterRender: (component)->
-          @afterCardSwitch.apply(@)
-        afterInitialize: (component)->
-          _.bindAll component, "afterRender", "afterCardSwitch"
+        name: 'column_view'
+        debugMode: true
+        ctype: 'column_view'
         components:[
-          ctype : 'card_demo'
+          name: 'column_one'
+          components:[
+            ctype: 'text_field'
+            label: 'Field One'
+            name: 'field_one'
+          ]
         ,
-          ctype : 'column_demo'
-        ,
-          ctype : 'split_demo'
-        ,
-          ctype : 'tabbed_demo'
-        ,
-          ctype: 'grid_demo'
-        ,
-          ctype : 'form_demo'
-
+          name: 'column_two'
+          components:[
+            ctype: 'text_field'
+            label: 'Field Two'
+            name: 'field_two'
+          ]
         ]
       ]
     ]
+
   main.render()

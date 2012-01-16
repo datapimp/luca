@@ -9,6 +9,8 @@ Luca.core.Container = Luca.View.extend
   className: 'luca-ui-container'
 
   componentClass: 'luca-ui-panel'
+  
+  isContainer: true
 
   hooks:[
     "before:components",
@@ -24,7 +26,6 @@ Luca.core.Container = Luca.View.extend
 
   initialize: (@options={})->
     _.extend @, @options
-    _.bindAll @, "index_components"
 
     @setupHooks( Luca.core.Container.prototype.hooks )
 
@@ -76,15 +77,19 @@ Luca.core.Container = Luca.View.extend
   # firstActivation() 
   #
   beforeRender: ()->
+    @debug "container before render"
     @doLayout() 
     @doComponents()
 
   doLayout: ()->
+    @debug "container do layout"
     @trigger "before:layout", @
     @prepareLayout()    
     @trigger "after:layout", @
 
   doComponents: ()->
+    @debug "container do components"
+
     @trigger "before:components", @, @components
     @prepareComponents()
     @createComponents()
@@ -96,6 +101,7 @@ Luca.core.Container = Luca.View.extend
     
     style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height
     style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width
+    style_declarations.push "float: #{ panel.float }" if panel.float
     
     config = 
       classes: @componentClass
@@ -107,24 +113,27 @@ Luca.core.Container = Luca.View.extend
   # its components.  Minimally you will want to set the
   # container property on each component.
   prepareLayout: ()->
-    @component_containers = _( @components ).map (component, componentIndex) =>
-      @applyPanelConfig.apply @, [ component, componentIndex ]
-
-    _( @component_containers ).each (container)=>
+    @debug "container prepare layout"
+    @componentContainers = _( @components ).map (component, index) =>
+      @applyPanelConfig.apply @, [ component, index ]
+    
+    _( @componentContainers ).each (container)=>
       $(@el).append Luca.templates["containers/basic"](container) 
 
   # prepare components is where you would set necessary object
   # attributes on the components themselves.
   prepareComponents: ()-> 
+    @debug "container prepare components"
     @components = _( @components ).map (object, index) =>
-      panel = @component_containers[ index ]
-      object.container = object.renderTo = "##{ panel.id }"
+      panel = @componentContainers[ index ]
+      object.container = "##{ panel.id }"
       object.parentEl = @el
 
       object
 
   createComponents: ()->
-    map = @component_index = 
+    @debug "container create components"
+    map = @componentIndex = 
       name_index: {}
       cid_index: {}
 
@@ -133,8 +142,8 @@ Luca.core.Container = Luca.View.extend
 
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround
-      if !component.renderTo and component.options.renderTo
-        component.container = component.renderTo = component.options.renderTo
+      if !component.container and component.options.container
+        component.container = component.options.container
       
       if map and component.cid?
         map.cid_index[ component.cid ] = index
@@ -143,13 +152,15 @@ Luca.core.Container = Luca.View.extend
         map.name_index[ component.name ] = index
 
       component
-  
+    
+    @debug "components created", @components
   # Trigger the Rendering Pipeline process on all of the nested
   # components
   renderComponents: (@debugMode="")->
+    @debug "container render components"
     _(@components).each (component)=> 
       component.getParent = ()=> @ 
-      $(component.renderTo).append $(component.el)
+      $( component.container ).append $(component.el)
       component.render()
 
   #### Container Activation
@@ -167,13 +178,29 @@ Luca.core.Container = Luca.View.extend
       component?.trigger?.apply @, "first:activation", [component, activator] 
 
   #### Component Finder Methods
+  select: (attribute, value, deep=false)->
+    components = _( @components ).map (component)->
+      matches = []
+      test = component[ attribute ]
+      
+      console.log attribute, value, test
+
+      matches.push( component ) if test is value
+
+      if deep is true and component.isContainer is true
+        console.log "Going Deep"
+        matches.push component.select(attribute, value, true)
+
+      _.compact matches
+
+    _.flatten( components )
 
   findComponentByName: (name, deep=false)-> @findComponent name, "name_index", deep
-  
+
   findComponentById: (id, deep=false)-> @findComponent id, "cid_index", deep
 
   findComponent: (needle, haystack="name", deep=false)->
-    position = @component_index?[ haystack ][ needle ]
+    position = @componentIndex?[ haystack ][ needle ]
     component = @components?[ position ]
 
     return component if component

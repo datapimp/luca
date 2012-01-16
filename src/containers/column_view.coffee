@@ -1,4 +1,4 @@
-Luca.containers.ColumnView = Luca.containers.SplitView.extend
+Luca.containers.ColumnView = Luca.core.Container.extend
   componentType: 'column_view'
 
   className: 'luca-ui-column-view'
@@ -6,25 +6,41 @@ Luca.containers.ColumnView = Luca.containers.SplitView.extend
   components: []
 
   initialize: (@options={})->
-    Luca.containers.SplitView.prototype.initialize.apply @,arguments
+    Luca.core.Container.prototype.initialize.apply @, arguments
+    @setColumnWidths()
   
   componentClass: 'luca-ui-column'
 
-  autoLayout: ()-> 
-    _( @components.length ).times ()=> parseInt( 100 / @components.length )
+  containerTemplate: "containers/basic"
+
+  autoColumnWidths: ()-> 
+    widths = []
+
+    _( @components.length ).times ()=> 
+      widths.push( parseInt( 100 / @components.length ) )
+
+    widths
 
   setColumnWidths: ()->
     @columnWidths = if @layout? 
       _( @layout.split('/') ).map((v)-> parseInt(v) ) 
     else 
-      @autoLayout()
+      @autoColumnWidths()
 
     @columnWidths = _( @columnWidths ).map (val)-> "#{ val }%"
+  
+  beforeComponents: ()->
+    @debug "column_view before components"
+    _( @components ).each (component)->
+      component.ctype ||= "panel_view"
 
   beforeLayout: ()->
-    @setColumnWidths()
+    @debug "column_view before layout"
 
     _(@columnWidths).each (width,index) =>
-      @component_containers[index].style = "float:left; width: #{ width };" 
+      @components[index].float = "left"
+      @components[index].width = width
+
+    Luca.core.Container.prototype.beforeLayout?.apply @, arguments
 
 Luca.register 'column_view', "Luca.containers.ColumnView"

@@ -3,6 +3,8 @@ Luca.containers.SplitView = Luca.core.Container.extend
 
   componentType: 'split_view'
 
+  containerTemplate: 'containers/basic'
+
   className: 'luca-ui-split-view' 
   
   componentClass: 'luca-ui-panel'
