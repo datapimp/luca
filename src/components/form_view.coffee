@@ -4,12 +4,14 @@ Luca.components.FormView = Luca.core.Container.extend
   className: 'luca-ui-form-view'
 
   hooks:[
-    "before:submit",
-    "before:reset",
-    "before:load",
-    "after:submit",
-    "after:reset",
+    "before:submit"
+    "before:reset"
+    "before:load"
+    "after:submit"
+    "after:reset"
     "after:load"
+    "after:submit:success"
+    "after:submit:error"
   ]
 
   events:
@@ -138,17 +140,23 @@ Luca.components.FormView = Luca.core.Container.extend
   
   defaultSaveOptions:
     success: (model, response, xhr)->
-      console.log "Successful Save Response", response
+      @trigger "after:submit:success", model, response
     error: ()->
-      console.log "Error Save", arguments
+      console.log "Save Error", arguments
+      @trigger "after:submit:error", model, response
 
   submit: (save=true, saveOptions)-> 
     saveOptions ||= @defaultSaveOptions
+    
+    _.bind saveOptions.success, @
+    _.bind saveOptions.error, @
+
     @current_model.set( @getValues() )
     return unless save
     @current_model.save( @current_model.toJSON(), saveOptions )
 
-  currentModel: ()-> @current_model
+  currentModel: ()-> 
+    @current_model
 
   setLegend: (@legend)->
     $('fieldset legend', @el).first().html(@legend)

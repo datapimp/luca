@@ -1634,7 +1634,7 @@
   Luca.components.FormView = Luca.core.Container.extend({
     tagName: 'form',
     className: 'luca-ui-form-view',
-    hooks: ["before:submit", "before:reset", "before:load", "after:submit", "after:reset", "after:load"],
+    hooks: ["before:submit", "before:reset", "before:load", "after:submit", "after:reset", "after:load", "after:submit:success", "after:submit:error"],
     events: {
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
@@ -1774,15 +1774,18 @@
     },
     defaultSaveOptions: {
       success: function(model, response, xhr) {
-        return console.log("Successful Save Response", response);
+        return this.trigger("after:submit:success", model, response);
       },
       error: function() {
-        return console.log("Error Save", arguments);
+        console.log("Save Error", arguments);
+        return this.trigger("after:submit:error", model, response);
       }
     },
     submit: function(save, saveOptions) {
       if (save == null) save = true;
       saveOptions || (saveOptions = this.defaultSaveOptions);
+      _.bind(saveOptions.success, this);
+      _.bind(saveOptions.error, this);
       this.current_model.set(this.getValues());
       if (!save) return;
       return this.current_model.save(this.current_model.toJSON(), saveOptions);
