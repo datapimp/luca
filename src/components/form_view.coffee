@@ -57,8 +57,12 @@ Luca.components.FormView = Luca.core.Container.extend
     $(@el).addClass( "label-align-#{ @labelAlign }")
   
   render: ()->
+    @debug "Rendering Form View #{ @name }"
     wrapper = $(Luca.templates["components/form_view"]( @ ))
     $('.form-view-body', wrapper).append( $(@el) )
+    
+    @debug ["Appending ", wrapper, $( @container )]
+
     $(@container).append( wrapper )
 
   wrapper: ()->

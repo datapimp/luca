@@ -6,7 +6,6 @@ Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
   includeReset: false
   
   render: ()->
-    console.log "Rendering Toolbar", $(@el), $(@container)
     $(@container).append(@el)
 
   initialize: (@options={})->

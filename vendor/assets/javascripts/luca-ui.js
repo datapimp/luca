@@ -1241,7 +1241,6 @@
       });
     },
     render: function() {
-      console.log("Rendering Toolbar", $(this.el), $(this.container));
       return $(this.container).append(this.el);
     }
   });
@@ -1584,7 +1583,6 @@
     position: 'bottom',
     includeReset: false,
     render: function() {
-      console.log("Rendering Toolbar", $(this.el), $(this.container));
       return $(this.container).append(this.el);
     },
     initialize: function(options) {
@@ -1663,8 +1661,10 @@
     },
     render: function() {
       var wrapper;
+      this.debug("Rendering Form View " + this.name);
       wrapper = $(Luca.templates["components/form_view"](this));
       $('.form-view-body', wrapper).append($(this.el));
+      this.debug(["Appending ", wrapper, $(this.container)]);
       return $(this.container).append(wrapper);
     },
     wrapper: function() {

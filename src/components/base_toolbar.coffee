@@ -11,7 +11,6 @@ Luca.components.Toolbar = Luca.core.Container.extend
       component.container = @el
 
   render: ()->
-    console.log "Rendering Toolbar", $(@el), $(@container)
     $(@container).append(@el)
 
 
