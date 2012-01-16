@@ -27,7 +27,16 @@ Luca.components.FormView = Luca.core.Container.extend
 
     @setupHooks( @hooks )
 
-    _.bindAll @, "submitHandler", "resetHandler" 
+    if @toolbar is true 
+      @toolbars = [
+        ctype: 'form_button_toolbar'
+        includeReset: true
+        position: 'bottom'
+      ]
+
+      @bind "after:render", _.once @renderToolbars
+
+    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars" 
 
   resetHandler: (e)->
     me = my = $( e.currentTarget )
@@ -51,6 +60,18 @@ Luca.components.FormView = Luca.core.Container.extend
     wrapper = $(Luca.templates["components/form_view"]( @ ))
     $('.form-view-body', wrapper).append( $(@el) )
     $(@container).append( wrapper )
+
+  wrapper: ()->
+    $(@el).parents('.luca-ui-form-view-wrapper')
+
+  toolbarContainers: (position="bottom")->
+    $(".toolbar-container.#{ position }", @wrapper() ).first()
+
+  renderToolbars: ()->
+    _( @toolbars ).each (toolbar)=>
+      toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
+      toolbar = Luca.util.LazyObject(toolbar)
+      toolbar.render()
 
   getFields: (attr,value)->
     # do a deep search of all of the nested components
@@ -86,7 +107,11 @@ Luca.components.FormView = Luca.core.Container.extend
 
   clear: ()->
     @current_model = undefined
-    _( @getFields() ).each (field)-> field.setValue('')
+    _( @getFields() ).each (field)=> 
+      try
+        field.setValue('')
+      catch e
+        console.log "Error Clearing", @, field
 
   getValues: (reject_blank=false,skip_buttons=true)->
     _( @getFields() ).inject (memo,field)->

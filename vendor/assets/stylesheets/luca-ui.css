@@ -23,6 +23,9 @@ html.luca-ui-fullscreen {
 .luca-ui-form-view .luca-ui-field {
   margin: 5px;
   padding: 5px; }
+  .luca-ui-form-view .luca-ui-field .helper-text {
+    font-size: 0.75em;
+    font-color: #ccc; }
 
 .luca-ui-form-view.label-align-top .luca-ui-field label, .luca-ui-form-view.label-align-top .luca-ui-field input, .luca-ui-form-view.label-align-top .luca-ui-field select, .luca-ui-form-view.label-align-top .luca-ui-field textarea {
   margin: 5px 0px;

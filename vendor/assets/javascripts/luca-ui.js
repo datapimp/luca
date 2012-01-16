@@ -1230,17 +1230,9 @@
   Luca.components.Toolbar = Luca.core.Container.extend({
     className: 'luca-ui-toolbar',
     position: 'bottom',
-    componentType: 'toolbar',
     initialize: function(options) {
       this.options = options != null ? options : {};
       return Luca.core.Container.prototype.initialize.apply(this, arguments);
-    },
-    afterInitialize: function() {
-      var _ref;
-      if ((_ref = Luca.core.Container.prototype.afterInitialize) != null) {
-        _ref.apply(this, arguments);
-      }
-      return this.container = "" + this.id + "-wrapper";
     },
     prepareComponents: function() {
       var _this = this;
@@ -1248,18 +1240,9 @@
         return component.container = _this.el;
       });
     },
-    prepareLayout: function() {
-      return true;
-    },
     render: function() {
+      console.log("Rendering Toolbar", $(this.el), $(this.container));
       return $(this.container).append(this.el);
-    },
-    position_action: function() {
-      if (this.position === "top") {
-        return "prepend";
-      } else {
-        return "append";
-      }
     }
   });
 
@@ -1600,6 +1583,10 @@
     className: 'luca-ui-form-toolbar',
     position: 'bottom',
     includeReset: false,
+    render: function() {
+      console.log("Rendering Toolbar", $(this.el), $(this.container));
+      return $(this.container).append(this.el);
+    },
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.components.Toolbar.prototype.initialize.apply(this, arguments);
@@ -1640,7 +1627,17 @@
       this.debug("form view initialized");
       this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
-      return _.bindAll(this, "submitHandler", "resetHandler");
+      if (this.toolbar === true) {
+        this.toolbars = [
+          {
+            ctype: 'form_button_toolbar',
+            includeReset: true,
+            position: 'bottom'
+          }
+        ];
+        this.bind("after:render", _.once(this.renderToolbars));
+      }
+      return _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
     },
     resetHandler: function(e) {
       var me, my;
@@ -1669,6 +1666,21 @@
       wrapper = $(Luca.templates["components/form_view"](this));
       $('.form-view-body', wrapper).append($(this.el));
       return $(this.container).append(wrapper);
+    },
+    wrapper: function() {
+      return $(this.el).parents('.luca-ui-form-view-wrapper');
+    },
+    toolbarContainers: function(position) {
+      if (position == null) position = "bottom";
+      return $(".toolbar-container." + position, this.wrapper()).first();
+    },
+    renderToolbars: function() {
+      var _this = this;
+      return _(this.toolbars).each(function(toolbar) {
+        toolbar.container = $("#" + _this.cid + "-" + toolbar.position + "-toolbar-container");
+        toolbar = Luca.util.LazyObject(toolbar);
+        return toolbar.render();
+      });
     },
     getFields: function(attr, value) {
       var fields;
@@ -1705,9 +1717,14 @@
       return this.loadModel(this.current_model);
     },
     clear: function() {
+      var _this = this;
       this.current_model = void 0;
       return _(this.getFields()).each(function(field) {
-        return field.setValue('');
+        try {
+          return field.setValue('');
+        } catch (e) {
+          return console.log("Error Clearing", _this, field);
+        }
       });
     },
     getValues: function(reject_blank, skip_buttons) {
@@ -1949,7 +1966,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container position-top\'></div>\n  </div>\n  '); if(legend){ __p.push('\n  <fieldset>\n    <legend>\n      ', legend ,'\n    </legend>\n    <div class=\'form-view-body\'></div>\n  </fieldset>\n  '); } else { __p.push('\n  <div class=\'form-view-body\'></div>\n  '); } __p.push('\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container position-bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\' id=\'', cid ,'-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container top\' id=\'', cid ,'-top-toolbar-container\'></div>\n  </div>\n  '); if(legend){ __p.push('\n  <fieldset>\n    <legend>\n      ', legend ,'\n    </legend>\n    <div class=\'form-view-body\'></div>\n  </fieldset>\n  '); } else { __p.push('\n  <div class=\'form-view-body\'></div>\n  '); } __p.push('\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container bottom\' id=\'', cid ,'-bottom-toolbar-container\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

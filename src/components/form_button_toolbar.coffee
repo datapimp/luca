@@ -4,6 +4,10 @@ Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
   position: 'bottom'
 
   includeReset: false
+  
+  render: ()->
+    console.log "Rendering Toolbar", $(@el), $(@container)
+    $(@container).append(@el)
 
   initialize: (@options={})->
     Luca.components.Toolbar.prototype.initialize.apply @, arguments

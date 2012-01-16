@@ -1,6 +1,6 @@
-.luca-ui-form-view-wrapper
+.luca-ui-form-view-wrapper{:id=>"<%= cid %>-wrapper"}
   .form-view-header
-    .toolbar-container.position-top
+    .toolbar-container.top{:id=>"<%= cid %>-top-toolbar-container"}
   <% if(legend){ %>
   %fieldset
     %legend
@@ -10,4 +10,4 @@
   .form-view-body
   <% } %>
   .form-view-footer
-    .toolbar-container.position-bottom
+    .toolbar-container.bottom{:id=>"<%= cid %>-bottom-toolbar-container"}
