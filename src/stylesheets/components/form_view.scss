@@ -6,6 +6,24 @@
   margin: 10px 0px;
 }
 
+.form-view-footer {
+  .toolbar-container {
+    float: left;
+    width: 100%;
+    clear: both;
+    display: block;
+    .luca-ui-form-toolbar {
+      width: 50%;
+      display: block;
+      margin: 0px auto;
+      .luca-ui-field {
+        float: left;
+      }
+    }
+  }
+}
+
+
 .luca-ui-form-view {
   .luca-ui-field {
     margin: 5px;

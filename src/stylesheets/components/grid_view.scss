@@ -99,3 +99,21 @@
   }
 
 }
+
+
+.grid-view-footer {
+  .toolbar-container {
+    float: left;
+    width: 100%;
+    clear: both;
+    display: block;
+    .luca-ui-toolbar {
+      display: block;
+      float: right;
+      clear: right;
+      .luca-ui-field {
+        float: left;
+      }
+    }
+  }
+}

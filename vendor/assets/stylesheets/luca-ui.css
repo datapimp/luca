@@ -20,6 +20,18 @@ html.luca-ui-fullscreen {
   clear: both;
   margin: 10px 0px; }
 
+.form-view-footer .toolbar-container {
+  float: left;
+  width: 100%;
+  clear: both;
+  display: block; }
+  .form-view-footer .toolbar-container .luca-ui-form-toolbar {
+    width: 50%;
+    display: block;
+    margin: 0px auto; }
+    .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field {
+      float: left; }
+
 .luca-ui-form-view .luca-ui-field {
   margin: 5px;
   padding: 5px; }
@@ -101,6 +113,18 @@ html.luca-ui-fullscreen {
     padding: 5px; }
   .scrollable-grid-view tbody.scrollable td {
     padding: 5px; }
+
+.grid-view-footer .toolbar-container {
+  float: left;
+  width: 100%;
+  clear: both;
+  display: block; }
+  .grid-view-footer .toolbar-container .luca-ui-toolbar {
+    display: block;
+    float: right;
+    clear: right; }
+    .grid-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
+      float: left; }
 .luca-ui-toolbar-wrapper {
   clear: both;
   display: block;
