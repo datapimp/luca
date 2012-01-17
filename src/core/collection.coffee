@@ -69,6 +69,8 @@ _.extend Luca.Collection.prototype,
     return @reset(@data) if @local is true
     
     return @load_from_cache() if @cached_models().length and not options.refresh
+    
+    console.log "Fetching From The Server via options.refresh" if options.refresh
 
     @fetching = true
 

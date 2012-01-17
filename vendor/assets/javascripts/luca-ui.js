@@ -657,6 +657,9 @@
       if (this.cached_models().length && !options.refresh) {
         return this.load_from_cache();
       }
+      if (options.refresh) {
+        console.log("Fetching From The Server via options.refresh");
+      }
       this.fetching = true;
       url = _.isFunction(this.url) ? this.url() : this.url;
       if (!(url && url.length > 1)) return true;
