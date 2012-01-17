@@ -133,15 +133,21 @@ Luca.components.FormView = Luca.core.Container.extend
   getValues: (reject_blank=false,skip_buttons=true)->
     _( @getFields() ).inject (memo,field)->
       value = field.getValue() 
-      unless ((skip_buttons and field.ctype is "button_field") or (reject_blank and _.isBlank(value)))
-        memo[ field.input_name || name ] = value
+      
+      skip = false
+      skip = true if skip_buttons and field.ctype is "button_field"
+      skip = true if reject_blank and _.isBlank(value)
+      skip = true if field.input_name is "id" and _.isBlank(value)
+
+      memo[ field.input_name || name ] = value unless skip
+
       memo
     , {}
   
   submit_success_handler: (model, response, xhr)->
     console.log "Submit Success", response
     @trigger "after:submit", @, model, response
-
+    
     if response and response.success
       @trigger "after:submit:success", @, model, response
     else
@@ -149,8 +155,8 @@ Luca.components.FormView = Luca.core.Container.extend
 
   submit_fatal_error_handler: ()->
     console.log "Save Error", arguments
-    @trigger "after:submit", @, model
-    @trigger "after:submit:fatal_error", model, response
+    @trigger.apply ["after:submit", @].concat(arguments)
+    @trigger.apply ["after:submit:fatal_error", @].concat(arguments)
 
   submit: (save=true, saveOptions={})-> 
     _.bindAll @, "submit_success_handler", "submit_fatal_error_handler"

@@ -1781,11 +1781,13 @@
       if (reject_blank == null) reject_blank = false;
       if (skip_buttons == null) skip_buttons = true;
       return _(this.getFields()).inject(function(memo, field) {
-        var value;
+        var skip, value;
         value = field.getValue();
-        if (!((skip_buttons && field.ctype === "button_field") || (reject_blank && _.isBlank(value)))) {
-          memo[field.input_name || name] = value;
-        }
+        skip = false;
+        if (skip_buttons && field.ctype === "button_field") skip = true;
+        if (reject_blank && _.isBlank(value)) skip = true;
+        if (field.input_name === "id" && _.isBlank(value)) skip = true;
+        if (!skip) memo[field.input_name || name] = value;
         return memo;
       }, {});
     },
@@ -1800,8 +1802,8 @@
     },
     submit_fatal_error_handler: function() {
       console.log("Save Error", arguments);
-      this.trigger("after:submit", this, model);
-      return this.trigger("after:submit:fatal_error", model, response);
+      this.trigger.apply(["after:submit", this].concat(arguments));
+      return this.trigger.apply(["after:submit:fatal_error", this].concat(arguments));
     },
     submit: function(save, saveOptions) {
       if (save == null) save = true;
