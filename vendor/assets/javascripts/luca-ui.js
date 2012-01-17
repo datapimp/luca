@@ -657,6 +657,7 @@
       if (this.cached_models().length && !options.refresh) {
         return this.load_from_cache();
       }
+      this.reset();
       if (options.refresh) {
         console.log("Fetching From The Server via options.refresh");
       }
@@ -682,12 +683,13 @@
       if (!this.fetching) return this.fetch();
     },
     parse: function(response) {
+      var models;
       this.trigger("after:response");
-      if (this.root != null) {
-        return response[this.root];
-      } else {
-        return response;
+      models = this.root != null ? response[this.root] : response;
+      if (this.model_cache_key) {
+        Luca.Collection.cache(this.model_cache_keys, models);
       }
+      return models;
     }
   });
 
@@ -1583,9 +1585,17 @@
       this.filter = Luca.Collection.baseParams();
       if (_.isFunction(this.url)) {
         return this.url = _.wrap(this.url, function(fn) {
-          var val;
+          var existing_params, new_val, parts, queryString, val;
           val = fn.apply(_this);
-          return "" + val + "?" + (_this.queryString());
+          parts = val.split('?');
+          if (parts.length > 1) existing_params = _.last(parts);
+          queryString = _this.queryString();
+          if (existing_params && val.match(existing_params)) {
+            queryString = queryString.replace(existing_params, '');
+          }
+          new_val = "" + val + "?" + queryString;
+          if (new_val.match(/\?$/)) new_val = new_val.replace(/\?$/, '');
+          return new_val;
         });
       } else {
         url = this.url;
@@ -1602,7 +1612,7 @@
         memo.push(str);
         return memo;
       }, []);
-      return parts.join("&");
+      return _.uniq(parts).join("&");
     },
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};

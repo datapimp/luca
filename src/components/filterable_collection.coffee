@@ -9,18 +9,29 @@ Luca.components.FilterableCollection = Luca.Collection.extend
       console.log "The use of base_url is deprecated"
 
     @filter = Luca.Collection.baseParams()
-
+    
     if _.isFunction(@url)
       @url = _.wrap @url, (fn)=>
         val = fn.apply @ 
-        "#{ val }?#{ @queryString() }"
+        parts = val.split('?')
 
+        existing_params = _.last(parts) if parts.length > 1
+
+        queryString = @queryString()
+        
+        if existing_params and val.match(existing_params)
+          queryString = queryString.replace( existing_params, '')
+
+        new_val = "#{ val }?#{ queryString }"
+        new_val = new_val.replace(/\?$/,'') if new_val.match(/\?$/)
+
+        new_val
     else
       url = @url
       params = @queryString()
-
+      
       @url = _([url,params]).compact().join("?")
-  
+
   queryString: ()->
     parts = _( @filter ).inject (memo, value, key)=>
       str = "#{ key }=#{ value }"
@@ -28,7 +39,7 @@ Luca.components.FilterableCollection = Luca.Collection.extend
       memo
     , [] 
 
-    parts.join("&")
+    _.uniq(parts).join("&")
 
   applyFilter: (filter={}, options={auto:true,refresh:true})->
     _.extend @filter, filter

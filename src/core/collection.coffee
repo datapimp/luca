@@ -70,6 +70,7 @@ _.extend Luca.Collection.prototype,
     
     return @load_from_cache() if @cached_models().length and not options.refresh
     
+    @reset()
     console.log "Fetching From The Server via options.refresh" if options.refresh
 
     @fetching = true
@@ -96,4 +97,9 @@ _.extend Luca.Collection.prototype,
 
   parse: (response)-> 
     @trigger "after:response"
-    if @root? then response[ @root ] else response
+    models = if @root? then response[ @root ] else response
+    
+    if @model_cache_key
+      Luca.Collection.cache( @model_cache_keys, models)
+
+    models
