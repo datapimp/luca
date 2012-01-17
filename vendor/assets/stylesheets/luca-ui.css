@@ -20,18 +20,6 @@ html.luca-ui-fullscreen {
   clear: both;
   margin: 10px 0px; }
 
-.form-view-footer .toolbar-container {
-  float: left;
-  width: 100%;
-  clear: both;
-  display: block; }
-  .form-view-footer .toolbar-container .luca-ui-form-toolbar {
-    width: 50%;
-    display: block;
-    margin: 0px auto; }
-    .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field {
-      float: left; }
-
 .luca-ui-form-view .luca-ui-field {
   margin: 5px;
   padding: 5px; }
@@ -45,6 +33,18 @@ html.luca-ui-fullscreen {
 
 .luca-ui-form-view.column-layout .luca-ui-field {
   float: left; }
+
+.form-view-footer .toolbar-container {
+  float: left;
+  width: 100%;
+  clear: both;
+  display: block; }
+  .form-view-footer .toolbar-container .luca-ui-form-toolbar {
+    width: 50%;
+    display: block;
+    margin: 0px auto; }
+    .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field {
+      float: left; }
 .scrollable-grid-view {
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
   /* Reset overflow value to hidden for all non-IE browsers. */

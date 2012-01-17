@@ -11,6 +11,7 @@ Luca.components.FormView = Luca.core.Container.extend
     "after:reset"
     "after:load"
     "after:submit:success"
+    "after:submit:fatal_error"
     "after:submit:error"
   ]
 
@@ -52,7 +53,6 @@ Luca.components.FormView = Luca.core.Container.extend
     me = my = $( e.currentTarget )
     @trigger "before:submit", @
     @submit()
-    @trigger "after:submit", @
   
   beforeLayout: ()->
     Luca.core.Container.prototype.beforeLayout?.apply @, arguments
@@ -138,19 +138,26 @@ Luca.components.FormView = Luca.core.Container.extend
       memo
     , {}
   
-  defaultSaveOptions:
-    success: (model, response, xhr)->
-      @trigger "after:submit:success", model, response
-    error: ()->
-      console.log "Save Error", arguments
-      @trigger "after:submit:error", model, response
+  submit_success_handler: (model, response, xhr)->
+    console.log "Submit Success", response
+    @trigger "after:submit", @, model, response
 
-  submit: (save=true, saveOptions)-> 
-    saveOptions ||= @defaultSaveOptions
+    if response and response.success
+      @trigger "after:submit:success", @, model, response
+    else
+      @trigger "after:submit:error", @, model, response
+
+  submit_fatal_error_handler: ()->
+    console.log "Save Error", arguments
+    @trigger "after:submit", @, model
+    @trigger "after:submit:fatal_error", model, response
+
+  submit: (save=true, saveOptions={})-> 
+    _.bindAll @, "submit_success_handler", "submit_fatal_error_handler"
+
+    saveOptions.success ||= @submit_success_handler
+    saveOptions.error ||= @submit_fatal_error_handler
     
-    _.bind saveOptions.success, @
-    _.bind saveOptions.error, @
-
     @current_model.set( @getValues() )
     return unless save
     @current_model.save( @current_model.toJSON(), saveOptions )

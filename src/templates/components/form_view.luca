@@ -5,8 +5,10 @@
   %fieldset
     %legend
       <%= legend %>
+    .form-view-flash-container
     .form-view-body
   <% } else { %>
+  %ul.form-view-flash-container
   .form-view-body
   <% } %>
   .form-view-footer
