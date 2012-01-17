@@ -27,10 +27,34 @@ _.extend Luca.Collection.prototype,
     if @cached
       @model_cache_key = if _.isFunction( @cached ) then @cached() else @cached  
     
+       # if we are to register with some global collection management system
+    if @registerWith
+      @registerAs ||= @cached
+      @registerAs = if _.isFunction( @registerAs ) then @registerAs() else @registerAs
+
+      @bind "before:fetch", ()=>
+        @register( @registerWith, key, @)
+ 
     if _.isArray(@data) and @data.length > 0
       @local = true
 
     Backbone.Collection.prototype.initialize.apply @, [models, @options] 
+  
+  # Collection Manager Registry
+  #
+  # If this collection is to be registered with some global collection
+  # tracker, such as App.collections, then we will register ourselves
+  # with this registry, by storing ourselves with a key
+  #
+  # To automatically register a collection with the registry, instantiate
+  # it with the registerWith property, which can either be a reference to
+  # the manager itself, or a string in case the manager isn't available
+  # at compile time
+  register: (collectionManager, key, collection)->
+    if _.isString( collectionManager )
+      collectionManager = Luca.util.nestedValue( collectionManager, window )
+
+    collectionManager[ key ] = collection
 
   load_from_cache: ()->
     return unless @model_cache_key
@@ -41,6 +65,7 @@ _.extend Luca.Collection.prototype,
 
   fetch: (options={})->
     @trigger "before:fetch", @
+
     return @reset(@data) if @local is true
     
     return @load_from_cache() if @cached_models().length and not options.refresh

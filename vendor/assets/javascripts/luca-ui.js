@@ -620,13 +620,27 @@
 
   _.extend(Luca.Collection.prototype, {
     initialize: function(models, options) {
+      var _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (this.cached) {
         this.model_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
       }
+      if (this.registerWith) {
+        this.registerAs || (this.registerAs = this.cached);
+        this.registerAs = _.isFunction(this.registerAs) ? this.registerAs() : this.registerAs;
+        this.bind("before:fetch", function() {
+          return _this.register(_this.registerWith, key, _this);
+        });
+      }
       if (_.isArray(this.data) && this.data.length > 0) this.local = true;
       return Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
+    },
+    register: function(collectionManager, key, collection) {
+      if (_.isString(collectionManager)) {
+        collectionManager = Luca.util.nestedValue(collectionManager, window);
+      }
+      return collectionManager[key] = collection;
     },
     load_from_cache: function() {
       if (!this.model_cache_key) return;
@@ -869,6 +883,10 @@
       var names;
       names = _(this.components).pluck('name');
       return _(names).indexOf(name);
+    },
+    activeComponent: function() {
+      if (!this.activeItem) return this;
+      return this.components[this.activeItem];
     },
     componentElements: function() {
       return $("." + this.componentClass, this.el);

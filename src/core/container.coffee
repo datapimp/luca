@@ -213,6 +213,10 @@ Luca.core.Container = Luca.View.extend
   indexOf: (name)->
     names = _( @components ).pluck('name')
     _( names ).indexOf(name)
+  
+  activeComponent: ()->
+    return @ unless @activeItem
+    return @components[ @activeItem ]
 
   componentElements: ()-> $(".#{ @componentClass }", @el)
  
