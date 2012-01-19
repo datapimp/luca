@@ -640,7 +640,11 @@
       if (_.isString(collectionManager)) {
         collectionManager = Luca.util.nestedValue(collectionManager, window);
       }
-      return collectionManager[key] = collection;
+      if (!collectionManager) throw "Could not register with collection manager";
+      if (_.isFunction(collectionManager.add)) {
+        return collectionManager.add(key, collection);
+      }
+      if (_.isObject(collect)) return collectionManager[key] = collection;
     },
     load_from_cache: function() {
       if (!this.model_cache_key) return;
@@ -836,6 +840,8 @@
         try {
           return component.render();
         } catch (e) {
+          console.log(e);
+          console.log("Component", component);
           throw "Error Rendering Component " + (component.name || component.cid);
         }
       });

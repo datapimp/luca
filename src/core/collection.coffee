@@ -53,9 +53,15 @@ _.extend Luca.Collection.prototype,
   register: (collectionManager, key, collection)->
     if _.isString( collectionManager )
       collectionManager = Luca.util.nestedValue( collectionManager, window )
+    
+    throw "Could not register with collection manager" unless collectionManager 
+    
+    if _.isFunction( collectionManager.add )
+      return collectionManager.add(key, collection)
 
-    collectionManager[ key ] = collection
-
+    if _.isObject( collect)
+      collectionManager[ key ] = collection
+    
   load_from_cache: ()->
     return unless @model_cache_key
     @reset @cached_models()

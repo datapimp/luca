@@ -165,6 +165,8 @@ Luca.core.Container = Luca.View.extend
       try
         component.render()
       catch e
+        console.log e
+        console.log "Component", component
         throw "Error Rendering Component #{ component.name || component.cid }"
 
   #### Container Activation
