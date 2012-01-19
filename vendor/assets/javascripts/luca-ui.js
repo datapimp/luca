@@ -629,14 +629,25 @@
       if (this.registerWith) {
         this.registerAs || (this.registerAs = this.cached);
         this.registerAs = _.isFunction(this.registerAs) ? this.registerAs() : this.registerAs;
-        this.bind("before:fetch", function() {
-          return _this.register(_this.registerWith, key, _this);
+        this.bind("after:initialize", function() {
+          console.log("Attempting To Register with", _this.registerWith, _this.registerAs);
+          return _this.register(_this.registerWith, _this.registerAs, _this);
         });
       }
       if (_.isArray(this.data) && this.data.length > 0) this.local = true;
-      return Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
+      Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
+      return this.trigger("after:initialize");
     },
     register: function(collectionManager, key, collection) {
+      if (collectionManager == null) collectionManager = "";
+      if (key == null) key = "";
+      console.log("Registering Collection With", arguments);
+      if (!(key.length > 1)) {
+        throw "Can not register with a collection manager without a key";
+      }
+      if (!(collectionManager.length > 1)) {
+        throw "Can not register with a collection manager without a valid collection manager";
+      }
       if (_.isString(collectionManager)) {
         collectionManager = Luca.util.nestedValue(collectionManager, window);
       }

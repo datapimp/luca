@@ -32,13 +32,16 @@ _.extend Luca.Collection.prototype,
       @registerAs ||= @cached
       @registerAs = if _.isFunction( @registerAs ) then @registerAs() else @registerAs
 
-      @bind "before:fetch", ()=>
-        @register( @registerWith, key, @)
+      @bind "after:initialize", ()=>
+        console.log "Attempting To Register with", @registerWith, @registerAs
+        @register( @registerWith, @registerAs, @)
  
     if _.isArray(@data) and @data.length > 0
       @local = true
 
     Backbone.Collection.prototype.initialize.apply @, [models, @options] 
+
+    @trigger "after:initialize"
   
   # Collection Manager Registry
   #
@@ -50,7 +53,12 @@ _.extend Luca.Collection.prototype,
   # it with the registerWith property, which can either be a reference to
   # the manager itself, or a string in case the manager isn't available
   # at compile time
-  register: (collectionManager, key, collection)->
+  register: (collectionManager="", key="", collection)->
+    console.log "Registering Collection With", arguments
+    
+    throw "Can not register with a collection manager without a key" unless key.length > 1
+    throw "Can not register with a collection manager without a valid collection manager" unless collectionManager.length > 1
+
     if _.isString( collectionManager )
       collectionManager = Luca.util.nestedValue( collectionManager, window )
     
