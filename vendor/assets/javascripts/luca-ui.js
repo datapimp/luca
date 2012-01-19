@@ -840,9 +840,8 @@
         try {
           return component.render();
         } catch (e) {
-          console.log(e);
-          console.log("Component", component);
-          throw "Error Rendering Component " + (component.name || component.cid);
+          console.log("Error Rendering Component " + (component.name || component.cid), component);
+          throw e;
         }
       });
     },
