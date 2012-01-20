@@ -180,7 +180,7 @@ Luca.core.Container = Luca.View.extend
   firstActivation: ()->  
     _( @components ).each (component)=>
       activator = @
-      #component?.trigger?.apply @, ["first:activation", [component, activator] ]
+      component?.trigger?.apply component, ["first:activation", [component, activator] ]
 
   #### Component Finder Methods
   select: (attribute, value, deep=false)->

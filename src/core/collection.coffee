@@ -33,7 +33,6 @@ _.extend Luca.Collection.prototype,
       @registerAs = if _.isFunction( @registerAs ) then @registerAs() else @registerAs
 
       @bind "after:initialize", ()=>
-        console.log "Attempting To Register with", @registerWith, @registerAs
         @register( @registerWith, @registerAs, @)
  
     if _.isArray(@data) and @data.length > 0
@@ -54,7 +53,6 @@ _.extend Luca.Collection.prototype,
   # the manager itself, or a string in case the manager isn't available
   # at compile time
   register: (collectionManager="", key="", collection)->
-    console.log "Registering Collection With", arguments
     
     throw "Can not register with a collection manager without a key" unless key.length > 1
     throw "Can not register with a collection manager without a valid collection manager" unless collectionManager.length > 1
@@ -85,7 +83,6 @@ _.extend Luca.Collection.prototype,
     return @load_from_cache() if @cached_models().length and not options.refresh
     
     @reset()
-    console.log "Fetching From The Server via options.refresh" if options.refresh
 
     @fetching = true
 
@@ -97,6 +94,7 @@ _.extend Luca.Collection.prototype,
       Backbone.Collection.prototype.fetch.apply @, arguments
     catch e
       console.log "Error in Collection.fetch", e
+      throw e
 
   ifLoaded: (fn, scope=@)->
     if @models.length > 0 and not @fetching

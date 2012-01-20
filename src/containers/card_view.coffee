@@ -46,6 +46,10 @@ Luca.containers.CardView = Luca.core.Container.extend
     @findComponentByName(name,true)
   
   activate: (index, silent=false, callback)->
+    if _.isFunction(silent)
+      silent = false
+      callback = silent
+
     return if index is @activeCard
 
     previous = @activeComponent()
@@ -61,7 +65,7 @@ Luca.containers.CardView = Luca.core.Container.extend
     
     _( @card_containers ).each (container)-> container.hide()
 
-    if current and not current.previously_activated
+    unless current.previously_activated
         current.trigger "first:activation" unless silent
         current.previously_activated = true
 

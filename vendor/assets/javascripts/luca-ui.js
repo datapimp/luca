@@ -630,7 +630,6 @@
         this.registerAs || (this.registerAs = this.cached);
         this.registerAs = _.isFunction(this.registerAs) ? this.registerAs() : this.registerAs;
         this.bind("after:initialize", function() {
-          console.log("Attempting To Register with", _this.registerWith, _this.registerAs);
           return _this.register(_this.registerWith, _this.registerAs, _this);
         });
       }
@@ -641,7 +640,6 @@
     register: function(collectionManager, key, collection) {
       if (collectionManager == null) collectionManager = "";
       if (key == null) key = "";
-      console.log("Registering Collection With", arguments);
       if (!(key.length > 1)) {
         throw "Can not register with a collection manager without a key";
       }
@@ -673,16 +671,14 @@
         return this.load_from_cache();
       }
       this.reset();
-      if (options.refresh) {
-        console.log("Fetching From The Server via options.refresh");
-      }
       this.fetching = true;
       url = _.isFunction(this.url) ? this.url() : this.url;
       if (!(url && url.length > 1)) return true;
       try {
         return Backbone.Collection.prototype.fetch.apply(this, arguments);
       } catch (e) {
-        return console.log("Error in Collection.fetch", e);
+        console.log("Error in Collection.fetch", e);
+        throw e;
       }
     },
     ifLoaded: function(fn, scope) {
@@ -859,8 +855,9 @@
     firstActivation: function() {
       var _this = this;
       return _(this.components).each(function(component) {
-        var activator;
-        return activator = _this;
+        var activator, _ref;
+        activator = _this;
+        return component != null ? (_ref = component.trigger) != null ? _ref.apply(component, ["first:activation", [component, activator]]) : void 0 : void 0;
       });
     },
     select: function(attribute, value, deep) {
@@ -1049,6 +1046,10 @@
     activate: function(index, silent, callback) {
       var current, previous;
       if (silent == null) silent = false;
+      if (_.isFunction(silent)) {
+        silent = false;
+        callback = silent;
+      }
       if (index === this.activeCard) return;
       previous = this.activeComponent();
       current = this.getComponent(index);
@@ -1061,7 +1062,7 @@
       _(this.card_containers).each(function(container) {
         return container.hide();
       });
-      if (current && !current.previously_activated) {
+      if (!current.previously_activated) {
         if (!silent) current.trigger("first:activation");
         current.previously_activated = true;
       }
