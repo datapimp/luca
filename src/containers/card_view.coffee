@@ -45,6 +45,9 @@ Luca.containers.CardView = Luca.core.Container.extend
   find: (name)-> 
     @findComponentByName(name,true)
   
+  firstActivation: ()->
+    @activeComponent().trigger "first:activation", @, @activeComponent()
+
   activate: (index, silent=false, callback)->
     if _.isFunction(silent)
       silent = false

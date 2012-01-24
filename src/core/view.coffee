@@ -47,8 +47,7 @@ Luca.View.extend = (definition)->
       if @immediate_trigger is true
         @deferrable.fetch()
       else
-        @bind @deferrable_trigger, ()=>
-          console.log "Caught #{ @deferrable_trigger } on #{ @name || @cid }"
+        @bind @deferrable_trigger, _.once ()=>
           @deferrable.fetch()
 
     else

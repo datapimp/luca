@@ -178,8 +178,6 @@ Luca.core.Container = Luca.View.extend
   # will trigger first:activation on the components as they become
   # displayed.
   firstActivation: ()->  
-    return unless @relayFirstActivation
-
     _( @components ).each (component)=>
       activator = @
       

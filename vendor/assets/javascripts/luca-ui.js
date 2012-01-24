@@ -530,10 +530,9 @@
         if (this.immediate_trigger === true) {
           return this.deferrable.fetch();
         } else {
-          return this.bind(this.deferrable_trigger, function() {
-            console.log("Caught " + _this.deferrable_trigger + " on " + (_this.name || _this.cid));
+          return this.bind(this.deferrable_trigger, _.once(function() {
             return _this.deferrable.fetch();
-          });
+          }));
         }
       } else {
         this.trigger("before:render", this);
@@ -857,7 +856,6 @@
     },
     firstActivation: function() {
       var _this = this;
-      if (!this.relayFirstActivation) return;
       return _(this.components).each(function(component) {
         var activator, _ref;
         activator = _this;
@@ -1063,6 +1061,9 @@
     },
     find: function(name) {
       return this.findComponentByName(name, true);
+    },
+    firstActivation: function() {
+      return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
       var current, previous;
@@ -1438,12 +1439,15 @@
     hooks: ["after:select"],
     className: 'luca-ui-select-field luca-ui-field',
     template: "fields/select_field",
+    includeBlank: true,
+    blankValue: '',
+    blankText: 'Select One',
     initialize: function(options) {
       var _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
-      _.bindAll(this, "change_handler");
+      _.bindAll(this, "change_handler", "populateOptions");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       if ((_ref = this.collection) != null ? _ref.data : void 0) {
         this.valueField || (this.valueField = "id");
@@ -1451,10 +1455,11 @@
         this.parseData();
       }
       try {
-        return this.configure_collection();
+        this.configure_collection();
       } catch (e) {
-        return console.log("Error Configuring Collection", this, e.message);
+        console.log("Error Configuring Collection", this, e.message);
       }
+      return this.collection.bind("reset", this.populateOptions);
     },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
@@ -1473,29 +1478,19 @@
       });
     },
     change_handler: function(e) {
-      var me, my;
-      return me = my = $(e.currentTarget);
-    },
-    includeBlank: true,
-    blankValue: '',
-    blankText: 'Select One',
-    beforeRender: function() {
-      var _ref;
-      if ((_ref = Luca.core.Field.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      return this.input = $('select', this.el);
+      return true;
     },
     afterRender: function() {
-      this.input.html('');
-      if (this.includeBlank) {
-        this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
-      }
-      return this.populateOptions();
+      this.input = $('select', this.el);
+      return this.collection.trigger("reset");
     },
     populateOptions: function() {
       var _ref,
         _this = this;
+      this.input.html('');
+      if (this.includeBlank) {
+        this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
+      }
       if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
         return this.collection.each(function(model) {
           var display, option, selected, value;

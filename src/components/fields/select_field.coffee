@@ -12,10 +12,16 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
   template: "fields/select_field"
 
+  includeBlank: true
+
+  blankValue: ''
+
+  blankText: 'Select One'
+ 
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
-    _.bindAll @, "change_handler"
+    _.bindAll @, "change_handler", "populateOptions"
 
     Luca.core.Field.prototype.initialize.apply @, arguments
     
@@ -28,6 +34,8 @@ Luca.fields.SelectField = Luca.core.Field.extend
       @configure_collection()
     catch e
       console.log "Error Configuring Collection", @, e.message
+
+    @collection.bind "reset", @populateOptions
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 
@@ -48,27 +56,18 @@ Luca.fields.SelectField = Luca.core.Field.extend
       hash
 
   change_handler: (e)->
-    me = my = $( e.currentTarget )
-  
-  includeBlank: true
-
-  blankValue: ''
-
-  blankText: 'Select One'
-  
-  beforeRender: ()->
-    Luca.core.Field.prototype.beforeRender?.apply @, arguments
-    @input = $('select', @el)
-
+    true 
+ 
   afterRender: ()->
+    @input = $('select', @el)
+    @collection.trigger("reset")
+  
+  populateOptions: ()->
     @input.html('')
     
     if @includeBlank
       @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
-    @populateOptions()
-  
-  populateOptions: ()->
     if @collection?.each?
       @collection.each (model) =>
         value = model.get( @valueField )
