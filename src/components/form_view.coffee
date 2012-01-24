@@ -72,16 +72,6 @@ Luca.components.FormView = Luca.core.Container.extend
   render: ()->
     $( @container ).append( $(@el) )
 
-  __render: ()->
-    @debug "Rendering Form View #{ @name }"
-    wrapper = $(Luca.templates["components/form_view"]( @ ))
-    
-    $('.form-view-body', wrapper).append( $(@el).html() )
-    
-    @debug ["Appending ", wrapper, $( @container )]
-
-    $(@container).append( wrapper )
-
   wrapper: ()->
     $(@el).parents('.luca-ui-form-view-wrapper')
 
@@ -93,6 +83,9 @@ Luca.components.FormView = Luca.core.Container.extend
       toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
       toolbar = Luca.util.LazyObject(toolbar)
       toolbar.render()
+  
+  getField: (name)->
+    _( @getFields('name', name) ).first()
 
   getFields: (attr,value)->
     # do a deep search of all of the nested components

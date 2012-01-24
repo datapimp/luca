@@ -907,10 +907,11 @@
       }
     },
     eachComponent: function(fn, deep) {
+      var _this = this;
       if (deep == null) deep = true;
       return _(this.components).each(function(component) {
         var _ref;
-        fn.apply(component, [fn, deep]);
+        fn.apply(component, [component]);
         if (deep) {
           return component != null ? (_ref = component.eachComponent) != null ? _ref.apply(component, [fn, deep]) : void 0 : void 0;
         }
@@ -1447,7 +1448,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
-      _.bindAll(this, "change_handler", "populateOptions");
+      _.bindAll(this, "change_handler", "populateOptions", "resetOptions");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       if ((_ref = this.collection) != null ? _ref.data : void 0) {
         this.valueField || (this.valueField = "id");
@@ -1459,6 +1460,7 @@
       } catch (e) {
         console.log("Error Configuring Collection", this, e.message);
       }
+      this.collection.bind("before:fetch", this.resetOptions);
       return this.collection.bind("reset", this.populateOptions);
     },
     afterInitialize: function() {
@@ -1481,18 +1483,27 @@
       return true;
     },
     afterRender: function() {
+      var _ref, _ref2;
       this.input = $('select', this.el);
-      return this.collection.trigger("reset");
+      if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
+        return this.populateOptions();
+      } else {
+        return this.collection.trigger("reset");
+      }
     },
-    populateOptions: function() {
-      var _ref,
-        _this = this;
+    resetOptions: function() {
       this.input.html('');
       if (this.includeBlank) {
-        this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
+        return this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
+    },
+    populateOptions: function() {
+      var currentValue, _ref,
+        _this = this;
+      currentValue = this.getValue();
+      this.resetOptions();
       if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
-        return this.collection.each(function(model) {
+        this.collection.each(function(model) {
           var display, option, selected, value;
           value = model.get(_this.valueField);
           display = model.get(_this.displayField);
@@ -1501,6 +1512,8 @@
           return _this.input.append(option);
         });
       }
+      if (currentValue) this.setValue(currentValue);
+      return this.trigger("after:populate:options", this);
     }
   });
 
@@ -1756,14 +1769,6 @@
     render: function() {
       return $(this.container).append($(this.el));
     },
-    __render: function() {
-      var wrapper;
-      this.debug("Rendering Form View " + this.name);
-      wrapper = $(Luca.templates["components/form_view"](this));
-      $('.form-view-body', wrapper).append($(this.el).html());
-      this.debug(["Appending ", wrapper, $(this.container)]);
-      return $(this.container).append(wrapper);
-    },
     wrapper: function() {
       return $(this.el).parents('.luca-ui-form-view-wrapper');
     },
@@ -1778,6 +1783,9 @@
         toolbar = Luca.util.LazyObject(toolbar);
         return toolbar.render();
       });
+    },
+    getField: function(name) {
+      return _(this.getFields('name', name)).first();
     },
     getFields: function(attr, value) {
       var fields;

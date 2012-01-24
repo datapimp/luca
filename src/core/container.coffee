@@ -222,8 +222,8 @@ Luca.core.Container = Luca.View.extend
   # and any nested containers in those components, recursively
   # pass false as the second argument to skip the deep recursion
   eachComponent: (fn, deep=true)->
-    _( @components ).each (component)->
-      fn.apply component, [fn,deep]
+    _( @components ).each (component)=>
+      fn.apply component, [component]
       component?.eachComponent?.apply component, [fn,deep] if deep
   
   indexOf: (name)->
