@@ -531,6 +531,7 @@
           return this.deferrable.fetch();
         } else {
           return this.bind(this.deferrable_trigger, function() {
+            console.log("Caught " + _this.deferrable_trigger + " on " + (_this.name || _this.cid));
             return _this.deferrable.fetch();
           });
         }
@@ -786,7 +787,7 @@
       }
       if (panel.float) style_declarations.push("float: " + panel.float);
       return config = {
-        classes: this.componentClass,
+        classes: (panel != null ? panel.classes : void 0) || this.componentClass,
         id: "" + this.cid + "-" + panelIndex,
         style: style_declarations.join(';')
       };
@@ -854,10 +855,18 @@
     },
     firstActivation: function() {
       var _this = this;
+      if (!this.relayFirstActivation) return;
       return _(this.components).each(function(component) {
         var activator, _ref;
         activator = _this;
-        return component != null ? (_ref = component.trigger) != null ? _ref.apply(component, ["first:activation", [component, activator]]) : void 0 : void 0;
+        if ((component != null ? component.previously_activated : void 0) !== true) {
+          if (component != null) {
+            if ((_ref = component.trigger) != null) {
+              _ref.apply(component, ["first:activation", [component, activator]]);
+            }
+          }
+          return component.previously_activated = true;
+        }
       });
     },
     select: function(attribute, value, deep) {
@@ -896,6 +905,16 @@
         });
         return sub_container != null ? typeof sub_container.findComponent === "function" ? sub_container.findComponent(needle, haystack, true) : void 0 : void 0;
       }
+    },
+    eachComponent: function(fn, deep) {
+      if (deep == null) deep = true;
+      return _(this.components).each(function(component) {
+        var _ref;
+        fn.apply(component, [fn, deep]);
+        if (deep) {
+          return component != null ? (_ref = component.eachComponent) != null ? _ref.apply(component, [fn, deep]) : void 0 : void 0;
+        }
+      });
     },
     indexOf: function(name) {
       var names;
@@ -1430,7 +1449,8 @@
         this.parseData();
       }
       try {
-        return this.configure_collection();
+        this.configure_collection();
+        return _.bindAll(this, "afterCollectionReset");
       } catch (e) {
         return console.log("Error Configuring Collection", this, e.message);
       }
@@ -1466,22 +1486,25 @@
       return this.input = $('select', this.el);
     },
     afterRender: function() {
-      var _ref,
-        _this = this;
+      var _ref;
       this.input.html('');
       if (this.includeBlank) {
         this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
-      if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
-        return this.collection.each(function(model) {
-          var display, option, selected, value;
-          value = model.get(_this.valueField);
-          display = model.get(_this.displayField);
-          if (_this.selected && value === _this.selected) selected = "selected";
-          option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-          return _this.input.append(option);
-        });
+      if ((_ref = this.collection) != null ? _ref.models.length : void 0) {
+        return this.afterCollectionReset(this.collection);
       }
+    },
+    afterCollectionReset: function(collection) {
+      var _this = this;
+      return collection != null ? collection.each(function(model) {
+        var display, option, selected, value;
+        value = model.get(_this.valueField);
+        display = model.get(_this.displayField);
+        if (_this.selected && value === _this.selected) selected = "selected";
+        option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
+        return $(_this.input).append(option);
+      }) : void 0;
     }
   });
 

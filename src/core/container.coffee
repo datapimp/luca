@@ -104,7 +104,7 @@ Luca.core.Container = Luca.View.extend
     style_declarations.push "float: #{ panel.float }" if panel.float
     
     config = 
-      classes: @componentClass
+      classes: panel?.classes || @componentClass
       id: "#{ @cid }-#{ panelIndex }"
       style: style_declarations.join(';')
 
@@ -178,9 +178,16 @@ Luca.core.Container = Luca.View.extend
   # will trigger first:activation on the components as they become
   # displayed.
   firstActivation: ()->  
+    return unless @relayFirstActivation
+
     _( @components ).each (component)=>
       activator = @
-      component?.trigger?.apply component, ["first:activation", [component, activator] ]
+      
+      # apply the first:activation trigger on the component, in the context of the component
+      # passing as arguments the component itself, and the component doing the activation
+      unless component?.previously_activated is true 
+        component?.trigger?.apply component, ["first:activation", [component, activator] ]
+        component.previously_activated = true
 
   #### Component Finder Methods
   select: (attribute, value, deep=false)->
@@ -197,9 +204,11 @@ Luca.core.Container = Luca.View.extend
 
     _.flatten( components )
 
-  findComponentByName: (name, deep=false)-> @findComponent name, "name_index", deep
+  findComponentByName: (name, deep=false)-> 
+    @findComponent(name, "name_index", deep)
 
-  findComponentById: (id, deep=false)-> @findComponent id, "cid_index", deep
+  findComponentById: (id, deep=false)-> 
+    @findComponent(id, "cid_index", deep)
 
   findComponent: (needle, haystack="name", deep=false)->
     position = @componentIndex?[ haystack ][ needle ]
@@ -210,6 +219,14 @@ Luca.core.Container = Luca.View.extend
     if deep is true
       sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
       sub_container?.findComponent?(needle, haystack, true)
+  
+  # run a function for each component in this container
+  # and any nested containers in those components, recursively
+  # pass false as the second argument to skip the deep recursion
+  eachComponent: (fn, deep=true)->
+    _( @components ).each (component)->
+      fn.apply component, [fn,deep]
+      component?.eachComponent?.apply component, [fn,deep] if deep
   
   indexOf: (name)->
     names = _( @components ).pluck('name')
