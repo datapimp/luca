@@ -26,11 +26,9 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
     try
       @configure_collection()
-      _.bindAll @, "afterCollectionReset"
     catch e
       console.log "Error Configuring Collection", @, e.message
-    
-    
+
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
@@ -68,14 +66,15 @@ Luca.fields.SelectField = Luca.core.Field.extend
     if @includeBlank
       @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
-    @afterCollectionReset(@collection) if @collection?.models.length
+    @populateOptions()
   
-  afterCollectionReset: (collection)->
-    collection?.each (model) =>
-      value = model.get( @valueField )
-      display = model.get( @displayField )
-      selected = "selected" if @selected and value is @selected
-      option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
-      $(@input).append( option )
+  populateOptions: ()->
+    if @collection?.each?
+      @collection.each (model) =>
+        value = model.get( @valueField )
+        display = model.get( @displayField )
+        selected = "selected" if @selected and value is @selected
+        option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
+        @input.append( option )
 
 Luca.register "select_field", "Luca.fields.SelectField"

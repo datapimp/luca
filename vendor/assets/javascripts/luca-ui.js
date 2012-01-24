@@ -1451,8 +1451,7 @@
         this.parseData();
       }
       try {
-        this.configure_collection();
-        return _.bindAll(this, "afterCollectionReset");
+        return this.configure_collection();
       } catch (e) {
         return console.log("Error Configuring Collection", this, e.message);
       }
@@ -1488,25 +1487,25 @@
       return this.input = $('select', this.el);
     },
     afterRender: function() {
-      var _ref;
       this.input.html('');
       if (this.includeBlank) {
         this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
-      if ((_ref = this.collection) != null ? _ref.models.length : void 0) {
-        return this.afterCollectionReset(this.collection);
-      }
+      return this.populateOptions();
     },
-    afterCollectionReset: function(collection) {
-      var _this = this;
-      return collection != null ? collection.each(function(model) {
-        var display, option, selected, value;
-        value = model.get(_this.valueField);
-        display = model.get(_this.displayField);
-        if (_this.selected && value === _this.selected) selected = "selected";
-        option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-        return $(_this.input).append(option);
-      }) : void 0;
+    populateOptions: function() {
+      var _ref,
+        _this = this;
+      if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
+        return this.collection.each(function(model) {
+          var display, option, selected, value;
+          value = model.get(_this.valueField);
+          display = model.get(_this.displayField);
+          if (_this.selected && value === _this.selected) selected = "selected";
+          option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
+          return _this.input.append(option);
+        });
+      }
     }
   });
 
