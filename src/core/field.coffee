@@ -25,8 +25,10 @@ Luca.core.Field = Luca.View.extend
   beforeRender: ()->
     $(@el).addClass('required') if @required
     $(@el).html Luca.templates[ @template ]( @ )
-    $( @container ).append( $(@el) )
     @input = $('input', @el)
+  
+  render: ()->
+    $( @container ).append( $(@el) )
 
   setValue: (value)-> 
     @input.attr('value', value)

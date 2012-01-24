@@ -7,9 +7,13 @@ Luca.components.FormView = Luca.core.Container.extend
     "before:submit"
     "before:reset"
     "before:load"
+    "before:load:new"
+    "before:load:existing"
     "after:submit"
     "after:reset"
     "after:load"
+    "after:load:new"
+    "after:load:existing"
     "after:submit:success"
     "after:submit:fatal_error"
     "after:submit:error"
@@ -111,6 +115,9 @@ Luca.components.FormView = Luca.core.Container.extend
     fields = @getFields()
     
     @trigger "before:load", @, @current_model
+    if @current_model
+      event = "before:load:#{ (if @current_model.isNew() then "new" else "existing")}"
+      @trigger event, @, @current_model
     
     _( fields ).each (field) =>
       field_name = field.input_name || field.name
@@ -118,12 +125,17 @@ Luca.components.FormView = Luca.core.Container.extend
       field?.setValue( value ) unless field.readOnly is true
     
     @trigger "after:load", @, @current_model
+
+    if @current_model
+      @trigger "after:load:#{ (if @current_model.isNew() then "new" else "existing")}", @, @current_model
+  
   
   reset: ()-> 
     @loadModel( @current_model )
 
   clear: ()->
-    @current_model = undefined
+    @current_model = if @defaultModel? then @defaultModel() else undefined
+
     _( @getFields() ).each (field)=> 
       try
         field.setValue('')
@@ -145,7 +157,6 @@ Luca.components.FormView = Luca.core.Container.extend
     , {}
   
   submit_success_handler: (model, response, xhr)->
-    console.log "Submit Success", response
     @trigger "after:submit", @, model, response
     
     if response and response.success
@@ -154,7 +165,6 @@ Luca.components.FormView = Luca.core.Container.extend
       @trigger "after:submit:error", @, model, response
 
   submit_fatal_error_handler: ()->
-    console.log "Save Error", arguments
     @trigger.apply ["after:submit", @].concat(arguments)
     @trigger.apply ["after:submit:fatal_error", @].concat(arguments)
 

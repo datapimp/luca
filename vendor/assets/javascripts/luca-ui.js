@@ -730,8 +730,10 @@
     beforeRender: function() {
       if (this.required) $(this.el).addClass('required');
       $(this.el).html(Luca.templates[this.template](this));
-      $(this.container).append($(this.el));
       return this.input = $('input', this.el);
+    },
+    render: function() {
+      return $(this.container).append($(this.el));
     },
     setValue: function(value) {
       return this.input.attr('value', value);
@@ -1705,7 +1707,7 @@
   Luca.components.FormView = Luca.core.Container.extend({
     tagName: 'form',
     className: 'luca-ui-form-view',
-    hooks: ["before:submit", "before:reset", "before:load", "after:submit", "after:reset", "after:load", "after:submit:success", "after:submit:fatal_error", "after:submit:error"],
+    hooks: ["before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error"],
     events: {
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
@@ -1800,12 +1802,16 @@
       return fields;
     },
     loadModel: function(current_model) {
-      var fields, form,
+      var event, fields, form,
         _this = this;
       this.current_model = current_model;
       form = this;
       fields = this.getFields();
       this.trigger("before:load", this, this.current_model);
+      if (this.current_model) {
+        event = "before:load:" + (this.current_model.isNew() ? "new" : "existing");
+        this.trigger(event, this, this.current_model);
+      }
       _(fields).each(function(field) {
         var field_name, value;
         field_name = field.input_name || field.name;
@@ -1814,14 +1820,17 @@
           return field != null ? field.setValue(value) : void 0;
         }
       });
-      return this.trigger("after:load", this, this.current_model);
+      this.trigger("after:load", this, this.current_model);
+      if (this.current_model) {
+        return this.trigger("after:load:" + (this.current_model.isNew() ? "new" : "existing"), this, this.current_model);
+      }
     },
     reset: function() {
       return this.loadModel(this.current_model);
     },
     clear: function() {
       var _this = this;
-      this.current_model = void 0;
+      this.current_model = this.defaultModel != null ? this.defaultModel() : void 0;
       return _(this.getFields()).each(function(field) {
         try {
           return field.setValue('');
@@ -1845,7 +1854,6 @@
       }, {});
     },
     submit_success_handler: function(model, response, xhr) {
-      console.log("Submit Success", response);
       this.trigger("after:submit", this, model, response);
       if (response && response.success) {
         return this.trigger("after:submit:success", this, model, response);
@@ -1854,7 +1862,6 @@
       }
     },
     submit_fatal_error_handler: function() {
-      console.log("Save Error", arguments);
       this.trigger.apply(["after:submit", this].concat(arguments));
       return this.trigger.apply(["after:submit:fatal_error", this].concat(arguments));
     },
@@ -2027,8 +2034,9 @@
       return this.header.append("<tr>" + headers + "</tr>");
     },
     render_row: function(row, row_index) {
-      var alt_class, cells, _ref,
+      var alt_class, cells, model_id, _ref,
         _this = this;
+      model_id = (row != null ? row.get : void 0) && (row != null ? row.attributes : void 0) ? row.get('id') : '';
       this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
         var display, style, value;
@@ -2038,7 +2046,7 @@
         return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
       alt_class = row_index % 2 === 0 ? "even" : "odd";
-      return (_ref = this.body) != null ? _ref.append("<tr data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
+      return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
     },
     cell_renderer: function(row, column, columnIndex) {
       var source;
