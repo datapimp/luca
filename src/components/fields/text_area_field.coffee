@@ -8,14 +8,14 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
 
   template: 'fields/text_area_field'
 
-  initialize: (@options={})->
-    _.bindAll @, "keydown_handler"
-    Luca.core.Field.prototype.initialize.apply @, arguments
-  
   height: "200px"
   width: "90%"
 
-  afterInitialize: ()->
+  initialize: (@options={})->
+    _.bindAll @, "keydown_handler"
+
+    Luca.core.Field.prototype.initialize.apply @, arguments
+
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
     @label ||= @name

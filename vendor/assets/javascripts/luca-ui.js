@@ -1522,14 +1522,12 @@
       "focus input": "focus_handler"
     },
     template: 'fields/text_area_field',
+    height: "200px",
+    width: "90%",
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.bindAll(this, "keydown_handler");
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
-    },
-    height: "200px",
-    width: "90%",
-    afterInitialize: function() {
+      Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
