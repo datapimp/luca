@@ -1454,11 +1454,12 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
-      _.bindAll(this, "change_handler", "populateOptions", "resetOptions");
+      _.bindAll(this, "change_handler", "populateOptions", "beforeFetch");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
-      return this.label || (this.label = this.name);
+      this.label || (this.label = this.name);
+      if (_.isUndefined(this.retainValue)) return this.retainValue = true;
     },
     afterInitialize: function() {
       var _ref;
@@ -1472,7 +1473,7 @@
       } catch (e) {
         console.log("Error Configuring Collection", this, e.message);
       }
-      this.collection.bind("before:fetch", this.resetOptions);
+      this.collection.bind("before:fetch", this.beforeFetch);
       return this.collection.bind("reset", this.populateOptions);
     },
     parseData: function() {
@@ -1498,6 +1499,13 @@
         return this.collection.trigger("reset");
       }
     },
+    setValue: function(value) {
+      this.currentValue = value;
+      return Luca.core.Field.prototype.setValue.apply(this, arguments);
+    },
+    beforeFetch: function() {
+      return this.resetOptions();
+    },
     resetOptions: function() {
       this.input.html('');
       if (this.includeBlank) {
@@ -1505,9 +1513,8 @@
       }
     },
     populateOptions: function() {
-      var currentValue, _ref,
+      var _ref,
         _this = this;
-      currentValue = this.getValue();
       this.resetOptions();
       if (((_ref = this.collection) != null ? _ref.each : void 0) != null) {
         this.collection.each(function(model) {
@@ -1519,8 +1526,8 @@
           return _this.input.append(option);
         });
       }
-      if (currentValue) this.setValue(currentValue);
-      return this.trigger("after:populate:options", this);
+      this.trigger("after:populate:options", this);
+      return this.setValue(this.currentValue);
     }
   });
 

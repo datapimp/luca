@@ -21,13 +21,14 @@ Luca.fields.SelectField = Luca.core.Field.extend
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
-    _.bindAll @, "change_handler", "populateOptions", "resetOptions"
+    _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
     Luca.core.Field.prototype.initialize.apply @, arguments
     
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
     @label ||= @name
+    @retainValue = true if _.isUndefined @retainValue
 
   afterInitialize: ()->
     if @collection?.data
@@ -40,7 +41,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
     catch e
       console.log "Error Configuring Collection", @, e.message
 
-    @collection.bind "before:fetch", @resetOptions
+    @collection.bind "before:fetch", @beforeFetch
     @collection.bind "reset", @populateOptions
  
   # if the select field is configured with a data property
@@ -67,6 +68,13 @@ Luca.fields.SelectField = Luca.core.Field.extend
     else
       @collection.trigger("reset")
   
+  setValue: (value)->
+    @currentValue = value
+    Luca.core.Field.prototype.setValue.apply @, arguments
+
+  beforeFetch: ()->
+    @resetOptions()
+
   resetOptions: ()->
     @input.html('')
     
@@ -74,8 +82,6 @@ Luca.fields.SelectField = Luca.core.Field.extend
       @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
   populateOptions: ()->
-    currentValue = @getValue()
-
     @resetOptions()
     
     if @collection?.each?
@@ -86,8 +92,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
         option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
         @input.append( option )
     
-    @setValue( currentValue ) if currentValue
-    
     @trigger "after:populate:options", @
+    @setValue( @currentValue )
 
 Luca.register "select_field", "Luca.fields.SelectField"
