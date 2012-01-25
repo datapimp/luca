@@ -1556,7 +1556,7 @@
       return this.field().html();
     },
     field: function() {
-      return $("textarea#" + this.input_id, this.el);
+      return this.input = $("textarea#" + this.input_id, this.el);
     },
     keydown_handler: function(e) {
       var me, my;
