@@ -84,12 +84,8 @@ _.extend Luca.View.prototype,
     # component id.  This allows us to re-use views when it makes sense
     Luca.cache( @cid, @ )
     
-    hooks = _.flatten [@hooks, Luca.View.prototype.hooks ]
-    unique = _(hooks).chain().flatten().uniq().value() 
-
-    console.log "Hooks", @cid, hooks
-    console.log "Unique", @cid, unique
-
+    unique = _( Luca.View.prototype.hooks.concat( @hooks ) ).uniq()
+    
     @setupHooks( unique )
 
     @trigger "after:initialize", @

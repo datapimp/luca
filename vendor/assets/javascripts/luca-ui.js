@@ -568,15 +568,12 @@
     hooks: ["after:initialize", "before:render", "after:render"],
     deferrable_event: "reset",
     initialize: function(options) {
-      var hooks, unique;
+      var unique;
       this.options = options != null ? options : {};
       if (this.name != null) this.cid = _.uniqueId(this.name);
       _.extend(this, this.options);
       Luca.cache(this.cid, this);
-      hooks = _.flatten([this.hooks, Luca.View.prototype.hooks]);
-      unique = _(hooks).chain().flatten().uniq().value();
-      console.log("Hooks", this.cid, hooks);
-      console.log("Unique", this.cid, unique);
+      unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
       this.setupHooks(unique);
       return this.trigger("after:initialize", this);
     },
