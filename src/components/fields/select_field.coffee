@@ -25,6 +25,11 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
     Luca.core.Field.prototype.initialize.apply @, arguments
     
+    @input_id ||= _.uniqueId('field') 
+    @input_name ||= @name 
+    @label ||= @name
+
+  afterInitialize: ()->
     if @collection?.data
       @valueField ||= "id"
       @displayField ||= "name"
@@ -34,15 +39,10 @@ Luca.fields.SelectField = Luca.core.Field.extend
       @configure_collection()
     catch e
       console.log "Error Configuring Collection", @, e.message
-    
+
     @collection.bind "before:fetch", @resetOptions
     @collection.bind "reset", @populateOptions
-
-  afterInitialize: ()->
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
-    @label ||= @name
-  
+ 
   # if the select field is configured with a data property
   # then parse that data into the proper format.  either
   # an array of objects with the valueField and displayField

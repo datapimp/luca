@@ -115,10 +115,17 @@
 (function() {
 
   Luca.modules.Deferrable = {
-    configure_collection: function() {
-      var collection;
-      collection = this.collection || this.store || this.filterable_collection || this.deferrable;
-      return this.deferrable = this.collection = new Luca.components.FilterableCollection(collection.initial_set, collection);
+    configure_collection: function(setAsDeferrable) {
+      var _ref;
+      if (setAsDeferrable == null) setAsDeferrable = true;
+      if (!this.collection) return;
+      if (!(this.collection && _.isFunction(this.collection.fetch) && _.isFunction(this.collection.reset))) {
+        this.collection = new Luca.components.FilterableCollection(this.collection.initial_set, this.collection);
+      }
+      if ((_ref = this.collection) != null ? _ref.deferrable_trigger : void 0) {
+        this.deferrable_trigger = this.collection.deferrable_trigger;
+      }
+      if (setAsDeferrable) return this.deferrable = this.collection;
     }
   };
 
@@ -1444,12 +1451,17 @@
     blankValue: '',
     blankText: 'Select One',
     initialize: function(options) {
-      var _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
       _.bindAll(this, "change_handler", "populateOptions", "resetOptions");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      return this.label || (this.label = this.name);
+    },
+    afterInitialize: function() {
+      var _ref;
       if ((_ref = this.collection) != null ? _ref.data : void 0) {
         this.valueField || (this.valueField = "id");
         this.displayField || (this.displayField = "name");
@@ -1462,11 +1474,6 @@
       }
       this.collection.bind("before:fetch", this.resetOptions);
       return this.collection.bind("reset", this.populateOptions);
-    },
-    afterInitialize: function() {
-      this.input_id || (this.input_id = _.uniqueId('field'));
-      this.input_name || (this.input_name = this.name);
-      return this.label || (this.label = this.name);
     },
     parseData: function() {
       var _this = this;
@@ -1627,8 +1634,6 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.Collection.prototype.initialize.apply(this, arguments);
-      this.url || (this.url = this.base_url);
-      if (this.base_url) console.log("The use of base_url is deprecated");
       this.filter = Luca.Collection.baseParams();
       if (_.isFunction(this.url)) {
         return this.url = _.wrap(this.url, function(fn) {

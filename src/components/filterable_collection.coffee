@@ -1,13 +1,9 @@
 Luca.components.FilterableCollection = Luca.Collection.extend 
   initialize: (models, @options={})->
     _.extend @, @options
+
     Luca.Collection.prototype.initialize.apply @, arguments
     
-    @url ||= @base_url
-    
-    if @base_url
-      console.log "The use of base_url is deprecated"
-
     @filter = Luca.Collection.baseParams()
     
     if _.isFunction(@url)
