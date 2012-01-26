@@ -39,11 +39,11 @@ html.luca-ui-fullscreen {
   width: 100%;
   clear: both;
   display: block; }
-  .form-view-footer .toolbar-container .luca-ui-form-toolbar {
+  .form-view-footer .toolbar-container .luca-ui-form-toolbar, .form-view-footer .toolbar-container .luca-ui-toolbar {
     width: 50%;
     display: block;
     margin: 0px auto; }
-    .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field {
+    .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field, .form-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
       float: left; }
 .scrollable-grid-view {
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */

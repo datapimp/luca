@@ -43,6 +43,7 @@ Luca.components.FormView = Luca.core.Container.extend
         position: 'bottom'
       ]
 
+    if @toolbars and @toolbars.length
       @bind "after:render", _.once @renderToolbars
 
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars" 
