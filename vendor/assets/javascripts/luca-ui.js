@@ -568,13 +568,13 @@
     hooks: ["after:initialize", "before:render", "after:render"],
     deferrable_event: "reset",
     initialize: function(options) {
+      var unique;
       this.options = options != null ? options : {};
       if (this.name != null) this.cid = _.uniqueId(this.name);
       _.extend(this, this.options);
       Luca.cache(this.cid, this);
-      if (this.options.hooks) this.setupHooks(this.options.hooks);
-      if (this.hooks && !this.options.hooks) this.setupHooks(this.hooks);
-      this.setupHooks(Luca.View.prototype.hooks);
+      unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
+      this.setupHooks(unique);
       return this.trigger("after:initialize", this);
     },
     setupHooks: function(set) {
@@ -1563,7 +1563,7 @@
       return this.field().html();
     },
     field: function() {
-      return $("textarea#" + this.input_id, this.el);
+      return this.input = $("textarea#" + this.input_id, this.el);
     },
     keydown_handler: function(e) {
       var me, my;

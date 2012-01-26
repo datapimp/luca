@@ -29,7 +29,7 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
     @field().html()
   
   field: ()->
-    $("textarea##{ @input_id }", @el)
+    @input = $("textarea##{ @input_id }", @el)
 
   keydown_handler: (e)->
     me = my = $( e.currentTarget )
