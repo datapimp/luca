@@ -69,7 +69,7 @@ Luca.containers.CardView = Luca.core.Container.extend
     _( @card_containers ).each (container)-> container.hide()
 
     unless current.previously_activated
-        current.trigger "first:activation" unless silent
+        current.trigger "first:activation"
         current.previously_activated = true
 
     $( current.container ).show()

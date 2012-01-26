@@ -1093,7 +1093,7 @@
         return container.hide();
       });
       if (!current.previously_activated) {
-        if (!silent) current.trigger("first:activation");
+        current.trigger("first:activation");
         current.previously_activated = true;
       }
       $(current.container).show();
@@ -1745,6 +1745,8 @@
             position: 'bottom'
           }
         ];
+      }
+      if (this.toolbars && this.toolbars.length) {
         this.bind("after:render", _.once(this.renderToolbars));
       }
       return _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
