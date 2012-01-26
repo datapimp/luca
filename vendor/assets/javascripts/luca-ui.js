@@ -719,7 +719,7 @@
     isField: true,
     template: 'fields/text_field',
     labelAlign: 'top',
-    hooks: ["before:validation", "after:validation"],
+    hooks: ["before:validation", "after:validation", "on:change"],
     initialize: function(options) {
       var _ref;
       this.options = options != null ? options : {};
@@ -746,6 +746,9 @@
     },
     getValue: function() {
       return this.input.attr('value');
+    },
+    change_handler: function(e) {
+      return this.trigger("on:change", this, e);
     }
   });
 
@@ -1366,6 +1369,7 @@
     change_handler: function(e) {
       var me, my;
       me = my = $(e.currentTarget);
+      this.trigger("on:change", this, e);
       if (me.checked === true) {
         return this.trigger("checked");
       } else {
@@ -1374,6 +1378,7 @@
     },
     className: 'luca-ui-checkbox-field luca-ui-field',
     template: 'fields/checkbox_field',
+    hooks: ["checked", "unchecked"],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
@@ -1487,9 +1492,6 @@
         return hash;
       });
     },
-    change_handler: function(e) {
-      return true;
-    },
     afterRender: function() {
       var _ref, _ref2;
       this.input = $('select', this.el);
@@ -1505,6 +1507,9 @@
     },
     beforeFetch: function() {
       return this.resetOptions();
+    },
+    change_handler: function(e) {
+      return this.trigger("on:change", this, e);
     },
     resetOptions: function() {
       this.input.html('');
@@ -1589,23 +1594,21 @@
     events: {
       "keydown input": "keydown_handler",
       "blur input": "blur_handler",
-      "focus input": "focus_handler"
+      "focus input": "focus_handler",
+      "change input": "change_handler"
     },
     template: 'fields/text_field',
     initialize: function(options) {
       this.options = options != null ? options : {};
-      _.bindAll(this, "keydown_handler");
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
-    },
-    afterInitialize: function() {
+      _.bindAll(this, "keydown_handler", "blur_handler", "focus_handler");
+      Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       return this.label || (this.label = this.name);
     },
-    keydown_handler: function(e) {
-      var me, my;
-      return me = my = $(e.currentTarget);
-    },
+    keydown_handler: _.throttle((function(e) {
+      return this.change_handler.apply(this, arguments);
+    }), 300),
     blur_handler: function(e) {
       var me, my;
       return me = my = $(e.currentTarget);
@@ -1613,6 +1616,9 @@
     focus_handler: function(e) {
       var me, my;
       return me = my = $(e.currentTarget);
+    },
+    change_handler: function(e) {
+      return this.trigger("on:change", this, e);
     }
   });
 

@@ -57,8 +57,6 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
       hash
 
-  change_handler: (e)->
-    true 
  
   afterRender: ()->
     @input = $('select', @el)
@@ -75,11 +73,15 @@ Luca.fields.SelectField = Luca.core.Field.extend
   beforeFetch: ()->
     @resetOptions()
 
+  change_handler: (e)->
+    @trigger "on:change", @, e 
+    
   resetOptions: ()->
     @input.html('')
     
     if @includeBlank
       @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
+
 
   populateOptions: ()->
     @resetOptions()

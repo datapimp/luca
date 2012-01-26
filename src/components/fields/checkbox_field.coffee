@@ -6,7 +6,9 @@ Luca.fields.CheckboxField = Luca.core.Field.extend
 
   change_handler: (e)->
     me = my = $(e.currentTarget)
-
+    
+    @trigger "on:change", @, e
+    
     if me.checked is true
       @trigger "checked"
     else
@@ -15,6 +17,8 @@ Luca.fields.CheckboxField = Luca.core.Field.extend
   className: 'luca-ui-checkbox-field luca-ui-field'
   
   template: 'fields/checkbox_field'
+
+  hooks: ["checked","unchecked"]
 
   initialize: (@options={})->
     _.extend @, @options

@@ -9,7 +9,8 @@ Luca.core.Field = Luca.View.extend
 
   hooks:[
     "before:validation",
-    "after:validation"
+    "after:validation",
+    "on:change"
   ]
 
   initialize: (@options={})->
@@ -35,3 +36,6 @@ Luca.core.Field = Luca.View.extend
 
   getValue: ()-> 
     @input.attr('value')
+  
+  change_handler: (e)->
+    @trigger "on:change", @, e 

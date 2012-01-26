@@ -107,6 +107,7 @@ Luca.components.GridView = Luca.View.extend
     _( @columns ).each (column)-> column.width ||= default_column_width
     @padLastColumn()
 
+
   lastColumn: ()->
     @columns[ @columns.length - 1 ]
 
