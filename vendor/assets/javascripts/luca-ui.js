@@ -614,15 +614,15 @@
     }
   };
 
-  Luca.Collection._models_cache = {};
+  Luca.Collection._bootstrapped_models = {};
 
   Luca.Collection.bootstrap = function(obj) {
-    return _.extend(Luca.Collection._models_cache, obj);
+    return _.extend(Luca.Collection._bootstrapped_models, obj);
   };
 
   Luca.Collection.cache = function(key, models) {
-    if (models) return Luca.Collection._models_cache[key] = models;
-    return Luca.Collection._models_cache[key] || [];
+    if (models) return Luca.Collection._bootstrapped_models[key] = models;
+    return Luca.Collection._bootstrapped_models[key] || [];
   };
 
   _.extend(Luca.Collection.prototype, {
@@ -631,7 +631,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (this.cached) {
-        this.model_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
+        this.bootstrap_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
       }
       if (this.registerWith) {
         this.registerAs || (this.registerAs = this.cached);
@@ -641,8 +641,53 @@
         });
       }
       if (_.isArray(this.data) && this.data.length > 0) this.local = true;
+      this.wrapUrl();
       Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
       return this.trigger("after:initialize");
+    },
+    wrapUrl: function() {
+      var params, url,
+        _this = this;
+      if (_.isFunction(this.url)) {
+        return this.url = _.wrap(this.url, function(fn) {
+          var existing_params, new_val, parts, queryString, val;
+          val = fn.apply(_this);
+          parts = val.split('?');
+          if (parts.length > 1) existing_params = _.last(parts);
+          queryString = _this.queryString();
+          if (existing_params && val.match(existing_params)) {
+            queryString = queryString.replace(existing_params, '');
+          }
+          new_val = "" + val + "?" + queryString;
+          if (new_val.match(/\?$/)) new_val = new_val.replace(/\?$/, '');
+          return new_val;
+        });
+      } else {
+        url = this.url;
+        params = this.queryString();
+        return this.url = _([url, params]).compact().join("?");
+      }
+    },
+    queryString: function() {
+      var parts,
+        _this = this;
+      parts = _(Luca.Collection.baseParams()).inject(function(memo, value, key) {
+        var str;
+        str = "" + key + "=" + value;
+        memo.push(str);
+        return memo;
+      }, []);
+      return _.uniq(parts).join("&");
+    },
+    applyFilter: function(filter, options) {
+      if (filter == null) filter = {};
+      if (options == null) {
+        options = {
+          auto: true,
+          refresh: true
+        };
+      }
+      return _.extend(this.base_params, filter);
     },
     register: function(collectionManager, key, collection) {
       if (collectionManager == null) collectionManager = "";
@@ -662,21 +707,19 @@
       }
       if (_.isObject(collect)) return collectionManager[key] = collection;
     },
-    load_from_cache: function() {
-      if (!this.model_cache_key) return;
+    bootstrap: function() {
+      if (!this.bootstrap_cache_key) return;
       return this.reset(this.cached_models());
     },
     cached_models: function() {
-      return Luca.Collection.cache(this.model_cache_key);
+      return Luca.Collection.cache(this.bootstrap_cache_key);
     },
     fetch: function(options) {
       var url;
       if (options == null) options = {};
       this.trigger("before:fetch", this);
       if (this.local === true) return this.reset(this.data);
-      if (this.cached_models().length && !options.refresh) {
-        return this.load_from_cache();
-      }
+      if (this.cached_models().length && !options.refresh) return this.bootstrap();
       this.reset();
       this.fetching = true;
       url = _.isFunction(this.url) ? this.url() : this.url;
@@ -702,10 +745,11 @@
     },
     parse: function(response) {
       var models;
+      this.fetching = false;
       this.trigger("after:response");
       models = this.root != null ? response[this.root] : response;
-      if (this.model_cache_key) {
-        Luca.Collection.cache(this.model_cache_keys, models);
+      if (this.bootstrap_cache_key) {
+        Luca.Collection.cache(this.bootstrap_cache_keys, models);
       }
       return models;
     }
