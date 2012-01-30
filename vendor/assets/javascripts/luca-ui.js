@@ -904,7 +904,8 @@
           return component.render();
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
-          throw e;
+          console.log(e.message);
+          return console.log(e.stack);
         }
       });
     },

@@ -95,7 +95,7 @@ _.extend Luca.Collection.prototype,
 
     if _.isString( collectionManager )
       collectionManager = Luca.util.nestedValue( collectionManager, window )
-    
+      
     throw "Could not register with collection manager" unless collectionManager 
     
     if _.isFunction( collectionManager.add )
