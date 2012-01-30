@@ -1606,10 +1606,10 @@
       return this.inputStyles || (this.inputStyles = "height:" + this.height + ";width:" + this.width);
     },
     setValue: function(value) {
-      return this.field().html(value);
+      return $(this.field()).val(value);
     },
     getValue: function() {
-      return this.field().html();
+      return $(this.field()).val();
     },
     field: function() {
       return this.input = $("textarea#" + this.input_id, this.el);

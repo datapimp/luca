@@ -23,10 +23,10 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
     @inputStyles ||= "height:#{ @height };width:#{ @width }"
 
   setValue: (value)->
-    @field().html(value)
+    $( @field() ).val(value)
 
   getValue: ()->
-    @field().html()
+    $( @field() ).val()
   
   field: ()->
     @input = $("textarea##{ @input_id }", @el)
