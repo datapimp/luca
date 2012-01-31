@@ -671,7 +671,7 @@
     queryString: function() {
       var parts,
         _this = this;
-      parts = _(Luca.Collection.baseParams()).inject(function(memo, value, key) {
+      parts = _(this.base_params || (this.base_params = Luca.Collection.baseParams())).inject(function(memo, value, key) {
         var str;
         str = "" + key + "=" + value;
         memo.push(str);
@@ -687,7 +687,16 @@
           refresh: true
         };
       }
-      return _.extend(this.base_params, filter);
+      this.applyParams(filter);
+      if (options.auto) {
+        return this.fetch({
+          refresh: options.refresh
+        });
+      }
+    },
+    applyParams: function(params) {
+      this.base_params || (this.base_params = Luca.Collection.baseParams());
+      return _.extend(this.base_params, params);
     },
     register: function(collectionManager, key, collection) {
       if (collectionManager == null) collectionManager = "";

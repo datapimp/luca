@@ -67,7 +67,7 @@ _.extend Luca.Collection.prototype,
       @url = _([url,params]).compact().join("?")  
 
   queryString: ()->
-    parts = _( Luca.Collection.baseParams() ).inject (memo, value, key)=>
+    parts = _( @base_params ||= Luca.Collection.baseParams() ).inject (memo, value, key)=>
       str = "#{ key }=#{ value }"
       memo.push(str)
       memo
@@ -76,7 +76,12 @@ _.extend Luca.Collection.prototype,
     _.uniq(parts).join("&")
 
   applyFilter: (filter={}, options={auto:true,refresh:true})->
-    _.extend @base_params, filter      
+    @applyParams(filter)
+    @fetch(refresh:options.refresh) if options.auto
+  
+  applyParams: (params)->
+    @base_params ||= Luca.Collection.baseParams()
+    _.extend @base_params, params
 
   # Collection Manager Registry
   #
