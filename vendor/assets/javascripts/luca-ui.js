@@ -565,7 +565,7 @@
       this.event = event;
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
-    hooks: ["after:initialize", "before:render", "after:render"],
+    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     deferrable_event: "reset",
     initialize: function(options) {
       var unique;
@@ -1131,7 +1131,7 @@
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous;
+      var current, previous, _ref;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
         silent = false;
@@ -1147,6 +1147,10 @@
       if (!current) return;
       if (!silent) this.trigger("before:card:switch", previous, current);
       _(this.card_containers).each(function(container) {
+        var _ref;
+        if ((_ref = container.trigger) != null) {
+          _ref.apply(container, ["deactivation", this, previous, current]);
+        }
         return container.hide();
       });
       if (!current.previously_activated) {
@@ -1155,7 +1159,12 @@
       }
       $(current.container).show();
       this.activeCard = index;
-      if (!silent) this.trigger("after:card:switch", previous, current);
+      if (!silent) {
+        this.trigger("after:card:switch", previous, current);
+        if ((_ref = current.trigger) != null) {
+          _ref.apply(current, ["activation", this, previous, current]);
+        }
+      }
       if (_.isFunction(callback)) {
         return callback.apply(this, [this, previous, current]);
       }

@@ -66,11 +66,17 @@ _.extend Luca.View.prototype,
     Backbone.View.prototype.trigger.apply @, arguments
 
   hooks:[
-    "after:initialize",
-    "before:render",
+    "after:initialize"
+    "before:render"
     "after:render"
+    "first:activation"
+    "activation"
+    "deactivation"
   ]
   
+  # which event should we listen to on
+  # our deferrable property, before we
+  # trigger the actual rendering  
   deferrable_event: "reset"
 
   initialize: (@options={})->
