@@ -45,10 +45,10 @@ Luca.View.extend = (definition)->
         @immediate_trigger = true
       
       if @immediate_trigger is true
-        @deferrable.fetch()
+        @deferrable[ @deferrable_action ]()
       else
         @bind @deferrable_trigger, _.once ()=>
-          @deferrable.fetch()
+          @deferrable[ @deferrable_action ]()
 
     else
       @trigger "before:render", @
@@ -65,13 +65,38 @@ _.extend Luca.View.prototype,
   trigger: (@event)->
     Backbone.View.prototype.trigger.apply @, arguments
 
+  # Hooks are event triggers which will automatically be bound to 
+  # methods with similar names, e.g. "after:initialize" => afterInitialize()
   hooks:[
-    "after:initialize",
-    "before:render",
+    "after:initialize"
+    "before:render"
     "after:render"
+    "first:activation"
+    "activation"
+    "deactivation"
   ]
   
+  #### Deferrable Rendering
+  #
+  # If you want to defer rendering of a view until a collection
+  # is loaded, you can pass that collection as a @deferrable property 
+  # on your view, and Luca will take care of the process for you.
+  deferrable: undefined 
+
+  # By default, a deferrable will be a collection but it coul dbe anything.
+  deferrable_action: "fetch"  
   deferrable_event: "reset"
+
+  # If you don't specify a trigger, then the binding / action firing process
+  # will happen immediately on the call to render.  Otherwise, if you want to
+  # delay the action firing which would trigger the event, you can specify
+  # which trigger you want to listen to on your view before that happens.  A 
+  # classic example would be having a bunch of views nested in a tab view
+  # or card view container, and you don't want to fetch the collection unless
+  # the tab is activated.  
+
+  # So you would set @deferrable_trigger to "first:activation"
+  deferrable_trigger: undefined
 
   initialize: (@options={})->
     @cid = _.uniqueId(@name) if @name?
