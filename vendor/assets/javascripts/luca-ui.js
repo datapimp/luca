@@ -565,7 +565,7 @@
       this.event = event;
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
-    hooks: ["after:initialize", "before:render", "after:render"],
+    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     deferrable_event: "reset",
     initialize: function(options) {
       var unique;
@@ -671,7 +671,7 @@
     queryString: function() {
       var parts,
         _this = this;
-      parts = _(Luca.Collection.baseParams()).inject(function(memo, value, key) {
+      parts = _(this.base_params || (this.base_params = Luca.Collection.baseParams())).inject(function(memo, value, key) {
         var str;
         str = "" + key + "=" + value;
         memo.push(str);
@@ -687,7 +687,16 @@
           refresh: true
         };
       }
-      return _.extend(this.base_params, filter);
+      this.applyParams(filter);
+      if (options.auto) {
+        return this.fetch({
+          refresh: options.refresh
+        });
+      }
+    },
+    applyParams: function(params) {
+      this.base_params || (this.base_params = Luca.Collection.baseParams());
+      return _.extend(this.base_params, params);
     },
     register: function(collectionManager, key, collection) {
       if (collectionManager == null) collectionManager = "";
@@ -904,7 +913,8 @@
           return component.render();
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
-          throw e;
+          console.log(e.message);
+          return console.log(e.stack);
         }
       });
     },
@@ -1121,7 +1131,7 @@
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous;
+      var current, previous, _ref;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
         silent = false;
@@ -1137,6 +1147,10 @@
       if (!current) return;
       if (!silent) this.trigger("before:card:switch", previous, current);
       _(this.card_containers).each(function(container) {
+        var _ref;
+        if ((_ref = container.trigger) != null) {
+          _ref.apply(container, ["deactivation", this, previous, current]);
+        }
         return container.hide();
       });
       if (!current.previously_activated) {
@@ -1145,7 +1159,12 @@
       }
       $(current.container).show();
       this.activeCard = index;
-      if (!silent) this.trigger("after:card:switch", previous, current);
+      if (!silent) {
+        this.trigger("after:card:switch", previous, current);
+        if ((_ref = current.trigger) != null) {
+          _ref.apply(current, ["activation", this, previous, current]);
+        }
+      }
       if (_.isFunction(callback)) {
         return callback.apply(this, [this, previous, current]);
       }

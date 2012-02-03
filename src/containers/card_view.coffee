@@ -66,7 +66,9 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     @trigger "before:card:switch", previous, current unless silent 
     
-    _( @card_containers ).each (container)-> container.hide()
+    _( @card_containers ).each (container)-> 
+      container.trigger?.apply(container, ["deactivation", @, previous, current])
+      container.hide()
 
     unless current.previously_activated
         current.trigger "first:activation"
@@ -75,7 +77,11 @@ Luca.containers.CardView = Luca.core.Container.extend
     $( current.container ).show()
 
     @activeCard = index
-    @trigger "after:card:switch", previous, current unless silent
+
+    unless silent
+      @trigger "after:card:switch", previous, current 
+      current.trigger?.apply(current, ["activation", @, previous, current])
+
 
     if _.isFunction(callback)
       callback.apply @, [@,previous,current]
