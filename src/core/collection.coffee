@@ -129,7 +129,7 @@ _.extend Luca.Collection.prototype,
 
     url = if _.isFunction(@url) then @url() else @url
     
-    return true unless url and url.length > 1
+    return true unless ((url and url.length > 1) or @localStorage)
 
     try
       Backbone.Collection.prototype.fetch.apply @, arguments

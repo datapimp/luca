@@ -732,7 +732,7 @@
       this.reset();
       this.fetching = true;
       url = _.isFunction(this.url) ? this.url() : this.url;
-      if (!(url && url.length > 1)) return true;
+      if (!((url && url.length > 1) || this.localStorage)) return true;
       try {
         return Backbone.Collection.prototype.fetch.apply(this, arguments);
       } catch (e) {
