@@ -1,4 +1,4 @@
-Luca.Collection = Backbone.Collection.extend
+Luca.Collection = Backbone.QueryCollection.extend
   base: 'Luca.Collection'
 
 Luca.Collection._baseParams = {}
