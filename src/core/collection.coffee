@@ -75,6 +75,10 @@ _.extend Luca.Collection.prototype,
 
     _.uniq(parts).join("&")
 
+  resetFilter: ()->
+    @base_params = Luca.Collection.baseParams()
+    @
+
   applyFilter: (filter={}, options={auto:true,refresh:true})->
     @applyParams(filter)
     @fetch(refresh:options.refresh) if options.auto

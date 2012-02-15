@@ -679,6 +679,10 @@
       }, []);
       return _.uniq(parts).join("&");
     },
+    resetFilter: function() {
+      this.base_params = Luca.Collection.baseParams();
+      return this;
+    },
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) {
