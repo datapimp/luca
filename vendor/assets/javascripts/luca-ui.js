@@ -744,6 +744,21 @@
         throw e;
       }
     },
+    onceLoaded: function(fn) {
+      var wrapped,
+        _this = this;
+      if (this.length > 0 && !this.fetching) {
+        fn.apply(this, [this]);
+        return;
+      }
+      wrapped = function() {
+        return fn.apply(_this, [_this]);
+      };
+      return this.bind("reset", function() {
+        wrapped();
+        return _this.unbind("reset", wrapped);
+      });
+    },
     ifLoaded: function(fn, scope) {
       var _this = this;
       if (scope == null) scope = this;
