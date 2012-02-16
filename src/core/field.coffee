@@ -13,6 +13,13 @@ Luca.core.Field = Luca.View.extend
     "on:change"
   ]
 
+  # see: http://twitter.github.com/bootstrap/base-css.html
+  controlGroupStates: [
+    "warning"
+    "error"
+    "success"
+  ]
+
   initialize: (@options={})->
     _.extend @, @options
     Luca.View.prototype.initialize.apply(@, arguments)
@@ -22,20 +29,36 @@ Luca.core.Field = Luca.View.extend
     @helperText ||= ""
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     @inputStyles ||= ""
+
+    @disable() if @disabled
     
   beforeRender: ()->
+    if Luca.enableBootstrap
+      $(@el).addClass('control-group')
+
     $(@el).addClass('required') if @required
+
     $(@el).html Luca.templates[ @template ]( @ )
     @input = $('input', @el)
   
+  change_handler: (e)->
+    @trigger "on:change", @, e 
+
+  disable: ()->
+    $("input",@el).attr('disabled', true)
+  
+  enable: ()->
+    $("input", @el).attr('disabled', false)  
+
+  getValue: ()-> 
+    @input.attr('value')
+
   render: ()->
     $( @container ).append( $(@el) )
 
   setValue: (value)-> 
     @input.attr('value', value)
-
-  getValue: ()-> 
-    @input.attr('value')
   
-  change_handler: (e)->
-    @trigger "on:change", @, e 
+  updateState: (state)->
+    _( @controlGroupStates ).each (cls)=> $(@el).removeClass(cls)
+    $(@el).addClass(state)

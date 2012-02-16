@@ -15,6 +15,11 @@ window.Luca =
     cid_index: {}
     name_index: {}
 
+# let's use the Twitter 2.0 Bootstrap Framework 
+# for what it is best at, and not try to solve this
+# problem on our own!
+Luca.enableBootstrap = true
+
 # adds an additional namespace to look for luca ui
 # components.  useful for when you define a bunch of
 # components in your own application's namespace

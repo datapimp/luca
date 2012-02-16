@@ -1,3 +1,8 @@
+#= require ./dependencies/underscore-min
+#= require ./dependencies/underscore-string.min
+#= require ./dependencies/backbone-min
+#= require ./dependencies/backbone-query.min
+#= require ./dependencies/bootstrap.min
 #= require ./luca-ui/framework
 #= require_tree ./luca-ui/modules
 #= require ./luca-ui/core/view

@@ -1,7 +1,14 @@
 %label{:for=>"<%= input_id %>"}
   <%= label %>
+
+<% if( addOn ) { %>
+%span.add-on
+  <%= addOn %>
+<% } %> 
+
 %input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>"}
+
 <% if(helperText) { %>
-%span.helper-text
+%p.helper-text.help-block
   <%= helperText %>
 <% } %>

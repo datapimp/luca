@@ -1,3 +1,5 @@
 /*
+ *= require ./bootstrap-responsive.min
+ *= require ./bootstrap.min
  *= require_tree ./luca-ui
  */
