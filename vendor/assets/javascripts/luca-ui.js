@@ -598,7 +598,7 @@
 }).call(this);
 (function() {
 
-  Luca.Collection = Backbone.Collection.extend({
+  Luca.Collection = Backbone.QueryCollection.extend({
     base: 'Luca.Collection'
   });
 
@@ -679,6 +679,10 @@
       }, []);
       return _.uniq(parts).join("&");
     },
+    resetFilter: function() {
+      this.base_params = Luca.Collection.baseParams();
+      return this;
+    },
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) {
@@ -739,6 +743,21 @@
         console.log("Error in Collection.fetch", e);
         throw e;
       }
+    },
+    onceLoaded: function(fn) {
+      var wrapped,
+        _this = this;
+      if (this.length > 0 && !this.fetching) {
+        fn.apply(this, [this]);
+        return;
+      }
+      wrapped = function() {
+        return fn.apply(_this, [_this]);
+      };
+      return this.bind("reset", function() {
+        wrapped();
+        return _this.unbind("reset", wrapped);
+      });
     },
     ifLoaded: function(fn, scope) {
       var _this = this;

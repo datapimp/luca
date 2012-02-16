@@ -1,4 +1,4 @@
-Luca.Collection = Backbone.Collection.extend
+Luca.Collection = Backbone.QueryCollection.extend
   base: 'Luca.Collection'
 
 Luca.Collection._baseParams = {}
@@ -75,6 +75,10 @@ _.extend Luca.Collection.prototype,
 
     _.uniq(parts).join("&")
 
+  resetFilter: ()->
+    @base_params = Luca.Collection.baseParams()
+    @
+
   applyFilter: (filter={}, options={auto:true,refresh:true})->
     @applyParams(filter)
     @fetch(refresh:options.refresh) if options.auto
@@ -135,8 +139,20 @@ _.extend Luca.Collection.prototype,
       Backbone.Collection.prototype.fetch.apply @, arguments
     catch e
       console.log "Error in Collection.fetch", e
+      
       throw e
 
+  onceLoaded: (fn)->
+    if @length > 0 and not @fetching
+      fn.apply @, [@]
+      return
+    
+    wrapped = ()=> fn.apply @,[@]
+
+    @bind "reset", ()=>
+      wrapped()
+      @unbind "reset", wrapped
+    
   ifLoaded: (fn, scope=@)->
     if @models.length > 0 and not @fetching
       fn.apply scope, [@]
