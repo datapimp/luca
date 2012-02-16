@@ -1,12 +1,12 @@
-%label{:for=>"<%= input_id %>"}
+%label.control-label{:for=>"<%= input_id %>"}
   <%= label %>
 
-<% if( addOn ) { %>
+<% if( typeof(addOn) !== "undefined" ) { %>
 %span.add-on
   <%= addOn %>
 <% } %> 
 
-%input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>"}
+%input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>",:placeholder=>"<%= placeHolder %>"}
 
 <% if(helperText) { %>
 %p.helper-text.help-block

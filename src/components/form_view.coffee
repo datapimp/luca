@@ -64,12 +64,12 @@ Luca.components.FormView = Luca.core.Container.extend
     $(@el).html Luca.templates["components/form_view"]( @ )    
 
     if Luca.enableBootstrap
-      $(@el).addClass('.form-search') if @searchForm 
-      $(@el).addClass('.form-horizontal') if @horizontalForm          
-      $(@el).addClass('.form-inline') if @inlineForm          
-    else
-      $(@el).addClass( @fieldLayoutClass ) if @fieldLayoutClass
-      $(@el).addClass( "label-align-#{ @labelAlign }")
+      $(@el).addClass('form-search') if @searchForm 
+      $(@el).addClass('form-horizontal') if @horizontalForm          
+      $(@el).addClass('form-inline') if @inlineForm          
+      
+    $(@el).addClass( @fieldLayoutClass ) if @fieldLayoutClass
+    $(@el).addClass( "label-align-#{ @labelAlign }")
 
   prepareComponents: ()->
     container = $('.form-view-body', @el)

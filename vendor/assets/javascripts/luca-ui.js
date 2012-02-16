@@ -874,9 +874,10 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
     template: 'fields/text_field',
     labelAlign: 'top',
     hooks: ["before:validation", "after:validation", "on:change"],
-    controlGroupStates: ["warning", "error", "success"],
+    statuses: ["warning", "error", "success"],
     initialize: function(options) {
-      var _ref;
+      var _ref,
+        _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
@@ -887,7 +888,11 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
         this.label || (this.label = "*" + this.label);
       }
       this.inputStyles || (this.inputStyles = "");
-      if (this.disabled) return this.disable();
+      if (this.disabled) this.disable();
+      _(this.statuses).each(function(state) {
+        if (_this[state]) return _this.updateState(state);
+      });
+      return this.placeHolder || (this.placeHolder = "");
     },
     beforeRender: function() {
       if (Luca.enableBootstrap) $(this.el).addClass('control-group');
@@ -915,7 +920,7 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
     },
     updateState: function(state) {
       var _this = this;
-      _(this.controlGroupStates).each(function(cls) {
+      _(this.statuses).each(function(cls) {
         return $(_this.el).removeClass(cls);
       });
       return $(this.el).addClass(state);
@@ -1965,13 +1970,12 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       }
       $(this.el).html(Luca.templates["components/form_view"](this));
       if (Luca.enableBootstrap) {
-        if (this.searchForm) $(this.el).addClass('.form-search');
-        if (this.horizontalForm) $(this.el).addClass('.form-horizontal');
-        if (this.inlineForm) return $(this.el).addClass('.form-inline');
-      } else {
-        if (this.fieldLayoutClass) $(this.el).addClass(this.fieldLayoutClass);
-        return $(this.el).addClass("label-align-" + this.labelAlign);
+        if (this.searchForm) $(this.el).addClass('form-search');
+        if (this.horizontalForm) $(this.el).addClass('form-horizontal');
+        if (this.inlineForm) $(this.el).addClass('form-inline');
       }
+      if (this.fieldLayoutClass) $(this.el).addClass(this.fieldLayoutClass);
+      return $(this.el).addClass("label-align-" + this.labelAlign);
     },
     prepareComponents: function() {
       var container;
@@ -2379,7 +2383,7 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); if( addOn ) { __p.push('\n<span class=\'add-on\'>\n  ', addOn ,'\n</span>\n'); } __p.push('\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n<span class=\'add-on\'>\n  ', addOn ,'\n</span>\n'); } __p.push('\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

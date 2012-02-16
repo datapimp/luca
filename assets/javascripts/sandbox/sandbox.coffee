@@ -6,7 +6,6 @@ $ do ->
     components:[
       name: 'form_view'
       ctype: 'form_view'
-      fieldLayoutClass: 'column-layout'
       components:[
         name: 'column_view'
         debugMode: true
@@ -17,10 +16,13 @@ $ do ->
             ctype: 'text_field'
             label: 'Field One'
             name: 'field_one'
+            warning: true
           ,
             ctype: 'text_field'
-            label: 'Field THree'
+            label: 'Field Three'
             name: 'Field THree'
+            helperText: 'Help Text'
+            placeHolder: 'this is a placeholder'
           ]
         ,
           name: 'column_two'
@@ -28,6 +30,7 @@ $ do ->
             ctype: 'text_field'
             label: 'Field Two'
             name: 'field_two'
+            error: 'What the f'
           ]
         ]
       ]

@@ -14,7 +14,7 @@ Luca.core.Field = Luca.View.extend
   ]
 
   # see: http://twitter.github.com/bootstrap/base-css.html
-  controlGroupStates: [
+  statuses: [
     "warning"
     "error"
     "success"
@@ -31,7 +31,12 @@ Luca.core.Field = Luca.View.extend
     @inputStyles ||= ""
 
     @disable() if @disabled
-    
+
+    _( @statuses ).each (state)=> 
+      @updateState(state) if @[state]
+
+    @placeHolder ||= ""
+
   beforeRender: ()->
     if Luca.enableBootstrap
       $(@el).addClass('control-group')
@@ -60,5 +65,5 @@ Luca.core.Field = Luca.View.extend
     @input.attr('value', value)
   
   updateState: (state)->
-    _( @controlGroupStates ).each (cls)=> $(@el).removeClass(cls)
+    _( @statuses ).each (cls)=> $(@el).removeClass(cls)
     $(@el).addClass(state)
