@@ -2,6 +2,6 @@
   <%= label %>
 %select{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:name=>"<%= input_name %>"}
 <% if(helperText) { %>
-%span.helper-text
+%p.helper-text.help-block
   <%= helperText %>
 <% } %>

@@ -1784,7 +1784,15 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
-      return this.label || (this.label = this.name);
+      this.label || (this.label = this.name);
+      if (this.prepend) {
+        $(this.el).addClass('input-prepend');
+        this.addOn = this.prepend;
+      }
+      if (this.append) {
+        $(this.el).addClass('input-append');
+        return this.addOn = this.append;
+      }
     },
     keydown_handler: _.throttle((function(e) {
       return this.change_handler.apply(this, arguments);
@@ -1958,7 +1966,8 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       $(this.el).html(Luca.templates["components/form_view"](this));
       if (Luca.enableBootstrap) {
         if (this.searchForm) $(this.el).addClass('.form-search');
-        if (this.horizontalLayout) return $(this.el).addClass('.form-horizontal');
+        if (this.horizontalForm) $(this.el).addClass('.form-horizontal');
+        if (this.inlineForm) return $(this.el).addClass('.form-inline');
       } else {
         if (this.fieldLayoutClass) $(this.el).addClass(this.fieldLayoutClass);
         return $(this.el).addClass("label-align-" + this.labelAlign);
@@ -2350,11 +2359,11 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n'); if(helperText) { __p.push('\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n  <input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n</label>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'file\' />\n'); if(helperText) { __p.push('\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'file\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -2362,11 +2371,11 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<select id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></select>\n'); if(helperText) { __p.push('\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<select id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></select>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></textarea>\n'); if(helperText) { __p.push('\n<span class=\'helper-text\'>\n  ', helperText ,'\n</span>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></textarea>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

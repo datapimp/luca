@@ -2,7 +2,7 @@
   <%= label %>
 %input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"file",:name=>"<%= input_name %>"}
 <% if(helperText) { %>
-%span.helper-text
+%p.helper-text.help-block
   <%= helperText %>
 <% } %>
 
