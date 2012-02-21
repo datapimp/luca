@@ -521,9 +521,11 @@
     var _base;
     _base = definition.render;
     _base || (_base = function() {
-      if (!($(this.container) && $(this.el))) {
-        return $(this.container).append($(this.el));
-      }
+      var container;
+      container = _.isFunction(this.container) ? this.container() : this.container;
+      if (!($(container) && $(this.el))) return this;
+      $(container).append($(this.el));
+      return this;
     });
     definition.render = function() {
       var _this = this;
