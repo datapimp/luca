@@ -1,0 +1,110 @@
+<!DOCTYPE html>  <html> <head>   <title>collection_manager.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="base_toolbar.html">                 base_toolbar.coffee               </a>                                           <a class="source" href="button_field.html">                 button_field.coffee               </a>                                           <a class="source" href="checkbox_field.html">                 checkbox_field.coffee               </a>                                           <a class="source" href="file_upload_field.html">                 file_upload_field.coffee               </a>                                           <a class="source" href="hidden_field.html">                 hidden_field.coffee               </a>                                           <a class="source" href="select_field.html">                 select_field.coffee               </a>                                           <a class="source" href="text_area_field.html">                 text_area_field.coffee               </a>                                           <a class="source" href="text_field.html">                 text_field.coffee               </a>                                           <a class="source" href="type_ahead_field.html">                 type_ahead_field.coffee               </a>                                           <a class="source" href="filterable_collection.html">                 filterable_collection.coffee               </a>                                           <a class="source" href="form_button_toolbar.html">                 form_button_toolbar.coffee               </a>                                           <a class="source" href="form_view.html">                 form_view.coffee               </a>                                           <a class="source" href="grid_view.html">                 grid_view.coffee               </a>                                           <a class="source" href="bread_crumb_navigatiion.html">                 bread_crumb_navigatiion.coffee               </a>                                           <a class="source" href="template.html">                 template.coffee               </a>                                           <a class="source" href="card_view.html">                 card_view.coffee               </a>                                           <a class="source" href="column_view.html">                 column_view.coffee               </a>                                           <a class="source" href="modal_view.html">                 modal_view.coffee               </a>                                           <a class="source" href="panel_view.html">                 panel_view.coffee               </a>                                           <a class="source" href="split_view.html">                 split_view.coffee               </a>                                           <a class="source" href="tab_view.html">                 tab_view.coffee               </a>                                           <a class="source" href="viewport.html">                 viewport.coffee               </a>                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="container.html">                 container.coffee               </a>                                           <a class="source" href="field.html">                 field.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                                           <a class="source" href="framework.html">                 framework.coffee               </a>                                           <a class="source" href="collection_manager.html">                 collection_manager.coffee               </a>                                           <a class="source" href="socket_manager.html">                 socket_manager.coffee               </a>                                           <a class="source" href="deferrable.html">                 deferrable.coffee               </a>                                           <a class="source" href="local_storage.html">                 local_storage.coffee               </a>                                           <a class="source" href="spin.html">                 spin.coffee               </a>                                           <a class="source" href="toolbars.html">                 toolbars.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               collection_manager.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h3>Collection Manager</h3>
+
+<p>The purpose of the collection manager is to provide an interface
+for tracking the creation of collections, so that you only create
+one instance of a given collection class per instance of some scope</p>
+
+<p>For example:</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>LucaApp = Luca.containers.Viewport.extend
+ initialize: (@options={})->
+    @collectionManager = new Luca.CollectionManager
+      getScope: ()-> @someParentValue
+ collection: (key,options={},models=[])-> 
+   @collectionManager.getOrCreate(key,options,models)</p>
+
+<p>Now in the single global instance of LucaApp you have 
+one central place to access a collection of models, one
+interface to listen to for add, remove, reset, change events </p>
+
+<p>If you don't want this, you can either do it the old fashioned way
+or just use the private option to get an unregistered instance.</p>
+
+<h3>View Event Binding Interface</h3>
+
+<p>Luca.Views can specify a @collectionEvents property very similar to
+the DOM @events property in Backbone.Views and this provides a very
+clean API for binding to events on the collection manager and doing
+the necessary things on the view.  This does assume that by default
+there is only one instance of the collection manager running, otherwise
+a configuration directive is provided at a view level to know which
+collection manager to pull from.</p>
+
+<p>Special Thanks to @tjbladez for this wonderful initialModelsa</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <h3>Automatic Registration</h3>
+
+<p>In the Luca.Collection class, there are two configuration options</p>
+
+<p>@registerAs which is used to define a unique name for which to reference the collection</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>@registerWith which is used to point to the instance of the collection manager
+this can be a string, in case the value doesn't exist yet, and luca will automatically
+find the object when it is time</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">CollectionManager</span>
+  <span class="nv">__collections: </span><span class="p">{}</span>
+  
+  <span class="nv">constructor: </span><span class="nf">(@options={})-&gt;</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="err">@</span><span class="p">,</span> <span class="nx">@options</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="err">@</span><span class="p">,</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Events</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>if you are going to use more than one collection
+manager, then you will have to specify which 
+collection manager your views need to interact
+with for their collectionEvents configuration handling</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">CollectionManager</span><span class="p">.</span><span class="nx">get</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot;A collection manager has already been created.  You are responsible for telling your views which to use&quot;</span>
+    <span class="k">else</span>
+      <span class="nv">Luca.CollectionManager.get = </span><span class="nx">_</span><span class="p">.</span><span class="nx">bind</span> <span class="nf">()-&gt;</span>
+        <span class="k">return</span> <span class="err">@</span>
+      <span class="p">,</span> <span class="err">@</span> 
+
+
+  <span class="nx">add</span><span class="o">:</span><span class="nf">(key, collection)-&gt;</span>
+    <span class="nx">@currentScope</span><span class="p">()[</span> <span class="nx">key</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">collection</span>
+
+  <span class="nv">allCollections: </span><span class="nf">()-&gt;</span>
+    <span class="nx">_</span><span class="p">(</span> <span class="nx">@currentScope</span><span class="p">()</span> <span class="p">).</span><span class="nx">values</span><span class="p">()</span> 
+  </pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>create a collection from just a key. <br />
+if you pass the private option, it will
+skip registering this collection</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">create: </span><span class="nf">(key, collectionOptions={}, initialModels=[], private=false)-&gt;</span>
+    <span class="nv">CollectionClass = </span><span class="nx">collectionOptions</span><span class="p">.</span><span class="nx">base</span> 
+    <span class="nx">CollectionClass</span> <span class="o">||=</span> <span class="nx">@guessCollectionClass</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
+    
+    <span class="nv">collectionOptions.registerWith = </span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="nx">private</span> <span class="o">or</span> <span class="nx">collectionOptions</span><span class="p">.</span><span class="nx">private</span>
+
+    <span class="nv">collection = </span><span class="k">new</span> <span class="nx">CollectionClass</span><span class="p">(</span><span class="nx">initialModels</span><span class="p">,</span><span class="nx">collectionOptions</span><span class="p">)</span>
+
+    <span class="nx">@add</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nx">collection</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h3>Collection Prefix</h3>
+
+<p>If you are doing things right, you are namespacing all of your collection
+definitions, for example </p>
+
+<p>LucaApp.collections.SomeCollection = Luca.Collection.extend
+  registerAs: "some_collection"
+  registerWith: "" </p>
+
+<p>You should override this attribute when you create or define your collection manager</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">collectionPrefix: </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">namespace</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <h3>Collection Scopes</h3>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>any time you create a collection, or use getOrCreate, the key
+value ( @registerAs ) for your collection will be used to retrieve it</p>
+
+<p>if you plan to have multiple instances per key, but with some sort of
+scope based on a parent attribute, you should define a </p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">currentScope: </span><span class="nf">()-&gt;</span>
+    <span class="k">if</span> <span class="nv">current_scope = </span><span class="nx">@getScope</span><span class="p">()</span>
+      <span class="nx">@__collections</span><span class="p">[</span> <span class="nx">current_scope</span> <span class="p">]</span> <span class="o">||=</span> <span class="p">{}</span>
+    <span class="k">else</span>
+      <span class="nx">@__collections</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>do something to each collection in the scope</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">each: </span><span class="nf">(fn)-&gt;</span>
+    <span class="nx">_</span><span class="p">(</span> <span class="nx">@all</span><span class="p">()</span> <span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span>
+
+  <span class="nx">get</span><span class="o">:</span><span class="nf">(key)-&gt;</span>
+    <span class="nx">@currentScope</span><span class="p">()[</span><span class="nx">key</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>by default, we won't use a scope, but if you wish to use one
+you should define this method on your collection manager</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">getScope: </span><span class="nf">()-&gt;</span> <span class="kc">undefined</span>
+
+  <span class="nv">getOrCreate: </span><span class="nf">(key,collectionOptions={},initialModels=[])-&gt;</span>  
+    <span class="nx">@get</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">||</span> <span class="nx">@create</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="nx">collectionOptions</span><span class="p">,</span><span class="nx">initialModels</span><span class="p">,</span><span class="kc">false</span><span class="p">)</span>
+  
+  <span class="nv">guessCollectionClass: </span><span class="nf">(key)-&gt;</span>
+    <span class="nv">classified = </span><span class="nx">_</span><span class="p">(</span> <span class="nx">key</span> <span class="p">).</span><span class="nx">chain</span><span class="p">().</span><span class="nx">capitalize</span><span class="p">().</span><span class="nx">camelize</span><span class="p">().</span><span class="nx">value</span><span class="p">()</span> 
+    <span class="nv">guess = </span><span class="p">(</span><span class="nx">@collectionPrefix</span> <span class="o">||</span> <span class="nb">window</span><span class="p">)[</span> <span class="nx">classified</span> <span class="p">]</span>
+    
+    <span class="nx">guess</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>in most cases, the collections we use can be used only once
+and any reset events should be respected, bound to, etc.  however
+if this ever isn't the case, you can create an instance
+of a collection which is "private" in that once it is 
+returned from the collection manager, it isn't tracked so
+you can make sure any add / reset / remove / filter events
+don't effect other views</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">private: </span><span class="nf">(key, collectionOptions={}, initialModels=[])-&gt;</span>
+    <span class="nx">@create</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="nx">collectionOptions</span><span class="p">,</span><span class="nx">initialModels</span><span class="p">,</span><span class="kc">true</span><span class="p">)</span> 
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

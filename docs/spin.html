@@ -1,0 +1,222 @@
+<!DOCTYPE html>  <html> <head>   <title>spin.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="base_toolbar.html">                 base_toolbar.coffee               </a>                                           <a class="source" href="button_field.html">                 button_field.coffee               </a>                                           <a class="source" href="checkbox_field.html">                 checkbox_field.coffee               </a>                                           <a class="source" href="file_upload_field.html">                 file_upload_field.coffee               </a>                                           <a class="source" href="hidden_field.html">                 hidden_field.coffee               </a>                                           <a class="source" href="select_field.html">                 select_field.coffee               </a>                                           <a class="source" href="text_area_field.html">                 text_area_field.coffee               </a>                                           <a class="source" href="text_field.html">                 text_field.coffee               </a>                                           <a class="source" href="type_ahead_field.html">                 type_ahead_field.coffee               </a>                                           <a class="source" href="filterable_collection.html">                 filterable_collection.coffee               </a>                                           <a class="source" href="form_button_toolbar.html">                 form_button_toolbar.coffee               </a>                                           <a class="source" href="form_view.html">                 form_view.coffee               </a>                                           <a class="source" href="grid_view.html">                 grid_view.coffee               </a>                                           <a class="source" href="bread_crumb_navigatiion.html">                 bread_crumb_navigatiion.coffee               </a>                                           <a class="source" href="template.html">                 template.coffee               </a>                                           <a class="source" href="card_view.html">                 card_view.coffee               </a>                                           <a class="source" href="column_view.html">                 column_view.coffee               </a>                                           <a class="source" href="modal_view.html">                 modal_view.coffee               </a>                                           <a class="source" href="panel_view.html">                 panel_view.coffee               </a>                                           <a class="source" href="split_view.html">                 split_view.coffee               </a>                                           <a class="source" href="tab_view.html">                 tab_view.coffee               </a>                                           <a class="source" href="viewport.html">                 viewport.coffee               </a>                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="container.html">                 container.coffee               </a>                                           <a class="source" href="field.html">                 field.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                                           <a class="source" href="framework.html">                 framework.coffee               </a>                                           <a class="source" href="collection_manager.html">                 collection_manager.coffee               </a>                                           <a class="source" href="socket_manager.html">                 socket_manager.coffee               </a>                                           <a class="source" href="deferrable.html">                 deferrable.coffee               </a>                                           <a class="source" href="local_storage.html">                 local_storage.coffee               </a>                                           <a class="source" href="spin.html">                 spin.coffee               </a>                                           <a class="source" href="toolbars.html">                 toolbars.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               spin.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>Many thanks to https://github.com/fgnass/spin.js</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="p">(</span><span class="nf">(window, document, undefined_) -&gt;</span>
+  <span class="nv">createEl = </span><span class="nf">(tag, prop) -&gt;</span>
+    <span class="nv">el = </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">tag</span> <span class="o">or</span> <span class="s2">&quot;div&quot;</span><span class="p">)</span>
+    <span class="nv">n = </span><span class="kc">undefined</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="k">of</span> <span class="nx">prop</span>
+      <span class="nx">el</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span> <span class="o">=</span> <span class="nx">prop</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span>
+    <span class="nx">el</span>
+  <span class="nv">ins = </span><span class="nf">(parent, child1, child2) -&gt;</span>
+    <span class="nx">ins</span> <span class="nx">parent</span><span class="p">,</span> <span class="nx">child2</span>  <span class="k">if</span> <span class="nx">child2</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">child2</span><span class="p">.</span><span class="nx">parentNode</span>
+    <span class="nx">parent</span><span class="p">.</span><span class="nx">insertBefore</span> <span class="nx">child1</span><span class="p">,</span> <span class="nx">child2</span> <span class="o">or</span> <span class="kc">null</span>
+    <span class="nx">parent</span>
+  <span class="nv">addAnimation = </span><span class="nf">(alpha, trail, i, lines) -&gt;</span>
+    <span class="nv">name = </span><span class="p">[</span> <span class="s2">&quot;opacity&quot;</span><span class="p">,</span> <span class="nx">trail</span><span class="p">,</span> <span class="o">~~</span><span class="p">(</span><span class="nx">alpha</span> <span class="o">*</span> <span class="mi">100</span><span class="p">),</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">lines</span> <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="nv">start = </span><span class="mf">0.01</span> <span class="o">+</span> <span class="nx">i</span> <span class="err">/ lines * 100</span>
+    <span class="nv">z = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="nx">trail</span> <span class="o">*</span> <span class="p">(</span><span class="mi">100</span> <span class="o">-</span> <span class="nx">start</span><span class="p">),</span> <span class="nx">alpha</span><span class="p">)</span>
+    <span class="nv">prefix = </span><span class="nx">useCssAnimations</span><span class="p">.</span><span class="nx">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">useCssAnimations</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">&quot;Animation&quot;</span><span class="p">)).</span><span class="nx">toLowerCase</span><span class="p">()</span>
+    <span class="nv">pre = </span><span class="nx">prefix</span> <span class="o">and</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="nx">prefix</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">or</span> <span class="s2">&quot;&quot;</span>
+    <span class="nx">unless</span> <span class="nx">animations</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span>
+      <span class="nx">sheet</span><span class="p">.</span><span class="nx">insertRule</span> <span class="s2">&quot;@&quot;</span> <span class="o">+</span> <span class="nx">pre</span> <span class="o">+</span> <span class="s2">&quot;keyframes &quot;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;0%{opacity:&quot;</span> <span class="o">+</span> <span class="nx">z</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="nx">start</span> <span class="o">+</span> <span class="s2">&quot;%{opacity:&quot;</span> <span class="o">+</span> <span class="nx">alpha</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">start</span> <span class="o">+</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;%{opacity:1}&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">start</span> <span class="o">+</span> <span class="nx">trail</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">+</span> <span class="s2">&quot;%{opacity:&quot;</span> <span class="o">+</span> <span class="nx">alpha</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="s2">&quot;100%{opacity:&quot;</span> <span class="o">+</span> <span class="nx">z</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span> <span class="mi">0</span>
+      <span class="nx">animations</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nx">name</span>
+  <span class="nv">vendor = </span><span class="nf">(el, prop) -&gt;</span>
+    <span class="nv">s = </span><span class="nx">el</span><span class="p">.</span><span class="nx">style</span>
+    <span class="nv">pp = </span><span class="kc">undefined</span>
+    <span class="nv">i = </span><span class="kc">undefined</span>
+    <span class="k">return</span> <span class="nx">prop</span>  <span class="k">if</span> <span class="nx">s</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">isnt</span> <span class="o">`</span><span class="kc">undefined</span><span class="o">`</span>
+    <span class="nv">prop = </span><span class="nx">prop</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nx">toUpperCase</span><span class="p">()</span> <span class="o">+</span> <span class="nx">prop</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nv">i = </span><span class="mi">0</span>
+    <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">prefixes</span><span class="p">.</span><span class="nx">length</span>
+      <span class="nv">pp = </span><span class="nx">prefixes</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">+</span> <span class="nx">prop</span>
+      <span class="k">return</span> <span class="nx">pp</span>  <span class="k">if</span> <span class="nx">s</span><span class="p">[</span><span class="nx">pp</span><span class="p">]</span> <span class="o">isnt</span> <span class="o">`</span><span class="kc">undefined</span><span class="o">`</span>
+      <span class="nx">i</span><span class="o">++</span>
+  <span class="nv">css = </span><span class="nf">(el, prop) -&gt;</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="k">of</span> <span class="nx">prop</span>
+      <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">[</span><span class="nx">vendor</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span> <span class="o">or</span> <span class="nx">n</span><span class="p">]</span> <span class="o">=</span> <span class="nx">prop</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span>
+    <span class="nx">el</span>
+  <span class="nv">merge = </span><span class="nf">(obj) -&gt;</span>
+    <span class="nv">i = </span><span class="mi">1</span>
+
+    <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span>
+      <span class="nv">def = </span><span class="nx">arguments</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+      <span class="k">for</span> <span class="nx">n</span> <span class="k">of</span> <span class="nx">def</span>
+        <span class="nx">obj</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span> <span class="o">=</span> <span class="nx">def</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span>  <span class="k">if</span> <span class="nx">obj</span><span class="p">[</span><span class="nx">n</span><span class="p">]</span> <span class="o">is</span> <span class="o">`</span><span class="kc">undefined</span><span class="o">`</span>
+      <span class="nx">i</span><span class="o">++</span>
+    <span class="nx">obj</span>
+  <span class="nv">pos = </span><span class="nf">(el) -&gt;</span>
+    <span class="nv">o =</span>
+      <span class="nv">x: </span><span class="nx">el</span><span class="p">.</span><span class="nx">offsetLeft</span>
+      <span class="nv">y: </span><span class="nx">el</span><span class="p">.</span><span class="nx">offsetTop</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="nv">el = </span><span class="nx">el</span><span class="p">.</span><span class="nx">offsetParent</span><span class="p">)</span>
+      <span class="nx">o</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">offsetLeft</span>
+      <span class="nx">o</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="nx">el</span><span class="p">.</span><span class="nx">offsetTop</span>
+    <span class="nx">o</span>
+  <span class="nv">prefixes = </span><span class="p">[</span> <span class="s2">&quot;webkit&quot;</span><span class="p">,</span> <span class="s2">&quot;Moz&quot;</span><span class="p">,</span> <span class="s2">&quot;ms&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span> <span class="p">]</span>
+  <span class="nv">animations = </span><span class="p">{}</span>
+  <span class="nv">useCssAnimations = </span><span class="kc">undefined</span>
+  <span class="nv">sheet = </span><span class="p">(</span><span class="o">-&gt;</span>
+    <span class="nv">el = </span><span class="nx">createEl</span><span class="p">(</span><span class="s2">&quot;style&quot;</span><span class="p">)</span>
+    <span class="nx">ins</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="s2">&quot;head&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">el</span>
+    <span class="nx">el</span><span class="p">.</span><span class="nx">sheet</span> <span class="o">or</span> <span class="nx">el</span><span class="p">.</span><span class="nx">styleSheet</span>
+  <span class="p">)()</span>
+  <span class="nv">Spinner = Spinner = </span><span class="nf">(o) -&gt;</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">Spinner</span><span class="p">(</span><span class="nx">o</span><span class="p">)</span>  <span class="nx">unless</span> <span class="nx">@spin</span>
+    <span class="vi">@opts = </span><span class="nx">merge</span><span class="p">(</span><span class="nx">o</span> <span class="o">or</span> <span class="p">{},</span> <span class="nx">Spinner</span><span class="p">.</span><span class="nx">defaults</span><span class="p">,</span> <span class="nx">defaults</span><span class="p">)</span>
+
+  <span class="nv">defaults = Spinner.defaults =</span>
+    <span class="nv">lines: </span><span class="mi">12</span>
+    <span class="nv">length: </span><span class="mi">7</span>
+    <span class="nv">width: </span><span class="mi">5</span>
+    <span class="nv">radius: </span><span class="mi">10</span>
+    <span class="nv">color: </span><span class="s2">&quot;#000&quot;</span>
+    <span class="nv">speed: </span><span class="mi">1</span>
+    <span class="nv">trail: </span><span class="mi">100</span>
+    <span class="nv">opacity: </span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="nv">fps: </span><span class="mi">20</span>
+
+  <span class="nv">proto = Spinner:: =</span>
+    <span class="nv">spin: </span><span class="nf">(target) -&gt;</span>
+      <span class="nx">@stop</span><span class="p">()</span>
+      <span class="nv">self = </span><span class="k">this</span>
+      <span class="nv">el = self.el = </span><span class="nx">css</span><span class="p">(</span><span class="nx">createEl</span><span class="p">(),</span>
+        <span class="nv">position: </span><span class="s2">&quot;relative&quot;</span>
+      <span class="p">)</span>
+      <span class="nv">ep = </span><span class="kc">undefined</span>
+      <span class="nv">tp = </span><span class="kc">undefined</span>
+      <span class="k">if</span> <span class="nx">target</span>
+        <span class="nv">tp = </span><span class="nx">pos</span><span class="p">(</span><span class="nx">ins</span><span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">el</span><span class="p">,</span> <span class="nx">target</span><span class="p">.</span><span class="nx">firstChild</span><span class="p">))</span>
+        <span class="nv">ep = </span><span class="nx">pos</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span>
+        <span class="nx">css</span> <span class="nx">el</span><span class="p">,</span>
+          <span class="nv">left: </span><span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">offsetWidth</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="nx">ep</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">tp</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+          <span class="nv">top: </span><span class="p">(</span><span class="nx">target</span><span class="p">.</span><span class="nx">offsetHeight</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="nx">ep</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">tp</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+      <span class="nx">el</span><span class="p">.</span><span class="nx">setAttribute</span> <span class="s2">&quot;aria-role&quot;</span><span class="p">,</span> <span class="s2">&quot;progressbar&quot;</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">lines</span> <span class="nx">el</span><span class="p">,</span> <span class="nx">self</span><span class="p">.</span><span class="nx">opts</span>
+      <span class="nx">unless</span> <span class="nx">useCssAnimations</span>
+        <span class="nv">o = </span><span class="nx">self</span><span class="p">.</span><span class="nx">opts</span>
+        <span class="nv">i = </span><span class="mi">0</span>
+        <span class="nv">fps = </span><span class="nx">o</span><span class="p">.</span><span class="nx">fps</span>
+        <span class="nv">f = </span><span class="nx">fps</span> <span class="err">/ o.speed</span>
+        <span class="nv">ostep = </span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">o</span><span class="p">.</span><span class="nx">opacity</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span> <span class="nx">o</span><span class="p">.</span><span class="nx">trail</span> <span class="err">/ 100)</span>
+        <span class="nv">astep = </span><span class="nx">f</span> <span class="err">/ o.lines</span>
+        <span class="p">(</span><span class="nv">anim = </span><span class="o">-&gt;</span>
+          <span class="nx">i</span><span class="o">++</span>
+          <span class="nv">s = </span><span class="nx">o</span><span class="p">.</span><span class="nx">lines</span>
+
+          <span class="k">while</span> <span class="nx">s</span>
+            <span class="nv">alpha = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="nx">s</span> <span class="o">*</span> <span class="nx">astep</span><span class="p">)</span> <span class="o">%</span> <span class="nx">f</span> <span class="o">*</span> <span class="nx">ostep</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">opacity</span><span class="p">)</span>
+            <span class="nx">self</span><span class="p">.</span><span class="nx">opacity</span> <span class="nx">el</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span> <span class="o">-</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">alpha</span><span class="p">,</span> <span class="nx">o</span>
+            <span class="nx">s</span><span class="o">--</span>
+          <span class="nv">self.timeout = </span><span class="nx">self</span><span class="p">.</span><span class="nx">el</span> <span class="o">and</span> <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">anim</span><span class="p">,</span> <span class="o">~~</span><span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="nx">fps</span><span class="p">))</span>
+        <span class="p">)()</span>
+      <span class="nx">self</span>
+
+    <span class="nv">stop: </span><span class="o">-&gt;</span>
+      <span class="nv">el = </span><span class="nx">@el</span>
+      <span class="k">if</span> <span class="nx">el</span>
+        <span class="nx">clearTimeout</span> <span class="nx">@timeout</span>
+        <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">removeChild</span> <span class="nx">el</span>  <span class="k">if</span> <span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span>
+        <span class="vi">@el = </span><span class="o">`</span><span class="kc">undefined</span><span class="o">`</span>
+      <span class="k">this</span>
+
+  <span class="nv">proto.lines = </span><span class="nf">(el, o) -&gt;</span>
+    <span class="nv">fill = </span><span class="nf">(color, shadow) -&gt;</span>
+      <span class="nx">css</span> <span class="nx">createEl</span><span class="p">(),</span>
+        <span class="nv">position: </span><span class="s2">&quot;absolute&quot;</span>
+        <span class="nv">width: </span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="nx">o</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+        <span class="nv">height: </span><span class="nx">o</span><span class="p">.</span><span class="nx">width</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+        <span class="nv">background: </span><span class="nx">color</span>
+        <span class="nv">boxShadow: </span><span class="nx">shadow</span>
+        <span class="nv">transformOrigin: </span><span class="s2">&quot;left&quot;</span>
+        <span class="nv">transform: </span><span class="s2">&quot;rotate(&quot;</span> <span class="o">+</span> <span class="o">~~</span><span class="p">(</span><span class="mi">360</span> <span class="o">/</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span> <span class="o">*</span> <span class="nx">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;deg) translate(&quot;</span> <span class="o">+</span> <span class="nx">o</span><span class="p">.</span><span class="nx">radius</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span> <span class="o">+</span> <span class="s2">&quot;,0)&quot;</span>
+        <span class="nv">borderRadius: </span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">width</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+    <span class="nv">i = </span><span class="mi">0</span>
+    <span class="nv">seg = </span><span class="kc">undefined</span>
+    <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span>
+      <span class="nv">seg = </span><span class="nx">css</span><span class="p">(</span><span class="nx">createEl</span><span class="p">(),</span>
+        <span class="nv">position: </span><span class="s2">&quot;absolute&quot;</span>
+        <span class="nv">top: </span><span class="mi">1</span> <span class="o">+</span> <span class="o">~</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">width</span> <span class="err">/ 2) + &quot;px&quot;</span>
+        <span class="nv">transform: </span><span class="s2">&quot;translate3d(0,0,0)&quot;</span>
+        <span class="nv">opacity: </span><span class="nx">o</span><span class="p">.</span><span class="nx">opacity</span>
+        <span class="nv">animation: </span><span class="nx">useCssAnimations</span> <span class="o">and</span> <span class="nx">addAnimation</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">opacity</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">trail</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="nx">o</span><span class="p">.</span><span class="nx">speed</span> <span class="o">+</span> <span class="s2">&quot;s linear infinite&quot;</span>
+      <span class="p">)</span>
+      <span class="k">if</span> <span class="nx">o</span><span class="p">.</span><span class="nx">shadow</span>
+        <span class="nx">ins</span> <span class="nx">seg</span><span class="p">,</span> <span class="nx">css</span><span class="p">(</span><span class="nx">fill</span><span class="p">(</span><span class="s2">&quot;#000&quot;</span><span class="p">,</span> <span class="s2">&quot;0 0 4px &quot;</span> <span class="o">+</span> <span class="s2">&quot;#000&quot;</span><span class="p">),</span>
+          <span class="nv">top: </span><span class="mi">2</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+        <span class="p">)</span>
+      <span class="nx">ins</span> <span class="nx">el</span><span class="p">,</span> <span class="nx">ins</span><span class="p">(</span><span class="nx">seg</span><span class="p">,</span> <span class="nx">fill</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">color</span><span class="p">,</span> <span class="s2">&quot;0 0 1px rgba(0,0,0,.1)&quot;</span><span class="p">))</span>
+      <span class="nx">i</span><span class="o">++</span>
+    <span class="nx">el</span>
+
+  <span class="nv">proto.opacity = </span><span class="nf">(el, i, val) -&gt;</span>
+    <span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nv">style.opacity = </span><span class="nx">val</span>  <span class="k">if</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">el</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">.</span><span class="nx">length</span>
+
+  <span class="p">(</span><span class="o">-&gt;</span>
+    <span class="nv">s = </span><span class="nx">css</span><span class="p">(</span><span class="nx">createEl</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">),</span>
+      <span class="nv">behavior: </span><span class="s2">&quot;url(#default#VML)&quot;</span>
+    <span class="p">)</span>
+    <span class="nv">i = </span><span class="kc">undefined</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">vendor</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">)</span> <span class="o">and</span> <span class="nx">s</span><span class="p">.</span><span class="nx">adj</span>
+      <span class="nv">i = </span><span class="mi">4</span>
+      <span class="k">while</span> <span class="nx">i</span><span class="o">--</span>
+        <span class="nx">sheet</span><span class="p">.</span><span class="nx">addRule</span> <span class="p">[</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;roundrect&quot;</span><span class="p">,</span> <span class="s2">&quot;fill&quot;</span><span class="p">,</span> <span class="s2">&quot;stroke&quot;</span> <span class="p">][</span><span class="nx">i</span><span class="p">],</span> <span class="s2">&quot;behavior:url(#default#VML)&quot;</span>
+      <span class="nv">proto.lines = </span><span class="nf">(el, o) -&gt;</span>
+        <span class="nv">grp = </span><span class="o">-&gt;</span>
+          <span class="nx">css</span> <span class="nx">createEl</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">,</span>
+            <span class="nv">coordsize: </span><span class="nx">s</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nx">s</span>
+            <span class="nv">coordorigin: </span><span class="o">-</span><span class="nx">r</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="o">-</span><span class="nx">r</span>
+          <span class="p">),</span>
+            <span class="nv">width: </span><span class="nx">s</span>
+            <span class="nv">height: </span><span class="nx">s</span>
+        <span class="nv">seg = </span><span class="nf">(i, dx, filter) -&gt;</span>
+          <span class="nx">ins</span> <span class="nx">g</span><span class="p">,</span> <span class="nx">ins</span><span class="p">(</span><span class="nx">css</span><span class="p">(</span><span class="nx">grp</span><span class="p">(),</span>
+            <span class="nv">rotation: </span><span class="mi">360</span> <span class="o">/</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span> <span class="o">*</span> <span class="nx">i</span> <span class="o">+</span> <span class="s2">&quot;deg&quot;</span>
+            <span class="nv">left: </span><span class="o">~~</span><span class="nx">dx</span>
+          <span class="p">),</span> <span class="nx">ins</span><span class="p">(</span><span class="nx">css</span><span class="p">(</span><span class="nx">createEl</span><span class="p">(</span><span class="s2">&quot;roundrect&quot;</span><span class="p">,</span>
+            <span class="nv">arcsize: </span><span class="mi">1</span>
+          <span class="p">),</span>
+            <span class="nv">width: </span><span class="nx">r</span>
+            <span class="nv">height: </span><span class="nx">o</span><span class="p">.</span><span class="nx">width</span>
+            <span class="nv">left: </span><span class="nx">o</span><span class="p">.</span><span class="nx">radius</span>
+            <span class="nv">top: </span><span class="o">-</span><span class="nx">o</span><span class="p">.</span><span class="nx">width</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+            <span class="nv">filter: </span><span class="nx">filter</span>
+          <span class="p">),</span> <span class="nx">createEl</span><span class="p">(</span><span class="s2">&quot;fill&quot;</span><span class="p">,</span>
+            <span class="nv">color: </span><span class="nx">o</span><span class="p">.</span><span class="nx">color</span>
+            <span class="nv">opacity: </span><span class="nx">o</span><span class="p">.</span><span class="nx">opacity</span>
+          <span class="p">),</span> <span class="nx">createEl</span><span class="p">(</span><span class="s2">&quot;stroke&quot;</span><span class="p">,</span>
+            <span class="nv">opacity: </span><span class="mi">0</span>
+          <span class="p">)))</span>
+        <span class="nv">r = </span><span class="nx">o</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="nx">o</span><span class="p">.</span><span class="nx">width</span>
+        <span class="nv">s = </span><span class="mi">2</span> <span class="o">*</span> <span class="nx">r</span>
+        <span class="nv">g = </span><span class="nx">grp</span><span class="p">()</span>
+        <span class="nv">margin = </span><span class="o">~</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">length</span> <span class="o">+</span> <span class="nx">o</span><span class="p">.</span><span class="nx">radius</span> <span class="o">+</span> <span class="nx">o</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;px&quot;</span>
+        <span class="nv">i = </span><span class="kc">undefined</span>
+        <span class="k">if</span> <span class="nx">o</span><span class="p">.</span><span class="nx">shadow</span>
+          <span class="nv">i = </span><span class="mi">1</span>
+          <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span>
+            <span class="nx">seg</span> <span class="nx">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)&quot;</span>
+            <span class="nx">i</span><span class="o">++</span>
+        <span class="nv">i = </span><span class="mi">1</span>
+        <span class="k">while</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span>
+          <span class="nx">seg</span> <span class="nx">i</span>
+          <span class="nx">i</span><span class="o">++</span>
+        <span class="nx">ins</span> <span class="nx">css</span><span class="p">(</span><span class="nx">el</span><span class="p">,</span>
+          <span class="nv">margin: </span><span class="nx">margin</span> <span class="o">+</span> <span class="s2">&quot; 0 0 &quot;</span> <span class="o">+</span> <span class="nx">margin</span>
+          <span class="nv">zoom: </span><span class="mi">1</span>
+        <span class="p">),</span> <span class="nx">g</span>
+
+      <span class="nv">proto.opacity = </span><span class="nf">(el, i, val, o) -&gt;</span>
+        <span class="nv">c = </span><span class="nx">el</span><span class="p">.</span><span class="nx">firstChild</span>
+        <span class="nv">o = </span><span class="nx">o</span><span class="p">.</span><span class="nx">shadow</span> <span class="o">and</span> <span class="nx">o</span><span class="p">.</span><span class="nx">lines</span> <span class="o">or</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nx">c</span> <span class="o">and</span> <span class="nx">i</span> <span class="o">+</span> <span class="nx">o</span> <span class="o">&lt;</span> <span class="nx">c</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">.</span><span class="nx">length</span>
+          <span class="nv">c = </span><span class="nx">c</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">[</span><span class="nx">i</span> <span class="o">+</span> <span class="nx">o</span><span class="p">]</span>
+          <span class="nv">c = </span><span class="nx">c</span> <span class="o">and</span> <span class="nx">c</span><span class="p">.</span><span class="nx">firstChild</span>
+          <span class="nv">c = </span><span class="nx">c</span> <span class="o">and</span> <span class="nx">c</span><span class="p">.</span><span class="nx">firstChild</span>
+          <span class="nv">c.opacity = </span><span class="nx">val</span>  <span class="k">if</span> <span class="nx">c</span>
+    <span class="k">else</span>
+      <span class="nv">useCssAnimations = </span><span class="nx">vendor</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s2">&quot;animation&quot;</span><span class="p">)</span>
+  <span class="p">)()</span>
+  <span class="nb">window</span><span class="p">.</span><span class="nv">Spinner = </span><span class="nx">Spinner</span>
+<span class="p">)</span> <span class="nb">window</span><span class="p">,</span> <span class="nb">document</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

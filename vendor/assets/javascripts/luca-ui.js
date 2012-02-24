@@ -726,12 +726,14 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
           return _this.register(_this.registerWith, _this.registerAs, _this);
         });
       }
-      if (_.isArray(this.data) && this.data.length > 0) this.local = true;
-      this.wrapUrl();
+      if (_.isArray(this.data) && this.data.length > 0) {
+        this.memoryCollection = true;
+      }
+      if (this.useNormalUrl !== true) this.__wrapUrl();
       Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
       return this.trigger("after:initialize");
     },
-    wrapUrl: function() {
+    __wrapUrl: function() {
       var params, url,
         _this = this;
       if (_.isFunction(this.url)) {
@@ -771,18 +773,11 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
     },
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
-      if (options == null) {
-        options = {
-          auto: true,
-          refresh: true
-        };
-      }
+      if (options == null) options = {};
       this.applyParams(filter);
-      if (options.auto) {
-        return this.fetch({
-          refresh: options.refresh
-        });
-      }
+      return this.fetch(_.extend(options, {
+        refresh: true
+      }));
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = Luca.Collection.baseParams());
@@ -806,12 +801,12 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       }
       if (_.isObject(collect)) return collectionManager[key] = collection;
     },
-    bootstrap: function() {
-      return this.loadFromBootstrap();
-    },
     loadFromBootstrap: function() {
       if (!this.bootstrap_cache_key) return;
       return this.reset(this.cached_models());
+    },
+    bootstrap: function() {
+      return this.loadFromBootstrap();
     },
     cached_models: function() {
       return Luca.Collection.cache(this.bootstrap_cache_key);
@@ -820,12 +815,11 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       var url;
       if (options == null) options = {};
       this.trigger("before:fetch", this);
-      if (this.local === true) return this.reset(this.data);
+      if (this.memoryCollection === true) return this.reset(this.data);
       if (this.cached_models().length && !options.refresh) return this.bootstrap();
-      this.reset();
-      this.fetching = true;
       url = _.isFunction(this.url) ? this.url() : this.url;
       if (!((url && url.length > 1) || this.localStorage)) return true;
+      this.fetching = true;
       try {
         return Backbone.Collection.prototype.fetch.apply(this, arguments);
       } catch (e) {

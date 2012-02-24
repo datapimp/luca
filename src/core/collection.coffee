@@ -33,24 +33,42 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     if @cached
       @bootstrap_cache_key = if _.isFunction( @cached ) then @cached() else @cached  
 
-    # if we are to register with some global collection management system
+    # If we are going to be registering this collection with the CollectionManager
+    # class, then we need to specify a key to register ourselves under. @registerAs can be 
+    # as simple as something as "books", or if you are using collections which need
+    # to be scoped with some sort of unique id, as say some sort of belongsTo relationship
+    # then you can specify @registerAs as a method()
     if @registerWith
       @registerAs ||= @cached
       @registerAs = if _.isFunction( @registerAs ) then @registerAs() else @registerAs
 
       @bind "after:initialize", ()=>
         @register( @registerWith, @registerAs, @)
- 
-    if _.isArray(@data) and @data.length > 0
-      @local = true
     
-    @wrapUrl()
+    # Populating a collection with local data
+    # 
+    # by specifying a @data property which is an array
+    # then you can set the collection to be a @memoryCollection
+    # which never interacts with a persistence layer at all.
+    #
+    # this is mainly used by the Luca.fields.SelectField class for
+    # generating simple select fields with static data  
+    if _.isArray(@data) and @data.length > 0
+      @memoryCollection = true
+    
+    @__wrapUrl() unless @useNormalUrl is true
      
     Backbone.Collection.prototype.initialize.apply @, [models, @options] 
 
     @trigger "after:initialize"
   
-  wrapUrl: ()->
+  #### Automatic Query String Generation
+  #
+  # Luca.Collections will append a query string to the URL 
+  # and will automatically do this for you without you having
+  # to write a special url handler.  If you want to use a normal
+  # url without this feature, just set @useNormalUrl = true
+  __wrapUrl: ()->
     if _.isFunction(@url)
       @url = _.wrap @url, (fn)=>
         val = fn.apply @ 
@@ -86,10 +104,16 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @base_params = Luca.Collection.baseParams()
     @
 
-  applyFilter: (filter={}, options={auto:true,refresh:true})->
+  # Applying a filter to a collection, will automatically apply
+  # the filter parameters and then call fetch.  passing an additional
+  # options hash will pass these options to the call to @fetch()
+  # setting refresh to true, forcing a remote call to the REST API
+  applyFilter: (filter={}, options={})->
     @applyParams(filter)
-    @fetch(refresh:options.refresh) if options.auto
+    @fetch _.extend(options,refresh:true)
   
+  # You can apply params to a collection, so that any upcoming requests
+  # made to the REST API are made with the key values specified 
   applyParams: (params)->
     @base_params ||= Luca.Collection.baseParams()
     _.extend @base_params, params
@@ -120,30 +144,44 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     if _.isObject( collect)
       collectionManager[ key ] = collection
   
-  # an alias for loadFromBootstrap which is a bit more descriptive
-  bootstrap: ()-> @loadFromBootstrap()
-
+  # A Luca.Collection will load models from the in memory model store
+  # returned from Luca.Collection.cache, where the key returned from 
+  # the @cached attribute or method matches the key of the model cache  
   loadFromBootstrap: ()->
     return unless @bootstrap_cache_key
     @reset @cached_models()
 
+  # an alias for loadFromBootstrap which is a bit more descriptive
+  bootstrap: ()-> @loadFromBootstrap()
+
+  # cached_models is a reference to the Luca.Collection.cache object
+  # key'd on whatever this collection's bootstrap_cache_key is set to be
+  # via the @cached() interface
   cached_models: ()->
     Luca.Collection.cache( @bootstrap_cache_key )
 
+  # Luca.Collection overrides the default Backbone.Collection.fetch method
+  # and triggers an event "before:fetch" which gives you additional control
+  # over the process
+  #
+  # in addition, it loads models directly from the bootstrap cache instead
+  # of going directly to the API 
   fetch: (options={})->
     @trigger "before:fetch", @
 
-    return @reset(@data) if @local is true
+    return @reset(@data) if @memoryCollection is true
     
+    # fetch will try to pull from the bootstrap if it is setup to do so
+    # you can actually make the roundtrip to the server anyway if you pass
+    # refresh = true in the options hash 
     return @bootstrap() if @cached_models().length and not options.refresh
     
-    @reset()
-
-    @fetching = true
 
     url = if _.isFunction(@url) then @url() else @url
     
     return true unless ((url and url.length > 1) or @localStorage)
+
+    @fetching = true
 
     try
       Backbone.Collection.prototype.fetch.apply @, arguments
@@ -152,6 +190,13 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
       
       throw e
 
+  # onceLoaded is equivalent to binding to the 
+  # reset trigger with a function wrapped in _.once 
+  # so that it only gets run...ahem...once.
+  #
+  # that being said, if the collection already has models
+  # it won't even bother fetching it it will just run
+  # as if reset was already triggered 
   onceLoaded: (fn)->
     if @length > 0 and not @fetching
       fn.apply @, [@]
@@ -162,7 +207,11 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @bind "reset", ()=>
       wrapped()
       @unbind "reset", wrapped
-    
+  
+  # ifLoaded is equivalent to binding to the reset trigger with
+  # a function, if the collection already has models it will just
+  # run automatically.  similar to onceLoaded except the binding
+  # stays in place 
   ifLoaded: (fn, scope=@)->
     if @models.length > 0 and not @fetching
       fn.apply scope, [@]
@@ -174,6 +223,17 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     unless @fetching
       @fetch()
 
+  # parse is very close to the stock Backbone.Collection parse, which
+  # just returns the response.  However, it also triggers a callback
+  # after:response, and automatically parses responses which contain
+  # a JSON root like you would see in rails, if you specify the @root
+  # property.
+  #
+  # it will also update the Luca.Collection.cache with the models from
+  # the response, so that any subsequent calls to fetch() on a bootstrapped
+  # collection, will have updated models from the server.  Really only
+  # useful if you call fetch(refresh:true) manually on any bootstrapped
+  # collection
   parse: (response)-> 
     @fetching = false
     @trigger "after:response"
