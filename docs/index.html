@@ -1,0 +1,207 @@
+<!DOCTYPE html>  <html> <head>   <title>index.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="base_toolbar.html">                 base_toolbar.coffee               </a>                                           <a class="source" href="button_field.html">                 button_field.coffee               </a>                                           <a class="source" href="checkbox_field.html">                 checkbox_field.coffee               </a>                                           <a class="source" href="file_upload_field.html">                 file_upload_field.coffee               </a>                                           <a class="source" href="hidden_field.html">                 hidden_field.coffee               </a>                                           <a class="source" href="select_field.html">                 select_field.coffee               </a>                                           <a class="source" href="text_area_field.html">                 text_area_field.coffee               </a>                                           <a class="source" href="text_field.html">                 text_field.coffee               </a>                                           <a class="source" href="type_ahead_field.html">                 type_ahead_field.coffee               </a>                                           <a class="source" href="filterable_collection.html">                 filterable_collection.coffee               </a>                                           <a class="source" href="form_button_toolbar.html">                 form_button_toolbar.coffee               </a>                                           <a class="source" href="form_view.html">                 form_view.coffee               </a>                                           <a class="source" href="grid_view.html">                 grid_view.coffee               </a>                                           <a class="source" href="template.html">                 template.coffee               </a>                                           <a class="source" href="card_view.html">                 card_view.coffee               </a>                                           <a class="source" href="column_view.html">                 column_view.coffee               </a>                                           <a class="source" href="modal_view.html">                 modal_view.coffee               </a>                                           <a class="source" href="panel_view.html">                 panel_view.coffee               </a>                                           <a class="source" href="split_view.html">                 split_view.coffee               </a>                                           <a class="source" href="tab_view.html">                 tab_view.coffee               </a>                                           <a class="source" href="viewport.html">                 viewport.coffee               </a>                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="container.html">                 container.coffee               </a>                                           <a class="source" href="field.html">                 field.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                                           <a class="source" href="framework.html">                 framework.coffee               </a>                                           <a class="source" href="index.html">                 index.coffee               </a>                                           <a class="source" href="collection_manager.html">                 collection_manager.coffee               </a>                                           <a class="source" href="socket_manager.html">                 socket_manager.coffee               </a>                                           <a class="source" href="deferrable.html">                 deferrable.coffee               </a>                                           <a class="source" href="local_storage.html">                 local_storage.coffee               </a>                                           <a class="source" href="spin.html">                 spin.coffee               </a>                                           <a class="source" href="toolbars.html">                 toolbars.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               index.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <h3>Luca.js</h3>
+
+<p>Luca is a Backbone Helper and Container View Library
+which is packed with about a year worth of Backbone.js
+experience and best practices accumulated while I developed
+several large Backbone applications.  By using it, you are
+to a degree accepting my way of doing things.  But, I can
+assure you that by accepting my way of doing things you can
+focus a lot more on developing your UI and features and less
+on the boilerplate code required to get things to work properly.</p>
+
+<p>Luca components and stock Backbone components are completely
+compatible and you can ( and should ) use both in your application
+wherever it makes the most sense to do so</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h3>ExtJS Component Style</h3>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Luca is inspired by the ExtJS style of laying out applications
+as composite views with components nested within components, and
+where the outer views or components handle communication between
+their children.  By properly abstracting your views it becomes 
+possible to build large applications simply with a bunch of JSON
+configuration parameters</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">MyApplication = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">Viewport</span><span class="p">.</span><span class="nx">extend</span>
+  <span class="nx">components</span><span class="o">:</span><span class="p">[</span>
+    <span class="nv">ctype: </span><span class="s1">&#39;column_view&#39;</span>
+    <span class="nv">layout: </span><span class="s1">&#39;50/50&#39;</span>
+    <span class="nv">components: </span><span class="p">[</span>
+      <span class="nv">ctype: </span><span class="s1">&#39;card_view&#39;</span>
+      <span class="nv">name: </span><span class="s1">&#39;view1&#39;</span>
+      <span class="nx">components</span><span class="o">:</span><span class="p">[</span>
+        <span class="nv">ctype: </span><span class="s1">&#39;custom_view&#39;</span> 
+        <span class="nv">name: </span><span class="s1">&#39;custom_view_1&#39;</span>
+      <span class="p">,</span>
+        <span class="nv">ctype: </span><span class="s1">&#39;custom_view&#39;</span>
+        <span class="nv">name: </span><span class="s1">&#39;custom_view_2&#39;</span>
+      <span class="p">]</span>
+    <span class="p">,</span>
+      <span class="nv">ctype : </span><span class="s1">&#39;custom_view&#39;</span>
+      <span class="nv">name: </span><span class="s1">&#39;custom_view_3&#39;</span>
+    <span class="p">]</span>
+  <span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <h3>View Registry</h3>
+
+<p>if You define your views in namespaces, like you should be</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">App.views.CustomView = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span>
+<span class="nv">App.views.OtherView = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>Then you can call Luca.registry.addNamespace 'App.views'
+and then have views like CustomView be accessible by
+a @ctype property with the value 'custom_view'
+in the various container views provided by luca.  This style of
+lazy instantiation adopted from ExtJS makes it possible to define
+a view and its relationships but not necessarily create it until
+you need it.  Or at the very least, to have the containers render
+these components for you and inject them into their proper place
+in the DOM structure</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">Luca</span><span class="p">.</span><span class="nx">registry</span><span class="p">.</span><span class="nx">addNamespace</span> <span class="s1">&#39;App.views&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <h3>View Helpers</h3>
+
+<p>Luca.View is an extension of Backbone.View and provides some common
+patterns that I have found useful in the most generic cases when developing
+all different kinds of features in various kinds of apps.</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h3>Auto Event Binding</h3>
+
+<p>views can define a hooks attribute which prevent you from having to
+bind to certain named triggers.  Hooks methods are automatically called
+within the context of the view itself</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">Luca.View = </span><span class="nx">Backbone</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+    <span class="p">...</span>
+    <span class="nx">hooks</span><span class="o">:</span><span class="p">[</span>
+      <span class="s2">&quot;before:render&quot;</span>
+      <span class="s2">&quot;after:render&quot;</span>
+    <span class="p">]</span>
+
+  <span class="nv">SubClass = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+    <span class="nv">beforeRender: </span><span class="nf">()-&gt;</span>
+      <span class="nx">@doSomething</span><span class="p">()</span>
+    <span class="nv">afterRender: </span><span class="nf">()-&gt;</span>
+      <span class="nx">@doSomething</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>this is accomplished by the setupHooks method
+which is automatically called on every Luca.View 
+subclass.  This allows you to just define which
+methods on your view should be called any time an
+event gets triggered </p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">setupHooks: </span><span class="nf">(set)-&gt;</span>
+    <span class="nx">set</span> <span class="o">||=</span> <span class="nx">@hooks</span>
+    
+    <span class="nx">_</span><span class="p">(</span><span class="nx">set</span><span class="p">).</span><span class="nx">each</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nv">parts = </span><span class="nx">event</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+      <span class="nv">prefix = </span><span class="nx">parts</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span>
+      
+      <span class="nv">parts = </span><span class="nx">_</span><span class="p">(</span> <span class="nx">parts</span> <span class="p">).</span><span class="nx">map</span> <span class="nf">(p)-&gt;</span> <span class="nx">_</span><span class="p">.</span><span class="nx">capitalize</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+      <span class="nv">fn = </span><span class="nx">prefix</span> <span class="o">+</span> <span class="nx">parts</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+      
+      <span class="nx">@bind</span> <span class="nx">event</span><span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span> <span class="err">@</span><span class="p">[</span><span class="nx">fn</span><span class="p">].</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span> <span class="k">if</span> <span class="err">@</span><span class="p">[</span><span class="nx">fn</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <h3>Collection Helpers</h3>
+
+<p>Luca.Collection is an extenstion of Backbone.Collection which provides
+a bunch of commonly used patterns for doing things like:</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <ul>
+<li>setting base parameters used on every request to your REST API</li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Luca.Collection.baseParams = </span><span class="nf">(obj)-&gt;</span>
+  <span class="k">return</span> <span class="nv">Luca.Collection._baseParams = </span><span class="nx">obj</span> <span class="k">if</span> <span class="nx">obj</span>
+
+  <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_baseParams</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_baseParams</span><span class="p">.</span><span class="nx">call</span><span class="p">()</span>
+  
+  <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isObject</span><span class="p">(</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_baseParams</span> <span class="p">)</span>
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_baseParams</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <ul>
+<li><p>filtering with query string parameters against your API</p></li>
+<li><p>automatic interaction with your Luca.CollectionManager class</p></li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">register: </span><span class="nf">(collectionManager=&quot;&quot;, key=&quot;&quot;, collection)-&gt;</span>
+    <span class="p">...</span>
+    <span class="nx">collection</span> <span class="o">||=</span> <span class="k">this</span> 
+    <span class="p">...</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isString</span><span class="p">(</span> <span class="nx">collectionManager</span> <span class="p">)</span>
+      <span class="nv">collectionManager = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">nestedValue</span><span class="p">(</span> <span class="nx">collectionManager</span><span class="p">,</span> <span class="nb">window</span> <span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span> <span class="nx">collectionManager</span><span class="p">.</span><span class="nx">add</span> <span class="p">)</span>
+      <span class="k">return</span> <span class="nx">collectionManager</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isObject</span><span class="p">(</span> <span class="nx">collect</span><span class="p">)</span>
+      <span class="nx">collectionManager</span><span class="p">[</span> <span class="nx">key</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">collection</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <ul>
+<li><p>make it easier to parse Rails style responses which include the root
+by specifying a @root parameter</p></li>
+<li><p>use backbone-query if available</p></li>
+<li><p>onceLoaded: run a callback once if there are models present, otherwise wait until
+the collection fetches</p></li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">onceLoaded: </span><span class="nf">(fn)-&gt;</span>
+    <span class="k">if</span> <span class="nx">@length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">@fetching</span>
+      <span class="nx">fn</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="p">[</span><span class="err">@</span><span class="p">]</span>
+      <span class="k">return</span>
+    
+    <span class="nv">wrapped = </span><span class="p">()</span><span class="o">=&gt;</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,[</span><span class="err">@</span><span class="p">]</span>
+
+    <span class="nx">@bind</span> <span class="s2">&quot;reset&quot;</span><span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span>
+      <span class="nx">wrapped</span><span class="p">()</span>
+      <span class="nx">@unbind</span> <span class="s2">&quot;reset&quot;</span><span class="p">,</span> <span class="nx">wrapped</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <ul>
+<li>ifLoaded: run a callback any time the model gets reset, or if there are already models</li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">ifLoaded: </span><span class="nf">(fn, scope=@)-&gt;</span>
+    <span class="k">if</span> <span class="nx">@models</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">@fetching</span>
+      <span class="nx">fn</span><span class="p">.</span><span class="nx">apply</span> <span class="nx">scope</span><span class="p">,</span> <span class="p">[</span><span class="err">@</span><span class="p">]</span>
+      <span class="k">return</span>
+
+    <span class="nx">@bind</span> <span class="s2">&quot;reset&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nx">collection</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nx">fn</span><span class="p">.</span><span class="nx">apply</span> <span class="nx">scope</span><span class="p">,</span> <span class="p">[</span><span class="nx">collection</span><span class="p">]</span>
+
+    <span class="nx">unless</span> <span class="nx">@fetching</span>
+      <span class="nx">@fetch</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <ul>
+<li>bootstrapping a collection of objects which are 
+rendered in your markup on page load</li>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <h3>Collections with Bootstrapped Models</h3>
+
+<p>In order to make our Backbone Apps super fast it is a good practice
+to pre-populate your collections by what is referred to as bootstrapping</p>
+
+<p>Luca.Collections make it easier for you to do this cleanly and automatically</p>
+
+<p>by specifying a @cached property or method in your collection definition
+Luca.Collections will automatically look in this space to find models
+and avoid a roundtrip to your API unless explicitly told to.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Luca.Collection._bootstrapped_models = </span><span class="p">{}</span>
+
+<span class="nv">Luca.Collection.bootstrap = </span><span class="nf">(obj)-&gt;</span>
+  <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_bootstrapped_models</span><span class="p">,</span> <span class="nx">obj</span>
+
+<span class="nv">Luca.Collection.cache = </span><span class="nf">(key, models)-&gt;</span>
+  <span class="k">return</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_bootstrapped_models</span><span class="p">[</span> <span class="nx">key</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">models</span> <span class="k">if</span> <span class="nx">models</span>
+  <span class="nx">Luca</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">_bootstrapped_models</span><span class="p">[</span> <span class="nx">key</span> <span class="p">]</span> <span class="o">||</span> <span class="p">[]</span>
+
+<span class="nv">Luca.Collection = </span><span class="nx">Backbone</span><span class="p">.</span><span class="nx">Collection</span><span class="p">.</span><span class="nx">extend</span>
+  <span class="p">...</span>
+  <span class="nv">fetch: </span><span class="nf">(options={})-&gt;</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;before:fetch&quot;</span><span class="p">,</span> <span class="err">@</span>
+
+    <span class="k">return</span> <span class="nx">@reset</span><span class="p">(</span><span class="nx">@data</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@memoryCollection</span> <span class="o">is</span> <span class="kc">true</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>fetch will try to pull from the bootstrap if it is setup to do so
+you can actually make the roundtrip to the server anyway if you pass
+refresh = true in the options hash </p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">return</span> <span class="nx">@bootstrap</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@cached_models</span><span class="p">().</span><span class="nx">length</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">options</span><span class="p">.</span><span class="nx">refresh</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <h3>Collection Manager</h3>
+
+<p>The purpose of the collection manager is to provide an interface
+for tracking the creation of collections, so that you only create
+one instance of a given collection class per instance of some scope.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">CollectionManager</span>
+  <span class="p">...</span> 
+  <span class="nv">getOrCreate: </span><span class="nf">(key,collectionOptions={},initialModels=[])-&gt;</span>  
+    <span class="nx">@get</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="o">||</span> <span class="nx">@create</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="nx">collectionOptions</span><span class="p">,</span><span class="nx">initialModels</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>If you use a underscored version of your collection class name
+as the key for your collection ( defined via @registerAs ) then
+it will automatically be able to guess which collection you are
+referring to and create it for you</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">guessCollectionClass: </span><span class="nf">(key)-&gt;</span>
+    <span class="nv">classified = </span><span class="nx">_</span><span class="p">(</span> <span class="nx">key</span> <span class="p">).</span><span class="nx">chain</span><span class="p">().</span><span class="nx">capitalize</span><span class="p">().</span><span class="nx">camelize</span><span class="p">().</span><span class="nx">value</span><span class="p">()</span> 
+    <span class="nv">guess = </span><span class="p">(</span><span class="nx">@collectionPrefix</span> <span class="o">||</span> <span class="nb">window</span><span class="p">)[</span> <span class="nx">classified</span> <span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <p>You would generally create the collection manager once as part of
+your global application object which, in my opinion should be a
+Luca Viewport container</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">LucaApp = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">Viewport</span><span class="p">.</span><span class="nx">extend</span>
+  <span class="nv">initialize: </span><span class="nf">(@options={})-&gt;</span>
+    <span class="vi">@collectionManager = </span><span class="k">new</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">CollectionManager</span>
+      <span class="nv">getScope: </span><span class="p">()</span><span class="o">=&gt;</span> <span class="nx">@someParentValue</span><span class="p">()</span>
+
+  <span class="nv">collection: </span><span class="nf">(key,options={},models=[])-&gt;</span> 
+    <span class="nx">@collectionManager</span><span class="p">.</span><span class="nx">getOrCreate</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="nx">options</span><span class="p">,</span><span class="nx">models</span><span class="p">)</span>
+
+  <span class="nv">someParentValue: </span><span class="nf">()-&gt;</span> <span class="nx">@usedToScopeTheCollections</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <p>Now in the single global instance of LucaApp you have 
+one central place to access a collection of models, one
+interface to listen to for add, remove, reset, change events </p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <h3>Collection and View Integration</h3>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>One really cool feature of Luca is the enhanced API for binding
+collections to views.  Using an API very similar to the 
+DOM @events property on Backbone views.  If you are using Luca.Collection 
+classes and a Luca.CollectionManager to track them, you can use the
+@collectionEvents property on your views as a cleaner interface for 
+setting up your event bindings</p>             </td>             <td class="code">               <div class="highlight"><pre>  
+<span class="nv">App.Manager = </span><span class="k">new</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">CollectionManager</span><span class="p">()</span>
+
+<span class="nv">App.SampleCollection = </span><span class="k">new</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">SampleCollection</span>
+  <span class="nv">registerWith: </span><span class="s2">&quot;App.Manager&quot;</span>
+  <span class="nv">registerAs: </span><span class="s2">&quot;sample_collection&quot;</span>
+
+<span class="nv">App.View = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+  <span class="nv">collectionEvents:</span>
+    <span class="s2">&quot;sample_collection add&quot;</span> <span class="o">:</span> <span class="s2">&quot;onCollectionAdd&quot;</span>
+
+  <span class="nv">onCollectionAdd: </span><span class="nf">(model,collection)-&gt;</span>
+    <span class="nx">@doSomethingRighteous</span><span class="p">()</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

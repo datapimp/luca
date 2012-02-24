@@ -25,6 +25,13 @@ class Luca.SocketManager
         @socket = new Faye.Client( @options.socket_host )
 
   #### Transport Loading and Configuration
+  #
+  # Luca wraps several popular client side socket abstractions
+  # such as socket.io or faye.js ( more coming soon )
+  #
+  # it provides a common interface on top of these and just
+  # treats them as Backbone.Events which you bind to like you
+  # would on any other Backbone class
   
   transportLoaded: ()-> @connect()
 

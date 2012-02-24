@@ -2322,16 +2322,6 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
 }).call(this);
 (function() {
 
-  Luca.components.BreadCrumbNavigation = Luca.View.extend({
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.View.prototype.initialize.apply(this, arguments);
-    }
-  });
-
-}).call(this);
-(function() {
-
   Luca.components.Template = Luca.View.extend({
     initialize: function(options) {
       this.options = options != null ? options : {};

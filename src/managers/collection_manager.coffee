@@ -34,16 +34,6 @@
 # Special Thanks to @tjbladez for this wonderful initialModelsa
 #
 
-#### Automatic Registration
-#
-# In the Luca.Collection class, there are two configuration options
-#
-# @registerAs which is used to define a unique name for which to reference the collection
-
-# @registerWith which is used to point to the instance of the collection manager
-# this can be a string, in case the value doesn't exist yet, and luca will automatically
-# find the object when it is time
-#
 
 class Luca.CollectionManager
   __collections: {}
