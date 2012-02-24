@@ -2,7 +2,7 @@ What Is Luca?
 -------------
 Luca is a component / container library for Backbone.js which
 encompasses all of the best practices for laying out a large
-app with many nested views and containers.
+app with many nested views and containers.  
 
 To run the sandbox:
 
@@ -34,33 +34,39 @@ stylesheet manifest
 
 What does it get me?
 --------------------
-If nothing else, JST/HAML/EJS templates using the .luca file extension.
-Simply load up a bunch of .luca files in the Rails 3.1 Asset Pipeline
-and you can have HAML views client side, with JST style <%=
-interpolation %> and <% if(conditional_logic) %>
+Luca provides an augmented View and Collection class which encompass all of the Backbone.JS best practices and optimizations that I have personally come up with developing some rather large Backbone.js apps on top of Rails.  
 
-But in actuality, a standard component / container library for easily
-handling layout, rendering, state tracking and switching for Backbone
-Views.
+It assumes a style of progamming very similar to ExtJS where you define almost all of your 
+views and components as large nested JSON structures.
 
-And a whole hell of a lot more best practices for Backbone.JS apps.
+Twitter Bootstrap
+-----------------
+Luca uses Twitter Bootstrap for a lot of styling, layout, CSS.  Not so much for the JS.  By default, bootstrap is enabled and Luca applies many of the necessary CSS classes, for example, in the Form View and in the various fields.  
+
+To disable Bootstrap, you can do
+
+```coffeescript
+Luca.enableBootstrap = false
+```
 
 Container Library
 -----------------------------
 - split_view.  
-  - horizontally split layout.
+  - a container for multiple views which get displayed side by side, or on top of one another, or in any other configuration.
+   
 - column_view. 
   - vertically split layout  
   - configurable widths via layout parameter
   - example: layout: '25/25/25/25' for 25% width
+
 - card_view
   - gives you a wizard style layout
   - one active view at a time
 - modal_view
-  - simplemodal based container.
+  - wrap your views in a twitter bootstrap modal container 
 - tab_view
   - similar to card view, but with an automatically rendered tab
-    selector widget
+    selector widget, using bootstrap's css 
 - viewport
   - for full screen views
 
@@ -71,14 +77,13 @@ Component Library
   - custom renderers for cells
   - scrollable grid component.
   - automatically renders a backbone collection to a table
-  - deferrable rendering through a Backbone.Collection or
-    Luca.FilterableCollection
 
 - form_view
   - build a complex form using any of the containers
   - bind to model
   - validation
   - text, checkbox, radio, select fields
+  - bootstrap styling for css
 
 The Base View Class.  Luca.View
 -------------------------------
@@ -97,13 +102,17 @@ initialize method like such.
 
 Rendering
 ---------
-Any Luca.View subclass, has special handling around the render() method.
-You automatically get beforeRender, afterRender binding for free.
+Because many large applications consist of many views nested within views
+
+any Luca.View subclass, has special handling around the render() method.  
+
+You automatically get beforeRender, afterRender methods on every View, and 
+render() by default automatically appends the view's $(@el) to its @container
 
 If you pass a deferrable property, which references a
 Backbone.Collection, it will automatically bind the render() method you
 define to the 'reset' event on the Collection, and will automatically
-call fetch() for you
+call fetch() for you.
 
 Hooks
 -----

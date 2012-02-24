@@ -1,31 +1,38 @@
-Luca.Collection = Backbone.QueryCollection.extend
-  base: 'Luca.Collection'
-
-Luca.Collection._baseParams = {}
-Luca.Collection.baseParams = (obj)->
-  return Luca.Collection._baseParams = obj if obj
-
-  if _.isFunction( Luca.Collection._baseParams )
-    return Luca.Collection._baseParams.call()
+# Luca.Collection
+#
+# Luca.Collection is an extenstion of Backbone.Collection which provides
+# a bunch of commonly used patterns for doing things like:
+#
+#   - setting base parameters used on every request to your REST API
+#
+#   - bootstrapping a collection of objects which are 
+#     rendered in your markup on page load
+#
+#   - filtering with query string parameters against your API
+#
+#   - automatic interaction with your Luca.CollectionManager class
+#
+#   - make it easier to parse Rails style responses which include the root
+#     by specifying a @root parameter
+#
+#   - use backbone-query if available
+#
+#   - onceLoaded: run a callback once if there are models present, otherwise wait until
+#     the collection fetches
+#
+#   - ifLoaded: run a callback any time the model gets reset, or if there are already models
+#
+Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   
-  if _.isObject( Luca.Collection._baseParams )
-    Luca.Collection._baseParams
-
-Luca.Collection._bootstrapped_models = {}
-
-Luca.Collection.bootstrap = (obj)->
-  _.extend Luca.Collection._bootstrapped_models, obj
-
-Luca.Collection.cache = (key, models)->
-  return Luca.Collection._bootstrapped_models[ key ] = models if models
-  Luca.Collection._bootstrapped_models[ key ] || []
-
-_.extend Luca.Collection.prototype,
   initialize: (models, @options={})->
     _.extend @, @options
 
+    # By specifying a @cached property or method, you can instruct
+    # Luca.Collection instances where to pull an array of model attributes
+    # usually done with the bootstrap functionality provided.
     if @cached
       @bootstrap_cache_key = if _.isFunction( @cached ) then @cached() else @cached  
+
     # if we are to register with some global collection management system
     if @registerWith
       @registerAs ||= @cached
@@ -90,8 +97,8 @@ _.extend Luca.Collection.prototype,
   # Collection Manager Registry
   #
   # If this collection is to be registered with some global collection
-  # tracker, such as App.collections, then we will register ourselves
-  # with this registry, by storing ourselves with a key
+  # tracker such as new Luca.CollectionManager() then we will register 
+  # ourselves automatically
   #
   # To automatically register a collection with the registry, instantiate
   # it with the registerWith property, which can either be a reference to
@@ -112,8 +119,11 @@ _.extend Luca.Collection.prototype,
 
     if _.isObject( collect)
       collectionManager[ key ] = collection
-    
-  bootstrap: ()->
+  
+  # an alias for loadFromBootstrap which is a bit more descriptive
+  bootstrap: ()-> @loadFromBootstrap()
+
+  loadFromBootstrap: ()->
     return unless @bootstrap_cache_key
     @reset @cached_models()
 
@@ -173,3 +183,40 @@ _.extend Luca.Collection.prototype,
       Luca.Collection.cache( @bootstrap_cache_keys, models)
 
     models
+
+#### Base Parameters
+#
+# Always include these parameters in every request to your REST API.
+#
+# either specify a function which returns a hash, or just a normal hash 
+Luca.Collection.baseParams = (obj)->
+  return Luca.Collection._baseParams = obj if obj
+
+  if _.isFunction( Luca.Collection._baseParams )
+    return Luca.Collection._baseParams.call()
+  
+  if _.isObject( Luca.Collection._baseParams )
+    Luca.Collection._baseParams
+
+#### Bootstrapped Models ( stuff loaded on page load )
+#
+# In order to make our Backbone Apps super fast it is a good practice
+# to pre-populate your collections by what is referred to as bootstrapping
+#
+# Luca.Collections make it easier for you to do this cleanly and automatically
+# 
+# by specifying a @cached property or method in your collection definition
+# Luca.Collections will automatically look in this space to find models
+# and avoid a roundtrip to your API unless explicitly told to.
+Luca.Collection._bootstrapped_models = {}
+
+# In order to do this, just load an object whose keys
+Luca.Collection.bootstrap = (obj)->
+  _.extend Luca.Collection._bootstrapped_models, obj
+
+# Lookup cached() or bootstrappable models.  This is used by the
+# augmented version of Backbone.Collection.fetch() in order to avoid
+# roundtrips to the API
+Luca.Collection.cache = (key, models)->
+  return Luca.Collection._bootstrapped_models[ key ] = models if models
+  Luca.Collection._bootstrapped_models[ key ] || []

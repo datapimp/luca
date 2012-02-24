@@ -680,34 +680,7 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
 }).call(this);
 (function() {
 
-  Luca.Collection = Backbone.QueryCollection.extend({
-    base: 'Luca.Collection'
-  });
-
-  Luca.Collection._baseParams = {};
-
-  Luca.Collection.baseParams = function(obj) {
-    if (obj) return Luca.Collection._baseParams = obj;
-    if (_.isFunction(Luca.Collection._baseParams)) {
-      return Luca.Collection._baseParams.call();
-    }
-    if (_.isObject(Luca.Collection._baseParams)) {
-      return Luca.Collection._baseParams;
-    }
-  };
-
-  Luca.Collection._bootstrapped_models = {};
-
-  Luca.Collection.bootstrap = function(obj) {
-    return _.extend(Luca.Collection._bootstrapped_models, obj);
-  };
-
-  Luca.Collection.cache = function(key, models) {
-    if (models) return Luca.Collection._bootstrapped_models[key] = models;
-    return Luca.Collection._bootstrapped_models[key] || [];
-  };
-
-  _.extend(Luca.Collection.prototype, {
+  Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend({
     initialize: function(models, options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -803,6 +776,9 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       if (_.isObject(collect)) return collectionManager[key] = collection;
     },
     bootstrap: function() {
+      return this.loadFromBootstrap();
+    },
+    loadFromBootstrap: function() {
       if (!this.bootstrap_cache_key) return;
       return this.reset(this.cached_models());
     },
@@ -864,6 +840,27 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
       return models;
     }
   });
+
+  Luca.Collection.baseParams = function(obj) {
+    if (obj) return Luca.Collection._baseParams = obj;
+    if (_.isFunction(Luca.Collection._baseParams)) {
+      return Luca.Collection._baseParams.call();
+    }
+    if (_.isObject(Luca.Collection._baseParams)) {
+      return Luca.Collection._baseParams;
+    }
+  };
+
+  Luca.Collection._bootstrapped_models = {};
+
+  Luca.Collection.bootstrap = function(obj) {
+    return _.extend(Luca.Collection._bootstrapped_models, obj);
+  };
+
+  Luca.Collection.cache = function(key, models) {
+    if (models) return Luca.Collection._bootstrapped_models[key] = models;
+    return Luca.Collection._bootstrapped_models[key] || [];
+  };
 
 }).call(this);
 (function() {
