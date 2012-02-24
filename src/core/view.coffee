@@ -26,8 +26,14 @@ Luca.View.extend = (definition)->
   _base = definition.render
 
   _base ||= ()->
-    return unless $(@container) and $(@el) 
-      $(@container).append( $(@el) )
+    container = if _.isFunction(@container) then @container() else @container 
+
+    return @ unless $(container) and $(@el) 
+
+
+    $(container).append( $(@el) )
+    @
+    
 
   definition.render = ()->
     if @deferrable
