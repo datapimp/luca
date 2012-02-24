@@ -120,3 +120,80 @@ _.extend Luca.View.prototype,
       fn = prefix + parts.join('')
       
       @bind event, ()=> @[fn].apply @, arguments if @[fn]
+
+
+  #### Luca.Collection and Luca.CollectionManager integration
+  #
+  # One really cool feature of Luca is the enhanced API for binding
+  # to views.  Using an API very similar to the DOM @events property
+  # on Backbone views.  If you are using Luca.Collection classes 
+  # and a Luca.CollectionManager to track them, you can use the
+  # @collectionEvents property on your views like such:
+  #
+  #
+
+  # App.Manager = new Luca.CollectionManager()
+  #
+  # App.Collection = new Luca.SampleCollection
+  #   registerWith: "App.Manager"
+  #   registerAs: "sample_collection"
+  #
+  # App.View = Luca.View.extend
+  #   collectionEvents:
+  #     "sample_collection add" : "onCollectionAdd"
+  #
+  #   onCollectionAdd: (model,collection)->
+  #     @doSomethingRighteous()
+  #
+  # under the hood, this will find your collection manager using 
+  # Luca.CollectionManager.get, which is a function that returns
+  # the first instance of the CollectionManager class ever created.
+  # 
+  # if you want to use more than one collection manager, over ride this
+  # function in your views with your own logic
+  getCollectionManager: ()-> 
+    Luca.CollectionManager.get?.call()
+
+  ##### Collection Events
+  #
+  # By defining a hash of collectionEvents in the form of
+  #
+  # "collectionManagerKey collectionEvent" : "functionName"
+  # 
+  # the Luca.View will bind to the collection found in the 
+  # collectionManager with that key, and bind to that event
+  #
+  # in the example:
+  #
+  # collectionEvents:
+  #   "books add" : "onBookAdd"
+  #
+  # then a property of @booksCollection will be created on the view, 
+  # and the "add" event will trigger "onBookAdd"
+  #
+  # you may also specify a function directly.  this 
+  #   
+  registerCollectionEvents: ()->
+    manager = @getCollectionManager()
+
+    _( @collectionEvents ).each (handler, signature)=>
+      [key,event] = signature.split(" ")
+
+      collection = @["#{ key }Collection"] = manager.getOrCreate( key )
+
+      if !collection 
+        throw "Could not find collection specified by #{ key }" 
+
+      if _.isFunction(handler)
+        handler = ()=> handler.apply(@, arguments)
+      else
+        handler = @[handler]
+
+      unless _.isFunction(handler)
+        throw "invalid collectionEvents configuration"
+
+      try
+        collection.bind(event, handler)
+      catch e
+        console.log "Error Binding To Collection in registerCollectionEvents", @
+        throw e

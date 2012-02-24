@@ -56,9 +56,14 @@ class Luca.CollectionManager
     # manager, then you will have to specify which 
     # collection manager your views need to interact
     # with for their collectionEvents configuration handling
-    unless Luca.CollectionManager.get
-      Luca.CollectionManager.get = ()-> @
-  
+    if Luca.CollectionManager.get
+      console.log "A collection manager has already been created.  You are responsible for telling your views which to use"
+    else
+      Luca.CollectionManager.get = _.bind ()->
+        return @
+      , @ 
+
+
   add:(key, collection)->
     @currentScope()[ key ] = collection
 

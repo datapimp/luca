@@ -674,6 +674,35 @@ a(b,d,c):b.trigger("error",b,d,c)}}}).call(this);
           if (_this[fn]) return _this[fn].apply(_this, arguments);
         });
       });
+    },
+    getCollectionManager: function() {
+      var _ref;
+      return (_ref = Luca.CollectionManager.get) != null ? _ref.call() : void 0;
+    },
+    registerCollectionEvents: function() {
+      var manager,
+        _this = this;
+      manager = this.getCollectionManager();
+      return _(this.collectionEvents).each(function(handler, signature) {
+        var collection, event, key, _ref;
+        _ref = signature.split(" "), key = _ref[0], event = _ref[1];
+        collection = _this["" + key + "Collection"] = manager.getOrCreate(key);
+        if (!collection) throw "Could not find collection specified by " + key;
+        if (_.isFunction(handler)) {
+          handler = function() {
+            return handler.apply(_this, arguments);
+          };
+        } else {
+          handler = _this[handler];
+        }
+        if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
+        try {
+          return collection.bind(event, handler);
+        } catch (e) {
+          console.log("Error Binding To Collection in registerCollectionEvents", _this);
+          throw e;
+        }
+      });
     }
   });
 
