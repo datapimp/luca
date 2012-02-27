@@ -8,7 +8,6 @@ $ do ->
       ctype: 'form_view'
       components:[
         name: 'column_view'
-        debugMode: true
         ctype: 'column_view'
         components:[
           name: 'column_one'

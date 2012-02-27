@@ -1,3 +1,4 @@
+# TODO THis module is going to be deprecated as it has been gradually gut over time
 Luca.modules.Deferrable = 
   configure_collection: (setAsDeferrable=true)->
     return unless @collection

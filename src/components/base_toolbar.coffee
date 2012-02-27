@@ -13,5 +13,4 @@ Luca.components.Toolbar = Luca.core.Container.extend
   render: ()->
     $(@container).append(@el)
 
-
 Luca.register "toolbar", "Luca.components.Toolbar"
