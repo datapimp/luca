@@ -1195,6 +1195,91 @@
 }).call(this);
 (function() {
 
+  Luca.Application = Luca.containers.Viewport.extend({
+    components: [
+      {
+        ctype: 'controller',
+        name: 'main_controller',
+        components: [
+          {
+            ctype: 'template',
+            template: 'welcome'
+          }
+        ]
+      }
+    ],
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
+      this.collectionManager = new Luca.CollectionManager();
+      this.state = new Backbone.Model(this.defaultState);
+      return this.bind("ready", this.render);
+    },
+    activeView: function() {
+      var active;
+      if (active = this.activeSubSection()) {
+        return this.view(active);
+      } else {
+        return this.view(this.activeSection());
+      }
+    },
+    activeSubSection: function() {
+      return this.get("active_sub_section");
+    },
+    activeSection: function() {
+      return this.get("active_section");
+    },
+    afterComponents: function() {
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.containers.Viewport.prototype.afterComponents) != null) {
+        _ref.apply(this, arguments);
+      }
+      this.getMainController().bind("after:card:switch", function(previous, current) {
+        return _this.state.set({
+          active_section: current.name
+        });
+      });
+      return this.getMainController().each(function(component) {
+        if (component.ctype.match(/controller$/)) {
+          return component.bind("after:card:switch", function(previous, current) {
+            return _this.state.set({
+              active_sub_section: current.name
+            });
+          });
+        }
+      });
+    },
+    beforeRender: function() {
+      var _ref;
+      if ((_ref = Luca.containers.Viewport.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      return Backbone.history.start();
+    },
+    boot: function() {
+      return this.trigger("ready");
+    },
+    collection: function() {
+      return this.collectionManager.getOrCreate.apply(this.collectionManager, arguments);
+    },
+    get: function(attribute) {
+      return this.state.get(attribute);
+    },
+    getMainController: function() {
+      return this.view("main_controler");
+    },
+    set: function(attributes) {
+      return this.state.set(attributes);
+    },
+    view: function(name) {
+      return Luca.cache(name);
+    }
+  });
+
+}).call(this);
+(function() {
+
   Luca.components.Toolbar = Luca.core.Container.extend({
     className: 'luca-ui-toolbar',
     position: 'bottom',
@@ -1214,6 +1299,44 @@
   });
 
   Luca.register("toolbar", "Luca.components.Toolbar");
+
+}).call(this);
+(function() {
+
+  Luca.components.Controller = Luca.containers.CardView.extend({
+    initialize: function(options) {
+      var _ref;
+      this.options = options;
+      Luca.containers.CardView.prototype.initialize.apply(this, arguments);
+      this.defaultCard || (this.defaultCard = (_ref = this.components[0]) != null ? _ref.name : void 0);
+      if (!this.defaultCard) {
+        throw "Controllers must specify a defaultCard property";
+      }
+      return this.state = new Backbone.Model({
+        active_section: this.defaultCard
+      });
+    },
+    each: function(fn) {
+      var _this = this;
+      return _(this.components).each(function(component) {
+        return fn.apply(_this, [component]);
+      });
+    },
+    "default": function(callback) {
+      return this.navigate_to(this.defaultCard, callback);
+    },
+    navigate_to: function(section, callback) {
+      var _this = this;
+      section || (section = this.defaultCard);
+      this.activate(section, false, function(activator, previous, current) {
+        _this.state.set({
+          active_section: current.name
+        });
+        if (_.isFunction(callback)) return callback.apply(current);
+      });
+      return this.find(section);
+    }
+  });
 
 }).call(this);
 (function() {
