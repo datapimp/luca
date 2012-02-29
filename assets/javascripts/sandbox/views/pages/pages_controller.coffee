@@ -19,9 +19,9 @@ Sandbox.views.PagesController = Luca.components.Controller.extend
       title: 'Collection Helpers'
       template: 'features/collection_helpers'
     ,
-      ctype: 'components_display'
-      name: 'components_display'
-      title: 'Component Library'
+      ctype: 'grid_demo'
+      name: 'grid_demo'
+      title: 'Grid Component'
     ]
   ]
 

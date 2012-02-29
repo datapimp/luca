@@ -1,4 +1,10 @@
 .luca-ui-tab-view {
+  .tab-content {
+    width: 100%;
+    .luca-ui-card {
+      width: 100%;
+    }
+  }
   ul {
     li {
       cursor: pointer;
