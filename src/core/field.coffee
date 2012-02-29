@@ -39,11 +39,11 @@ Luca.core.Field = Luca.View.extend
 
   beforeRender: ()->
     if Luca.enableBootstrap
-      $(@el).addClass('control-group')
+      @$el.addClass('control-group')
 
-    $(@el).addClass('required') if @required
+    @$el.addClass('required') if @required
 
-    $(@el).html Luca.templates[ @template ]( @ )
+    @$el.html Luca.templates[ @template ]( @ )
     @input = $('input', @el)
   
   change_handler: (e)->
@@ -59,11 +59,11 @@ Luca.core.Field = Luca.View.extend
     @input.attr('value')
 
   render: ()->
-    $( @container ).append( $(@el) )
+    $( @container ).append( @$el )
 
   setValue: (value)-> 
     @input.attr('value', value)
   
   updateState: (state)->
-    _( @statuses ).each (cls)=> $(@el).removeClass(cls)
-    $(@el).addClass(state)
+    _( @statuses ).each (cls)=> @$el.removeClass(cls)
+    @$el.addClass(state)

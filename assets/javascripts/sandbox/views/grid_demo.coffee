@@ -1,6 +1,6 @@
 Sandbox.views.GridDemo = Luca.components.GridView.extend
-  store: 
-    base_url: '/sandbox/api'
+  collection: 
+    url: '/sandbox/api'
   columns:[
     header: "Name"
     data: 'name'

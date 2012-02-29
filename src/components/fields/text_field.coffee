@@ -18,11 +18,11 @@ Luca.fields.TextField = Luca.core.Field.extend
     @label ||= @name
 
     if @prepend
-      $(@el).addClass('input-prepend')  
+      @$el.addClass('input-prepend')  
       @addOn = @prepend
     
     if @append
-      $(@el).addClass('input-append')
+      @$el.addClass('input-append')
       @addOn = @append
 
   keydown_handler: _.throttle ((e)-> @change_handler.apply @, arguments), 300

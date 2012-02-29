@@ -12,5 +12,5 @@ Luca.containers.Viewport = Luca.containers.CardView.extend
 
   render: ()->
     console.log "Rendering Viewport"
-    $(@el).addClass('luca-ui-viewport')
+    @$el.addClass('luca-ui-viewport')
 

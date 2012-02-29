@@ -59,7 +59,7 @@ Luca.containers.ModalView = Luca.core.Container.extend
     $.modal.close()
 
   prepareLayout: ()->
-    $('body').append( $(@el) )
+    $('body').append( @$el )
 
   prepareComponents: ()->
     @components = _(@components).map (object,index) =>
@@ -67,17 +67,17 @@ Luca.containers.ModalView = Luca.core.Container.extend
       object
 
   afterInitialize: ()-> 
-    $(@el).hide()
+    @$el.hide()
     @render() if @renderOnInitialize
 
   afterRender: ()->
     @show() if @showOnRender
 
-  wrapper: ()-> $( $(@el).parent() )
+  wrapper: ()-> $( @$el.parent() )
 
   show: ()->
     @trigger "before:show", @
-    $(@el).modal( @modalOptions )
+    @$el.modal( @modalOptions )
 
   hide: ()->
     @trigger "before:hide", @

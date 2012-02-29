@@ -72,11 +72,11 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
     _.last(@components)
 
   beforeRender: ()->
-    $(@el).addClass("#{ @resource }-manager")
+    @$el.addClass("#{ @resource }-manager")
     Luca.containers.CardView.prototype.beforeRender?.apply @, arguments
     
-    $(@el).addClass("#{ @resource } record-manager")
-    $(@el).data('resource', @resource)
+    @$el.addClass("#{ @resource } record-manager")
+    @$el.data('resource', @resource)
 
     $(@getGrid().el).addClass("#{ @resource } record-manager-grid")
     $(@getFilter().el).addClass("#{ @resource } record-manager-filter")

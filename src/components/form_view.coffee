@@ -61,15 +61,15 @@ Luca.components.FormView = Luca.core.Container.extend
   
   beforeLayout: ()->
     Luca.core.Container.prototype.beforeLayout?.apply @, arguments
-    $(@el).html Luca.templates["components/form_view"]( @ )    
+    @$el.html Luca.templates["components/form_view"]( @ )    
 
     if Luca.enableBootstrap
-      $(@el).addClass('form-search') if @searchForm 
-      $(@el).addClass('form-horizontal') if @horizontalForm          
-      $(@el).addClass('form-inline') if @inlineForm          
+      @$el.addClass('form-search') if @searchForm 
+      @$el.addClass('form-horizontal') if @horizontalForm          
+      @$el.addClass('form-inline') if @inlineForm          
       
-    $(@el).addClass( @fieldLayoutClass ) if @fieldLayoutClass
-    $(@el).addClass( "label-align-#{ @labelAlign }")
+    @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass
+    @$el.addClass( "label-align-#{ @labelAlign }")
 
   prepareComponents: ()->
     container = $('.form-view-body', @el)
@@ -77,10 +77,10 @@ Luca.components.FormView = Luca.core.Container.extend
       component.container = container
   
   render: ()->
-    $( @container ).append( $(@el) )
+    $( @container ).append( @$el )
 
   wrapper: ()->
-    $(@el).parents('.luca-ui-form-view-wrapper')
+    @$el.parents('.luca-ui-form-view-wrapper')
 
   toolbarContainers: (position="bottom")->
     $(".toolbar-container.#{ position }", @wrapper() ).first()

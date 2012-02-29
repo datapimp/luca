@@ -9,10 +9,11 @@ Luca.components.Template = Luca.View.extend
   templateContainer: "Luca.templates"
 
   beforeRender: ()->
-    $(@el).html(@markup || @templateContainer[ @template ](@options) )
+    @templateContainer = JST if _.isUndefined( @templateContainer) 
+    @$el.html(@markup || @templateContainer[ @template ](@options) )
 
   render: ()->
-    $(@container).append( @el )
+    $(@container).append( @$el )
 
 
 Luca.register "template", "Luca.components.Template"

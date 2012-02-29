@@ -9,7 +9,7 @@ Luca.containers.TabView = Luca.containers.CardView.extend
 
   componentType: 'tab_view'
 
-  className: 'tabbable'
+  className: 'luca-ui-tab-view tabbable'
 
   tab_position: 'top'
 
@@ -23,35 +23,36 @@ Luca.containers.TabView = Luca.containers.CardView.extend
   activeTabSelector: ()->
     @tabSelectors().eq( @activeCard )
 
-  assignTabContainers: ()->
-    _( @components ).map (component,index)=>
-      component.container = "##{ @cid }-tab-view-content"
+  prepareLayout: ()->
+    @card_containers = _( @cards ).map (card, index)=>
+      @$('.tab-content').append Luca.templates["containers/basic"](card) 
+      $("##{ card.id }")
 
   beforeLayout: ()->
+    console.log "Before Layout on ", @name
     @$el.addClass("tabs-#{ @tab_position }")
-    @$el.data('toggle','tab')
 
     if @tab_position is "below"
-      $(@el).append Luca.templates["containers/tab_view"](@)
-      $(@el).append Luca.templates["containers/tab_selector_container"](@)
+      @$el.append Luca.templates["containers/tab_view"](@)
+      @$el.append Luca.templates["containers/tab_selector_container"](@)
     else
-      $(@el).append Luca.templates["containers/tab_selector_container"](@)
-      $(@el).append Luca.templates["containers/tab_view"](@)
-
-    @createTabSelectors()
+      @$el.append Luca.templates["containers/tab_selector_container"](@)
+      @$el.append Luca.templates["containers/tab_view"](@)
 
     Luca.containers.CardView.prototype.beforeLayout.apply @, arguments
 
-    @assignTabContainers()
+  beforeRender: ()->
+    Luca.containers.CardView.prototype.beforeRender?.apply @, arguments
+    @activeTabSelector().addClass('active')
 
   highlightSelectedTab: ()->
-    @tabSelectors().removeClass('active-tab')
-    @activeTabSelector().addClass('active-tab')
+    @tabSelectors().removeClass('active')
+    @activeTabSelector().addClass('active')
 
   select: (e)->
     me = my = $( e.currentTarget )
     @trigger "before:select", @
-    @activate my.data('target-tab')
+    @activate my.data('target')
     @trigger "after:select", @
 
   tabContainer: ()->
@@ -59,10 +60,3 @@ Luca.containers.TabView = Luca.containers.CardView.extend
 
   tabSelectors: ()->
     $( 'li.tab-selector', @tabContainer() )
-
-  createTabSelectors: ()->
-    _( @components ).map (component,index)=>
-      title = component.title || "Tab #{ index + 1 }"
-      @tabContainer().append "<li class='tab-selector' data-target-tab='#{ index }'>#{ title }</li>"
-
-

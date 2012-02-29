@@ -28,10 +28,10 @@ Luca.View.extend = (definition)->
   _base ||= ()->
     container = if _.isFunction(@container) then @container() else @container 
 
-    return @ unless $(container) and $(@el) 
+    return @ unless $(container) and @$el 
 
 
-    $(container).append( $(@el) )
+    $(container).append( @$el )
     @
     
 

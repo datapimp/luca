@@ -1,11 +1,5 @@
 .scrollable-grid-view {
-  .grid-view-row.odd {
-    background-color: #e3e3e3;
-  }
 
-  .grid-view-row.even {
-
-  }
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
   .grid-view-body {
     clear: both;
@@ -29,7 +23,6 @@
   }
   /* define width of table. IE browsers only                 */
   .grid-view-body table {
-    float: left;
   }
 
   /* define width of table. Add 16px to width for scrollbar.           */

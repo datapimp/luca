@@ -26,7 +26,7 @@ Luca.containers.CardView = Luca.core.Container.extend
  
   prepareLayout: ()->
     @card_containers = _( @cards ).map (card, index)=>
-      $(@el).append Luca.templates["containers/basic"](card) 
+      @$el.append Luca.templates["containers/basic"](card) 
       $("##{ card.id }")
 
   prepareComponents: ()-> 

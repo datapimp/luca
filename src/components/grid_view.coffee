@@ -25,7 +25,7 @@ Luca.components.GridView = Luca.View.extend
 
     Luca.View.prototype.initialize.apply( @, arguments )
 
-    _.bindAll @, "rowDoubleClick", "rowClick"
+    _.bindAll @, "double_click_handler", "click_handler"
     
     @configure_collection()
 
@@ -36,9 +36,9 @@ Luca.components.GridView = Luca.View.extend
   beforeRender: ()->
     @trigger "before:grid:render", @
 
-    $(@el).addClass 'scrollable-grid-view' if @scrollable
+    @$el.addClass 'scrollable-grid-view' if @scrollable
 
-    $(@el).html Luca.templates["components/grid_view"]()
+    @$el.html Luca.templates["components/grid_view"]()
 
     @table  = $('table.luca-ui-grid-view', @el)
     @header = $("thead", @table) 
@@ -53,7 +53,7 @@ Luca.components.GridView = Luca.View.extend
 
     @renderToolbars()
 
-    $(@container).append $(@el)
+    $(@container).append @$el
   
   toolbarContainers:(position="bottom")->
     $(".toolbar-container.#{ position }", @el)

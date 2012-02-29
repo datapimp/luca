@@ -1,1 +1,7 @@
 %ul{:id=>"<%= cid %>-tab-selector",:class=>"nav nav-tabs"}
+  <% for(var i = 0; i < components.length; i++ ) { %>
+  <% var component = components[i];%>
+  %li.tab-selector{:data=>{:target=>"<%= i %>"}}
+    %a{:data=>{:target=>"<%= i %>"}}
+      <%= component.title %>
+  <% } %>
