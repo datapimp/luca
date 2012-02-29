@@ -9,16 +9,16 @@ guard 'sprockets2', :assets_path => assets_path, :sprockets => App.sprockets, :p
 
   callback(:run_on_change_end) do
     compiled = Dir.glob( assets_path + '/luca-ui*.*s' )
-    
+
     compiled.each do |file|
       if File.extname(file) == ".js"
         FileUtils.mkdir_p javascript_path
-        FileUtils.mv file, javascript_path
+        FileUtils.cp file, javascript_path
       end
 
       if File.extname(file) == ".css"
         FileUtils.mkdir_p stylesheets_path
-        FileUtils.mv file, stylesheets_path
+        FileUtils.cp file, stylesheets_path
       end
     end
   end

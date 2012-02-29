@@ -11,5 +11,6 @@ Luca.containers.Viewport = Luca.containers.CardView.extend
     $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
 
   render: ()->
+    console.log "Rendering Viewport"
     $(@el).addClass('luca-ui-viewport')
 

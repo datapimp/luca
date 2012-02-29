@@ -10,12 +10,12 @@
 #  initialize: (@options={})->
 #     @collectionManager = new Luca.CollectionManager
 #       getScope: ()-> @someParentValue
-#  collection: (key,options={},models=[])-> 
+#  collection: (key,options={},models=[])->
 #    @collectionManager.getOrCreate(key,options,models)
 #
-# Now in the single global instance of LucaApp you have 
+# Now in the single global instance of LucaApp you have
 # one central place to access a collection of models, one
-# interface to listen to for add, remove, reset, change events 
+# interface to listen to for add, remove, reset, change events
 #
 # If you don't want this, you can either do it the old fashioned way
 # or just use the private option to get an unregistered instance.
@@ -37,13 +37,13 @@
 
 class Luca.CollectionManager
   __collections: {}
-  
+
   constructor: (@options={})->
     _.extend @, @options
     _.extend @, Backbone.Events
 
     # if you are going to use more than one collection
-    # manager, then you will have to specify which 
+    # manager, then you will have to specify which
     # collection manager your views need to interact
     # with for their collectionEvents configuration handling
     if Luca.CollectionManager.get
@@ -51,22 +51,22 @@ class Luca.CollectionManager
     else
       Luca.CollectionManager.get = _.bind ()->
         return @
-      , @ 
+      , @
 
 
   add:(key, collection)->
     @currentScope()[ key ] = collection
 
   allCollections: ()->
-    _( @currentScope() ).values() 
-  
-  # create a collection from just a key.    
+    _( @currentScope() ).values()
+
+  # create a collection from just a key.
   # if you pass the private option, it will
   # skip registering this collection
   create: (key, collectionOptions={}, initialModels=[], private=false)->
-    CollectionClass = collectionOptions.base 
+    CollectionClass = collectionOptions.base
     CollectionClass ||= @guessCollectionClass(key)
-    
+
     collectionOptions.registerWith = "" if private or collectionOptions.private
 
     collection = new CollectionClass(initialModels,collectionOptions)
@@ -78,24 +78,24 @@ class Luca.CollectionManager
   #### Collection Prefix
   #
   # If you are doing things right, you are namespacing all of your collection
-  # definitions, for example 
-  # 
+  # definitions, for example
+  #
   # LucaApp.collections.SomeCollection = Luca.Collection.extend
   #   registerAs: "some_collection"
-  #   registerWith: "" 
+  #   registerWith: ""
   #
   # You should override this attribute when you create or define your collection manager
   #
-  # 
+  #
   collectionPrefix: Luca.Collection.namespace
 
   #### Collection Scopes
 
   # any time you create a collection, or use getOrCreate, the key
   # value ( @registerAs ) for your collection will be used to retrieve it
-  # 
+  #
   # if you plan to have multiple instances per key, but with some sort of
-  # scope based on a parent attribute, you should define a 
+  # scope based on a parent attribute, you should define a
   currentScope: ()->
     if current_scope = @getScope()
       @__collections[ current_scope ] ||= {}
@@ -113,21 +113,21 @@ class Luca.CollectionManager
   # you should define this method on your collection manager
   getScope: ()-> undefined
 
-  getOrCreate: (key,collectionOptions={},initialModels=[])->  
+  getOrCreate: (key,collectionOptions={},initialModels=[])->
     @get(key) || @create(key,collectionOptions,initialModels,false)
-  
+
   guessCollectionClass: (key)->
-    classified = _( key ).chain().capitalize().camelize().value() 
-    guess = (@collectionPrefix || window)[ classified ]
-    
+    classified = _( key ).chain().capitalize().camelize().value()
+    guess = (@collectionPrefix || (window || global) )[ classified ]
+
     guess
 
   # in most cases, the collections we use can be used only once
   # and any reset events should be respected, bound to, etc.  however
   # if this ever isn't the case, you can create an instance
-  # of a collection which is "private" in that once it is 
+  # of a collection which is "private" in that once it is
   # returned from the collection manager, it isn't tracked so
   # you can make sure any add / reset / remove / filter events
   # don't effect other views
   private: (key, collectionOptions={}, initialModels=[])->
-    @create(key,collectionOptions,initialModels,true) 
+    @create(key,collectionOptions,initialModels,true)

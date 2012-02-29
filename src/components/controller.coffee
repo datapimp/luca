@@ -4,17 +4,17 @@ Luca.components.Controller = Luca.containers.CardView.extend
 
     @defaultCard ||= @components[0]?.name
 
-    throw "Controllers must specify a defaultCard property" unless @defaultCard
+    throw "Controllers must specify a defaultCard property and/or the first component must have a name" unless @defaultCard
 
     @state = new Backbone.Model
       active_section: @defaultCard
-  
+
 
   each: (fn)->
     _( @components ).each (component)=>
       fn.apply @, [component]
-  
-  default: (callback)-> 
+
+  default: (callback)->
     @navigate_to(@defaultCard, callback)
 
   # switch the active card of this controller
@@ -23,8 +23,8 @@ Luca.components.Controller = Luca.containers.CardView.extend
   # the currently active card
   navigate_to: (section, callback)->
     section ||= @defaultCard
-    
-    # activate is a method on Luca.containers.CardView which 
+
+    # activate is a method on Luca.containers.CardView which
     # selects a component and makes it visible, hiding any
     # other component which may be monopolizing the view at that time.
 
@@ -36,6 +36,6 @@ Luca.components.Controller = Luca.containers.CardView.extend
       @state.set(active_section: current.name )
       if _.isFunction( callback )
         callback.apply(current)
-    
+
     # return the section we are navigating to
     @find(section)

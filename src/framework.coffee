@@ -16,7 +16,7 @@ window.Luca =
     name_index: {}
 
 
-# let's use the Twitter 2.0 Bootstrap Framework 
+# let's use the Twitter 2.0 Bootstrap Framework
 # for what it is best at, and not try to solve this
 # problem on our own!
 Luca.enableBootstrap = true
@@ -34,7 +34,7 @@ Luca.cache = (needle, component)->
   Luca.component_cache.cid_index[ needle ] = component if component?
 
   component = Luca.component_cache.cid_index[ needle ]
-  
+
   # optionally, cache it by tying its name to its cid for easier lookups
   if component?.component_name?
     Luca.component_cache.name_index[ component.component_name ] = component.cid
@@ -65,15 +65,15 @@ Luca.registry.lookup = (ctype)->
 
   className = _.camelize _.capitalize( ctype )
 
-  parents = _( Luca.registry.namespaces ).map (namespace)-> Luca.util.nestedValue(namespace, window)
-  
+  parents = _( Luca.registry.namespaces ).map (namespace)-> Luca.util.nestedValue(namespace, (window || global))
+
   _.first _.compact _( parents ).map (parent)-> parent[className]
 
 # creates a new object from a hash with a ctype property
 # matching something in the Luca registry
 Luca.util.LazyObject = (config)->
   ctype = config.ctype
-  
+
   componentClass = Luca.registry.lookup( ctype )
 
   throw "Invalid Component Type: #{ ctype }.  Did you forget to register it?" unless componentClass
@@ -114,5 +114,5 @@ Luca.util.is_renderable = (component={})->
 
 
 
-$ do -> 
+$ do ->
   $('body').addClass('luca-ui-enabled')
