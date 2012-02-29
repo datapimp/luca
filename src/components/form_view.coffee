@@ -25,6 +25,8 @@ Luca.components.FormView = Luca.core.Container.extend
   
   labelAlign: 'top'
 
+  toolbar: true
+  
   initialize: (@options={})->
     Luca.core.Container.prototype.initialize.apply @, arguments
     

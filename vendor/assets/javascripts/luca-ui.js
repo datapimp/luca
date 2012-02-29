@@ -1281,7 +1281,6 @@
       });
     },
     beforeLayout: function() {
-      console.log("Before Layout on ", this.name);
       this.$el.addClass("tabs-" + this.tab_position);
       if (this.tab_position === "below") {
         this.$el.append(Luca.templates["containers/tab_view"](this));
@@ -1916,6 +1915,7 @@
       "click .reset-button": "resetHandler"
     },
     labelAlign: 'top',
+    toolbar: true,
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.core.Container.prototype.initialize.apply(this, arguments);
@@ -2142,7 +2142,7 @@
         return toolbar.render();
       });
     },
-    setDimensions: function() {
+    setDimensions: function(offset) {
       var _this = this;
       this.height || (this.height = 285);
       $('.grid-view-body', this.el).height(this.height);
@@ -2150,7 +2150,7 @@
       this.container_width = (function() {
         return $(_this.container).width();
       })();
-      this.width || (this.width = this.container_width > 0 ? this.container_width : 756);
+      this.width = this.container_width > 0 ? this.container_width : 756;
       $('.grid-view-body', this.el).width(this.width);
       $('.grid-view-body table', this.el).width(this.width);
       return this.setDefaultColumnWidths();
@@ -2508,6 +2508,7 @@
     templateContainer: "Luca.templates",
     beforeRender: function() {
       if (_.isUndefined(this.templateContainer)) this.templateContainer = JST;
+      console.log("Adding Markup", this.markup);
       return this.$el.html(this.markup || this.templateContainer[this.template](this.options));
     },
     render: function() {

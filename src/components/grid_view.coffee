@@ -64,15 +64,17 @@ Luca.components.GridView = Luca.View.extend
       toolbar.container = @toolbarContainers( toolbar.position ) 
       toolbar.render()
 
-  setDimensions: ()->
+  setDimensions: (offset)->
     @height ||= 285
 
     $('.grid-view-body', @el).height( @height )
     $('tbody.scrollable', @el).height( @height - 23 )
     
     @container_width = do => $(@container).width()
-    @width ||= if @container_width > 0 then @container_width else 756
+    @width = if @container_width > 0 then @container_width else 756
     
+    #@width += offset if offset
+
     $('.grid-view-body', @el).width( @width )
     $('.grid-view-body table', @el).width( @width )
     

@@ -11,3 +11,11 @@
     }
   }
 }
+
+.luca-ui-tab-view {
+  .luca-ui-card {
+    .luca-ui-grid-view, .luca-ui-form-view {
+      overflow: hidden;
+    }
+  }
+}

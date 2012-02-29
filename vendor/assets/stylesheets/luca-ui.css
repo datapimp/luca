@@ -753,6 +753,9 @@ html.luca-ui-fullscreen {
     width: 100%; }
 .luca-ui-tab-view ul li {
   cursor: pointer; }
+
+.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view {
+  overflow: hidden; }
 /* normalize.css 2011-11-04T15:38 UTC - http://github.com/necolas/normalize.css */
 /* =============================================================================
    HTML5 display definitions

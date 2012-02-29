@@ -29,7 +29,6 @@ Luca.containers.TabView = Luca.containers.CardView.extend
       $("##{ card.id }")
 
   beforeLayout: ()->
-    console.log "Before Layout on ", @name
     @$el.addClass("tabs-#{ @tab_position }")
 
     if @tab_position is "below"
