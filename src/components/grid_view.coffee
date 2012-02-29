@@ -9,6 +9,10 @@ Luca.components.GridView = Luca.View.extend
   
   emptyText: 'No Results To display'
 
+  # available options are striped, condensed, bordered
+  # or any combination of these, split up by space
+  tableStyle: 'striped'
+
   hooks:[
     "before:grid:render",
     "before:render:header",
@@ -44,6 +48,12 @@ Luca.components.GridView = Luca.View.extend
     @header = $("thead", @table) 
     @body   = $("tbody", @table) 
     @footer = $("tfoot", @table) 
+
+    if Luca.enableBootstrap
+      @table.addClass('table')
+
+    _( @tableStyle?.split(" ") ).each (style)=>
+      @table.addClass("table-#{ style }")
 
     @setDimensions() if @scrollable
 
@@ -87,6 +97,8 @@ Luca.components.GridView = Luca.View.extend
     $('.grid-view-body', @el).width( @width )
     $('.grid-view-body table', @el).width( @width )
 
+
+
     if @columns.length > 0
       distribution = difference / @columns.length 
 
@@ -106,7 +118,10 @@ Luca.components.GridView = Luca.View.extend
   
   setDefaultColumnWidths: ()->
     default_column_width = if @columns.length > 0 then @width / @columns.length else 200
-    _( @columns ).each (column)-> column.width ||= default_column_width
+
+    _( @columns ).each (column)-> 
+      parseInt(column.width ||= default_column_width)
+
     @padLastColumn()
 
 
@@ -163,7 +178,8 @@ Luca.components.GridView = Luca.View.extend
 
       "<td style='#{ style }' class='column-#{ col_index }'>#{ display }</td>"
     
-    alt_class = if row_index % 2 is 0 then "even" else "odd"
+    if @alternateRowClasses 
+      alt_class = if row_index % 2 is 0 then "even" else "odd"
 
     @body?.append("<tr data-record-id='#{ model_id }' data-row-index='#{ row_index }' class='grid-view-row #{ alt_class }' id='row-#{ row_index }'>#{ cells }</tr>")
 

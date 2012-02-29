@@ -32,8 +32,7 @@ Luca.core.Field = Luca.View.extend
 
     @disable() if @disabled
 
-    _( @statuses ).each (state)=> @updateState(state) if @[state]
-
+    @updateState( @state )
     @placeHolder ||= ""
 
   beforeRender: ()->

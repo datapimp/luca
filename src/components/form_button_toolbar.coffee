@@ -1,5 +1,5 @@
 Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
-  className: 'luca-ui-form-toolbar'
+  className: 'luca-ui-form-toolbar form-actions'
 
   position: 'bottom'
 

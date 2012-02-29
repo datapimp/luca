@@ -31,25 +31,10 @@ Sandbox.views.FormDemo = Luca.containers.SplitView.extend
           placeHolder: 'This is a placeholder'
           helperText : 'This is helper text'
         ,
-          ctype: 'text_field'
-          label: 'Text Field'
-          name: 'textfield2'
-          state: 'error'
-          placeHolder: 'This is a placeholder'
-          helperText : 'This is helper text'
-        ,       
-          ctype: 'text_field'
-          label: 'Text Field'
-          name: 'textfield3'
-          state: 'error'
-          placeHolder: 'This is a placeholder'
-          helperText : 'This is helper text'
-        ,       
           ctype: 'text_area_field'
           label: 'Text Area'
           name: 'textarea',
           width: 125
-          state : 'error'
         ]
       ]      
     ]

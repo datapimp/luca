@@ -30,13 +30,40 @@ Luca.components.FormView = Luca.core.Container.extend
   initialize: (@options={})->
     Luca.core.Container.prototype.initialize.apply @, arguments
     
-    @debug "form view initialized"
+    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars" 
 
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
     
     @legend ||= ""
+
+    @configureToolbars()
+    @applyStyles() 
+
+  addBootstrapFormControls: ()->
+    @bind "after:render", ()=>
+      el = @$('.toolbar-container.bottom')
+
+      el.addClass('form-controls')
+      el.html @formControlsTemplate || Luca.templates["components/bootstrap_form_controls"](@)  
+
+  applyStyles: ()->
+    return @applyBootstrapStyles() if Luca.enableBootstrap
+
+    @$el.addClass( "label-align-#{ @labelAlign }")
+    @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass    
+
+  applyBootstrapStyles: ()->
+    @inlineForm = true if @labelAlign is "left"
+
+    @$el.addClass('well') if @well
+    @$el.addClass('form-search') if @searchForm 
+    @$el.addClass('form-horizontal') if @horizontalForm          
+    @$el.addClass('form-inline') if @inlineForm          
+
+  configureToolbars: ()->
+    return @addBootstrapFormControls() if Luca.enableBootstrap
 
     if @toolbar is true 
       @toolbars = [
@@ -46,9 +73,7 @@ Luca.components.FormView = Luca.core.Container.extend
       ]
 
     if @toolbars and @toolbars.length
-      @bind "after:render", _.once @renderToolbars
-
-    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars" 
+      @bind "after:render", _.once @renderToolbars    
 
   resetHandler: (e)->
     me = my = $( e.currentTarget )
@@ -65,13 +90,6 @@ Luca.components.FormView = Luca.core.Container.extend
     Luca.core.Container.prototype.beforeLayout?.apply @, arguments
     @$el.html Luca.templates["components/form_view"]( @ )    
 
-    if Luca.enableBootstrap
-      @$el.addClass('form-search') if @searchForm 
-      @$el.addClass('form-horizontal') if @horizontalForm          
-      @$el.addClass('form-inline') if @inlineForm          
-      
-    @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass
-    @$el.addClass( "label-align-#{ @labelAlign }")
 
   prepareComponents: ()->
     container = $('.form-view-body', @el)
@@ -88,10 +106,10 @@ Luca.components.FormView = Luca.core.Container.extend
     $(".toolbar-container.#{ position }", @wrapper() ).first()
 
   renderToolbars: ()->
-    _( @toolbars ).each (toolbar)=>
-      toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
-      toolbar = Luca.util.LazyObject(toolbar)
-      toolbar.render()
+      _( @toolbars ).each (toolbar)=>
+        toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
+        toolbar = Luca.util.LazyObject(toolbar)
+        toolbar.render()
   
   getField: (name)->
     _( @getFields('name', name) ).first()

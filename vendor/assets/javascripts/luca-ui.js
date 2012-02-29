@@ -215,11 +215,15 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
+  Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <button class=\'btn btn-primary\'>\n    Save Changes\n  </button>\n  <button class=\'btn\'>\n    Cancel\n  </button>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
   Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\' id=\'', cid ,'-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container top\' id=\'', cid ,'-top-toolbar-container\'></div>\n  </div>\n  '); if(legend){ __p.push('\n  <fieldset>\n    <legend>\n      ', legend ,'\n    </legend>\n    <div class=\'form-view-flash-container\'></div>\n    <div class=\'form-view-body\'></div>\n  </fieldset>\n  '); } else { __p.push('\n  <ul class=\'form-view-flash-container\'></ul>\n  <div class=\'form-view-body\'></div>\n  '); } __p.push('\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container bottom\' id=\'', cid ,'-bottom-toolbar-container\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'>\n    <div class=\'toolbar-container top\'></div>\n  </div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'table striped-table luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'>\n    <div class=\'toolbar-container bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'>\n    <div class=\'toolbar-container top\'></div>\n  </div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'>\n    <div class=\'toolbar-container bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -584,8 +588,7 @@
     hooks: ["before:validation", "after:validation", "on:change"],
     statuses: ["warning", "error", "success"],
     initialize: function(options) {
-      var _ref,
-        _this = this;
+      var _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       Luca.View.prototype.initialize.apply(this, arguments);
@@ -597,9 +600,7 @@
       }
       this.inputStyles || (this.inputStyles = "");
       if (this.disabled) this.disable();
-      _(this.statuses).each(function(state) {
-        if (_this[state]) return _this.updateState(state);
-      });
+      this.updateState(this.state);
       return this.placeHolder || (this.placeHolder = "");
     },
     beforeRender: function() {
@@ -1875,7 +1876,7 @@
 (function() {
 
   Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend({
-    className: 'luca-ui-form-toolbar',
+    className: 'luca-ui-form-toolbar form-actions',
     position: 'bottom',
     includeReset: false,
     render: function() {
@@ -1919,10 +1920,36 @@
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.core.Container.prototype.initialize.apply(this, arguments);
-      this.debug("form view initialized");
+      _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
       this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
       this.legend || (this.legend = "");
+      this.configureToolbars();
+      return this.applyStyles();
+    },
+    addBootstrapFormControls: function() {
+      var _this = this;
+      return this.bind("after:render", function() {
+        var el;
+        el = _this.$('.toolbar-container.bottom');
+        el.addClass('form-controls');
+        return el.html(_this.formControlsTemplate || Luca.templates["components/bootstrap_form_controls"](_this));
+      });
+    },
+    applyStyles: function() {
+      if (Luca.enableBootstrap) return this.applyBootstrapStyles();
+      this.$el.addClass("label-align-" + this.labelAlign);
+      if (this.fieldLayoutClass) return this.$el.addClass(this.fieldLayoutClass);
+    },
+    applyBootstrapStyles: function() {
+      if (this.labelAlign === "left") this.inlineForm = true;
+      if (this.well) this.$el.addClass('well');
+      if (this.searchForm) this.$el.addClass('form-search');
+      if (this.horizontalForm) this.$el.addClass('form-horizontal');
+      if (this.inlineForm) return this.$el.addClass('form-inline');
+    },
+    configureToolbars: function() {
+      if (Luca.enableBootstrap) return this.addBootstrapFormControls();
       if (this.toolbar === true) {
         this.toolbars = [
           {
@@ -1933,9 +1960,8 @@
         ];
       }
       if (this.toolbars && this.toolbars.length) {
-        this.bind("after:render", _.once(this.renderToolbars));
+        return this.bind("after:render", _.once(this.renderToolbars));
       }
-      return _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
     },
     resetHandler: function(e) {
       var me, my;
@@ -1955,14 +1981,7 @@
       if ((_ref = Luca.core.Container.prototype.beforeLayout) != null) {
         _ref.apply(this, arguments);
       }
-      this.$el.html(Luca.templates["components/form_view"](this));
-      if (Luca.enableBootstrap) {
-        if (this.searchForm) this.$el.addClass('form-search');
-        if (this.horizontalForm) this.$el.addClass('form-horizontal');
-        if (this.inlineForm) this.$el.addClass('form-inline');
-      }
-      if (this.fieldLayoutClass) this.$el.addClass(this.fieldLayoutClass);
-      return this.$el.addClass("label-align-" + this.labelAlign);
+      return this.$el.html(Luca.templates["components/form_view"](this));
     },
     prepareComponents: function() {
       var container;
@@ -2102,6 +2121,7 @@
     className: 'luca-ui-grid-view',
     scrollable: true,
     emptyText: 'No Results To display',
+    tableStyle: 'striped',
     hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click", "after:collection:load"],
     initialize: function(options) {
       var _this = this;
@@ -2117,6 +2137,8 @@
       });
     },
     beforeRender: function() {
+      var _ref,
+        _this = this;
       this.trigger("before:grid:render", this);
       if (this.scrollable) this.$el.addClass('scrollable-grid-view');
       this.$el.html(Luca.templates["components/grid_view"]());
@@ -2124,6 +2146,10 @@
       this.header = $("thead", this.table);
       this.body = $("tbody", this.table);
       this.footer = $("tfoot", this.table);
+      if (Luca.enableBootstrap) this.table.addClass('table');
+      _((_ref = this.tableStyle) != null ? _ref.split(" ") : void 0).each(function(style) {
+        return _this.table.addClass("table-" + style);
+      });
       if (this.scrollable) this.setDimensions();
       this.renderHeader();
       this.emptyMessage();
@@ -2183,7 +2209,7 @@
       var default_column_width;
       default_column_width = this.columns.length > 0 ? this.width / this.columns.length : 200;
       _(this.columns).each(function(column) {
-        return column.width || (column.width = default_column_width);
+        return parseInt(column.width || (column.width = default_column_width));
       });
       return this.padLastColumn();
     },
@@ -2250,7 +2276,9 @@
         display = _.isUndefined(value) ? "" : value;
         return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
-      alt_class = row_index % 2 === 0 ? "even" : "odd";
+      if (this.alternateRowClasses) {
+        alt_class = row_index % 2 === 0 ? "even" : "odd";
+      }
       return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
     },
     cell_renderer: function(row, column, columnIndex) {
