@@ -138,7 +138,14 @@ Luca.core.Container = Luca.View.extend
       cid_index: {}
 
     @components = _( @components ).map (object, index)=>
-      component = if _.isObject( object ) and object.ctype? then Luca.util.LazyObject( object ) else object
+      # you can include normal backbone views as components
+      # you will want to make sure your render method handles
+      # adding the views @$el to the appropriate @container
+      component = if _.isObject( object ) and object.render and object.trigger
+        object
+      else
+        object.ctype ||= Luca.defaultComponentType || "template"
+        Luca.util.LazyObject( object )
 
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround

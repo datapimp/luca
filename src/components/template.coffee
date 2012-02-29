@@ -10,7 +10,6 @@ Luca.components.Template = Luca.View.extend
 
   beforeRender: ()->
     @templateContainer = JST if _.isUndefined( @templateContainer) 
-    console.log "Adding Markup", @markup
     @$el.html(@markup || @templateContainer[ @template ](@options) )
 
   render: ()->

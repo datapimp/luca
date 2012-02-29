@@ -628,10 +628,10 @@
     },
     updateState: function(state) {
       var _this = this;
-      _(this.statuses).each(function(cls) {
-        return _this.$el.removeClass(cls);
+      return _(this.statuses).each(function(cls) {
+        _this.$el.removeClass(cls);
+        return _this.$el.addClass(state);
       });
-      return this.$el.addClass(state);
     }
   });
 
@@ -718,7 +718,7 @@
       };
       this.components = _(this.components).map(function(object, index) {
         var component;
-        component = _.isObject(object) && (object.ctype != null) ? Luca.util.LazyObject(object) : object;
+        component = _.isObject(object) && object.render && object.trigger ? object : (object.ctype || (object.ctype = Luca.defaultComponentType || "template"), Luca.util.LazyObject(object));
         if (!component.container && component.options.container) {
           component.container = component.options.container;
         }
@@ -1888,14 +1888,14 @@
         {
           ctype: 'button_field',
           label: 'Submit',
-          "class": 'submit-button'
+          "class": 'btn submit-button'
         }
       ];
       if (this.includeReset) {
         return this.components.push({
           ctype: 'button_field',
           label: 'Reset',
-          "class": 'reset-button'
+          "class": 'btn reset-button'
         });
       }
     }
@@ -2508,7 +2508,6 @@
     templateContainer: "Luca.templates",
     beforeRender: function() {
       if (_.isUndefined(this.templateContainer)) this.templateContainer = JST;
-      console.log("Adding Markup", this.markup);
       return this.$el.html(this.markup || this.templateContainer[this.template](this.options));
     },
     render: function() {
