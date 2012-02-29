@@ -5,7 +5,6 @@
 %span.add-on
   <%= addOn %>
 <% } %> 
-
 %input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>",:placeholder=>"<%= placeHolder %>"}
 
 <% if(helperText) { %>

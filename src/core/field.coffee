@@ -32,8 +32,7 @@ Luca.core.Field = Luca.View.extend
 
     @disable() if @disabled
 
-    _( @statuses ).each (state)=> 
-      @updateState(state) if @[state]
+    _( @statuses ).each (state)=> @updateState(state) if @[state]
 
     @placeHolder ||= ""
 
@@ -65,5 +64,6 @@ Luca.core.Field = Luca.View.extend
     @input.attr('value', value)
   
   updateState: (state)->
-    _( @statuses ).each (cls)=> @$el.removeClass(cls)
-    @$el.addClass(state)
+    _( @statuses ).each (cls)=> 
+      @$el.removeClass(cls)
+      @$el.addClass(state)

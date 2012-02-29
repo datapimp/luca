@@ -4,17 +4,14 @@ Sandbox.views.PagesController = Luca.components.Controller.extend
     name: 'pages_tab_view'
     tab_position: 'left'
     components:[
-      ctype: 'template'
       name: 'introduction'
       title: 'Introduction'
       template: 'features/introduction'
     ,
-      ctype: 'template'
       name: 'view_helpers'
       title: 'View Helpers'
       template: 'features/view_helpers'
     ,
-      ctype: 'template'
       name: 'collection_helpers'
       title: 'Collection Helpers'
       template: 'features/collection_helpers'

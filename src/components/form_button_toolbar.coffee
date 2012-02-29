@@ -14,13 +14,13 @@ Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
     @components = [
       ctype: 'button_field'
       label: 'Submit'
-      class: 'submit-button'
+      class: 'btn submit-button'
     ]
 
     if @includeReset
       @components.push
         ctype: 'button_field'
         label: 'Reset'
-        class: 'reset-button'
+        class: 'btn reset-button'
 
 Luca.register "form_button_toolbar", "Luca.components.FormButtonToolbar"
