@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.4.0",
+    VERSION: "0.5.0",
     core: {},
     containers: {},
     components: {},
@@ -53,7 +53,7 @@
     if (c != null) return c;
     className = _.camelize(_.capitalize(ctype));
     parents = _(Luca.registry.namespaces).map(function(namespace) {
-      return Luca.util.nestedValue(namespace, window);
+      return Luca.util.nestedValue(namespace, window || global);
     });
     return _.first(_.compact(_(parents).map(function(parent) {
       return parent[className];
@@ -231,11 +231,11 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-container\' id=\'', cid ,'-tab-container\'>\n  <ul></ul>\n</div>\n');}return __p.join('');};
+  Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav nav-tabs\' id=\'', cid ,'-tab-selector\'></ul>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-tab-panel-container\' id=\'', cid ,'-tab-panel-container\'></div>\n');}return __p.join('');};
+  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -272,6 +272,10 @@
 (function() {
   Luca.templates || (Luca.templates = {});
   Luca.templates["sample/contents"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<p>Sample Contents</p>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["sample/welcome"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('welcome.luca\n');}return __p.join('');};
 }).call(this);
 (function() {
 
@@ -475,7 +479,7 @@
         throw "Can not register with a collection manager without a valid collection manager";
       }
       if (_.isString(collectionManager)) {
-        collectionManager = Luca.util.nestedValue(collectionManager, window);
+        collectionManager = Luca.util.nestedValue(collectionManager, window || global);
       }
       if (!collectionManager) throw "Could not register with collection manager";
       if (_.isFunction(collectionManager.add)) {
@@ -839,6 +843,147 @@
 }).call(this);
 (function() {
 
+  Luca.CollectionManager = (function() {
+
+    CollectionManager.prototype.__collections = {};
+
+    function CollectionManager(options) {
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      _.extend(this, Backbone.Events);
+      if (Luca.CollectionManager.get) {
+        console.log("A collection manager has already been created.  You are responsible for telling your views which to use");
+      } else {
+        Luca.CollectionManager.get = _.bind(function() {
+          return this;
+        }, this);
+      }
+    }
+
+    CollectionManager.prototype.add = function(key, collection) {
+      return this.currentScope()[key] = collection;
+    };
+
+    CollectionManager.prototype.allCollections = function() {
+      return _(this.currentScope()).values();
+    };
+
+    CollectionManager.prototype.create = function(key, collectionOptions, initialModels, private) {
+      var CollectionClass, collection;
+      if (collectionOptions == null) collectionOptions = {};
+      if (initialModels == null) initialModels = [];
+      if (private == null) private = false;
+      CollectionClass = collectionOptions.base;
+      CollectionClass || (CollectionClass = this.guessCollectionClass(key));
+      if (private || collectionOptions.private) {
+        collectionOptions.registerWith = "";
+      }
+      collection = new CollectionClass(initialModels, collectionOptions);
+      this.add(key, collection);
+      return collection;
+    };
+
+    CollectionManager.prototype.collectionPrefix = Luca.Collection.namespace;
+
+    CollectionManager.prototype.currentScope = function() {
+      var current_scope, _base;
+      if (current_scope = this.getScope()) {
+        return (_base = this.__collections)[current_scope] || (_base[current_scope] = {});
+      } else {
+        return this.__collections;
+      }
+    };
+
+    CollectionManager.prototype.each = function(fn) {
+      return _(this.all()).each(fn);
+    };
+
+    CollectionManager.prototype.get = function(key) {
+      return this.currentScope()[key];
+    };
+
+    CollectionManager.prototype.getScope = function() {
+      return;
+    };
+
+    CollectionManager.prototype.getOrCreate = function(key, collectionOptions, initialModels) {
+      if (collectionOptions == null) collectionOptions = {};
+      if (initialModels == null) initialModels = [];
+      return this.get(key) || this.create(key, collectionOptions, initialModels, false);
+    };
+
+    CollectionManager.prototype.guessCollectionClass = function(key) {
+      var classified, guess;
+      classified = _(key).chain().capitalize().camelize().value();
+      guess = (this.collectionPrefix || (window || global))[classified];
+      return guess;
+    };
+
+    CollectionManager.prototype.private = function(key, collectionOptions, initialModels) {
+      if (collectionOptions == null) collectionOptions = {};
+      if (initialModels == null) initialModels = [];
+      return this.create(key, collectionOptions, initialModels, true);
+    };
+
+    return CollectionManager;
+
+  })();
+
+}).call(this);
+(function() {
+
+  Luca.SocketManager = (function() {
+
+    function SocketManager(options) {
+      this.options = options != null ? options : {};
+      _.extend(Backbone.Events);
+      this.loadTransport();
+    }
+
+    SocketManager.prototype.connect = function() {
+      switch (this.options.provider) {
+        case "socket.io":
+          return this.socket = io.connect(this.options.socket_host);
+        case "faye.js":
+          return this.socket = new Faye.Client(this.options.socket_host);
+      }
+    };
+
+    SocketManager.prototype.transportLoaded = function() {
+      return this.connect();
+    };
+
+    SocketManager.prototype.transport_script = function() {
+      switch (this.options.provider) {
+        case "socket.io":
+          return "" + this.options.transport_host + "/socket.io/socket.io.js";
+        case "faye.js":
+          return "" + this.options.transport_host + "/faye.js";
+      }
+    };
+
+    SocketManager.prototype.loadTransport = function() {
+      var script,
+        _this = this;
+      script = document.createElement('script');
+      script.setAttribute("type", "text/javascript");
+      script.setAttribute("src", this.transport_script());
+      script.onload = this.transportLoaded;
+      if (Luca.util.isIE()) {
+        script.onreadystatechange = function() {
+          if (script.readyState === "loaded") return _this.transportLoaded();
+        };
+      }
+      return document.getElementsByTagName('head')[0].appendChild(script);
+    };
+
+    return SocketManager;
+
+  })();
+
+}).call(this);
+(function() {
+
   Luca.containers.SplitView = Luca.core.Container.extend({
     layout: '100',
     componentType: 'split_view',
@@ -1112,19 +1257,45 @@
 
   Luca.containers.TabView = Luca.containers.CardView.extend({
     events: {
-      "click .luca-ui-tab-container li": "select"
+      "click ul.nav-tabs li": "select"
     },
     hooks: ["before:select", "after:select"],
     componentType: 'tab_view',
-    className: 'luca-ui-tab-view-wrapper',
-    components: [],
-    componentClass: 'luca-ui-tab-panel',
+    className: 'tabbable',
+    tab_position: 'top',
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "select", "highlightSelectedTab");
       this.setupHooks(this.hooks);
       return this.bind("after:card:switch", this.highlightSelectedTab);
+    },
+    activeTabSelector: function() {
+      return this.tabSelectors().eq(this.activeCard);
+    },
+    assignTabContainers: function() {
+      var _this = this;
+      return _(this.components).map(function(component, index) {
+        return component.container = "#" + _this.cid + "-tab-view-content";
+      });
+    },
+    beforeLayout: function() {
+      this.$el.addClass("tabs-" + this.tab_position);
+      this.$el.data('toggle', 'tab');
+      if (this.tab_position === "below") {
+        $(this.el).append(Luca.templates["containers/tab_view"](this));
+        $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
+      } else {
+        $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
+        $(this.el).append(Luca.templates["containers/tab_view"](this));
+      }
+      this.createTabSelectors();
+      Luca.containers.CardView.prototype.beforeLayout.apply(this, arguments);
+      return this.assignTabContainers();
+    },
+    highlightSelectedTab: function() {
+      this.tabSelectors().removeClass('active-tab');
+      return this.activeTabSelector().addClass('active-tab');
     },
     select: function(e) {
       var me, my;
@@ -1133,28 +1304,8 @@
       this.activate(my.data('target-tab'));
       return this.trigger("after:select", this);
     },
-    highlightSelectedTab: function() {
-      this.tabSelectors().removeClass('active-tab');
-      return this.activeTabSelector().addClass('active-tab');
-    },
-    activeTabSelector: function() {
-      return this.tabSelectors().eq(this.activeCard);
-    },
     tabContainer: function() {
-      return $("#" + this.cid + "-tab-container>ul");
-    },
-    tab_position: 'top',
-    beforeLayout: function() {
-      $(this.el).addClass("tab-position-" + this.tab_position);
-      if (this.tab_position === "top" || this.tab_position === "left") {
-        $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
-        $(this.el).append(Luca.templates["containers/tab_view"](this));
-      } else {
-        $(this.el).append(Luca.templates["containers/tab_view"](this));
-        $(this.el).append(Luca.templates["containers/tab_selector_container"](this));
-      }
-      this.createTabSelectors();
-      return Luca.containers.CardView.prototype.beforeLayout.apply(this, arguments);
+      return $("ul.nav-tabs", this.el);
     },
     tabSelectors: function() {
       return $('li.tab-selector', this.tabContainer());
@@ -1163,7 +1314,6 @@
       var _this = this;
       return _(this.components).map(function(component, index) {
         var title;
-        component.container = "#" + _this.cid + "-tab-panel-container";
         title = component.title || ("Tab " + (index + 1));
         return _this.tabContainer().append("<li class='tab-selector' data-target-tab='" + index + "'>" + title + "</li>");
       });
@@ -1183,6 +1333,7 @@
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
     },
     render: function() {
+      console.log("Rendering Viewport");
       return $(this.el).addClass('luca-ui-viewport');
     }
   });
@@ -1200,20 +1351,26 @@
       {
         ctype: 'controller',
         name: 'main_controller',
+        defaultCard: 'welcome',
         components: [
           {
             ctype: 'template',
-            template: 'welcome'
+            name: 'welcome',
+            template: 'sample/welcome',
+            templateContainer: "Luca.templates"
           }
         ]
       }
     ],
     initialize: function(options) {
+      var _this = this;
       this.options = options != null ? options : {};
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       this.collectionManager = new Luca.CollectionManager();
       this.state = new Backbone.Model(this.defaultState);
-      return this.bind("ready", this.render);
+      return this.bind("ready", function() {
+        return _this.render();
+      });
     },
     activeView: function() {
       var active;
@@ -1230,17 +1387,19 @@
       return this.get("active_section");
     },
     afterComponents: function() {
-      var _ref,
+      var _ref, _ref2, _ref3,
         _this = this;
       if ((_ref = Luca.containers.Viewport.prototype.afterComponents) != null) {
         _ref.apply(this, arguments);
       }
-      this.getMainController().bind("after:card:switch", function(previous, current) {
-        return _this.state.set({
-          active_section: current.name
+      if ((_ref2 = this.getMainController()) != null) {
+        _ref2.bind("after:card:switch", function(previous, current) {
+          return _this.state.set({
+            active_section: current.name
+          });
         });
-      });
-      return this.getMainController().each(function(component) {
+      }
+      return (_ref3 = this.getMainController()) != null ? _ref3.each(function(component) {
         if (component.ctype.match(/controller$/)) {
           return component.bind("after:card:switch", function(previous, current) {
             return _this.state.set({
@@ -1248,16 +1407,14 @@
             });
           });
         }
-      });
+      }) : void 0;
     },
     beforeRender: function() {
       var _ref;
-      if ((_ref = Luca.containers.Viewport.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      return Backbone.history.start();
+      return (_ref = Luca.containers.Viewport.prototype.beforeRender) != null ? _ref.apply(this, arguments) : void 0;
     },
     boot: function() {
+      console.log("Sup?");
       return this.trigger("ready");
     },
     collection: function() {
@@ -1310,7 +1467,7 @@
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       this.defaultCard || (this.defaultCard = (_ref = this.components[0]) != null ? _ref.name : void 0);
       if (!this.defaultCard) {
-        throw "Controllers must specify a defaultCard property";
+        throw "Controllers must specify a defaultCard property and/or the first component must have a name";
       }
       return this.state = new Backbone.Model({
         active_section: this.defaultCard
@@ -2346,9 +2503,13 @@
       if (!(this.template || this.markup)) {
         throw "Templates must specify which template / markup to use";
       }
+      if (_.isString(this.templateContainer)) {
+        return this.templateContainer = eval("(window || global)." + this.templateContainer);
+      }
     },
+    templateContainer: "Luca.templates",
     beforeRender: function() {
-      return $(this.el).html(this.markup || JST[this.template](this.options));
+      return $(this.el).html(this.markup || this.templateContainer[this.template](this.options));
     },
     render: function() {
       return $(this.container).append(this.el);
