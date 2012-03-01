@@ -1,0 +1,9 @@
+.luca-ui-tab-view .tab-content {
+  width: 100%; }
+  .luca-ui-tab-view .tab-content .luca-ui-card {
+    width: 100%; }
+.luca-ui-tab-view ul li {
+  cursor: pointer; }
+
+.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view {
+  overflow: hidden; }

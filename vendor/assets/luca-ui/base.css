@@ -1,0 +1,15 @@
+html.luca-ui-fullscreen {
+  height: 100%; }
+  html.luca-ui-fullscreen body {
+    height: 100%;
+    padding: 0;
+    margin: 0; }
+  html.luca-ui-fullscreen .luca-ui-viewport {
+    height: 100%;
+    padding: 0;
+    margin: 0; }
+
+.luca-ui-viewport li {
+  list-style-type: none; }
+.luca-ui-viewport li.nav {
+  cursor: pointer; }

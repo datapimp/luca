@@ -4,13 +4,14 @@ assets_path = Dir.pwd + '/vendor/assets'
 javascript_path = File.join( assets_path, 'javascripts' )
 stylesheets_path = File.join( assets_path, 'stylesheets' )
 
-guard 'sprockets2', :assets_path => assets_path, :sprockets => App.sprockets, :precompile=>[/^luca-ui.(coffee|js|css|scss)$/], :digest => false, :gz => false do
+guard 'sprockets2', :assets_path => assets_path, :sprockets => App.sprockets, :precompile=>[/^luca-ui.+(coffee|js|css|scss)$/], :digest => false, :gz => false do
   watch(%r{^src/.+$})
 
   callback(:run_on_change_end) do
-    compiled = Dir.glob( assets_path + '/luca-ui*.*s' )
+    compiled = Dir.glob( assets_path + '/luca-ui*' )
 
     compiled.each do |file|
+      puts "Handling Compiled File #{ file }"
       if File.extname(file) == ".js"
         FileUtils.mkdir_p javascript_path
         FileUtils.cp file, javascript_path
