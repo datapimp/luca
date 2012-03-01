@@ -14,7 +14,7 @@ Luca.View.originalExtend = Backbone.View.extend
 # some method definitions and add special behavior around them
 # mostly related to render()
 Luca.View.extend = (definition)->
-  #### Rendering 
+  #### Rendering
   #
   # Our base view class wraps the defined render() method
   # of the views which inherit from it, and does things like
@@ -26,30 +26,30 @@ Luca.View.extend = (definition)->
   _base = definition.render
 
   _base ||= ()->
-    container = if _.isFunction(@container) then @container() else @container 
+    container = if _.isFunction(@container) then @container() else @container
 
-    return @ unless $(container) and @$el 
+    return @ unless $(container) and @$el
 
 
     $(container).append( @$el )
     @
-    
+
 
   definition.render = ()->
     if @deferrable
       @trigger "before:render", @
-      
+
       @deferrable.bind @deferrable_event, _.once ()=>
         _base.apply(@, arguments)
         @trigger "after:render", @
-     
-      # we might not want to fetch immediately upon 
+
+      # we might not want to fetch immediately upon
       # rendering, so we can pass a deferrable_trigger
       # event and not fire the fetch until this event
       # occurs
       if !@deferrable_trigger
         @immediate_trigger = true
-      
+
       if @immediate_trigger is true
         @deferrable.fetch()
       else
@@ -68,7 +68,11 @@ _.extend Luca.View.prototype,
     return unless @debugMode or window.LucaDebugMode?
     console.log [(@name || @cid),message] for message in arguments
 
-  trigger: (@event)->
+  trigger: ()->
+    if Luca.enableGlobalObserver
+      Luca.ViewObserver ||= new Luca.Observer(type:"view")
+      Luca.ViewObserver.relay @, arguments
+
     Backbone.View.prototype.trigger.apply @, arguments
 
   hooks:[
@@ -79,10 +83,10 @@ _.extend Luca.View.prototype,
     "activation"
     "deactivation"
   ]
-  
+
   # which event should we listen to on
   # our deferrable property, before we
-  # trigger the actual rendering  
+  # trigger the actual rendering
   deferrable_event: "reset"
 
   initialize: (@options={})->
@@ -95,19 +99,19 @@ _.extend Luca.View.prototype,
     # Luca.View(s) which get created get stored in a global cache by their
     # component id.  This allows us to re-use views when it makes sense
     Luca.cache( @cid, @ )
-    
+
     unique = _( Luca.View.prototype.hooks.concat( @hooks ) ).uniq()
-    
+
     @setupHooks( unique )
 
     @trigger "after:initialize", @
 
   #### Hooks or Auto Event Binding
-  # 
+  #
   # views which inherit from Luca.View can define hooks
   # or events which can be emitted from them.  Automatically,
   # any functions on the view which are named according to the
-  # convention will automatically get run.  
+  # convention will automatically get run.
   #
   # by default, all Luca.View classes come with the following:
   #
@@ -117,26 +121,26 @@ _.extend Luca.View.prototype,
   # first:activation  : firstActivation()
   setupHooks: (set)->
     set ||= @hooks
-    
+
     _(set).each (event)=>
       parts = event.split(':')
       prefix = parts.shift()
-      
+
       parts = _( parts ).map (p)-> _.capitalize(p)
       fn = prefix + parts.join('')
-      
+
       @bind event, ()=> @[fn].apply @, arguments if @[fn]
 
 
   #### Luca.Collection and Luca.CollectionManager integration
-  
-  # under the hood, this will find your collection manager using 
+
+  # under the hood, this will find your collection manager using
   # Luca.CollectionManager.get, which is a function that returns
   # the first instance of the CollectionManager class ever created.
-  # 
+  #
   # if you want to use more than one collection manager, over ride this
   # function in your views with your own logic
-  getCollectionManager: ()-> 
+  getCollectionManager: ()->
     Luca.CollectionManager.get?.call()
 
   ##### Collection Events
@@ -144,14 +148,14 @@ _.extend Luca.View.prototype,
   # By defining a hash of collectionEvents in the form of
   #
   # "books add" : "onBookAdd"
-  # 
-  # the Luca.View will bind to the collection found in the 
+  #
+  # the Luca.View will bind to the collection found in the
   # collectionManager with that key, and bind to that event.
-  # a property of @booksCollection will be created on the view, 
+  # a property of @booksCollection will be created on the view,
   # and the "add" event will trigger "onBookAdd"
   #
-  # you may also specify a function directly.  this 
-  #   
+  # you may also specify a function directly.  this
+  #
   registerCollectionEvents: ()->
     manager = @getCollectionManager()
 
@@ -160,8 +164,8 @@ _.extend Luca.View.prototype,
 
       collection = @["#{ key }Collection"] = manager.getOrCreate( key )
 
-      if !collection 
-        throw "Could not find collection specified by #{ key }" 
+      if !collection
+        throw "Could not find collection specified by #{ key }"
 
       if _.isFunction(handler)
         handler = ()=> handler.apply(@, arguments)

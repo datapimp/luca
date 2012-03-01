@@ -282,6 +282,48 @@
   Luca.templates["sample/welcome"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('welcome.luca\n');}return __p.join('');};
 }).call(this);
 (function() {
+  var __slice = Array.prototype.slice;
+
+  Luca.Observer = (function() {
+
+    function Observer(options) {
+      var _this = this;
+      this.options = options != null ? options : {};
+      _.extend(this, Backbone.Events);
+      this.type = this.options.type;
+      if (this.options.debugAll) {
+        this.bind("event", function() {
+          var args, t;
+          t = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+          return console.log("Observed " + _this.type + " " + (t.name || t.id || t.cid), t, _(args).flatten());
+        });
+      }
+    }
+
+    Observer.prototype.relay = function() {
+      var args, triggerer;
+      triggerer = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      this.trigger("event", triggerer, args);
+      return this.trigger("event:" + args[0], triggerer, args.slice(1));
+    };
+
+    return Observer;
+
+  })();
+
+  Luca.Observer.enableObservers = function(options) {
+    if (options == null) options = {};
+    Luca.enableGlobalObserver = true;
+    Luca.ViewObserver = new Luca.Observer(_.extend(options, {
+      type: "view"
+    }));
+    return Luca.CollectionObserver = new Luca.Observer(_.extend(options, {
+      type: "collection"
+    }));
+  };
+
+}).call(this);
+(function() {
 
   Luca.View = Backbone.View.extend({
     base: 'Luca.View'
@@ -335,8 +377,13 @@
       }
       return _results;
     },
-    trigger: function(event) {
-      this.event = event;
+    trigger: function() {
+      if (Luca.enableGlobalObserver) {
+        Luca.ViewObserver || (Luca.ViewObserver = new Luca.Observer({
+          type: "view"
+        }));
+        Luca.ViewObserver.relay(this, arguments);
+      }
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
@@ -553,6 +600,18 @@
         Luca.Collection.cache(this.bootstrap_cache_keys, models);
       }
       return models;
+    }
+  });
+
+  _.extend(Luca.Collection.prototype, {
+    trigger: function() {
+      if (Luca.enableGlobalObserver) {
+        Luca.CollectionObserver || (Luca.CollectionObserver = new Luca.Observer({
+          type: "collection"
+        }));
+        Luca.CollectionObserver.relay(this, arguments);
+      }
+      return Backbone.View.prototype.trigger.apply(this, arguments);
     }
   });
 

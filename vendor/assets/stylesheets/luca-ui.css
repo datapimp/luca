@@ -746,7 +746,8 @@ html.luca-ui-fullscreen {
       float: left;
       margin: 5px; }
 .luca-ui-card {
-  padding: 5px; }
+  padding: 5px;
+  width: 100%; }
 .luca-ui-tab-view .tab-content {
   width: 100%; }
   .luca-ui-tab-view .tab-content .luca-ui-card {

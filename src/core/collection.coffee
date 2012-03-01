@@ -244,6 +244,16 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
     models
 
+
+# Global Collection Observer
+_.extend Luca.Collection.prototype,
+  trigger: ()->
+    if Luca.enableGlobalObserver
+      Luca.CollectionObserver ||= new Luca.Observer(type:"collection")
+      Luca.CollectionObserver.relay(@, arguments)
+
+    Backbone.View.prototype.trigger.apply @, arguments
+
 #### Base Parameters
 #
 # Always include these parameters in every request to your REST API.
