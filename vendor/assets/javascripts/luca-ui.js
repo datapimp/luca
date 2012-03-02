@@ -235,7 +235,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav nav-tabs\' id=\'', cid ,'-tab-selector\'>\n  '); for(var i = 0; i < components.length; i++ ) { __p.push('\n  '); var component = components[i];__p.push('\n  <li class=\'tab-selector\' data-target=\'', i ,'\'>\n    <a data-target=\'', i ,'\'>\n      ', component.title ,'\n    </a>\n  </li>\n  '); } __p.push('\n</ul>\n');}return __p.join('');};
+  Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-selector-container\' id=\'', cid ,'-tab-selector\'>\n  <ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-nav\'>\n    '); for(var i = 0; i < components.length; i++ ) { __p.push('\n    '); var component = components[i];__p.push('\n    <li class=\'tab-selector\' data-target=\'', i ,'\'>\n      <a data-target=\'', i ,'\'>\n        ', component.title ,'\n      </a>\n    </li>\n    '); } __p.push('\n  </ul>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -397,6 +397,9 @@
       unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
       this.setupHooks(unique);
       return this.trigger("after:initialize", this);
+    },
+    $container: function() {
+      return $(this.container);
     },
     setupHooks: function(set) {
       var _this = this;
@@ -1323,6 +1326,7 @@
     componentType: 'tab_view',
     className: 'luca-ui-tab-view tabbable',
     tab_position: 'top',
+    tabVerticalOffset: '50px',
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
@@ -1356,7 +1360,16 @@
       if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
         _ref.apply(this, arguments);
       }
-      return this.activeTabSelector().addClass('active');
+      this.activeTabSelector().addClass('active');
+      if (Luca.enableBootstrap && this.tab_position === "left" || this.tab_position === "right") {
+        this.$el.addClass('grid-12');
+        this.tabContainerWrapper().addClass('grid-3');
+        this.tabContentWrapper().addClass('grid-9');
+        if (this.tabVerticalOffset) {
+          console.log("Yeah dawg");
+          return this.tabContainerWrapper().css('padding-top', this.tabVerticalOffset);
+        }
+      }
     },
     highlightSelectedTab: function() {
       this.tabSelectors().removeClass('active');
@@ -1369,8 +1382,14 @@
       this.activate(my.data('target'));
       return this.trigger("after:select", this);
     },
+    tabContentWrapper: function() {
+      return $("#" + this.cid + "-tab-view-content");
+    },
+    tabContainerWrapper: function() {
+      return $("#" + this.cid + "-tabs-selector");
+    },
     tabContainer: function() {
-      return $("ul.nav-tabs", this.el);
+      return $("ul#" + this.cid + "-tabs-nav");
     },
     tabSelectors: function() {
       return $('li.tab-selector', this.tabContainer());

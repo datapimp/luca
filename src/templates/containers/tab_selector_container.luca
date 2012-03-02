@@ -1,7 +1,8 @@
-%ul{:id=>"<%= cid %>-tab-selector",:class=>"nav nav-tabs"}
-  <% for(var i = 0; i < components.length; i++ ) { %>
-  <% var component = components[i];%>
-  %li.tab-selector{:data=>{:target=>"<%= i %>"}}
-    %a{:data=>{:target=>"<%= i %>"}}
-      <%= component.title %>
-  <% } %>
+%div{:id=>"<%= cid %>-tab-selector",:class=>"tab-selector-container"}
+  %ul{:id=>"<%= cid %>-tabs-nav",:class=>"nav nav-tabs"}
+    <% for(var i = 0; i < components.length; i++ ) { %>
+    <% var component = components[i];%>
+    %li.tab-selector{:data=>{:target=>"<%= i %>"}}
+      %a{:data=>{:target=>"<%= i %>"}}
+        <%= component.title %>
+    <% } %>

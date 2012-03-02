@@ -22,4 +22,57 @@ html.luca-ui-fullscreen {
   li.nav {
     cursor: pointer;
   }
+
+
 }
+
+/*http://csswizardry.com/fluid-grids/#generated-grids*/
+.wrapper{
+  max-width:1208px;
+/*  max-width:894px;*/
+  padding:0 15px;
+  margin:0 auto;
+}
+
+/*
+Column container
+*/
+.grids{
+  width:auto;
+  max-width:924px;
+  clear:both;
+  margin:0 0 0 -3.247%;
+  list-style:none; /* So we can make grids out of lists. */
+  overflow:hidden; /* Clear the floats */
+}
+
+[class*="grid-"]{
+  float:left;
+  margin:0 3.247% 0 0;
+}
+
+.grid-margin {
+  margin:0 3.247% 0 0;
+}
+.grids {
+  .grid-margin {
+    margin:0 0 0 3.247%;
+  }
+}
+
+.grids [class*="grid-"]{
+  margin:0 0 0 3.247%;
+}
+
+.grid-1{ width:5.087% }
+.grid-2{ width:13.42% }
+.grid-3{ width:21.753% }
+.grid-4{ width:30.087% }
+.grid-5{ width:38.42% }
+.grid-6{ width:46.753% }
+.grid-7{ width:55.087% }
+.grid-8{ width:63.42% }
+.grid-9{ width:71.753% }
+.grid-10{ width:80.087% }
+.grid-11{ width:88.42% }
+.grid-12{ width:96.753%; margin:0; }

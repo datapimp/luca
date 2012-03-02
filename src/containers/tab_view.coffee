@@ -13,6 +13,8 @@ Luca.containers.TabView = Luca.containers.CardView.extend
 
   tab_position: 'top'
 
+  tabVerticalOffset: '50px'
+
   initialize: (@options={})->
     Luca.containers.CardView.prototype.initialize.apply @, arguments
     _.bindAll @, "select", "highlightSelectedTab"
@@ -25,7 +27,7 @@ Luca.containers.TabView = Luca.containers.CardView.extend
 
   prepareLayout: ()->
     @card_containers = _( @cards ).map (card, index)=>
-      @$('.tab-content').append Luca.templates["containers/basic"](card) 
+      @$('.tab-content').append Luca.templates["containers/basic"](card)
       $("##{ card.id }")
 
   beforeLayout: ()->
@@ -44,6 +46,15 @@ Luca.containers.TabView = Luca.containers.CardView.extend
     Luca.containers.CardView.prototype.beforeRender?.apply @, arguments
     @activeTabSelector().addClass('active')
 
+    if Luca.enableBootstrap and @tab_position is "left" or @tab_position is "right"
+      @$el.addClass('grid-12')
+      @tabContainerWrapper().addClass('grid-3')
+      @tabContentWrapper().addClass('grid-9')
+
+      if @tabVerticalOffset
+        console.log "Yeah dawg"
+        @tabContainerWrapper().css('padding-top', @tabVerticalOffset )
+
   highlightSelectedTab: ()->
     @tabSelectors().removeClass('active')
     @activeTabSelector().addClass('active')
@@ -54,8 +65,14 @@ Luca.containers.TabView = Luca.containers.CardView.extend
     @activate my.data('target')
     @trigger "after:select", @
 
+  tabContentWrapper: ()->
+    $("##{ @cid }-tab-view-content")
+
+  tabContainerWrapper: ()->
+    $("##{ @cid }-tabs-selector")
+
   tabContainer: ()->
-    $("ul.nav-tabs", @el)
+    $("ul##{ @cid }-tabs-nav")
 
   tabSelectors: ()->
     $( 'li.tab-selector', @tabContainer() )

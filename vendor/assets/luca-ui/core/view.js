@@ -73,6 +73,9 @@
       this.setupHooks(unique);
       return this.trigger("after:initialize", this);
     },
+    $container: function() {
+      return $(this.container);
+    },
     setupHooks: function(set) {
       var _this = this;
       set || (set = this.hooks);

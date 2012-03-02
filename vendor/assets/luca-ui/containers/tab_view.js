@@ -8,6 +8,7 @@
     componentType: 'tab_view',
     className: 'luca-ui-tab-view tabbable',
     tab_position: 'top',
+    tabVerticalOffset: '50px',
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
@@ -41,7 +42,16 @@
       if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
         _ref.apply(this, arguments);
       }
-      return this.activeTabSelector().addClass('active');
+      this.activeTabSelector().addClass('active');
+      if (Luca.enableBootstrap && this.tab_position === "left" || this.tab_position === "right") {
+        this.$el.addClass('grid-12');
+        this.tabContainerWrapper().addClass('grid-3');
+        this.tabContentWrapper().addClass('grid-9');
+        if (this.tabVerticalOffset) {
+          console.log("Yeah dawg");
+          return this.tabContainerWrapper().css('padding-top', this.tabVerticalOffset);
+        }
+      }
     },
     highlightSelectedTab: function() {
       this.tabSelectors().removeClass('active');
@@ -54,8 +64,14 @@
       this.activate(my.data('target'));
       return this.trigger("after:select", this);
     },
+    tabContentWrapper: function() {
+      return $("#" + this.cid + "-tab-view-content");
+    },
+    tabContainerWrapper: function() {
+      return $("#" + this.cid + "-tabs-selector");
+    },
     tabContainer: function() {
-      return $("ul.nav-tabs", this.el);
+      return $("ul#" + this.cid + "-tabs-nav");
     },
     tabSelectors: function() {
       return $('li.tab-selector', this.tabContainer());

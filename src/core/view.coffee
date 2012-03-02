@@ -106,6 +106,7 @@ _.extend Luca.View.prototype,
 
     @trigger "after:initialize", @
 
+  $container: ()-> $(@container)
   #### Hooks or Auto Event Binding
   #
   # views which inherit from Luca.View can define hooks

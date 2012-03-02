@@ -13,6 +13,76 @@ html.luca-ui-fullscreen {
   list-style-type: none; }
 .luca-ui-viewport li.nav {
   cursor: pointer; }
+
+/*http://csswizardry.com/fluid-grids/#generated-grids*/
+.wrapper {
+  max-width: 1208px;
+  /*  max-width:894px;*/
+  padding: 0 15px;
+  margin: 0 auto; }
+
+/*
+Column container
+*/
+.grids {
+  width: auto;
+  max-width: 924px;
+  clear: both;
+  margin: 0 0 0 -3.247%;
+  list-style: none;
+  /* So we can make grids out of lists. */
+  overflow: hidden;
+  /* Clear the floats */ }
+
+[class*="grid-"] {
+  float: left;
+  margin: 0 3.247% 0 0; }
+
+.grid-margin {
+  margin: 0 3.247% 0 0; }
+
+.grids .grid-margin {
+  margin: 0 0 0 3.247%; }
+
+.grids [class*="grid-"] {
+  margin: 0 0 0 3.247%; }
+
+.grid-1 {
+  width: 5.087%; }
+
+.grid-2 {
+  width: 13.42%; }
+
+.grid-3 {
+  width: 21.753%; }
+
+.grid-4 {
+  width: 30.087%; }
+
+.grid-5 {
+  width: 38.42%; }
+
+.grid-6 {
+  width: 46.753%; }
+
+.grid-7 {
+  width: 55.087%; }
+
+.grid-8 {
+  width: 63.42%; }
+
+.grid-9 {
+  width: 71.753%; }
+
+.grid-10 {
+  width: 80.087%; }
+
+.grid-11 {
+  width: 88.42%; }
+
+.grid-12 {
+  width: 96.753%;
+  margin: 0; }
 .luca-ui-form-view-wrapper {
   width: 100%;
   float: left;
@@ -135,15 +205,22 @@ html.luca-ui-fullscreen {
 .luca-ui-card {
   padding: 5px;
   width: 100%; }
-.luca-ui-tab-view .tab-content {
-  width: 100%; }
-  .luca-ui-tab-view .tab-content .luca-ui-card {
-    width: 100%; }
-.luca-ui-tab-view ul li {
-  cursor: pointer; }
-
-.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view {
+.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view, .luca-ui-tab-view .luca-ui-card .luca-ui-card {
   overflow: hidden; }
+
+.luca-ui-tab-view.tabs-below .tab-selector-container, .luca-ui-tab-view.tabs-right .tab-selector-container {
+  display: block;
+  clear: both; }
+
+.luca-ui-tab-view.tabs-left .tab-selector-container {
+  float: left; }
+.luca-ui-tab-view.tabs-left .tab-content {
+  float: left; }
+
+.luca-ui-tab-view.tabs-right .tab-selector-container {
+  float: right; }
+.luca-ui-tab-view.tabs-right .tab-content {
+  float: left; }
 /* normalize.css 2011-11-04T15:38 UTC - http://github.com/necolas/normalize.css */
 /* =============================================================================
    HTML5 display definitions

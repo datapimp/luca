@@ -1,9 +1,16 @@
-.luca-ui-tab-view .tab-content {
-  width: 100%; }
-  .luca-ui-tab-view .tab-content .luca-ui-card {
-    width: 100%; }
-.luca-ui-tab-view ul li {
-  cursor: pointer; }
-
-.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view {
+.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view, .luca-ui-tab-view .luca-ui-card .luca-ui-card {
   overflow: hidden; }
+
+.luca-ui-tab-view.tabs-below .tab-selector-container, .luca-ui-tab-view.tabs-right .tab-selector-container {
+  display: block;
+  clear: both; }
+
+.luca-ui-tab-view.tabs-left .tab-selector-container {
+  float: left; }
+.luca-ui-tab-view.tabs-left .tab-content {
+  float: left; }
+
+.luca-ui-tab-view.tabs-right .tab-selector-container {
+  float: right; }
+.luca-ui-tab-view.tabs-right .tab-content {
+  float: left; }

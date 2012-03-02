@@ -1,21 +1,33 @@
 .luca-ui-tab-view {
-  .tab-content {
-    width: 100%;
-    .luca-ui-card {
-      width: 100%;
-    }
-  }
-  ul {
-    li {
-      cursor: pointer;
-    }
-  }
-}
-
-.luca-ui-tab-view {
   .luca-ui-card {
-    .luca-ui-grid-view, .luca-ui-form-view {
+    .luca-ui-grid-view, .luca-ui-form-view, .luca-ui-card {
       overflow: hidden;
     }
   }
 }
+
+.luca-ui-tab-view.tabs-below, .luca-ui-tab-view.tabs-right {
+  .tab-selector-container {
+    display: block;
+    clear: both;
+  }
+}
+
+.luca-ui-tab-view.tabs-left {
+  .tab-selector-container {
+    float: left;
+  }
+  .tab-content {
+    float: left;
+  }
+}
+
+.luca-ui-tab-view.tabs-right {
+  .tab-selector-container {
+    float: right;
+  }
+  .tab-content {
+    float: left;
+  }
+}
+
