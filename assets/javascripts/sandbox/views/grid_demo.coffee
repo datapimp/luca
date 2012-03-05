@@ -1,6 +1,5 @@
 Sandbox.views.GridDemo = Luca.components.GridView.extend
-  collection:
-    url: '/sandbox/api'
+  collection: "sandbox"
 
   afterInitialize: ()->
     @bind "activation", ()=>

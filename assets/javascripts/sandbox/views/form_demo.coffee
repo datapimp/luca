@@ -6,8 +6,15 @@ Sandbox.views.FormDemo = Luca.containers.SplitView.extend
     ctype: 'form_view'
     components:[
       ctype: 'column_view'
-      layout: '50/50'
+      layout: '33/33/33'
       components:[
+        components:[
+          ctype: 'text_field'
+          name: 'textfield3'
+          label: 'Sup baby?'
+          placeHolder: 'Bootstrapped'
+        ]
+      ,
         components:[
           ctype: 'checkbox_field'
           label: 'Checkbox Field'

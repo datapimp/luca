@@ -1,1 +1,6 @@
 %h1 View Helpers
+
+%pre.prettyprint.linenums.lang-coffee
+  :plain
+    MyView = Luca.View.extend
+      initialize: (@options={})->

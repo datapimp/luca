@@ -4,3 +4,4 @@
 #= require ./dependencies/backbone-min.js
 #= require ./dependencies/backbone-query.min.js
 #= require ./dependencies/bootstrap.min
+#= require ./dependencies/prettify

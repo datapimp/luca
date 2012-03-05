@@ -1,0 +1,1 @@
+Sandbox.views.CollectionEvents = Luca.View.extend
