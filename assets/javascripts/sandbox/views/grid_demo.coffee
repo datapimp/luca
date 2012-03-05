@@ -4,7 +4,7 @@ Sandbox.views.GridDemo = Luca.components.GridView.extend
 
   afterInitialize: ()->
     @bind "activation", ()=>
-      @resize( @$container().width() )
+       @resize( @$container().width() )
 
   columns:[
     header: "Name"
