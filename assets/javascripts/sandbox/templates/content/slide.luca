@@ -1,2 +1,0 @@
-%h1 <%= description %>
-%a.cycle Click To Cycle Cards
