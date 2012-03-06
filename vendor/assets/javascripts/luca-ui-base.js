@@ -456,7 +456,8 @@
 
   Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend({
     initialize: function(models, options) {
-      var _this = this;
+      var table,
+        _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (this.cached) {
@@ -468,6 +469,11 @@
         this.bind("after:initialize", function() {
           return _this.register(_this.registerWith, _this.registerAs, _this);
         });
+      }
+      if (this.useLocalStorage === true && (window.localStorage != null)) {
+        table = this.bootstrap_cache_key || this.registerAs;
+        throw "Must specify either a cached or registerAs property to use localStorage";
+        this.localStorage = new Luca.LocalStore(table);
       }
       if (_.isArray(this.data) && this.data.length > 0) {
         this.memoryCollection = true;
