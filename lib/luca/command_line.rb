@@ -3,60 +3,67 @@ require 'optparse'
 module Luca
   class CommandLine
     BANNER = <<-EOS
-Usage luca [command] [options] 
+    luca-ui generator
 
-Luca is a generator for apps based on the luca-ui framework.
+    used to generate an application skeleton, or components
 
-Options:
-  EOS
+    example:
 
-    def initialize
-      parse_options
-      Sidecar::Message.new(@options)
+    luca new MyApp
+
+    EOS
+
+    attr_accessor :keystore, :arguments
+
+    GRAMMAR = %w{}
+
+    def initialize arguments=[]
+      arguments = arguments.split if arguments.is_a? String
+      parse_options arguments
+
+      if !@options[:action]
+        puts @option_parser.banner
+        exit
+      end
     end
 
-    def parse_options
-      @options = {
-        :message_type   => nil,
-        :contents       => nil,
-        :config_path    => nil,
-        :base_url       => nil,
-        :project_root   => Dir.getwd,
-        :channel        => "client"
-      }
+    def options
+      @options
+    end
+
+    def parse_options arguments=[]
+      @options = {}
 
       @option_parser = OptionParser.new do |opts|
-        opts.on('-r','--root',)
+        opts.separator ""
+        opts.separator "Actions:"
 
-        opts.on('-W','--disable-watcher') do
-          @options[:disable_watcher] = true
+        opts.on("-n",'--new APPLICATION_NAME','Create a new luca-ui app skeleton') do |s|
+          @options[:action] = "new"
         end
 
-        opts.on('-d','--debug','Enable debugging mode') do
-          @options[:debug] = true
+        opts.separator ""
+        opts.separator "Common Options:"
+
+        opts.on_tail("-h","--help",'You are looking at it') do
+          puts opts
+          exit
         end
 
-        opts.on('-c','--config PATH','Path to sidecar.yml') do |config_path|
-          @options[:config_path] = config_path
-        end
-
-        opts.on('-a', '--assets LIST','List of files to evaluate in the target environment') do |assets|
-          @options[:contents] = assets
-        end
-
-        opts.on_tail('-v','--version','display Sidecar version') do
-          puts "Sidecar version #{Sidecar::VERSION}"
+        opts.on_tail('-v','--version','display Sentry version') do
+          puts "Luca Version #{ Luca::VERSION }"
           exit
         end
       end
-      
-      arguments = ARGV.dup
-      
-      @options[:channel] = arguments[0]
-      @options[:message_type] = arguments[1]
 
       @option_parser.banner = BANNER
-      @option_parser.parse!(arguments)
+
+      arguments.collect! do |arg|
+        GRAMMAR.include?(arg.downcase) ? "--#{ arg.downcase }" : arg
+      end
+
+      @option_parser.parse!( arguments )
     end
+
   end
 end
