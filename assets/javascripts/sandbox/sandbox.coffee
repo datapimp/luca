@@ -10,7 +10,7 @@ Sandbox.Application = Luca.Application.extend
     ]
   ]
 
-n$ do ->
+$ do ->
   (window || global).SandboxApp = new Sandbox.Application()
   SandboxApp.boot()
   prettyPrint()
