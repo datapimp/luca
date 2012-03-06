@@ -33,6 +33,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     if @cached
       @bootstrap_cache_key = if _.isFunction( @cached ) then @cached() else @cached
 
+
     # If we are going to be registering this collection with the CollectionManager
     # class, then we need to specify a key to register ourselves under. @registerAs can be
     # as simple as something as "books", or if you are using collections which need
@@ -44,6 +45,14 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
       @bind "after:initialize", ()=>
         @register( @registerWith, @registerAs, @)
+
+    # by passing useLocalStorage = true to your collection definition
+    # you will bypass the RESTful persistence layer and just persist everything
+    # locally in localStorage
+    if @useLocalStorage is true and window.localStorage?
+      table = @bootstrap_cache_key || @registerAs
+      throw "Must specify either a cached or registerAs property to use localStorage"
+      @localStorage = new Luca.LocalStore( table )
 
     # Populating a collection with local data
     #
