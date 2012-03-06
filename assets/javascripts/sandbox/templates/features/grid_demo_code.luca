@@ -1,0 +1,24 @@
+.code-sample-container
+  %h3
+    This was created by the following code snippet
+
+  %pre.prettyprint.lang-coffee
+    :plain
+      Sandbox.views.GridViewDemo = Luca.components.GridView.extend
+        collection:
+          url: "/sandbox/api"
+
+        afterInitialize: ()->
+          @bind "activation", ()=>
+             @resize( @$container().width() )
+
+        columns:[
+          header: "Name"
+          data: 'name'
+        ,
+          header : "Location"
+          data: "location"
+        ,
+          header : "Website"
+          data: "website"
+        ]
