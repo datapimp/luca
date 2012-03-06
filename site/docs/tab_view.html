@@ -1,0 +1,80 @@
+<!DOCTYPE html>  <html> <head>   <title>tab_view.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="application.html">                 application.coffee               </a>                                           <a class="source" href="base_toolbar.html">                 base_toolbar.coffee               </a>                                           <a class="source" href="controller.html">                 controller.coffee               </a>                                           <a class="source" href="button_field.html">                 button_field.coffee               </a>                                           <a class="source" href="checkbox_field.html">                 checkbox_field.coffee               </a>                                           <a class="source" href="file_upload_field.html">                 file_upload_field.coffee               </a>                                           <a class="source" href="hidden_field.html">                 hidden_field.coffee               </a>                                           <a class="source" href="select_field.html">                 select_field.coffee               </a>                                           <a class="source" href="text_area_field.html">                 text_area_field.coffee               </a>                                           <a class="source" href="text_field.html">                 text_field.coffee               </a>                                           <a class="source" href="type_ahead_field.html">                 type_ahead_field.coffee               </a>                                           <a class="source" href="filterable_collection.html">                 filterable_collection.coffee               </a>                                           <a class="source" href="form_button_toolbar.html">                 form_button_toolbar.coffee               </a>                                           <a class="source" href="form_view.html">                 form_view.coffee               </a>                                           <a class="source" href="grid_view.html">                 grid_view.coffee               </a>                                           <a class="source" href="record_manager.html">                 record_manager.coffee               </a>                                           <a class="source" href="router.html">                 router.coffee               </a>                                           <a class="source" href="template.html">                 template.coffee               </a>                                           <a class="source" href="card_view.html">                 card_view.coffee               </a>                                           <a class="source" href="column_view.html">                 column_view.coffee               </a>                                           <a class="source" href="modal_view.html">                 modal_view.coffee               </a>                                           <a class="source" href="panel_view.html">                 panel_view.coffee               </a>                                           <a class="source" href="split_view.html">                 split_view.coffee               </a>                                           <a class="source" href="tab_view.html">                 tab_view.coffee               </a>                                           <a class="source" href="viewport.html">                 viewport.coffee               </a>                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="container.html">                 container.coffee               </a>                                           <a class="source" href="field.html">                 field.coffee               </a>                                           <a class="source" href="observer.html">                 observer.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                                           <a class="source" href="framework.html">                 framework.coffee               </a>                                           <a class="source" href="index.html">                 index.coffee               </a>                                           <a class="source" href="collection_manager.html">                 collection_manager.coffee               </a>                                           <a class="source" href="socket_manager.html">                 socket_manager.coffee               </a>                                           <a class="source" href="deferrable.html">                 deferrable.coffee               </a>                                           <a class="source" href="local_storage.html">                 local_storage.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               tab_view.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Luca.containers.TabView = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">extend</span>
+  <span class="nv">events:</span>
+    <span class="s2">&quot;click ul.nav-tabs li&quot;</span> <span class="o">:</span> <span class="s2">&quot;select&quot;</span>
+
+  <span class="nx">hooks</span><span class="o">:</span><span class="p">[</span>
+    <span class="s2">&quot;before:select&quot;</span>
+    <span class="s2">&quot;after:select&quot;</span>
+  <span class="p">]</span>
+
+  <span class="nv">componentType: </span><span class="s1">&#39;tab_view&#39;</span>
+
+  <span class="nv">className: </span><span class="s1">&#39;luca-ui-tab-view tabbable&#39;</span>
+
+  <span class="nv">tab_position: </span><span class="s1">&#39;top&#39;</span>
+
+  <span class="nv">tabVerticalOffset: </span><span class="s1">&#39;50px&#39;</span>
+
+  <span class="nv">initialize: </span><span class="nf">(@options={})-&gt;</span>
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">initialize</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">bindAll</span> <span class="err">@</span><span class="p">,</span> <span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="s2">&quot;highlightSelectedTab&quot;</span>
+    <span class="nx">@setupHooks</span><span class="p">(</span> <span class="nx">@hooks</span> <span class="p">)</span>
+
+    <span class="nx">@bind</span> <span class="s2">&quot;after:card:switch&quot;</span><span class="p">,</span> <span class="nx">@highlightSelectedTab</span>
+
+  <span class="nv">activeTabSelector: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@tabSelectors</span><span class="p">().</span><span class="nx">eq</span><span class="p">(</span> <span class="nx">@activeCard</span> <span class="p">)</span>
+
+  <span class="nv">prepareLayout: </span><span class="nf">()-&gt;</span>
+    <span class="vi">@card_containers = </span><span class="nx">_</span><span class="p">(</span> <span class="nx">@cards</span> <span class="p">).</span><span class="nx">map</span> <span class="p">(</span><span class="nx">card</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nx">@$</span><span class="p">(</span><span class="s1">&#39;.tab-content&#39;</span><span class="p">).</span><span class="nx">append</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;containers/basic&quot;</span><span class="p">](</span><span class="nx">card</span><span class="p">)</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;##{ card.id }&quot;</span><span class="p">)</span>
+
+  <span class="nv">beforeLayout: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@$el</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;tabs-#{ @tab_position }&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">@tab_position</span> <span class="o">is</span> <span class="s2">&quot;below&quot;</span>
+      <span class="nx">@$el</span><span class="p">.</span><span class="nx">append</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;containers/tab_view&quot;</span><span class="p">](</span><span class="err">@</span><span class="p">)</span>
+      <span class="nx">@$el</span><span class="p">.</span><span class="nx">append</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;containers/tab_selector_container&quot;</span><span class="p">](</span><span class="err">@</span><span class="p">)</span>
+    <span class="k">else</span>
+      <span class="nx">@$el</span><span class="p">.</span><span class="nx">append</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;containers/tab_selector_container&quot;</span><span class="p">](</span><span class="err">@</span><span class="p">)</span>
+      <span class="nx">@$el</span><span class="p">.</span><span class="nx">append</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;containers/tab_view&quot;</span><span class="p">](</span><span class="err">@</span><span class="p">)</span>
+
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">beforeLayout</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span>
+
+  <span class="nv">beforeRender: </span><span class="nf">()-&gt;</span>
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">beforeRender</span><span class="o">?</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span>
+    <span class="nx">@activeTabSelector</span><span class="p">().</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">enableBootstrap</span> <span class="o">and</span> <span class="nx">@tab_position</span> <span class="o">is</span> <span class="s2">&quot;left&quot;</span> <span class="o">or</span> <span class="nx">@tab_position</span> <span class="o">is</span> <span class="s2">&quot;right&quot;</span>
+      <span class="nx">@$el</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;grid-12&#39;</span><span class="p">)</span>
+      <span class="nx">@tabContainerWrapper</span><span class="p">().</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;grid-3&#39;</span><span class="p">)</span>
+      <span class="nx">@tabContentWrapper</span><span class="p">().</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;grid-9&#39;</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="nx">@tabVerticalOffset</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot;Yeah dawg&quot;</span>
+        <span class="nx">@tabContainerWrapper</span><span class="p">().</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;padding-top&#39;</span><span class="p">,</span> <span class="nx">@tabVerticalOffset</span> <span class="p">)</span>
+
+  <span class="nv">highlightSelectedTab: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@tabSelectors</span><span class="p">().</span><span class="nx">removeClass</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">)</span>
+    <span class="nx">@activeTabSelector</span><span class="p">().</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">)</span>
+
+  <span class="nv">select: </span><span class="nf">(e)-&gt;</span>
+    <span class="nv">me = my = </span><span class="nx">$</span><span class="p">(</span> <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span> <span class="p">)</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;before:select&quot;</span><span class="p">,</span> <span class="err">@</span>
+    <span class="nx">@activate</span> <span class="nx">my</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;after:select&quot;</span><span class="p">,</span> <span class="err">@</span>
+
+  <span class="nv">tabContentWrapper: </span><span class="nf">()-&gt;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;##{ @cid }-tab-view-content&quot;</span><span class="p">)</span>
+
+  <span class="nv">tabContainerWrapper: </span><span class="nf">()-&gt;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;##{ @cid }-tabs-selector&quot;</span><span class="p">)</span>
+
+  <span class="nv">tabContainer: </span><span class="nf">()-&gt;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;ul##{ @cid }-tabs-nav&quot;</span><span class="p">)</span>
+
+  <span class="nv">tabSelectors: </span><span class="nf">()-&gt;</span>
+    <span class="nx">$</span><span class="p">(</span> <span class="s1">&#39;li.tab-selector&#39;</span><span class="p">,</span> <span class="nx">@tabContainer</span><span class="p">()</span> <span class="p">)</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

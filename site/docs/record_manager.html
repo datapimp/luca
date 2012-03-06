@@ -1,0 +1,198 @@
+<!DOCTYPE html>  <html> <head>   <title>record_manager.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="application.html">                 application.coffee               </a>                                           <a class="source" href="base_toolbar.html">                 base_toolbar.coffee               </a>                                           <a class="source" href="controller.html">                 controller.coffee               </a>                                           <a class="source" href="button_field.html">                 button_field.coffee               </a>                                           <a class="source" href="checkbox_field.html">                 checkbox_field.coffee               </a>                                           <a class="source" href="file_upload_field.html">                 file_upload_field.coffee               </a>                                           <a class="source" href="hidden_field.html">                 hidden_field.coffee               </a>                                           <a class="source" href="select_field.html">                 select_field.coffee               </a>                                           <a class="source" href="text_area_field.html">                 text_area_field.coffee               </a>                                           <a class="source" href="text_field.html">                 text_field.coffee               </a>                                           <a class="source" href="type_ahead_field.html">                 type_ahead_field.coffee               </a>                                           <a class="source" href="filterable_collection.html">                 filterable_collection.coffee               </a>                                           <a class="source" href="form_button_toolbar.html">                 form_button_toolbar.coffee               </a>                                           <a class="source" href="form_view.html">                 form_view.coffee               </a>                                           <a class="source" href="grid_view.html">                 grid_view.coffee               </a>                                           <a class="source" href="record_manager.html">                 record_manager.coffee               </a>                                           <a class="source" href="router.html">                 router.coffee               </a>                                           <a class="source" href="template.html">                 template.coffee               </a>                                           <a class="source" href="card_view.html">                 card_view.coffee               </a>                                           <a class="source" href="column_view.html">                 column_view.coffee               </a>                                           <a class="source" href="modal_view.html">                 modal_view.coffee               </a>                                           <a class="source" href="panel_view.html">                 panel_view.coffee               </a>                                           <a class="source" href="split_view.html">                 split_view.coffee               </a>                                           <a class="source" href="tab_view.html">                 tab_view.coffee               </a>                                           <a class="source" href="viewport.html">                 viewport.coffee               </a>                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="container.html">                 container.coffee               </a>                                           <a class="source" href="field.html">                 field.coffee               </a>                                           <a class="source" href="observer.html">                 observer.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                                           <a class="source" href="framework.html">                 framework.coffee               </a>                                           <a class="source" href="index.html">                 index.coffee               </a>                                           <a class="source" href="collection_manager.html">                 collection_manager.coffee               </a>                                           <a class="source" href="socket_manager.html">                 socket_manager.coffee               </a>                                           <a class="source" href="deferrable.html">                 deferrable.coffee               </a>                                           <a class="source" href="local_storage.html">                 local_storage.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               record_manager.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>The RecordManager is a high level component which incorporates
+a filterable grid, and an editor form responsible for editing
+the records in that grid. </p>
+
+<p>it provides convenience methods for accesing those components.</p>
+
+<p>this represents a clean pattern for having multiple components
+which work together.  inter-component communication should be handled
+by parent containers, and not individual components, which should
+usually not be aware of other components.</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Work in progress</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Luca.components.RecordManager = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">extend</span>
+
+  <span class="nv">events:</span>
+    <span class="s2">&quot;click .record-manager-grid .edit-link&quot;</span> <span class="o">:</span> <span class="s2">&quot;edit_handler&quot;</span>
+    <span class="s2">&quot;click .record-manager-filter .filter-button&quot;</span> <span class="o">:</span> <span class="s2">&quot;filter_handler&quot;</span>
+    <span class="s2">&quot;click .record-manager-filter .reset-button&quot;</span> <span class="o">:</span> <span class="s2">&quot;reset_filter_handler&quot;</span>
+    <span class="s2">&quot;click .add-button&quot;</span> <span class="o">:</span> <span class="s2">&quot;add_handler&quot;</span>
+    <span class="s2">&quot;click .refresh-button&quot;</span> <span class="o">:</span> <span class="s2">&quot;filter_handler&quot;</span>
+    <span class="s2">&quot;click .back-to-search-button&quot;</span> <span class="o">:</span> <span class="s2">&quot;back_to_search_handler&quot;</span>
+  
+  <span class="nv">record_manager: </span><span class="kc">true</span>
+
+  <span class="nv">initialize: </span><span class="nf">(@options={})-&gt;</span>
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">initialize</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span>
+    
+    <span class="k">throw</span> <span class="s2">&quot;Record Managers must specify a name&quot;</span> <span class="nx">unless</span> <span class="nx">@name</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">bindAll</span> <span class="err">@</span><span class="p">,</span> <span class="s2">&quot;add_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;edit_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;filter_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;reset_filter_handler&quot;</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="nx">@components</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nx">@filterConfig</span> <span class="k">if</span> <span class="nx">@filterConfig</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="nx">@components</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="nx">@gridConfig</span> <span class="k">if</span> <span class="nx">@gridConfig</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="nx">@components</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nx">@editorConfig</span> <span class="k">if</span> <span class="nx">@editorConfig</span>
+  
+    <span class="nx">@bind</span> <span class="s2">&quot;after:card:switch&quot;</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nx">@trigger</span><span class="p">(</span><span class="s2">&quot;activation:search&quot;</span><span class="p">,</span> <span class="err">@</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@activeCard</span> <span class="o">is</span> <span class="mi">0</span>
+      <span class="nx">@trigger</span><span class="p">(</span><span class="s2">&quot;activation:editor&quot;</span><span class="p">,</span> <span class="err">@</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@activeCard</span> <span class="o">is</span> <span class="mi">1</span>
+
+  <span class="nx">components</span><span class="o">:</span><span class="p">[</span>
+    <span class="nv">ctype: </span><span class="s1">&#39;split_view&#39;</span><span class="p">,</span>
+    <span class="nv">relayFirstActivation: </span><span class="kc">true</span>
+    <span class="nx">components</span><span class="o">:</span><span class="p">[</span>
+      <span class="nv">ctype: </span><span class="s1">&#39;form_view&#39;</span>
+    <span class="p">,</span>
+      <span class="nv">ctype: </span><span class="s1">&#39;grid_view&#39;</span>
+    <span class="p">]</span>
+  <span class="p">,</span>
+    <span class="nv">ctype: </span><span class="s1">&#39;form_view&#39;</span>
+  <span class="p">]</span>   
+
+  <span class="nv">getSearch: </span><span class="nf">(activate=false, reset=true)-&gt;</span>
+    <span class="nx">@activate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="nx">activate</span> <span class="o">is</span> <span class="kc">true</span>
+    <span class="nx">@getEditor</span><span class="p">().</span><span class="nx">clear</span><span class="p">()</span> <span class="k">if</span> <span class="nx">reset</span> <span class="o">is</span> <span class="kc">true</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">first</span><span class="p">(</span><span class="nx">@components</span><span class="p">)</span>
+
+  <span class="nv">getFilter: </span><span class="nf">()-&gt;</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">first</span> <span class="nx">@getSearch</span><span class="p">().</span><span class="nx">components</span>
+
+  <span class="nv">getGrid: </span><span class="nf">()-&gt;</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">last</span> <span class="nx">@getSearch</span><span class="p">().</span><span class="nx">components</span>
+
+  <span class="nv">getCollection: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@getGrid</span><span class="p">().</span><span class="nx">collection</span>
+
+  <span class="nv">getEditor: </span><span class="nf">(activate=false,reset=false)-&gt;</span>
+    <span class="k">if</span> <span class="nx">activate</span> <span class="o">is</span> <span class="kc">true</span>
+      <span class="nx">@activate</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="nx">activator</span><span class="p">,</span><span class="nx">previous</span><span class="p">,</span><span class="nx">current</span><span class="p">)</span><span class="o">=&gt;</span>
+        <span class="nx">current</span><span class="p">.</span><span class="nx">reset</span><span class="p">()</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">last</span><span class="p">(</span><span class="nx">@components</span><span class="p">)</span>
+
+  <span class="nv">beforeRender: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@$el</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;#{ @resource }-manager&quot;</span><span class="p">)</span>
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">beforeRender</span><span class="o">?</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span>
+    
+    <span class="nx">@$el</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;#{ @resource } record-manager&quot;</span><span class="p">)</span>
+    <span class="nx">@$el</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;resource&#39;</span><span class="p">,</span> <span class="nx">@resource</span><span class="p">)</span>
+
+    <span class="nx">$</span><span class="p">(</span><span class="nx">@getGrid</span><span class="p">().</span><span class="nx">el</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;#{ @resource } record-manager-grid&quot;</span><span class="p">)</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nx">@getFilter</span><span class="p">().</span><span class="nx">el</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;#{ @resource } record-manager-filter&quot;</span><span class="p">)</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nx">@getEditor</span><span class="p">().</span><span class="nx">el</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;#{ @resource } record-manager-editor&quot;</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>This is an example of a best practice from ExtJS
+that we incorporate in Luca, which is that container
+components are responsible for component communication.</p>
+
+<p>child components should not be aware of other components
+in the layout.  Their parents should be responsible for 
+controlling how they interact.  listening to events on one,
+changing state, inducing effects in the others</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">afterRender: </span><span class="nf">()-&gt;</span>
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">containers</span><span class="p">.</span><span class="nx">CardView</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">afterRender</span><span class="o">?</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span> 
+
+    <span class="nv">manager = </span><span class="err">@</span>
+    <span class="nv">grid = </span><span class="nx">@getGrid</span><span class="p">()</span>
+    <span class="nv">filter = </span><span class="nx">@getFilter</span><span class="p">()</span>
+    <span class="nv">editor = </span><span class="nx">@getEditor</span><span class="p">()</span>
+    <span class="nv">collection = </span><span class="nx">@getCollection</span><span class="p">()</span>
+   </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>when a row is double clicked on the grid
+then we edit that row</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">grid</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;row:double:click&quot;</span><span class="p">,</span> <span class="nf">(grid,model,index)-&gt;</span>
+      <span class="nx">manager</span><span class="p">.</span><span class="nx">getEditor</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+      <span class="nx">editor</span><span class="p">.</span><span class="nx">loadModel</span><span class="p">(</span> <span class="nx">model</span> <span class="p">)</span>
+
+    <span class="nx">editor</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;before:submit&quot;</span><span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-flash-container&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-body&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">spin</span><span class="p">(</span><span class="s2">&quot;large&quot;</span><span class="p">)</span>
+
+    <span class="nx">editor</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;after:submit&quot;</span><span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-body&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">spin</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+    
+    <span class="nx">editor</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;after:submit:fatal_error&quot;</span><span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-flash-container&#39;</span><span class="p">,</span> <span class="nx">@el</span> <span class="p">).</span><span class="nx">append</span> <span class="s2">&quot;&lt;li class=&#39;error&#39;&gt;There was an internal server error saving this record.  Please contact developers@benchprep.com to report this error.&lt;/li&gt;&quot;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-body&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">spin</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+
+    <span class="nx">editor</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;after:submit:error&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nx">form</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nx">_</span><span class="p">(</span> <span class="nx">response</span><span class="p">.</span><span class="nx">errors</span> <span class="p">).</span><span class="nx">each</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="o">=&gt;</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-flash-container&#39;</span><span class="p">,</span> <span class="nx">@el</span> <span class="p">).</span><span class="nx">append</span> <span class="s2">&quot;&lt;li class=&#39;error&#39;&gt;#{ error }&lt;/li&gt;&quot;</span>
+    
+    <span class="nx">editor</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;after:submit:success&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nx">form</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-flash-container&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">append</span> <span class="s2">&quot;&lt;li class=&#39;success&#39;&gt;Successfully Saved Record&lt;/li&gt;&quot;</span>
+      
+      <span class="nx">model</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span> <span class="nx">response</span><span class="p">.</span><span class="nx">result</span> <span class="p">)</span>
+      <span class="nx">form</span><span class="p">.</span><span class="nx">loadModel</span><span class="p">(</span> <span class="nx">model</span> <span class="p">)</span>
+
+      <span class="nx">grid</span><span class="p">.</span><span class="nx">refresh</span><span class="p">()</span>
+
+      <span class="nx">_</span><span class="p">.</span><span class="nx">delay</span> <span class="p">()</span><span class="o">=&gt;</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-flash-container li.success&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">fadeOut</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.form-view-flash-container&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+      <span class="p">,</span> <span class="mi">4000</span>
+    
+    <span class="nx">filter</span><span class="p">.</span><span class="nx">eachComponent</span> <span class="p">(</span><span class="nx">component</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="k">try</span>
+        <span class="nx">component</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;on:change&quot;</span><span class="p">,</span> <span class="nx">@filter_handler</span>
+      <span class="k">catch</span> <span class="nx">e</span>
+        <span class="kc">undefined</span>
+  
+  <span class="nv">firstActivation: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@getGrid</span><span class="p">().</span><span class="nx">trigger</span> <span class="s2">&quot;first:activation&quot;</span><span class="p">,</span> <span class="err">@</span><span class="p">,</span> <span class="nx">@getGrid</span><span class="p">()</span>
+    <span class="nx">@getFilter</span><span class="p">().</span><span class="nx">trigger</span> <span class="s2">&quot;first:activation&quot;</span><span class="p">,</span> <span class="err">@</span><span class="p">,</span> <span class="nx">@getGrid</span><span class="p">()</span>
+
+  <span class="nv">reload: </span><span class="nf">()-&gt;</span>
+    <span class="nv">manager = </span><span class="err">@</span>
+
+    <span class="nv">grid = </span><span class="nx">@getGrid</span><span class="p">()</span>
+    <span class="nv">filter = </span><span class="nx">@getFilter</span><span class="p">()</span>
+    <span class="nv">editor = </span><span class="nx">@getEditor</span><span class="p">()</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>refresh the select fields in the filter</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">filter</span><span class="p">.</span><span class="nx">clear</span><span class="p">()</span>
+
+    <span class="nx">grid</span><span class="p">.</span><span class="nx">applyFilter</span><span class="p">()</span>
+  
+  <span class="nv">manageRecord: </span><span class="nf">(record_id)-&gt;</span>
+    <span class="nv">model = </span><span class="nx">@getCollection</span><span class="p">().</span><span class="nx">get</span><span class="p">(</span><span class="nx">record_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">@loadModel</span><span class="p">(</span><span class="nx">model</span><span class="p">)</span> <span class="k">if</span> <span class="nx">model</span>
+    
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s2">&quot;Could Not Find Model, building and fetching&quot;</span>
+
+    <span class="nv">model = </span><span class="nx">@buildModel</span><span class="p">()</span>
+    <span class="nx">model</span><span class="p">.</span><span class="nx">set</span><span class="p">({</span><span class="nx">id</span><span class="o">:</span><span class="nx">record_id</span><span class="p">},{</span><span class="nx">silent</span><span class="o">:</span><span class="kc">true</span><span class="p">})</span>
+
+    <span class="nx">model</span><span class="p">.</span><span class="nx">fetch</span>
+      <span class="nv">success: </span><span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="nx">response</span><span class="p">)</span><span class="o">=&gt;</span>
+        <span class="nx">@loadModel</span><span class="p">(</span><span class="nx">model</span><span class="p">)</span>
+
+  <span class="nv">loadModel: </span><span class="nf">(@current_model)-&gt;</span>
+    <span class="nx">@getEditor</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="nx">loadModel</span><span class="p">(</span> <span class="nx">@current_model</span> <span class="p">)</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;model:loaded&quot;</span><span class="p">,</span> <span class="nx">@current_model</span>
+
+  <span class="nv">currentModel: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@getEditor</span><span class="p">(</span><span class="kc">false</span><span class="p">).</span><span class="nx">currentModel</span><span class="p">()</span>
+
+  <span class="nv">buildModel: </span><span class="nf">()-&gt;</span>
+    <span class="nv">editor = </span><span class="nx">@getEditor</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+    <span class="nv">collection = </span><span class="nx">@getCollection</span><span class="p">()</span>
+
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">add</span><span class="p">([{}],</span> <span class="nx">silent</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nv">at: </span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nv">model = </span><span class="nx">collection</span><span class="p">.</span><span class="nx">at</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="nv">createModel: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@loadModel</span><span class="p">(</span><span class="nx">@buildModel</span><span class="p">())</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <h4>DOM Event Handlers</h4>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">reset_filter_handler: </span><span class="nf">(e)-&gt;</span>
+    <span class="nx">@getFilter</span><span class="p">().</span><span class="nx">clear</span><span class="p">()</span>
+    <span class="nx">@getGrid</span><span class="p">().</span><span class="nx">applyFilter</span><span class="p">(</span> <span class="nx">@getFilter</span><span class="p">().</span><span class="nx">getValues</span><span class="p">()</span> <span class="p">)</span>
+
+  <span class="nv">filter_handler: </span><span class="nf">(e)-&gt;</span>
+    <span class="nx">@getGrid</span><span class="p">().</span><span class="nx">applyFilter</span><span class="p">(</span> <span class="nx">@getFilter</span><span class="p">().</span><span class="nx">getValues</span><span class="p">()</span> <span class="p">)</span>
+
+  <span class="nv">edit_handler: </span><span class="nf">(e)-&gt;</span>
+    <span class="nv">me = my = </span><span class="nx">$</span><span class="p">(</span> <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span> <span class="p">)</span>
+    <span class="nv">record_id = </span><span class="nx">my</span><span class="p">.</span><span class="nx">parents</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;record-id&#39;</span><span class="p">)</span>
+  
+    <span class="k">if</span> <span class="nx">record_id</span>
+      <span class="nv">model = </span><span class="nx">@getGrid</span><span class="p">().</span><span class="nx">collection</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span> <span class="nx">record_id</span> <span class="p">)</span>
+
+    <span class="nx">model</span> <span class="o">||=</span> <span class="nx">@getGrid</span><span class="p">().</span><span class="nx">collection</span><span class="p">.</span><span class="nx">at</span><span class="p">(</span> <span class="nx">row_index</span> <span class="p">)</span>
+
+
+  <span class="nv">add_handler: </span><span class="nf">(e)-&gt;</span>
+    <span class="nv">me = my = </span><span class="nx">$</span><span class="p">(</span> <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span> <span class="p">)</span>
+    <span class="nv">resource = </span><span class="nx">my</span><span class="p">.</span><span class="nx">parents</span><span class="p">(</span><span class="s1">&#39;.record-manager&#39;</span><span class="p">).</span><span class="nx">eq</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;resource&#39;</span><span class="p">)</span>
+
+  <span class="nv">destroy_handler: </span><span class="nf">(e)-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>destroy handler</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">back_to_search_handler: </span><span class="nf">()-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>search handler</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

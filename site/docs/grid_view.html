@@ -1,0 +1,201 @@
+<!DOCTYPE html>  <html> <head>   <title>grid_view.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="application.html">                 application.coffee               </a>                                           <a class="source" href="base_toolbar.html">                 base_toolbar.coffee               </a>                                           <a class="source" href="controller.html">                 controller.coffee               </a>                                           <a class="source" href="button_field.html">                 button_field.coffee               </a>                                           <a class="source" href="checkbox_field.html">                 checkbox_field.coffee               </a>                                           <a class="source" href="file_upload_field.html">                 file_upload_field.coffee               </a>                                           <a class="source" href="hidden_field.html">                 hidden_field.coffee               </a>                                           <a class="source" href="select_field.html">                 select_field.coffee               </a>                                           <a class="source" href="text_area_field.html">                 text_area_field.coffee               </a>                                           <a class="source" href="text_field.html">                 text_field.coffee               </a>                                           <a class="source" href="type_ahead_field.html">                 type_ahead_field.coffee               </a>                                           <a class="source" href="filterable_collection.html">                 filterable_collection.coffee               </a>                                           <a class="source" href="form_button_toolbar.html">                 form_button_toolbar.coffee               </a>                                           <a class="source" href="form_view.html">                 form_view.coffee               </a>                                           <a class="source" href="grid_view.html">                 grid_view.coffee               </a>                                           <a class="source" href="record_manager.html">                 record_manager.coffee               </a>                                           <a class="source" href="router.html">                 router.coffee               </a>                                           <a class="source" href="template.html">                 template.coffee               </a>                                           <a class="source" href="card_view.html">                 card_view.coffee               </a>                                           <a class="source" href="column_view.html">                 column_view.coffee               </a>                                           <a class="source" href="modal_view.html">                 modal_view.coffee               </a>                                           <a class="source" href="panel_view.html">                 panel_view.coffee               </a>                                           <a class="source" href="split_view.html">                 split_view.coffee               </a>                                           <a class="source" href="tab_view.html">                 tab_view.coffee               </a>                                           <a class="source" href="viewport.html">                 viewport.coffee               </a>                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="container.html">                 container.coffee               </a>                                           <a class="source" href="field.html">                 field.coffee               </a>                                           <a class="source" href="observer.html">                 observer.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                                           <a class="source" href="framework.html">                 framework.coffee               </a>                                           <a class="source" href="index.html">                 index.coffee               </a>                                           <a class="source" href="collection_manager.html">                 collection_manager.coffee               </a>                                           <a class="source" href="socket_manager.html">                 socket_manager.coffee               </a>                                           <a class="source" href="deferrable.html">                 deferrable.coffee               </a>                                           <a class="source" href="local_storage.html">                 local_storage.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               grid_view.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Luca.components.GridView = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span>
+  <span class="nv">events:</span>
+    <span class="s2">&quot;dblclick .grid-view-row&quot;</span> <span class="o">:</span> <span class="s2">&quot;double_click_handler&quot;</span>
+    <span class="s2">&quot;click .grid-view-row&quot;</span><span class="o">:</span> <span class="s2">&quot;click_handler&quot;</span>
+
+  <span class="nv">className: </span><span class="s1">&#39;luca-ui-grid-view&#39;</span>
+
+  <span class="nv">scrollable: </span><span class="kc">true</span>
+
+  <span class="nv">emptyText: </span><span class="s1">&#39;No Results To display&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>available options are striped, condensed, bordered
+or any combination of these, split up by space</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">tableStyle: </span><span class="s1">&#39;striped&#39;</span>
+
+  <span class="nx">hooks</span><span class="o">:</span><span class="p">[</span>
+    <span class="s2">&quot;before:grid:render&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;before:render:header&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;before:render:row&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;after:grid:render&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;row:double:click&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;row:click&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;after:collection:load&quot;</span>
+  <span class="p">]</span>
+
+  <span class="nv">initialize: </span><span class="nf">(@options={})-&gt;</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="err">@</span><span class="p">,</span> <span class="nx">@options</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="err">@</span><span class="p">,</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">modules</span><span class="p">.</span><span class="nx">Deferrable</span>
+
+    <span class="nx">Luca</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">initialize</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span> <span class="err">@</span><span class="p">,</span> <span class="nx">arguments</span> <span class="p">)</span>
+
+    <span class="nx">_</span><span class="p">.</span><span class="nx">bindAll</span> <span class="err">@</span><span class="p">,</span> <span class="s2">&quot;double_click_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;click_handler&quot;</span>
+
+    <span class="nx">@configure_collection</span><span class="p">()</span>
+
+    <span class="nx">@collection</span><span class="p">.</span><span class="nx">bind</span> <span class="s2">&quot;reset&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nx">collection</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="nx">@refresh</span><span class="p">()</span>
+      <span class="nx">@trigger</span> <span class="s2">&quot;after:collection:load&quot;</span><span class="p">,</span> <span class="nx">collection</span>
+
+  <span class="nv">beforeRender: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;before:grid:render&quot;</span><span class="p">,</span> <span class="err">@</span>
+
+    <span class="nx">@$el</span><span class="p">.</span><span class="nx">addClass</span> <span class="s1">&#39;scrollable-grid-view&#39;</span> <span class="k">if</span> <span class="nx">@scrollable</span>
+
+    <span class="nx">@$el</span><span class="p">.</span><span class="nx">html</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;components/grid_view&quot;</span><span class="p">]()</span>
+
+    <span class="vi">@table  = </span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;table.luca-ui-grid-view&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">)</span>
+    <span class="vi">@header = </span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;thead&quot;</span><span class="p">,</span> <span class="nx">@table</span><span class="p">)</span>
+    <span class="vi">@body   = </span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;tbody&quot;</span><span class="p">,</span> <span class="nx">@table</span><span class="p">)</span>
+    <span class="vi">@footer = </span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;tfoot&quot;</span><span class="p">,</span> <span class="nx">@table</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">enableBootstrap</span>
+      <span class="nx">@table</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+
+    <span class="nx">_</span><span class="p">(</span> <span class="nx">@tableStyle</span><span class="o">?</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="p">).</span><span class="nx">each</span> <span class="p">(</span><span class="nx">style</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nx">@table</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;table-#{ style }&quot;</span><span class="p">)</span>
+
+    <span class="nx">@setDimensions</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@scrollable</span>
+
+    <span class="nx">@renderHeader</span><span class="p">()</span>
+
+    <span class="nx">@emptyMessage</span><span class="p">()</span>
+
+    <span class="nx">@renderToolbars</span><span class="p">()</span>
+
+    <span class="nx">$</span><span class="p">(</span><span class="nx">@container</span><span class="p">).</span><span class="nx">append</span> <span class="nx">@$el</span>
+
+  <span class="nx">toolbarContainers</span><span class="o">:</span><span class="nf">(position=&quot;bottom&quot;)-&gt;</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;.toolbar-container.#{ position }&quot;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">)</span>
+
+  <span class="nv">renderToolbars: </span><span class="nf">()-&gt;</span>
+    <span class="nx">_</span><span class="p">(</span> <span class="nx">@toolbars</span> <span class="p">).</span><span class="nx">each</span> <span class="p">(</span><span class="nx">toolbar</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nv">toolbar = </span><span class="nx">Luca</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">LazyObject</span><span class="p">(</span><span class="nx">toolbar</span><span class="p">)</span>
+      <span class="nv">toolbar.container = </span><span class="nx">@toolbarContainers</span><span class="p">(</span> <span class="nx">toolbar</span><span class="p">.</span><span class="nx">position</span> <span class="p">)</span>
+      <span class="nx">toolbar</span><span class="p">.</span><span class="nx">render</span><span class="p">()</span>
+
+  <span class="nv">setDimensions: </span><span class="nf">(offset)-&gt;</span>
+    <span class="nx">@height</span> <span class="o">||=</span> <span class="mi">285</span>
+
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.grid-view-body&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">height</span><span class="p">(</span> <span class="nx">@height</span> <span class="p">)</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;tbody.scrollable&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">height</span><span class="p">(</span> <span class="nx">@height</span> <span class="o">-</span> <span class="mi">23</span> <span class="p">)</span>
+
+    <span class="vi">@container_width = </span><span class="nx">do</span> <span class="o">=&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="nx">@container</span><span class="p">).</span><span class="nx">width</span><span class="p">()</span>
+    <span class="vi">@width = </span><span class="k">if</span> <span class="nx">@container_width</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="nx">@container_width</span> <span class="k">else</span> <span class="mi">756</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>@width += offset if offset</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.grid-view-body&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">width</span><span class="p">(</span> <span class="nx">@width</span> <span class="p">)</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.grid-view-body table&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">width</span><span class="p">(</span> <span class="nx">@width</span> <span class="p">)</span>
+
+    <span class="nx">@setDefaultColumnWidths</span><span class="p">()</span>
+
+  <span class="nv">resize: </span><span class="nf">(newWidth)-&gt;</span>
+    <span class="nv">difference = </span><span class="nx">newWidth</span> <span class="o">-</span> <span class="nx">@width</span>
+    <span class="vi">@width = </span><span class="nx">newWidth</span>
+
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.grid-view-body&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">width</span><span class="p">(</span> <span class="nx">@width</span> <span class="p">)</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.grid-view-body table&#39;</span><span class="p">,</span> <span class="nx">@el</span><span class="p">).</span><span class="nx">width</span><span class="p">(</span> <span class="nx">@width</span> <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nx">@columns</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+      <span class="nv">distribution = </span><span class="nx">difference</span> <span class="err">/ @columns.length</span>
+
+      <span class="nx">_</span><span class="p">(</span><span class="nx">@columns</span><span class="p">).</span><span class="nx">each</span> <span class="p">(</span><span class="nx">col</span><span class="p">,</span><span class="nx">index</span><span class="p">)</span><span class="o">=&gt;</span>
+        <span class="nv">column = </span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;.column-#{ index }&quot;</span><span class="p">,</span> <span class="nx">@el</span> <span class="p">)</span>
+        <span class="nx">column</span><span class="p">.</span><span class="nx">width</span><span class="p">(</span> <span class="nv">col.width = </span><span class="nx">col</span><span class="p">.</span><span class="nx">width</span> <span class="o">+</span> <span class="nx">distribution</span> <span class="p">)</span>
+
+  <span class="nv">padLastColumn: </span><span class="nf">()-&gt;</span>
+    <span class="nv">configured_column_widths = </span><span class="nx">_</span><span class="p">(</span><span class="nx">@columns</span><span class="p">).</span><span class="nx">inject</span> <span class="nf">(sum, column)-&gt;</span>
+      <span class="nv">sum = </span><span class="p">(</span><span class="nx">column</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="o">+</span> <span class="nx">sum</span>
+    <span class="p">,</span> <span class="mi">0</span>
+
+    <span class="nv">unused_width = </span><span class="nx">@width</span> <span class="o">-</span> <span class="nx">configured_column_widths</span>
+
+    <span class="k">if</span> <span class="nx">unused_width</span> <span class="o">&gt;</span> <span class="mi">0</span>
+      <span class="nx">@lastColumn</span><span class="p">().</span><span class="nx">width</span> <span class="o">+=</span> <span class="nx">unused_width</span>
+
+  <span class="nv">setDefaultColumnWidths: </span><span class="nf">()-&gt;</span>
+    <span class="nv">default_column_width = </span><span class="k">if</span> <span class="nx">@columns</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="nx">@width</span> <span class="err">/ @columns.length else 200</span>
+
+    <span class="nx">_</span><span class="p">(</span> <span class="nx">@columns</span> <span class="p">).</span><span class="nx">each</span> <span class="nf">(column)-&gt;</span>
+      <span class="nb">parseInt</span><span class="p">(</span><span class="nx">column</span><span class="p">.</span><span class="nx">width</span> <span class="o">||=</span> <span class="nx">default_column_width</span><span class="p">)</span>
+
+    <span class="nx">@padLastColumn</span><span class="p">()</span>
+
+
+  <span class="nv">lastColumn: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@columns</span><span class="p">[</span> <span class="nx">@columns</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">]</span>
+
+  <span class="nv">afterRender: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@refresh</span><span class="p">()</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;after:grid:render&quot;</span><span class="p">,</span> <span class="err">@</span>
+
+  <span class="nv">emptyMessage: </span><span class="nf">(text=&quot;&quot;)-&gt;</span>
+    <span class="nx">text</span> <span class="o">||=</span> <span class="nx">@emptyText</span>
+    <span class="nx">@body</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nx">@body</span><span class="p">.</span><span class="nx">append</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="s2">&quot;components/grid_view_empty_text&quot;</span><span class="p">](</span><span class="nx">colspan</span><span class="o">:</span><span class="nx">@columns</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span><span class="nx">text</span><span class="o">:</span><span class="nx">text</span><span class="p">)</span>
+
+  <span class="nv">refresh: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@body</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nx">@collection</span><span class="p">.</span><span class="nx">each</span> <span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="nx">index</span><span class="p">)</span><span class="o">=&gt;</span>
+      <span class="nx">@render_row</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="err">@</span><span class="p">,</span> <span class="p">[</span><span class="nx">model</span><span class="p">,</span><span class="nx">index</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nx">@collection</span><span class="p">.</span><span class="nx">models</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="nx">@emptyMessage</span><span class="p">()</span>
+
+  <span class="nv">ifLoaded: </span><span class="nf">(fn, scope)-&gt;</span>
+    <span class="nx">scope</span> <span class="o">||=</span> <span class="err">@</span>
+    <span class="nx">fn</span> <span class="o">||=</span> <span class="nf">()-&gt;</span> <span class="kc">true</span>
+
+    <span class="nx">@collection</span><span class="p">.</span><span class="nx">ifLoaded</span><span class="p">(</span><span class="nx">fn</span><span class="p">,</span><span class="nx">scope</span><span class="p">)</span>
+
+  <span class="nv">applyFilter: </span><span class="nf">(values, options={auto:true,refresh:true})-&gt;</span>
+    <span class="nx">@collection</span><span class="p">.</span><span class="nx">applyFilter</span><span class="p">(</span><span class="nx">values</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
+
+  <span class="nv">renderHeader: </span><span class="nf">()-&gt;</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;before:render:header&quot;</span>
+
+    <span class="nv">headers = </span><span class="nx">_</span><span class="p">(</span><span class="nx">@columns</span><span class="p">).</span><span class="nx">map</span> <span class="p">(</span><span class="nx">column</span><span class="p">,</span><span class="nx">column_index</span><span class="p">)</span> <span class="o">=&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>temporary hack for scrollable grid dimensions.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nv">style = </span><span class="k">if</span> <span class="nx">column</span><span class="p">.</span><span class="nx">width</span> <span class="k">then</span> <span class="s2">&quot;width:#{ column.width }px;&quot;</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+      <span class="s2">&quot;&lt;th style=&#39;#{ style }&#39; class=&#39;column-#{ column_index }&#39;&gt;#{ column.header}&lt;/th&gt;&quot;</span>
+
+    <span class="nx">@header</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;&lt;tr&gt;#{ headers }&lt;/tr&gt;&quot;</span><span class="p">)</span>
+
+  <span class="nv">render_row: </span><span class="nf">(row,row_index)-&gt;</span>
+    <span class="nv">model_id = </span><span class="k">if</span> <span class="nx">row</span><span class="o">?</span><span class="p">.</span><span class="nx">get</span> <span class="o">and</span> <span class="nx">row</span><span class="o">?</span><span class="p">.</span><span class="nx">attributes</span> <span class="k">then</span> <span class="nx">row</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="nx">@trigger</span> <span class="s2">&quot;before:render:row&quot;</span><span class="p">,</span> <span class="nx">row</span><span class="p">,</span> <span class="nx">row_index</span>
+
+    <span class="nv">cells = </span><span class="nx">_</span><span class="p">(</span> <span class="nx">@columns</span> <span class="p">).</span><span class="nx">map</span> <span class="p">(</span><span class="nx">column</span><span class="p">,</span><span class="nx">col_index</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="nv">value = </span><span class="nx">@cell_renderer</span><span class="p">(</span><span class="nx">row</span><span class="p">,</span> <span class="nx">column</span><span class="p">,</span> <span class="nx">col_index</span><span class="p">)</span>
+      <span class="nv">style = </span><span class="k">if</span> <span class="nx">column</span><span class="p">.</span><span class="nx">width</span> <span class="k">then</span> <span class="s2">&quot;width:#{ column.width }px;&quot;</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+      <span class="nv">display = </span><span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isUndefined</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="k">then</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="nx">value</span>
+
+      <span class="s2">&quot;&lt;td style=&#39;#{ style }&#39; class=&#39;column-#{ col_index }&#39;&gt;#{ display }&lt;/td&gt;&quot;</span>
+
+    <span class="k">if</span> <span class="nx">@alternateRowClasses</span>
+      <span class="nv">alt_class = </span><span class="k">if</span> <span class="nx">row_index</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">is</span> <span class="mi">0</span> <span class="k">then</span> <span class="s2">&quot;even&quot;</span> <span class="k">else</span> <span class="s2">&quot;odd&quot;</span>
+
+    <span class="nx">@body</span><span class="o">?</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;&lt;tr data-record-id=&#39;#{ model_id }&#39; data-row-index=&#39;#{ row_index }&#39; class=&#39;grid-view-row #{ alt_class }&#39; id=&#39;row-#{ row_index }&#39;&gt;#{ cells }&lt;/tr&gt;&quot;</span><span class="p">)</span>
+
+  <span class="nv">cell_renderer: </span><span class="nf">(row, column, columnIndex )-&gt;</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isFunction</span> <span class="nx">column</span><span class="p">.</span><span class="nx">renderer</span>
+      <span class="k">return</span> <span class="nx">column</span><span class="p">.</span><span class="nx">renderer</span><span class="p">.</span><span class="nx">apply</span> <span class="err">@</span><span class="p">,</span> <span class="p">[</span><span class="nx">row</span><span class="p">,</span><span class="nx">column</span><span class="p">,</span><span class="nx">columnIndex</span><span class="p">]</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="nx">column</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/\w+\.\w+/</span><span class="p">)</span>
+      <span class="nv">source = </span><span class="nx">row</span><span class="p">.</span><span class="nx">attributes</span> <span class="o">||</span> <span class="nx">row</span>
+      <span class="k">return</span> <span class="nx">Luca</span><span class="p">.</span><span class="nx">util</span><span class="p">.</span><span class="nx">nestedValue</span><span class="p">(</span> <span class="nx">column</span><span class="p">.</span><span class="nx">data</span><span class="p">,</span> <span class="nx">source</span> <span class="p">)</span>
+    <span class="k">else</span>
+      <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">get</span><span class="o">?</span><span class="p">(</span> <span class="nx">column</span><span class="p">.</span><span class="nx">data</span> <span class="p">)</span> <span class="o">||</span> <span class="nx">row</span><span class="p">[</span> <span class="nx">column</span><span class="p">.</span><span class="nx">data</span> <span class="p">]</span>
+
+  <span class="nv">double_click_handler: </span><span class="nf">(e)-&gt;</span>
+    <span class="nv">me = my = </span><span class="nx">$</span><span class="p">(</span> <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span> <span class="p">)</span>
+    <span class="nv">rowIndex = </span><span class="nx">my</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;row-index&#39;</span><span class="p">)</span>
+    <span class="nv">record = </span><span class="nx">@collection</span><span class="p">.</span><span class="nx">at</span><span class="p">(</span> <span class="nx">rowIndex</span> <span class="p">)</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;row:double:click&quot;</span><span class="p">,</span> <span class="err">@</span><span class="p">,</span> <span class="nx">record</span><span class="p">,</span> <span class="nx">rowIndex</span>
+
+  <span class="nv">click_handler: </span><span class="nf">(e)-&gt;</span>
+    <span class="nv">me = my = </span><span class="nx">$</span><span class="p">(</span> <span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span> <span class="p">)</span>
+    <span class="nv">rowIndex = </span><span class="nx">my</span><span class="p">.</span><span class="nx">data</span><span class="p">(</span><span class="s1">&#39;row-index&#39;</span><span class="p">)</span>
+    <span class="nv">record = </span><span class="nx">@collection</span><span class="p">.</span><span class="nx">at</span><span class="p">(</span> <span class="nx">rowIndex</span> <span class="p">)</span>
+    <span class="nx">@trigger</span> <span class="s2">&quot;row:click&quot;</span><span class="p">,</span> <span class="err">@</span><span class="p">,</span> <span class="nx">record</span><span class="p">,</span> <span class="nx">rowIndex</span>
+
+    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.grid-view-row&#39;</span><span class="p">,</span> <span class="nx">@body</span> <span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s1">&#39;selected-row&#39;</span><span class="p">)</span>
+    <span class="nx">me</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;selected-row&#39;</span><span class="p">)</span>
+
+<span class="nx">Luca</span><span class="p">.</span><span class="nx">register</span> <span class="s2">&quot;grid_view&quot;</span><span class="p">,</span><span class="s2">&quot;Luca.components.GridView&quot;</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
