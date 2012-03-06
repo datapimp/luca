@@ -1,1 +1,33 @@
 %h1 Collection Helpers
+%pre.prettyprint.lang-coffee
+  :plain
+    Luca.Collection.bootstrap window.BootstrappedData.sample_collection_1
+
+    SampleCollection = Luca.View.extend
+      # The Collection Manager is responsible for tracking
+      # all instances of this collection, so that we don't
+      # create more than one instance if we don't need to
+      registerWith: "CollectionManager"
+
+      # specify a unique ID to register this collection
+      # with the CollectionManager.  This will allow us to
+      # call 
+      #
+      # MyApp.collection("sample_collection") 
+      #
+      # and get an instance of this collection
+      registerAs: "sample_collection"
+
+      myScopeVariable: 1
+
+      # Bootstrap Models
+      #
+      # Specify the named property of the object which contains
+      # our bootstrapped models.  This allows us to load up an array
+      # of model attributes on page load, and automatically populate
+      # our collection with them 
+      #
+      # This will look in the models cache for sample_collection_1
+      # and automatically populate this collection with those models
+      # when fetch() is called
+      cached: ()-> "sample_collection_" + @myScopeVariable

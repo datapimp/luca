@@ -45,5 +45,9 @@ Sandbox.views.FormDemo = Luca.containers.SplitView.extend
         ]
       ]      
     ]
+  ,
+    markup: "<h3>This was produced by the following code:</h3>"
+  ,
+    template: "features/form_view_code"
   ]
 
