@@ -1,1 +1,0 @@
-collection_spec.coffee

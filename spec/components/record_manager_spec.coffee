@@ -1,1 +1,0 @@
-record_manager_spec.coffee

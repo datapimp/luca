@@ -1,1 +1,0 @@
-socket_manager_spec.coffee

@@ -1,1 +1,0 @@
-split_view_spec.coffee

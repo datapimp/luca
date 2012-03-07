@@ -1,1 +1,0 @@
-observer_spec.coffee

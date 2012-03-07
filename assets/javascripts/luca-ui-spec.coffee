@@ -1,1 +1,1 @@
-luca-ui-spec.coffee
+#= require_tree ./spec
