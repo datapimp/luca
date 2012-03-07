@@ -27,6 +27,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   initialize: (models, @options={})->
     _.extend @, @options
 
+
     # By specifying a @cached property or method, you can instruct
     # Luca.Collection instances where to pull an array of model attributes
     # usually done with the bootstrap functionality provided.
