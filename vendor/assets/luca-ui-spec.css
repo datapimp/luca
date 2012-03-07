@@ -1,0 +1,754 @@
+body {
+  font-family: "Helvetica Neue Light", "Lucida Grande", "Calibri", "Arial", sans-serif;
+}
+
+
+.jasmine_reporter a:visited, .jasmine_reporter a {
+  color: #303; 
+}
+
+.jasmine_reporter a:hover, .jasmine_reporter a:active {
+  color: blue; 
+}
+
+.run_spec {
+  float:right;
+  padding-right: 5px;
+  font-size: .8em;
+  text-decoration: none;
+}
+
+.jasmine_reporter {
+  margin: 0 5px;
+}
+
+.banner {
+  color: #303;
+  background-color: #fef;
+  padding: 5px;
+}
+
+.logo {
+  float: left;
+  font-size: 1.1em;
+  padding-left: 5px;
+}
+
+.logo .version {
+  font-size: .6em;
+  padding-left: 1em;
+}
+
+.runner.running {
+  background-color: yellow;
+}
+
+
+.options {
+  text-align: right;
+  font-size: .8em;
+}
+
+
+
+
+.suite {
+  border: 1px outset gray;
+  margin: 5px 0;
+  padding-left: 1em;
+}
+
+.suite .suite {
+  margin: 5px; 
+}
+
+.suite.passed {
+  background-color: #dfd;
+}
+
+.suite.failed {
+  background-color: #fdd;
+}
+
+.spec {
+  margin: 5px;
+  padding-left: 1em;
+  clear: both;
+}
+
+.spec.failed, .spec.passed, .spec.skipped {
+  padding-bottom: 5px;
+  border: 1px solid gray;
+}
+
+.spec.failed {
+  background-color: #fbb;
+  border-color: red;
+}
+
+.spec.passed {
+  background-color: #bfb;
+  border-color: green;
+}
+
+.spec.skipped {
+  background-color: #bbb;
+}
+
+.messages {
+  border-left: 1px dashed gray;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.passed {
+  background-color: #cfc;
+  display: none;
+}
+
+.failed {
+  background-color: #fbb;
+}
+
+.skipped {
+  color: #777;
+  background-color: #eee;
+  display: none;
+}
+
+
+/*.resultMessage {*/
+  /*white-space: pre;*/
+/*}*/
+
+.resultMessage span.result {
+  display: block;
+  line-height: 2em;
+  color: black;
+}
+
+.resultMessage .mismatch {
+  color: black;
+}
+
+.stackTrace {
+  white-space: pre;
+  font-size: .8em;
+  margin-left: 10px;
+  max-height: 5em;
+  overflow: auto;
+  border: 1px inset red;
+  padding: 1em;
+  background: #eef;
+}
+
+.finished-at {
+  padding-left: 1em;
+  font-size: .6em;
+}
+
+.show-passed .passed,
+.show-skipped .skipped {
+  display: block;
+}
+
+
+#jasmine_content {
+  position:fixed;
+  right: 100%;
+}
+
+.runner {
+  border: 1px solid gray;
+  display: block;
+  margin: 5px 0;
+  padding: 2px 0 2px 10px;
+}
+html.luca-ui-fullscreen {
+  height: 100%; }
+  html.luca-ui-fullscreen body {
+    height: 100%;
+    padding: 0;
+    margin: 0; }
+  html.luca-ui-fullscreen .luca-ui-viewport {
+    height: 100%;
+    padding: 0;
+    margin: 0; }
+
+.luca-ui-viewport li {
+  list-style-type: none; }
+.luca-ui-viewport li.nav {
+  cursor: pointer; }
+
+/*http://csswizardry.com/fluid-grids/#generated-grids*/
+.wrapper {
+  max-width: 1208px;
+  /*  max-width:894px;*/
+  padding: 0 15px;
+  margin: 0 auto; }
+
+/*
+Column container
+*/
+.grids {
+  width: auto;
+  max-width: 924px;
+  clear: both;
+  margin: 0 0 0 -3.247%;
+  list-style: none;
+  /* So we can make grids out of lists. */
+  overflow: hidden;
+  /* Clear the floats */ }
+
+[class*="grid-"] {
+  float: left;
+  margin: 0 3.247% 0 0; }
+
+.grid-margin {
+  margin: 0 3.247% 0 0; }
+
+.grids .grid-margin {
+  margin: 0 0 0 3.247%; }
+
+.grids [class*="grid-"] {
+  margin: 0 0 0 3.247%; }
+
+.grid-1 {
+  width: 5.087%; }
+
+.grid-2 {
+  width: 13.42%; }
+
+.grid-3 {
+  width: 21.753%; }
+
+.grid-4 {
+  width: 30.087%; }
+
+.grid-5 {
+  width: 38.42%; }
+
+.grid-6 {
+  width: 46.753%; }
+
+.grid-7 {
+  width: 55.087%; }
+
+.grid-8 {
+  width: 63.42%; }
+
+.grid-9 {
+  width: 71.753%; }
+
+.grid-10 {
+  width: 80.087%; }
+
+.grid-11 {
+  width: 88.42%; }
+
+.grid-12 {
+  width: 96.753%;
+  margin: 0; }
+.luca-ui-form-view-wrapper {
+  width: 100%;
+  float: left;
+  display: block;
+  clear: both;
+  margin: 10px 0px; }
+
+.luca-ui-form-view .luca-ui-field {
+  margin: 5px;
+  padding: 5px; }
+  .luca-ui-form-view .luca-ui-field .helper-text {
+    font-size: 0.75em;
+    font-color: #ccc; }
+
+.luca-ui-form-view.label-align-top .luca-ui-field label, .luca-ui-form-view.label-align-top .luca-ui-field input, .luca-ui-form-view.label-align-top .luca-ui-field select, .luca-ui-form-view.label-align-top .luca-ui-field textarea {
+  margin: 5px 0px;
+  display: block; }
+
+.luca-ui-form-view.column-layout .luca-ui-field {
+  float: left; }
+
+.form-view-footer .toolbar-container {
+  float: left;
+  width: 100%;
+  clear: both;
+  display: block; }
+  .form-view-footer .toolbar-container .luca-ui-form-toolbar, .form-view-footer .toolbar-container .luca-ui-toolbar {
+    width: 50%;
+    display: block;
+    margin: 0px auto; }
+    .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field, .form-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
+      float: left; }
+.scrollable-grid-view {
+  /* define height and width of scrollable area. Add 16px to width for scrollbar          */
+  /* Reset overflow value to hidden for all non-IE browsers. */
+  /* define width of table. IE browsers only                 */
+  /* define width of table. Add 16px to width for scrollbar.           */
+  /* All other non-IE browsers.                                        */
+  /* set table header to a fixed position. WinIE 6.x only                                       */
+  /* In WinIE 6.x, any element with a position property set to relative and is a child of       */
+  /* an element that has an overflow property set, the relative value translates into fixed.    */
+  /* Ex: parent element DIV with a class of tableContainer has an overflow property set to auto */
+  /* set THEAD element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* make the TH elements pretty */
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* WARNING: swapping the background on hover may cause problems in WinIE 6.x   */
+  /* define the table content to be scrollable                                              */
+  /* set TBODY element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* induced side effect is that child TDs no longer accept width: auto                     */
+  /* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+  /* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+  /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
+  /* All other non-IE browsers.                                            */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */ }
+  .scrollable-grid-view .grid-view-body {
+    clear: both;
+    overflow: auto; }
+  .scrollable-grid-view .grid-view-body {
+    overflow: hidden; }
+  .scrollable-grid-view .grid-view-body .empty-text-wrapper {
+    display: block;
+    margin: 10px auto;
+    width: 30%;
+    padding: 50px;
+    text-align: center; }
+    .scrollable-grid-view .grid-view-body .empty-text-wrapper p {
+      color: #aaa; }
+  .scrollable-grid-view thead.fixed tr {
+    position: relative; }
+  .scrollable-grid-view thead.fixed tr {
+    display: block; }
+  .scrollable-grid-view thead.fixed th {
+    font-weight: bold;
+    text-align: left; }
+  .scrollable-grid-view thead.fixed a, .scrollable-grid-view thead.fixed a:link, .scrollable-grid-view thead.fixed a:visited {
+    color: #FFF;
+    display: block;
+    text-decoration: none;
+    width: 100%; }
+  .scrollable-grid-view thead.fixed a:hover {
+    color: #FFF;
+    display: block;
+    text-decoration: underline;
+    width: 100%; }
+  .scrollable-grid-view tbody.scrollable {
+    display: block;
+    overflow: auto;
+    width: 100%; }
+  .scrollable-grid-view thead.fixed th {
+    padding: 5px; }
+  .scrollable-grid-view tbody.scrollable td {
+    padding: 5px; }
+
+.grid-view-footer .toolbar-container {
+  float: left;
+  width: 100%;
+  clear: both;
+  display: block; }
+  .grid-view-footer .toolbar-container .luca-ui-toolbar {
+    display: block;
+    float: right;
+    clear: right; }
+    .grid-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
+      float: left; }
+.luca-ui-toolbar-wrapper {
+  clear: both;
+  display: block;
+  float: left;
+  width: 100%; }
+  .luca-ui-toolbar-wrapper .luca-ui-form-toolbar, .luca-ui-toolbar-wrapper .luca-ui-toolbar {
+    clear: both;
+    margin: 5px auto; }
+    .luca-ui-toolbar-wrapper .luca-ui-form-toolbar .luca-ui-field, .luca-ui-toolbar-wrapper .luca-ui-toolbar .luca-ui-field {
+      float: left;
+      margin: 5px; }
+.luca-ui-card {
+  padding: 5px;
+  width: 100%; }
+.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view, .luca-ui-tab-view .luca-ui-card .luca-ui-card {
+  overflow: hidden; }
+
+.luca-ui-tab-view.tabs-below .tab-selector-container, .luca-ui-tab-view.tabs-right .tab-selector-container {
+  display: block;
+  clear: both; }
+
+.luca-ui-tab-view.tabs-left .tab-selector-container {
+  float: left; }
+.luca-ui-tab-view.tabs-left .tab-content {
+  float: left; }
+
+.luca-ui-tab-view.tabs-right .tab-selector-container {
+  float: right; }
+.luca-ui-tab-view.tabs-right .tab-content {
+  float: left; }
+/* normalize.css 2011-11-04T15:38 UTC - http://github.com/necolas/normalize.css */
+/* =============================================================================
+   HTML5 display definitions
+   ========================================================================== */
+/*
+ * Corrects block display not defined in IE6/7/8/9 & FF3
+ */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block; }
+
+/*
+ * Corrects inline-block display not defined in IE6/7/8/9 & FF3
+ */
+audio,
+canvas,
+video {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1; }
+
+/*
+ * Prevents modern browsers from displaying 'audio' without controls
+ */
+audio:not([controls]) {
+  display: none; }
+
+/*
+ * Addresses styling for 'hidden' attribute not present in IE7/8/9, FF3, S4
+ * Known issue: no IE6 support
+ */
+[hidden] {
+  display: none; }
+
+/* =============================================================================
+   Base
+   ========================================================================== */
+/*
+ * 1. Corrects text resizing oddly in IE6/7 when body font-size is set using em units
+ *    http://clagnut.com/blog/348/#c790
+ * 2. Keeps page centred in all browsers regardless of content height
+ * 3. Prevents iOS text size adjust after orientation change, without disabling user zoom
+ *    www.456bereastreet.com/archive/201012/controlling_text_size_in_safari_for_ios_without_disabling_user_zoom/
+ */
+html {
+  font-size: 100%;
+  /* 1 */
+  overflow-y: scroll;
+  /* 2 */
+  -webkit-text-size-adjust: 100%;
+  /* 3 */
+  -ms-text-size-adjust: 100%;
+  /* 3 */ }
+
+/*
+ * Addresses margins handled incorrectly in IE6/7
+ */
+body {
+  margin: 0; }
+
+/* 
+ * Addresses font-family inconsistency between 'textarea' and other form elements.
+ */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: sans-serif; }
+
+/* =============================================================================
+   Links
+   ========================================================================== */
+/*
+ * Addresses outline displayed oddly in Chrome
+ */
+a:focus {
+  outline: thin dotted; }
+
+/*
+ * Improves readability when focused and also mouse hovered in all browsers
+ * people.opera.com/patrickl/experiments/keyboard/test
+ */
+a:hover,
+a:active {
+  outline: 0; }
+
+/* =============================================================================
+   Typography
+   ========================================================================== */
+/*
+ * Neutralise smaller font-size in 'section' and 'article' in FF4+, Chrome, S5
+ */
+h1 {
+  font-size: 2em; }
+
+/*
+ * Addresses styling not present in IE7/8/9, S5, Chrome
+ */
+abbr[title] {
+  border-bottom: 1px dotted; }
+
+/*
+ * Addresses style set to 'bolder' in FF3+, S4/5, Chrome
+*/
+b,
+strong {
+  font-weight: bold; }
+
+blockquote {
+  margin: 1em 40px; }
+
+/*
+ * Addresses styling not present in S5, Chrome
+ */
+dfn {
+  font-style: italic; }
+
+/*
+ * Addresses styling not present in IE6/7/8/9
+ */
+mark {
+  background: #ff0;
+  color: #000; }
+
+/*
+ * Corrects font family set oddly in IE6, S4/5, Chrome
+ * en.wikipedia.org/wiki/User:Davidgothberg/Test59
+ */
+pre,
+code,
+kbd,
+samp {
+  font-family: monospace, serif;
+  _font-family: 'courier new', monospace;
+  font-size: 1em; }
+
+/*
+ * Improves readability of pre-formatted text in all browsers
+ */
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word; }
+
+/*
+ * 1. Addresses CSS quotes not supported in IE6/7
+ * 2. Addresses quote property not supported in S4
+ */
+/* 1 */
+q {
+  quotes: none; }
+
+/* 2 */
+q:before,
+q:after {
+  content: '';
+  content: none; }
+
+small {
+  font-size: 75%; }
+
+/*
+ * Prevents sub and sup affecting line-height in all browsers
+ * gist.github.com/413930
+ */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline; }
+
+sup {
+  top: -0.5em; }
+
+sub {
+  bottom: -0.25em; }
+
+/* =============================================================================
+   Lists
+   ========================================================================== */
+ul,
+ol {
+  margin-left: 0;
+  padding: 0 0 0 40px; }
+
+dd {
+  margin: 0 0 0 40px; }
+
+nav ul,
+nav ol {
+  list-style: none;
+  list-style-image: none; }
+
+/* =============================================================================
+   Embedded content
+   ========================================================================== */
+/*
+ * 1. Removes border when inside 'a' element in IE6/7/8/9, FF3
+ * 2. Improves image quality when scaled in IE7
+ *    code.flickr.com/blog/2008/11/12/on-ui-quality-the-little-things-client-side-image-resizing/
+ */
+img {
+  border: 0;
+  /* 1 */
+  -ms-interpolation-mode: bicubic;
+  /* 2 */ }
+
+/*
+ * Corrects overflow displayed oddly in IE9 
+ */
+svg:not(:root) {
+  overflow: hidden; }
+
+/* =============================================================================
+   Figures
+   ========================================================================== */
+/*
+ * Addresses margin not present in IE6/7/8/9, S5, O11
+ */
+figure {
+  margin: 0; }
+
+/* =============================================================================
+   Forms
+   ========================================================================== */
+/*
+ * Corrects margin displayed oddly in IE6/7
+ */
+form {
+  margin: 0; }
+
+/*
+ * Define consistent border, margin, and padding
+ */
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em; }
+
+/*
+ * 1. Corrects color not being inherited in IE6/7/8/9
+ * 2. Corrects alignment displayed oddly in IE6/7
+ */
+legend {
+  border: 0;
+  /* 1 */
+  *margin-left: -7px;
+  /* 2 */ }
+
+/*
+ * 1. Corrects font size not being inherited in all browsers
+ * 2. Addresses margins set differently in IE6/7, FF3+, S5, Chrome
+ * 3. Improves appearance and consistency in all browsers
+ */
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+  /* 1 */
+  margin: 0;
+  /* 2 */
+  vertical-align: baseline;
+  /* 3 */
+  *vertical-align: middle;
+  /* 3 */ }
+
+/*
+ * Addresses FF3/4 setting line-height on 'input' using !important in the UA stylesheet
+ */
+button,
+input {
+  line-height: normal;
+  /* 1 */ }
+
+/*
+ * 1. Improves usability and consistency of cursor style between image-type 'input' and others
+ * 2. Corrects inability to style clickable 'input' types in iOS
+ * 3. Removes inner spacing in IE7 without affecting normal text inputs
+ *    Known issue: inner spacing remains in IE6
+ */
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  cursor: pointer;
+  /* 1 */
+  -webkit-appearance: button;
+  /* 2 */
+  *overflow: visible;
+  /* 3 */ }
+
+/*
+ * 1. Addresses box sizing set to content-box in IE8/9
+ * 2. Removes excess padding in IE8/9
+ */
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  /* 1 */
+  padding: 0;
+  /* 2 */ }
+
+/*
+ * 1. Addresses appearance set to searchfield in S5, Chrome
+ * 2. Addresses box-sizing set to border-box in S5, Chrome (include -moz to future-proof)
+ */
+input[type="search"] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  /* 2 */
+  box-sizing: content-box; }
+
+/*
+ * Removes inner padding that is displayed in S5, Chrome on OS X
+ */
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none; }
+
+/*
+ * Removes inner padding and border in FF3+
+ * www.sitepen.com/blog/2008/05/14/the-devils-in-the-details-fixing-dojos-toolbar-buttons/
+ */
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0; }
+
+/*
+ * 1. Removes default vertical scrollbar in IE6/7/8/9
+ * 2. Improves readability and alignment in all browsers
+ */
+textarea {
+  overflow: auto;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */ }
+
+/* =============================================================================
+   Tables
+   ========================================================================== */
+/* 
+ * Remove most spacing between table cells
+ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+/*
+
+
+
+ */
+

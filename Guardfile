@@ -6,6 +6,7 @@ stylesheets_path = File.join( assets_path, 'stylesheets' )
 
 guard 'sprockets2', :assets_path => assets_path, :sprockets => App.sprockets, :precompile=>[/^luca-ui.+(coffee|js|css|scss)$/], :digest => false, :gz => false do
   watch(%r{^src/.+$})
+  watch(%r{^spec/.+$})
 
   callback(:run_on_change_end) do
     compiled = Dir.glob( assets_path + '/luca-ui*' )
