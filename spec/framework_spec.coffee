@@ -35,7 +35,6 @@ describe "The Luca Framework", ->
       template: "components/form_view"    
 
     component = Luca.util.lazyComponent(object)
-    
     expect( _.isFunction(component.render) ).toBeTruthy()
 
 describe 
