@@ -452,20 +452,29 @@
     initialize: function(models, options) {
       var table,
         _this = this;
-      this.options = options != null ? options : {};
+      this.options = options;
+      if (models && !(this.options != null) && !_.isArray(models)) {
+        this.options = models;
+      }
       _.extend(this, this.options);
       if (this.cached) {
         this.bootstrap_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
       }
-      if (this.registerWith) {
-        this.registerAs || (this.registerAs = this.cached);
-        this.registerAs = _.isFunction(this.registerAs) ? this.registerAs() : this.registerAs;
+      if (this.registerAs || this.registerWith) {
+        console.log("This configuration API is deprecated.  use @name and @manager properties instead");
+      }
+      this.name || (this.name = this.registerAs);
+      this.manager || (this.manager = this.registerWith);
+      if (this.name && !this.manager) this.manager = Luca.CollectionManager.get();
+      if (this.manager) {
+        this.name || (this.name = this.cached());
+        this.name = _.isFunction(this.name) ? this.name() : this.name;
         this.bind("after:initialize", function() {
-          return _this.register(_this.registerWith, _this.registerAs, _this);
+          return _this.register(_this.manager, _this.name, _this);
         });
       }
       if (this.useLocalStorage === true && (window.localStorage != null)) {
-        table = this.bootstrap_cache_key || this.registerAs;
+        table = this.bootstrap_cache_key || this.name;
         throw "Must specify either a cached or registerAs property to use localStorage";
         this.localStorage = new Luca.LocalStore(table);
       }
@@ -542,7 +551,9 @@
       if (_.isFunction(collectionManager.add)) {
         return collectionManager.add(key, collection);
       }
-      if (_.isObject(collect)) return collectionManager[key] = collection;
+      if (_.isObject(collectionManager)) {
+        return collectionManager[key] = collection;
+      }
     },
     loadFromBootstrap: function() {
       if (!this.bootstrap_cache_key) return;
@@ -917,13 +928,9 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
-      if (Luca.CollectionManager.get) {
-        console.log("A collection manager has already been created.  You are responsible for telling your views which to use");
-      } else {
-        Luca.CollectionManager.get = _.bind(function() {
-          return this;
-        }, this);
-      }
+      Luca.CollectionManager.get = _.bind(function() {
+        return this;
+      }, this);
     }
 
     CollectionManager.prototype.add = function(key, collection) {

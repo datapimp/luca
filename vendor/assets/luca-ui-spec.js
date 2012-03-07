@@ -65,7 +65,42 @@
 }).call(this);
 (function() {
 
+  describe("Luca.Collection", function() {
+    return it("should accept my better method signature", function() {
+      var collection;
+      collection = new Luca.Collection({
+        registerAs: "yesyesyall"
+      });
+      return expect(collection.registerAs).toEqual("yesyesyall");
+    });
+  });
 
+  describe("Registering with the collection manager", function() {
+    window.mgr = new Luca.CollectionManager();
+    it("should automatically register with the manager if I specify a name", function() {
+      var collection;
+      collection = new Luca.Collection({
+        name: "auto_register"
+      });
+      return expect(mgr.get("auto_register")).toEqual(collection);
+    });
+    it("should register with a specific manager", function() {
+      var collection;
+      window.other_manager = new Luca.CollectionManager();
+      collection = new Luca.Collection({
+        name: "other_collection",
+        manager: window.other_manager
+      });
+      return expect(window.other_manager.get("other_collection")).toEqual(collection);
+    });
+    return it("should find a collection manager by string", function() {
+      var collection;
+      window.find_mgr_by_string = new Luca.CollectionManager();
+      return collection = new Luca.Collection({
+        manager: "find_mgr_by_string"
+      });
+    });
+  });
 
 }).call(this);
 (function() {
@@ -241,7 +276,33 @@
 }).call(this);
 (function() {
 
-
+  describe("The Collection Manager", function() {
+    it("should be defined", function() {
+      return expect(Luca.CollectionManager).toBeDefined();
+    });
+    it("should make the latest instance accessible by class function", function() {
+      var manager;
+      manager = new Luca.CollectionManager();
+      return expect(Luca.CollectionManager.get()).toEqual(manager);
+    });
+    return it("should be scopable", function() {
+      var babyone, babytwo, manager, scope;
+      scope = "one";
+      manager = new Luca.CollectionManager({
+        getScope: function() {
+          return scope;
+        }
+      });
+      babyone = new Luca.Collection({
+        name: "baby"
+      });
+      manager.add("baby");
+      scope = "two";
+      return babytwo = new Luca.Collection({
+        name: "baby"
+      });
+    });
+  });
 
 }).call(this);
 (function() {

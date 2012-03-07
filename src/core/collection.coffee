@@ -45,7 +45,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @manager ||= @registerWith
 
 
-    # if they specify a 
+    # if they specify a
     if @name and not @manager
       @manager = Luca.CollectionManager.get()
 
@@ -59,6 +59,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
       @name = if _.isFunction( @name ) then @name() else @name
 
       @bind "after:initialize", ()=>
+        console.log "After Initialize", @manager, @name, @
         @register( @manager, @name, @)
 
     # by passing useLocalStorage = true to your collection definition
@@ -152,10 +153,9 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   # it with the registerWith property, which can either be a reference to
   # the manager itself, or a string in case the manager isn't available
   # at compile time
-  register: (collectionManager="", key="", collection)->
-
-    throw "Can not register with a collection manager without a key" unless key.length > 1
-    throw "Can not register with a collection manager without a valid collection manager" unless collectionManager.length > 1
+  register: (collectionManager=Luca.CollectionManager.get(), key="", collection)->
+    throw "Can not register with a collection manager without a key" unless key.length >= 1
+    throw "Can not register with a collection manager without a valid collection manager" unless collectionManager?
 
     # by passing a string instead of a reference to an object, we can look up
     # that object only when necessary.  this prevents us from having to create
