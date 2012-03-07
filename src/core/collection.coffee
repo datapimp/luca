@@ -24,9 +24,12 @@
 #
 Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
-  initialize: (models, @options={})->
-    _.extend @, @options
+  initialize: (models, @options)->
 
+    if models and !@options? and !_.isArray(models)
+      @options =  models
+
+    _.extend @, @options
 
     # By specifying a @cached property or method, you can instruct
     # Luca.Collection instances where to pull an array of model attributes
@@ -34,24 +37,35 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     if @cached
       @bootstrap_cache_key = if _.isFunction( @cached ) then @cached() else @cached
 
+    if @registerAs or @registerWith
+      console.log "This configuration API is deprecated.  use @name and @manager properties instead"
+
+    # support the older configuration API
+    @name ||= @registerAs
+    @manager ||= @registerWith
+
+
+    # if they specify a 
+    if @name and not @manager
+      @manager = Luca.CollectionManager.get()
 
     # If we are going to be registering this collection with the CollectionManager
     # class, then we need to specify a key to register ourselves under. @registerAs can be
     # as simple as something as "books", or if you are using collections which need
     # to be scoped with some sort of unique id, as say some sort of belongsTo relationship
     # then you can specify @registerAs as a method()
-    if @registerWith
-      @registerAs ||= @cached
-      @registerAs = if _.isFunction( @registerAs ) then @registerAs() else @registerAs
+    if @manager
+      @name ||= @cached()
+      @name = if _.isFunction( @name ) then @name() else @name
 
       @bind "after:initialize", ()=>
-        @register( @registerWith, @registerAs, @)
+        @register( @manager, @name, @)
 
     # by passing useLocalStorage = true to your collection definition
     # you will bypass the RESTful persistence layer and just persist everything
     # locally in localStorage
     if @useLocalStorage is true and window.localStorage?
-      table = @bootstrap_cache_key || @registerAs
+      table = @bootstrap_cache_key || @name
       throw "Must specify either a cached or registerAs property to use localStorage"
       @localStorage = new Luca.LocalStore( table )
 
@@ -143,6 +157,9 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     throw "Can not register with a collection manager without a key" unless key.length > 1
     throw "Can not register with a collection manager without a valid collection manager" unless collectionManager.length > 1
 
+    # by passing a string instead of a reference to an object, we can look up
+    # that object only when necessary.  this prevents us from having to create
+    # the manager instance before we can define our collections
     if _.isString( collectionManager )
       collectionManager = Luca.util.nestedValue( collectionManager, (window || global) )
 
@@ -151,7 +168,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     if _.isFunction( collectionManager.add )
       return collectionManager.add(key, collection)
 
-    if _.isObject( collect)
+    if _.isObject( collectionManager )
       collectionManager[ key ] = collection
 
   # A Luca.Collection will load models from the in memory model store

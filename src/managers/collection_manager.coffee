@@ -33,8 +33,6 @@
 #
 # Special Thanks to @tjbladez for this wonderful initialModelsa
 #
-
-
 class Luca.CollectionManager
   __collections: {}
 
@@ -46,12 +44,9 @@ class Luca.CollectionManager
     # manager, then you will have to specify which
     # collection manager your views need to interact
     # with for their collectionEvents configuration handling
-    if Luca.CollectionManager.get
-      console.log "A collection manager has already been created.  You are responsible for telling your views which to use"
-    else
-      Luca.CollectionManager.get = _.bind ()->
-        return @
-      , @
+    Luca.CollectionManager.get = _.bind ()->
+      return @
+    , @
 
 
   add:(key, collection)->
