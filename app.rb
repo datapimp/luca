@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'bundler'
 Bundler.require
 
@@ -17,7 +18,7 @@ class App < Sinatra::Base
   # set :precompile, [ /.*/ ]
   set :assets_prefix, 'assets'
   set :assets_path, File.join(root, 'public', assets_prefix)
-  
+
   require "#{ root }/lib/sprockets/luca_template.rb"
   sprockets.register_engine '.luca', Sprockets::LucaTemplate
 
@@ -30,19 +31,13 @@ class App < Sinatra::Base
       include AssetHelpers
     end
   end
-  
+
   helpers do
     include AssetHelpers
   end
-  
+
   get "/" do
     erb :index
   end
 
-  get "/sandbox/api" do
-    content_type :json
-    100.times.collect {
-      {name:"#{ Faker::Name.first_name } #{ Faker::Name.last_name}",location:Faker::Address.city,email:Faker::Internet.email,website:"www.#{ Faker::Internet.domain_name }"} 
-    }.to_json
-  end
 end

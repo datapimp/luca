@@ -24,3 +24,8 @@ guard 'sprockets2', :assets_path => assets_path, :sprockets => App.sprockets, :p
     end
   end
 end
+
+guard 'jasmine', :port => 9292, :jasmine_url => "http://lvh.me:9292/jasmine/index.html" do
+  watch(%r{src/(.+)\.coffee}) {|m| "spec/#{ m[1] }_spec.coffee" }
+  watch(%r{spec/(.+)_spec\.coffee}) {|m| "src/#{ m[1] }.coffee" }
+end
