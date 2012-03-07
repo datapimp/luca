@@ -12,7 +12,6 @@ guard 'sprockets2', :assets_path => assets_path, :sprockets => App.sprockets, :p
     compiled = Dir.glob( assets_path + '/luca-ui*' )
 
     compiled.each do |file|
-      puts "Handling Compiled File #{ file }"
       if File.extname(file) == ".js"
         FileUtils.mkdir_p javascript_path
         FileUtils.cp file, javascript_path
