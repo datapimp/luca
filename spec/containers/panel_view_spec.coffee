@@ -1,0 +1,1 @@
+panel_view_spec.coffee

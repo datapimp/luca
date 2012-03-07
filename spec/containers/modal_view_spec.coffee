@@ -1,0 +1,1 @@
+modal_view_spec.coffee
