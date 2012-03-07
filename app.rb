@@ -40,4 +40,8 @@ class App < Sinatra::Base
     erb :index
   end
 
+  get "/jasmine" do
+    erb :jasmine
+  end
+
 end

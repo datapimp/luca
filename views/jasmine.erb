@@ -5,7 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Luca. Container Framework For Backbone Views</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    
+
+    <link rel="stylesheet" href="<%= asset_path('jasmine.css') %>" />
+    <script src="<%= asset_path('jasmine.js') %>"></script> 
+    <script src="<%= asset_path('jasmine-html.js') %>"></script> 
     <script src="<%= asset_path('dependencies.js') %>"></script>
     <script src="<%= asset_path('luca-ui.js') %>"></script>
     <script src="<%= asset_path('luca-ui-spec.js') %>"></script>    
@@ -14,6 +17,9 @@
     <div id="container">
       <div id="viewport"></div>
     </div>
-
+      <script type="text/javascript">
+        jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+        jasmine.getEnv().execute();
+      </script>
   </body>
 </html>

@@ -21,6 +21,7 @@ window.Luca =
 # problem on our own!
 Luca.enableBootstrap = true
 
+
 # adds an additional namespace to look for luca ui
 # components.  useful for when you define a bunch of
 # components in your own application's namespace
