@@ -60,7 +60,7 @@
     })));
   };
 
-  Luca.util.LazyObject = function(config) {
+  Luca.util.lazyComponent = function(config) {
     var componentClass, constructor, ctype;
     ctype = config.ctype;
     componentClass = Luca.registry.lookup(ctype);
@@ -101,12 +101,6 @@
     } catch (e) {
       return true;
     }
-  };
-
-  Luca.util.is_renderable = function(component) {
-    if (component == null) component = {};
-    if (Luca.registry.lookup(component.ctype)) return true;
-    if (_.isFunction(component.render)) return true;
   };
 
   $((function() {
@@ -790,7 +784,7 @@
       };
       this.components = _(this.components).map(function(object, index) {
         var component;
-        component = _.isObject(object) && object.render && object.trigger ? object : (object.ctype || (object.ctype = Luca.defaultComponentType || "template"), Luca.util.LazyObject(object));
+        component = _.isObject(object) && object.render && object.trigger ? object : (object.ctype || (object.ctype = Luca.defaultComponentType || "template"), Luca.util.lazyComponent(object));
         if (!component.container && component.options.container) {
           component.container = component.options.container;
         }

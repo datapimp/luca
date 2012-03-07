@@ -145,7 +145,7 @@ Luca.core.Container = Luca.View.extend
         object
       else
         object.ctype ||= Luca.defaultComponentType || "template"
-        Luca.util.LazyObject( object )
+        Luca.util.lazyComponent( object )
 
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround

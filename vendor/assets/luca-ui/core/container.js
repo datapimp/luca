@@ -80,7 +80,7 @@
       };
       this.components = _(this.components).map(function(object, index) {
         var component;
-        component = _.isObject(object) && object.render && object.trigger ? object : (object.ctype || (object.ctype = Luca.defaultComponentType || "template"), Luca.util.LazyObject(object));
+        component = _.isObject(object) && object.render && object.trigger ? object : (object.ctype || (object.ctype = Luca.defaultComponentType || "template"), Luca.util.lazyComponent(object));
         if (!component.container && component.options.container) {
           component.container = component.options.container;
         }

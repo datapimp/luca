@@ -108,7 +108,7 @@ Luca.components.FormView = Luca.core.Container.extend
   renderToolbars: ()->
       _( @toolbars ).each (toolbar)=>
         toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
-        toolbar = Luca.util.LazyObject(toolbar)
+        toolbar = Luca.util.lazyComponent(toolbar)
         toolbar.render()
   
   getField: (name)->

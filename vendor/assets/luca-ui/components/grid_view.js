@@ -50,7 +50,7 @@
     renderToolbars: function() {
       var _this = this;
       return _(this.toolbars).each(function(toolbar) {
-        toolbar = Luca.util.LazyObject(toolbar);
+        toolbar = Luca.util.lazyComponent(toolbar);
         toolbar.container = _this.toolbarContainers(toolbar.position);
         return toolbar.render();
       });

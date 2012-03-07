@@ -97,7 +97,7 @@
       var _this = this;
       return _(this.toolbars).each(function(toolbar) {
         toolbar.container = $("#" + _this.cid + "-" + toolbar.position + "-toolbar-container");
-        toolbar = Luca.util.LazyObject(toolbar);
+        toolbar = Luca.util.lazyComponent(toolbar);
         return toolbar.render();
       });
     },

@@ -1,3 +1,5 @@
+#= require "./helper"
+
 describe "The Luca Framework", ->
   it "should specify a version", ->
     expect(Luca.VERSION).toBeDefined()
@@ -19,33 +21,21 @@ describe "The Luca Framework", ->
     expect( Luca.registry.namespaces ).toContain("Test.namespace")
 
   it "should resolve a value.string to the object", ->
-    nested =
-      value:
-        string: "haha"
-
-    value = Luca.util.nestedValue("value.string", nested)
-
-    expect(value).toEqual("haha")
-
-  it "should resolve a nested.value.string to the object", ->
     window.nested =
       value:
         string: "haha"
 
-    value = Luca.util.nestedValue("nested.value.string")
+    value = Luca.util.nestedValue("nested.value.string", window)
 
     expect(value).toEqual("haha")
 
-  it "should know if a component is renderable or not", ->
-    renderable = Luca.util.is_renderable({})
-    expect(renderable).toBeFalsy()
+  it "should create an instance of a class by ctype", ->
+    object = 
+      ctype: "template"
+      template: "components/form_view"    
 
-  it "should know if a component is renderable or not", ->
-    view =
-      render: ()-> true
-    renderable = Luca.util.is_renderable(view)
-    expect(renderable).toBeTruthy()
+    component = Luca.util.lazyComponent(object)
+    
+    expect( _.isFunction(component.render) ).toBeTruthy()
 
-  it "should know if core component is renderable or not", ->
-    renderable = Luca.util.is_renderable("form_view")
-    expect(renderable).toBeTruthy()
+describe 

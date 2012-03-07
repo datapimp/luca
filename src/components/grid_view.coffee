@@ -70,7 +70,7 @@ Luca.components.GridView = Luca.View.extend
 
   renderToolbars: ()->
     _( @toolbars ).each (toolbar)=>
-      toolbar = Luca.util.LazyObject(toolbar)
+      toolbar = Luca.util.lazyComponent(toolbar)
       toolbar.container = @toolbarContainers( toolbar.position )
       toolbar.render()
 

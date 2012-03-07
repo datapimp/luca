@@ -93,6 +93,99 @@
 
 }).call(this);
 (function() {
+  var EventMatchers, ModelMatchers, eventBucket, json, msg, triggerSpy;
+
+  json = function(object) {
+    return JSON.stringify(object);
+  };
+
+  msg = function(list) {
+    if (list.length !== 0) {
+      return list.join(";");
+    } else {
+      return "";
+    }
+  };
+
+  eventBucket = function(model, eventName) {
+    var bucket, spiedEvents;
+    spiedEvents = model.spiedEvents;
+    if (!spiedEvents) spiedEvents = model.spiedEvents = {};
+    bucket = spiedEvents[eventName];
+    if (!bucket) bucket = spiedEvents[eventName] = [];
+    return bucket;
+  };
+
+  triggerSpy = function(constructor) {
+    var trigger;
+    trigger = constructor.prototype.trigger;
+    return constructor.prototype.trigger = function(eventName) {
+      var bucket;
+      bucket = eventBucket(this, eventName);
+      bucket.push(Array.prototype.slice.call(arguments, 1));
+      return trigger.apply(this, arguments);
+    };
+  };
+
+  triggerSpy(Backbone.Model);
+
+  triggerSpy(Backbone.Collection);
+
+  EventMatchers = {
+    toHaveTriggered: function(eventName) {
+      var bucket, triggeredWith;
+      bucket = eventBucket(this.actual, eventName);
+      triggeredWith = Array.prototype.slice.call(arguments, 1);
+      this.message = function() {
+        return ["expected model or collection to have received '" + eventName + "' with " + json(triggeredWith), "expected model not to have received event '" + eventName + "', but it did"];
+      };
+      return _.detect(bucket, function(args) {
+        if (triggeredWith.length === 0) {
+          return true;
+        } else {
+          return jasmine.getEnv().equals_(triggeredWith, args);
+        }
+      });
+    }
+  };
+
+  ModelMatchers = {
+    toHaveAttributes: function(attributes) {
+      var i, keys, message, missing, values;
+      keys = [];
+      values = [];
+      jasmine.getEnv().equals_(this.actual.attributes, attributes, keys, values);
+      missing = [];
+      i = 0;
+      while (i < keys.length) {
+        message = keys[i];
+        if (message.match(/but missing from/)) missing.push(keys[i]);
+        i++;
+      }
+      this.message = function() {
+        return ["model should have at least these attributes(" + json(attributes) + ") " + msg(missing) + " " + msg(values), "model should have none of the following attributes(" + json(attributes) + ") " + msg(keys) + " " + msg(values)];
+      };
+      return missing.length === 0 && values.length === 0;
+    },
+    toHaveExactlyTheseAttributes: function(attributes) {
+      var equal, keys, values;
+      keys = [];
+      values = [];
+      equal = jasmine.getEnv().equals_(this.actual.attributes, attributes, keys, values);
+      this.message = function() {
+        return ["model should match exact attributes, but does not. " + msg(keys) + " " + msg(values), "model has exactly these attributes, but shouldn't :" + json(attributes)];
+      };
+      return equal;
+    }
+  };
+
+  beforeEach(function() {
+    this.addMatchers(ModelMatchers);
+    return this.addMatchers(EventMatchers);
+  });
+
+}).call(this);
+(function() {
 
   describe("The Luca Framework", function() {
     it("should specify a version", function() {
@@ -115,46 +208,27 @@
       return expect(Luca.registry.namespaces).toContain("Test.namespace");
     });
     it("should resolve a value.string to the object", function() {
-      var nested, value;
-      nested = {
-        value: {
-          string: "haha"
-        }
-      };
-      value = Luca.util.nestedValue("value.string", nested);
-      return expect(value).toEqual("haha");
-    });
-    it("should resolve a nested.value.string to the object", function() {
       var value;
       window.nested = {
         value: {
           string: "haha"
         }
       };
-      value = Luca.util.nestedValue("nested.value.string");
+      value = Luca.util.nestedValue("nested.value.string", window);
       return expect(value).toEqual("haha");
     });
-    it("should know if a component is renderable or not", function() {
-      var renderable;
-      renderable = Luca.util.is_renderable({});
-      return expect(renderable).toBeFalsy();
-    });
-    it("should know if a component is renderable or not", function() {
-      var renderable, view;
-      view = {
-        render: function() {
-          return true;
-        }
+    return it("should create an instance of a class by ctype", function() {
+      var component, object;
+      object = {
+        ctype: "template",
+        template: "components/form_view"
       };
-      renderable = Luca.util.is_renderable(view);
-      return expect(renderable).toBeTruthy();
-    });
-    return it("should know if core component is renderable or not", function() {
-      var renderable;
-      renderable = Luca.util.is_renderable("form_view");
-      return expect(renderable).toBeTruthy();
+      component = Luca.util.lazyComponent(object);
+      return expect(_.isFunction(component.render)).toBeTruthy();
     });
   });
+
+  describe;
 
 }).call(this);
 (function() {
