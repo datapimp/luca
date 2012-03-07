@@ -37,4 +37,12 @@ describe "The Luca Framework", ->
     component = Luca.util.lazyComponent(object)
     expect( _.isFunction(component.render) ).toBeTruthy()
 
+  it "should find a created view in the cache", ->
+    template = new Luca.components.Template
+      template: "components/form_view"    
+      name: 'test_template'
+
+    expect(Luca.cache("test_template")).toBeDefined()
+
+
 describe 

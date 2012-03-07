@@ -217,7 +217,7 @@
       value = Luca.util.nestedValue("nested.value.string", window);
       return expect(value).toEqual("haha");
     });
-    return it("should create an instance of a class by ctype", function() {
+    it("should create an instance of a class by ctype", function() {
       var component, object;
       object = {
         ctype: "template",
@@ -225,6 +225,14 @@
       };
       component = Luca.util.lazyComponent(object);
       return expect(_.isFunction(component.render)).toBeTruthy();
+    });
+    return it("should find a created view in the cache", function() {
+      var template;
+      template = new Luca.components.Template({
+        template: "components/form_view",
+        name: 'test_template'
+      });
+      return expect(Luca.cache("test_template")).toBeDefined();
     });
   });
 
