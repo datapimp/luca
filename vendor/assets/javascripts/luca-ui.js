@@ -119,7 +119,7 @@
         this.collection = collectionManager.getOrCreate(this.collection);
       }
       if (!(this.collection && _.isFunction(this.collection.fetch) && _.isFunction(this.collection.reset))) {
-        this.collection = new Luca.components.FilterableCollection(this.collection.initial_set, this.collection);
+        this.collection = new Luca.Collection(this.collection.initial_set, this.collection);
       }
       if ((_ref2 = this.collection) != null ? _ref2.deferrable_trigger : void 0) {
         this.deferrable_trigger = this.collection.deferrable_trigger;
@@ -386,14 +386,21 @@
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     deferrable_event: "reset",
     initialize: function(options) {
-      var unique;
+      var unique,
+        _this = this;
       this.options = options != null ? options : {};
-      if (this.name != null) this.cid = _.uniqueId(this.name);
       _.extend(this, this.options);
+      if (this.name != null) this.cid = _.uniqueId(this.name);
       Luca.cache(this.cid, this);
       unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
       this.setupHooks(unique);
-      return this.trigger("after:initialize", this);
+      if (this.autoBindEventHandlers === true) {
+        _(this.events).each(function(handler, event) {
+          if (_.isString(handler)) return _.bindAll(_this, handler);
+        });
+      }
+      this.trigger("after:initialize", this);
+      return this.registerCollectionEvents();
     },
     $container: function() {
       return $(this.container);
@@ -416,7 +423,7 @@
     },
     getCollectionManager: function() {
       var _ref;
-      return (_ref = Luca.CollectionManager.get) != null ? _ref.call() : void 0;
+      return this.collectionManager || ((_ref = Luca.CollectionManager.get) != null ? _ref.call() : void 0);
     },
     registerCollectionEvents: function() {
       var manager,
@@ -427,13 +434,7 @@
         _ref = signature.split(" "), key = _ref[0], event = _ref[1];
         collection = _this["" + key + "Collection"] = manager.getOrCreate(key);
         if (!collection) throw "Could not find collection specified by " + key;
-        if (_.isFunction(handler)) {
-          handler = function() {
-            return handler.apply(_this, arguments);
-          };
-        } else {
-          handler = _this[handler];
-        }
+        if (_.isString(handler)) handler = _this[handler];
         if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
         try {
           return collection.bind(event, handler);
@@ -452,10 +453,8 @@
     initialize: function(models, options) {
       var table,
         _this = this;
+      if (models == null) models = [];
       this.options = options;
-      if (models && !(this.options != null) && !_.isArray(models)) {
-        this.options = models;
-      }
       _.extend(this, this.options);
       if (this.cached) {
         this.bootstrap_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
@@ -470,7 +469,6 @@
         this.name || (this.name = this.cached());
         this.name = _.isFunction(this.name) ? this.name() : this.name;
         this.bind("after:initialize", function() {
-          console.log("After Initialize", _this.manager, _this.name, _this);
           return _this.register(_this.manager, _this.name, _this);
         });
       }
@@ -584,9 +582,14 @@
         throw e;
       }
     },
-    onceLoaded: function(fn) {
+    onceLoaded: function(fn, options) {
       var wrapped,
         _this = this;
+      if (options == null) {
+        options = {
+          autoFetch: true
+        };
+      }
       if (this.length > 0 && !this.fetching) {
         fn.apply(this, [this]);
         return;
@@ -594,30 +597,37 @@
       wrapped = function() {
         return fn.apply(_this, [_this]);
       };
-      return this.bind("reset", function() {
+      this.bind("reset", function() {
         wrapped();
         return _this.unbind("reset", wrapped);
       });
+      if (!(this.fetching || !options.autoFetch)) return this.fetch();
     },
-    ifLoaded: function(fn, scope) {
-      var _this = this;
-      if (scope == null) scope = this;
-      if (this.models.length > 0 && !this.fetching) {
-        fn.apply(scope, [this]);
-        return;
+    ifLoaded: function(fn, options) {
+      var scope,
+        _this = this;
+      if (options == null) {
+        options = {
+          scope: this,
+          autoFetch: true
+        };
       }
+      scope = options.scope || this;
+      if (this.length > 0 && !this.fetching) fn.apply(scope, [this]);
       this.bind("reset", function(collection) {
         return fn.apply(scope, [collection]);
       });
-      if (!this.fetching) return this.fetch();
+      if (!(this.fetching === true || !options.autoFetch || this.length > 0)) {
+        return this.fetch();
+      }
     },
     parse: function(response) {
       var models;
       this.fetching = false;
-      this.trigger("after:response");
+      this.trigger("after:response", response);
       models = this.root != null ? response[this.root] : response;
       if (this.bootstrap_cache_key) {
-        Luca.Collection.cache(this.bootstrap_cache_keys, models);
+        Luca.Collection.cache(this.bootstrap_cache_key, models);
       }
       return models;
     }
@@ -922,6 +932,9 @@
 
 }).call(this);
 (function() {
+  var instances;
+
+  instances = [];
 
   Luca.CollectionManager = (function() {
 
@@ -931,9 +944,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
-      Luca.CollectionManager.get = _.bind(function() {
-        return this;
-      }, this);
+      instances.push(this);
     }
 
     CollectionManager.prototype.add = function(key, collection) {
@@ -959,7 +970,7 @@
       return collection;
     };
 
-    CollectionManager.prototype.collectionPrefix = Luca.Collection.namespace;
+    CollectionManager.prototype.collectionNamespace = Luca.Collection.namespace;
 
     CollectionManager.prototype.currentScope = function() {
       var current_scope, _base;
@@ -991,7 +1002,7 @@
     CollectionManager.prototype.guessCollectionClass = function(key) {
       var classified, guess;
       classified = _(key).chain().capitalize().camelize().value();
-      guess = (this.collectionPrefix || (window || global))[classified];
+      guess = (this.collectionNamespace || (window || global))[classified];
       return guess;
     };
 
@@ -1004,6 +1015,18 @@
     return CollectionManager;
 
   })();
+
+  Luca.CollectionManager.destroyAll = function() {
+    return instances = [];
+  };
+
+  Luca.CollectionManager.instances = function() {
+    return instances;
+  };
+
+  Luca.CollectionManager.get = function() {
+    return _(instances).last();
+  };
 
 }).call(this);
 (function() {
@@ -1905,61 +1928,6 @@
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       return this.label || (this.label = this.name);
-    }
-  });
-
-}).call(this);
-(function() {
-
-  Luca.components.FilterableCollection = Luca.Collection.extend({
-    initialize: function(models, options) {
-      var params, url,
-        _this = this;
-      this.options = options != null ? options : {};
-      _.extend(this, this.options);
-      Luca.Collection.prototype.initialize.apply(this, arguments);
-      this.filter = Luca.Collection.baseParams();
-      if (_.isFunction(this.url)) {
-        return this.url = _.wrap(this.url, function(fn) {
-          var existing_params, new_val, parts, queryString, val;
-          val = fn.apply(_this);
-          parts = val.split('?');
-          if (parts.length > 1) existing_params = _.last(parts);
-          queryString = _this.queryString();
-          if (existing_params && val.match(existing_params)) {
-            queryString = queryString.replace(existing_params, '');
-          }
-          new_val = "" + val + "?" + queryString;
-          if (new_val.match(/\?$/)) new_val = new_val.replace(/\?$/, '');
-          return new_val;
-        });
-      } else {
-        url = this.url;
-        params = this.queryString();
-        return this.url = _([url, params]).compact().join("?");
-      }
-    },
-    queryString: function() {
-      var parts,
-        _this = this;
-      parts = _(this.filter).inject(function(memo, value, key) {
-        var str;
-        str = "" + key + "=" + value;
-        memo.push(str);
-        return memo;
-      }, []);
-      return _.uniq(parts).join("&");
-    },
-    applyFilter: function(filter, options) {
-      if (filter == null) filter = {};
-      if (options == null) {
-        options = {
-          auto: true,
-          refresh: true
-        };
-      }
-      _.extend(this.filter, filter);
-      if (!!options.auto) return this.fetch(options);
     }
   });
 
