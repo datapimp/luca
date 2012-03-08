@@ -6,7 +6,7 @@ Luca.containers.ColumnView = Luca.core.Container.extend
   components: []
 
   initialize: (@options={})->
-    Luca.core.Container.prototype.initialize.apply @, arguments
+    Luca.core.Container::initialize.apply @, arguments
     @setColumnWidths()
   
   componentClass: 'luca-ui-column'
@@ -43,6 +43,6 @@ Luca.containers.ColumnView = Luca.core.Container.extend
       @components[index].float = "left"
       @components[index].width = width
 
-    Luca.core.Container.prototype.beforeLayout?.apply @, arguments
+    Luca.core.Container::beforeLayout?.apply @, arguments
 
 Luca.register 'column_view', "Luca.containers.ColumnView"

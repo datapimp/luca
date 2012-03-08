@@ -24,7 +24,7 @@ Luca.fields.CheckboxField = Luca.core.Field.extend
     _.extend @, @options
     _.bindAll @, "change_handler"
 
-    Luca.core.Field.prototype.initialize.apply @, arguments
+    Luca.core.Field::initialize.apply @, arguments
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 

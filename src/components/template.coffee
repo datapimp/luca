@@ -1,6 +1,6 @@
 Luca.components.Template = Luca.View.extend
   initialize: (@options={})->
-    Luca.View.prototype.initialize.apply @, arguments
+    Luca.View::initialize.apply @, arguments
     throw "Templates must specify which template / markup to use" unless @template or @markup
 
     if _.isString(@templateContainer)

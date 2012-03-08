@@ -28,7 +28,7 @@ Luca.components.FormView = Luca.core.Container.extend
   toolbar: true
   
   initialize: (@options={})->
-    Luca.core.Container.prototype.initialize.apply @, arguments
+    Luca.core.Container::initialize.apply @, arguments
     
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars" 
 
@@ -87,7 +87,7 @@ Luca.components.FormView = Luca.core.Container.extend
     @submit()
   
   beforeLayout: ()->
-    Luca.core.Container.prototype.beforeLayout?.apply @, arguments
+    Luca.core.Container::beforeLayout?.apply @, arguments
     @$el.html Luca.templates["components/form_view"]( @ )    
 
 

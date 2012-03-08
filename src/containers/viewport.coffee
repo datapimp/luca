@@ -6,7 +6,7 @@ Luca.containers.Viewport = Luca.containers.CardView.extend
   fullscreen: true
 
   initialize: (@options={})->
-    Luca.core.Container.prototype.initialize.apply(@, arguments)
+    Luca.core.Container::initialize.apply(@, arguments)
 
     $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
 

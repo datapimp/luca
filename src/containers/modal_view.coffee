@@ -30,7 +30,7 @@ Luca.containers.ModalView = Luca.core.Container.extend
   modalOptions: {}
 
   initialize: (@options={})->
-    Luca.core.Container.prototype.initialize.apply @,arguments
+    Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
 
     _( @defaultModalOptions ).each (value,setting) => @modalOptions[ setting ] ||= value 

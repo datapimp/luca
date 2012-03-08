@@ -22,7 +22,7 @@ Luca.fields.ButtonField = Luca.core.Field.extend
     _.extend @options
     _.bindAll @, "click_handler"
 
-    Luca.core.Field.prototype.initialize.apply @, arguments
+    Luca.core.Field::initialize.apply @, arguments
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('button')

@@ -16,7 +16,7 @@ Luca.containers.TabView = Luca.containers.CardView.extend
   tabVerticalOffset: '50px'
 
   initialize: (@options={})->
-    Luca.containers.CardView.prototype.initialize.apply @, arguments
+    Luca.containers.CardView::initialize.apply @, arguments
     _.bindAll @, "select", "highlightSelectedTab"
     @setupHooks( @hooks )
 
@@ -40,10 +40,10 @@ Luca.containers.TabView = Luca.containers.CardView.extend
       @$el.append Luca.templates["containers/tab_selector_container"](@)
       @$el.append Luca.templates["containers/tab_view"](@)
 
-    Luca.containers.CardView.prototype.beforeLayout.apply @, arguments
+    Luca.containers.CardView::beforeLayout.apply @, arguments
 
   beforeRender: ()->
-    Luca.containers.CardView.prototype.beforeRender?.apply @, arguments
+    Luca.containers.CardView::beforeRender?.apply @, arguments
     @activeTabSelector().addClass('active')
 
     if Luca.enableBootstrap and @tab_position is "left" or @tab_position is "right"

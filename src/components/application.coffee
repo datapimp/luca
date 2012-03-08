@@ -13,7 +13,7 @@ Luca.Application = Luca.containers.Viewport.extend
   ]
 
   initialize: (@options={})->
-    Luca.containers.Viewport.prototype.initialize.apply @, arguments
+    Luca.containers.Viewport::initialize.apply @, arguments
 
     @collectionManager = new Luca.CollectionManager()
 
@@ -34,7 +34,7 @@ Luca.Application = Luca.containers.Viewport.extend
     @get("active_section")
 
   afterComponents: ()->
-    Luca.containers.Viewport.prototype.afterComponents?.apply @, arguments
+    Luca.containers.Viewport::afterComponents?.apply @, arguments
 
     # any time the main controller card switches we should track
     # the active card on the global state chart
@@ -49,7 +49,7 @@ Luca.Application = Luca.containers.Viewport.extend
           @state.set(active_sub_section:current.name)
 
   beforeRender: ()->
-    Luca.containers.Viewport.prototype.beforeRender?.apply @, arguments
+    Luca.containers.Viewport::beforeRender?.apply @, arguments
     #Backbone.history.start()
 
   # boot should trigger the ready event, which will call the initial call

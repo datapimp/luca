@@ -22,7 +22,7 @@ Luca.core.Field = Luca.View.extend
 
   initialize: (@options={})->
     _.extend @, @options
-    Luca.View.prototype.initialize.apply(@, arguments)
+    Luca.View::initialize.apply(@, arguments)
 
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 

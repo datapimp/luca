@@ -13,7 +13,7 @@ Luca.containers.CardView = Luca.core.Container.extend
   ]
   
   initialize: (@options)->
-    Luca.core.Container.prototype.initialize.apply @,arguments
+    Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
   
   componentClass: 'luca-ui-card'

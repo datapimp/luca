@@ -2,7 +2,7 @@ Luca.containers.PanelView = Luca.core.Container.extend
   className: 'luca-ui-panel'
 
   initialize: (@options={})->
-    Luca.core.Container.prototype.initialize.apply @, arguments
+    Luca.core.Container::initialize.apply @, arguments
   
   afterLayout: ()->
     if @template

@@ -27,9 +27,9 @@ Luca.core.Container = Luca.View.extend
   initialize: (@options={})->
     _.extend @, @options
 
-    @setupHooks( Luca.core.Container.prototype.hooks )
+    @setupHooks( Luca.core.Container::hooks )
 
-    Luca.View.prototype.initialize.apply @, arguments
+    Luca.View::initialize.apply @, arguments
   
   #### Rendering Pipeline
   #

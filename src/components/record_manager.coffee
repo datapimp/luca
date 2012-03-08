@@ -23,7 +23,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
   record_manager: true
 
   initialize: (@options={})->
-    Luca.containers.CardView.prototype.initialize.apply @, arguments
+    Luca.containers.CardView::initialize.apply @, arguments
     
     throw "Record Managers must specify a name" unless @name
 
@@ -73,7 +73,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
 
   beforeRender: ()->
     @$el.addClass("#{ @resource }-manager")
-    Luca.containers.CardView.prototype.beforeRender?.apply @, arguments
+    Luca.containers.CardView::beforeRender?.apply @, arguments
     
     @$el.addClass("#{ @resource } record-manager")
     @$el.data('resource', @resource)
@@ -91,7 +91,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
   # controlling how they interact.  listening to events on one,
   # changing state, inducing effects in the others
   afterRender: ()->
-    Luca.containers.CardView.prototype.afterRender?.apply @, arguments 
+    Luca.containers.CardView::afterRender?.apply @, arguments 
 
     manager = @
     grid = @getGrid()

@@ -14,7 +14,7 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
   initialize: (@options={})->
     _.bindAll @, "keydown_handler"
 
-    Luca.core.Field.prototype.initialize.apply @, arguments
+    Luca.core.Field::initialize.apply @, arguments
 
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 

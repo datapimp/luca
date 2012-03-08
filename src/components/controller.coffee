@@ -1,6 +1,6 @@
 Luca.components.Controller = Luca.containers.CardView.extend
   initialize: (@options)->
-    Luca.containers.CardView.prototype.initialize.apply @, arguments
+    Luca.containers.CardView::initialize.apply @, arguments
 
     @defaultCard ||= @components[0]?.name
 

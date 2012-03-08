@@ -4,7 +4,7 @@ Luca.components.Toolbar = Luca.core.Container.extend
   position: 'bottom'
 
   initialize: (@options={})->
-    Luca.core.Container.prototype.initialize.apply @, arguments
+    Luca.core.Container::initialize.apply @, arguments
 
   prepareComponents: ()->
     _( @components ).each (component)=> 

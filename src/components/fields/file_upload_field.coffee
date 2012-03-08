@@ -4,7 +4,7 @@ Luca.fields.FileUploadField = Luca.core.Field.extend
   template: 'fields/file_upload_field'
 
   initialize: (@options={})->
-    Luca.core.Field.prototype.initialize.apply @, arguments
+    Luca.core.Field::initialize.apply @, arguments
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field') 

@@ -23,7 +23,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
     _.extend @, Luca.modules.Deferrable
     _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
-    Luca.core.Field.prototype.initialize.apply @, arguments
+    Luca.core.Field::initialize.apply @, arguments
     
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
@@ -68,7 +68,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
   
   setValue: (value)->
     @currentValue = value
-    Luca.core.Field.prototype.setValue.apply @, arguments
+    Luca.core.Field::setValue.apply @, arguments
 
   beforeFetch: ()->
     @resetOptions()
