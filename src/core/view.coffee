@@ -94,7 +94,7 @@ _.extend Luca.View.prototype,
     _.extend @, @options
 
     @cid = _.uniqueId(@name) if @name?
-    
+
     #### View Caching
     #
     # Luca.View(s) which get created get stored in a global cache by their
@@ -105,8 +105,15 @@ _.extend Luca.View.prototype,
 
     @setupHooks( unique )
 
+    if @autoBindEventHandlers is true
+      _( @events ).each (handler,event)=>
+        if _.isString(handler)
+          _.bindAll @, handler
+
 
     @trigger "after:initialize", @
+
+    @registerCollectionEvents()
 
   $container: ()-> $(@container)
   #### Hooks or Auto Event Binding
@@ -144,7 +151,7 @@ _.extend Luca.View.prototype,
   # if you want to use more than one collection manager, over ride this
   # function in your views with your own logic
   getCollectionManager: ()->
-    Luca.CollectionManager.get?.call()
+    @collectionManager || Luca.CollectionManager.get?.call()
 
   ##### Collection Events
   #
@@ -170,9 +177,7 @@ _.extend Luca.View.prototype,
       if !collection
         throw "Could not find collection specified by #{ key }"
 
-      if _.isFunction(handler)
-        handler = ()=> handler.apply(@, arguments)
-      else
+      if _.isString(handler)
         handler = @[handler]
 
       unless _.isFunction(handler)

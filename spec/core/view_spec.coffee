@@ -1,4 +1,8 @@
 describe "Luca.View", ->
+  Custom = Luca.View.extend
+    clickHandler: sinon.spy()
+    autoBindEventHandlers: true 
+
   it "should be defined", ->
     expect(Luca.View).toBeDefined()
 
@@ -18,6 +22,10 @@ describe "Luca.View", ->
     view = new Luca.View()
     expect( view ).toHaveTriggered("after:initialize")
 
+  it "should auto-bind event handlers", ->
+
+
+
 describe "Hooks", ->
   it "should have before and after render hooks", ->
     Custom = Luca.View.extend
@@ -28,8 +36,8 @@ describe "Hooks", ->
 
     view.render()
 
-    expect( view.beforeRender.called ).toBeTruthy()
-    expect( view.afterRender.called ).toBeTruthy()
+    expect( view.beforeRender ).toHaveBeenCalled()
+    expect( view.afterRender ).toHaveBeenCalled()
 
   it "should call custom hooks in addition to framework hooks", ->
     Custom = Luca.View.extend
@@ -39,16 +47,40 @@ describe "Hooks", ->
 
     view = new Custom()
 
-    expect( view.customHook.called ).toBeFalsy()
-
     view.render()
 
-    expect( view.customHook.called ).toBeTruthy()
+    expect( view.customHook ).toHaveBeenCalled()
 
 describe "The Collection Events API", ->
-  manager = new Luca.CollectionManager()
-  
-  SampleCollection = Luca.Collection.extend
+  App =
+    collections : {}
+
+  App.collections.Sample = Luca.Collection.extend
     name: "sample"
 
+  SampleView = Luca.View.extend
+    resetHandler: sinon.spy() 
+    collectionEvents:
+      "sample reset" : "resetHandler"    
 
+  class SampleManager extends Luca.CollectionManager
+    collectionNamespace: App.collections
+    name: "collectionEvents"
+
+  beforeEach ()->
+    @manager ||= new SampleManager()
+    @collection = @manager.getOrCreate("sample")
+
+  it "should know which collection manager to use", ->
+    view = new SampleView()
+    expect( view.getCollectionManager().name ).toEqual( "collectionEvents" )
+
+  it "should create a reference to the collection", ->
+    view = new SampleView()
+    expect( view.sampleCollection ).toBeDefined()
+
+  it "should call the resetHandler callback on the view", ->
+    view = new SampleView()
+    collection = @manager.get("sample")
+    collection.reset([])
+    expect( view.resetHandler ).toHaveBeenCalled()

@@ -1,20 +1,25 @@
 describe "The Collection Manager", ->
   App = collections: {}
 
-  App.collections.SampleCollection = Luca.Collection.extend()
+  App.collections.SampleCollection = Luca.Collection.extend
+    url: "/models"
 
-  manager = new Luca.CollectionManager(collectionNamespace: App.collections)
+  beforeEach ()->
+    @manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections)
 
   it "should be defined", ->
     expect( Luca.CollectionManager ).toBeDefined()
 
   it "should make the latest instance accessible by class function", ->
-    expect( Luca.CollectionManager.get() ).toBeDefined()
+    expect( Luca.CollectionManager.get().name ).toEqual("manager")
 
   it "should be able to guess a collection constructor class", ->
-    base = manager.guessCollectionClass("sample_collection")
+    base = @manager.guessCollectionClass("sample_collection")
     expect( base ).toEqual(App.collections.SampleCollection)
 
+  it "should create a collection on demand", ->
+    collection = @manager.getOrCreate("sample_collection")
+    expect( collection.url ).toEqual "/models"
 
 describe "The Scope Functionality", ->
   scope = "one"
@@ -39,5 +44,8 @@ describe "The Scope Functionality", ->
   expect( manager.get("baby") ).toBeDefined()
   expect( manager.get("baby") ).toEqual( babytwo )
   expect( manager.allCollections().length ).toEqual(1) 
+
+  scope = "one" 
+  expect( manager.get("baby").pluck('id') ).toEqual([1,2])
 
 

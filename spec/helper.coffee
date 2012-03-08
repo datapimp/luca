@@ -83,11 +83,39 @@ createFakeServer = ->
   ])
   server
 
+
+
+spyMatchers = "called calledOnce calledTwice calledThrice calledBefore calledAfter calledOn alwaysCalledOn calledWith alwaysCalledWith calledWithExactly alwaysCalledWithExactly".split(" ")
+i = spyMatchers.length
+spyMatcherHash = {}
+unusualMatchers =
+  returned: "toHaveReturned"
+  alwaysReturned: "toHaveAlwaysReturned"
+  threw: "toHaveThrown"
+  alwaysThrew: "toHaveAlwaysThrown"
+
+getMatcherFunction = (sinonName) ->
+  ->
+    sinonProperty = @actual[sinonName]
+    (if (typeof sinonProperty is "function") then sinonProperty.apply(@actual, arguments) else sinonProperty)
+
+while i--
+  sinonName = spyMatchers[i]
+  matcherName = "toHaveBeen" + sinonName.charAt(0).toUpperCase() + sinonName.slice(1)
+  spyMatcherHash[matcherName] = getMatcherFunction(sinonName)
+for j of unusualMatchers
+  spyMatcherHash[unusualMatchers[j]] = getMatcherFunction(j)
+
+window.sinonJasmine = 
+  getMatchers: ->
+    spyMatcherHash
+
 beforeEach ->
   @server = createFakeServer()
 
   @addMatchers ModelMatchers
   @addMatchers EventMatchers
+  @addMatchers sinonJasmine.getMatchers()
 
 afterEach ->
   @server.restore()

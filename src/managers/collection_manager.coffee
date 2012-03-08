@@ -33,6 +33,9 @@
 #
 # Special Thanks to @tjbladez for this wonderful initialModelsa
 #
+
+instances = []
+
 class Luca.CollectionManager
   __collections: {}
 
@@ -44,9 +47,7 @@ class Luca.CollectionManager
     # manager, then you will have to specify which
     # collection manager your views need to interact
     # with for their collectionEvents configuration handling
-    me = @
-    Luca.CollectionManager.get = ()-> me
-
+    instances.push(@)
 
   add:(key, collection)->
     @currentScope()[ key ] = collection
@@ -125,3 +126,7 @@ class Luca.CollectionManager
   # don't effect other views
   private: (key, collectionOptions={}, initialModels=[])->
     @create(key,collectionOptions,initialModels,true)
+
+Luca.CollectionManager.destroyAll = ()-> instances = []
+Luca.CollectionManager.instances = ()-> instances
+Luca.CollectionManager.get = ()-> _( instances ).last()
