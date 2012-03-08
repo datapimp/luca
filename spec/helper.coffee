@@ -23,6 +23,7 @@ triggerSpy = (constructor) ->
 
 triggerSpy Backbone.Model
 triggerSpy Backbone.Collection
+triggerSpy Backbone.View
 
 EventMatchers =
   toHaveTriggered: (eventName) ->

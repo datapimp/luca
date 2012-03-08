@@ -44,9 +44,8 @@ class Luca.CollectionManager
     # manager, then you will have to specify which
     # collection manager your views need to interact
     # with for their collectionEvents configuration handling
-    Luca.CollectionManager.get = _.bind ()->
-      return @
-    , @
+    me = @
+    Luca.CollectionManager.get = ()-> me
 
 
   add:(key, collection)->
@@ -82,7 +81,7 @@ class Luca.CollectionManager
   # You should override this attribute when you create or define your collection manager
   #
   #
-  collectionPrefix: Luca.Collection.namespace
+  collectionNamespace: Luca.Collection.namespace
 
   #### Collection Scopes
 
@@ -113,7 +112,7 @@ class Luca.CollectionManager
 
   guessCollectionClass: (key)->
     classified = _( key ).chain().capitalize().camelize().value()
-    guess = (@collectionPrefix || (window || global) )[ classified ]
+    guess = (@collectionNamespace || (window || global) )[ classified ]
 
     guess
 

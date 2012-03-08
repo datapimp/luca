@@ -90,10 +90,11 @@ _.extend Luca.View.prototype,
   deferrable_event: "reset"
 
   initialize: (@options={})->
-    @cid = _.uniqueId(@name) if @name?
 
     _.extend @, @options
 
+    @cid = _.uniqueId(@name) if @name?
+    
     #### View Caching
     #
     # Luca.View(s) which get created get stored in a global cache by their
@@ -103,6 +104,7 @@ _.extend Luca.View.prototype,
     unique = _( Luca.View.prototype.hooks.concat( @hooks ) ).uniq()
 
     @setupHooks( unique )
+
 
     @trigger "after:initialize", @
 
