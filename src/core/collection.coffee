@@ -24,11 +24,7 @@
 #
 Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
-  initialize: (models, @options)->
-
-    if models and !@options? and !_.isArray(models)
-      @options =  models
-
+  initialize: (models=[], @options)->
     _.extend @, @options
 
     # By specifying a @cached property or method, you can instruct
@@ -59,7 +55,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
       @name = if _.isFunction( @name ) then @name() else @name
 
       @bind "after:initialize", ()=>
-        console.log "After Initialize", @manager, @name, @
         @register( @manager, @name, @)
 
     # by passing useLocalStorage = true to your collection definition
@@ -203,7 +198,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     # refresh = true in the options hash
     return @bootstrap() if @cached_models().length and not options.refresh
 
-
     url = if _.isFunction(@url) then @url() else @url
 
     return true unless ((url and url.length > 1) or @localStorage)
@@ -224,7 +218,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   # that being said, if the collection already has models
   # it won't even bother fetching it it will just run
   # as if reset was already triggered
-  onceLoaded: (fn)->
+  onceLoaded: (fn, options={autoFetch:true})->
     if @length > 0 and not @fetching
       fn.apply @, [@]
       return
@@ -235,19 +229,22 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
       wrapped()
       @unbind "reset", wrapped
 
+    unless @fetching or not options.autoFetch
+      @fetch()
+
   # ifLoaded is equivalent to binding to the reset trigger with
   # a function, if the collection already has models it will just
   # run automatically.  similar to onceLoaded except the binding
   # stays in place
-  ifLoaded: (fn, scope=@)->
-    if @models.length > 0 and not @fetching
+  ifLoaded: (fn, options={scope:@,autoFetch:true})->
+    scope = options.scope || @
+
+    if @length > 0 and not @fetching
       fn.apply scope, [@]
-      return
 
-    @bind "reset", (collection)=>
-      fn.apply scope, [collection]
+    @bind "reset", (collection)=> fn.apply scope, [collection]
 
-    unless @fetching
+    unless @fetching is true or !options.autoFetch or @length > 0
       @fetch()
 
   # parse is very close to the stock Backbone.Collection parse, which
@@ -263,11 +260,11 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   # collection
   parse: (response)->
     @fetching = false
-    @trigger "after:response"
+    @trigger "after:response", response
     models = if @root? then response[ @root ] else response
 
     if @bootstrap_cache_key
-      Luca.Collection.cache( @bootstrap_cache_keys, models)
+      Luca.Collection.cache( @bootstrap_cache_key, models)
 
     models
 

@@ -24,7 +24,7 @@ triggerSpy = (constructor) ->
 triggerSpy Backbone.Model
 triggerSpy Backbone.Collection
 
-EventMatchers = 
+EventMatchers =
   toHaveTriggered: (eventName) ->
     bucket = eventBucket(@actual, eventName)
     triggeredWith = Array::slice.call(arguments, 1)
@@ -63,6 +63,30 @@ ModelMatchers =
 
     equal
 
+createFakeServer = ->
+  server = sinon.fakeServer.create()
+  server.respondWith("GET", "/models", [
+    200,
+    {"Content-Type":"application/json"},
+    '[{"id":1,"attr1":"value1","attr2":"value2"},{"id":2,"attr1":"value1","attr2":"value2"}]'
+  ])
+  server.respondWith("GET", "/rooted/models", [
+    200,
+    {"Content-Type":"application/json"},
+    '{"root":[{"id":1,"attr1":"value1","attr2":"value2"},{"id":2,"attr1":"value1","attr2":"value2"}]}'
+  ])
+  server.respondWith("GET", "/empty", [
+    200,
+    {"Content-Type":"application/json"},
+    '[]'
+  ])
+  server
+
 beforeEach ->
+  @server = createFakeServer()
+
   @addMatchers ModelMatchers
   @addMatchers EventMatchers
+
+afterEach ->
+  @server.restore()
