@@ -1,4 +1,7 @@
 (function() {
+  var instances;
+
+  instances = [];
 
   Luca.CollectionManager = (function() {
 
@@ -8,13 +11,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
-      if (Luca.CollectionManager.get) {
-        console.log("A collection manager has already been created.  You are responsible for telling your views which to use");
-      } else {
-        Luca.CollectionManager.get = _.bind(function() {
-          return this;
-        }, this);
-      }
+      instances.push(this);
     }
 
     CollectionManager.prototype.add = function(key, collection) {
@@ -40,7 +37,7 @@
       return collection;
     };
 
-    CollectionManager.prototype.collectionPrefix = Luca.Collection.namespace;
+    CollectionManager.prototype.collectionNamespace = Luca.Collection.namespace;
 
     CollectionManager.prototype.currentScope = function() {
       var current_scope, _base;
@@ -72,7 +69,7 @@
     CollectionManager.prototype.guessCollectionClass = function(key) {
       var classified, guess;
       classified = _(key).chain().capitalize().camelize().value();
-      guess = (this.collectionPrefix || (window || global))[classified];
+      guess = (this.collectionNamespace || (window || global))[classified];
       return guess;
     };
 
@@ -85,5 +82,17 @@
     return CollectionManager;
 
   })();
+
+  Luca.CollectionManager.destroyAll = function() {
+    return instances = [];
+  };
+
+  Luca.CollectionManager.instances = function() {
+    return instances;
+  };
+
+  Luca.CollectionManager.get = function() {
+    return _(instances).last();
+  };
 
 }).call(this);

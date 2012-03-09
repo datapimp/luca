@@ -1,5 +1,5 @@
 .form-actions
   %button.btn.btn-primary
-    Save Changes
+    %i.icon-ok Save Changes
   %button.btn
-    Cancel
+    %i.icon-remove Cancel

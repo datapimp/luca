@@ -4,20 +4,27 @@
     initialize: function(models, options) {
       var table,
         _this = this;
-      this.options = options != null ? options : {};
+      if (models == null) models = [];
+      this.options = options;
       _.extend(this, this.options);
       if (this.cached) {
         this.bootstrap_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
       }
-      if (this.registerWith) {
-        this.registerAs || (this.registerAs = this.cached);
-        this.registerAs = _.isFunction(this.registerAs) ? this.registerAs() : this.registerAs;
+      if (this.registerAs || this.registerWith) {
+        console.log("This configuration API is deprecated.  use @name and @manager properties instead");
+      }
+      this.name || (this.name = this.registerAs);
+      this.manager || (this.manager = this.registerWith);
+      if (this.name && !this.manager) this.manager = Luca.CollectionManager.get();
+      if (this.manager) {
+        this.name || (this.name = this.cached());
+        this.name = _.isFunction(this.name) ? this.name() : this.name;
         this.bind("after:initialize", function() {
-          return _this.register(_this.registerWith, _this.registerAs, _this);
+          return _this.register(_this.manager, _this.name, _this);
         });
       }
       if (this.useLocalStorage === true && (window.localStorage != null)) {
-        table = this.bootstrap_cache_key || this.registerAs;
+        table = this.bootstrap_cache_key || this.name;
         throw "Must specify either a cached or registerAs property to use localStorage";
         this.localStorage = new Luca.LocalStore(table);
       }
@@ -79,12 +86,14 @@
       return _.extend(this.base_params, params);
     },
     register: function(collectionManager, key, collection) {
-      if (collectionManager == null) collectionManager = "";
+      if (collectionManager == null) {
+        collectionManager = Luca.CollectionManager.get();
+      }
       if (key == null) key = "";
-      if (!(key.length > 1)) {
+      if (!(key.length >= 1)) {
         throw "Can not register with a collection manager without a key";
       }
-      if (!(collectionManager.length > 1)) {
+      if (collectionManager == null) {
         throw "Can not register with a collection manager without a valid collection manager";
       }
       if (_.isString(collectionManager)) {
@@ -94,7 +103,9 @@
       if (_.isFunction(collectionManager.add)) {
         return collectionManager.add(key, collection);
       }
-      if (_.isObject(collect)) return collectionManager[key] = collection;
+      if (_.isObject(collectionManager)) {
+        return collectionManager[key] = collection;
+      }
     },
     loadFromBootstrap: function() {
       if (!this.bootstrap_cache_key) return;
@@ -122,9 +133,14 @@
         throw e;
       }
     },
-    onceLoaded: function(fn) {
+    onceLoaded: function(fn, options) {
       var wrapped,
         _this = this;
+      if (options == null) {
+        options = {
+          autoFetch: true
+        };
+      }
       if (this.length > 0 && !this.fetching) {
         fn.apply(this, [this]);
         return;
@@ -132,30 +148,37 @@
       wrapped = function() {
         return fn.apply(_this, [_this]);
       };
-      return this.bind("reset", function() {
+      this.bind("reset", function() {
         wrapped();
         return _this.unbind("reset", wrapped);
       });
+      if (!(this.fetching || !options.autoFetch)) return this.fetch();
     },
-    ifLoaded: function(fn, scope) {
-      var _this = this;
-      if (scope == null) scope = this;
-      if (this.models.length > 0 && !this.fetching) {
-        fn.apply(scope, [this]);
-        return;
+    ifLoaded: function(fn, options) {
+      var scope,
+        _this = this;
+      if (options == null) {
+        options = {
+          scope: this,
+          autoFetch: true
+        };
       }
+      scope = options.scope || this;
+      if (this.length > 0 && !this.fetching) fn.apply(scope, [this]);
       this.bind("reset", function(collection) {
         return fn.apply(scope, [collection]);
       });
-      if (!this.fetching) return this.fetch();
+      if (!(this.fetching === true || !options.autoFetch || this.length > 0)) {
+        return this.fetch();
+      }
     },
     parse: function(response) {
       var models;
       this.fetching = false;
-      this.trigger("after:response");
+      this.trigger("after:response", response);
       models = this.root != null ? response[this.root] : response;
       if (this.bootstrap_cache_key) {
-        Luca.Collection.cache(this.bootstrap_cache_keys, models);
+        Luca.Collection.cache(this.bootstrap_cache_key, models);
       }
       return models;
     }

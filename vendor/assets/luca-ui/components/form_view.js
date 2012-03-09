@@ -42,7 +42,9 @@
       if (this.inlineForm) return this.$el.addClass('form-inline');
     },
     configureToolbars: function() {
-      if (Luca.enableBootstrap) return this.addBootstrapFormControls();
+      if (Luca.enableBootstrap && this.toolbar === true) {
+        return this.addBootstrapFormControls();
+      }
       if (this.toolbar === true) {
         this.toolbars = [
           {

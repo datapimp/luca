@@ -9,7 +9,7 @@
         this.collection = collectionManager.getOrCreate(this.collection);
       }
       if (!(this.collection && _.isFunction(this.collection.fetch) && _.isFunction(this.collection.reset))) {
-        this.collection = new Luca.components.FilterableCollection(this.collection.initial_set, this.collection);
+        this.collection = new Luca.Collection(this.collection.initial_set, this.collection);
       }
       if ((_ref2 = this.collection) != null ? _ref2.deferrable_trigger : void 0) {
         this.deferrable_trigger = this.collection.deferrable_trigger;
