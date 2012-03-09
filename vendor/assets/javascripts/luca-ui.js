@@ -1635,7 +1635,10 @@
       this.input_name || (this.input_name = this.name || (this.name = this.input_id));
       this.input_value || (this.input_value = this.label || (this.label = this.text));
       this.input_type || (this.input_type = "button");
-      return this.input_class || (this.input_class = this["class"] || "luca-button");
+      this.input_class || (this.input_class = this["class"]);
+      if (Luca.enableBootstrap) {
+        return this.input_class = "btn " + this.input_class;
+      }
     },
     setValue: function() {
       return true;
@@ -2008,7 +2011,9 @@
       if (this.inlineForm) return this.$el.addClass('form-inline');
     },
     configureToolbars: function() {
-      if (Luca.enableBootstrap) return this.addBootstrapFormControls();
+      if (Luca.enableBootstrap && this.toolbar === true) {
+        return this.addBootstrapFormControls();
+      }
       if (this.toolbar === true) {
         this.toolbars = [
           {

@@ -63,7 +63,7 @@ Luca.components.FormView = Luca.core.Container.extend
     @$el.addClass('form-inline') if @inlineForm          
 
   configureToolbars: ()->
-    return @addBootstrapFormControls() if Luca.enableBootstrap
+    return @addBootstrapFormControls() if Luca.enableBootstrap and @toolbar is true
 
     if @toolbar is true 
       @toolbars = [
