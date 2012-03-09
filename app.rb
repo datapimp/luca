@@ -15,7 +15,6 @@ class App < Sinatra::Base
   set :root, File.expand_path('../', __FILE__)
   set :sprockets, Sprockets::Environment.new(root)
   set :precompile, [ /\w+\.(?!js|css).+/, /application.(css|js)$/ ]
-  # set :precompile, [ /.*/ ]
   set :assets_prefix, 'assets'
   set :assets_path, File.join(root, 'public', assets_prefix)
 

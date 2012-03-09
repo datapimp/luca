@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Luca. Container Framework For Backbone Views</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <% for stylesheet in @stylesheets %>
+    <link rel="stylesheet" href="<%= stylesheet %>" />
+    <% end %>
+    <% for script in @javascripts %>
+    <script type="text/javascript" src="<%= script %>"></script>
+    <% end %>
+  </head>
+  <body>
+    <div id="container">
+      <div id="viewport"></div>
+    </div>
+      <script type="text/javascript">
+        jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+        jasmine.getEnv().execute();
+      </script>
+  </body>
+</html>
