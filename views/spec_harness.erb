@@ -3,10 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Luca. Container Framework For Backbone Views</title>
+    <title>Spec Harness - Jasmine specs for <%= params[:application] %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/assets/luca-spec-dependencies.css" />
     <link rel="stylesheet" href="<%= params[:application] %>/manifest.css" />
+
+    <script type="text/javascript" src="/assets/luca-spec-dependencies.js"></script>
     <script type="text/javascript" src="<%= params[:application] %>/manifest.js"></script>
+
+    <% for asset in @assets %>
+    <script type="text/javascript" src="/assets/<%= asset %>"></script>
+    <% end %>
+    
     <script type="text/javascript" src="<%= params[:application] %>/specs_manifest.js"></script>
   </head>
   <body>

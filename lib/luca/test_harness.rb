@@ -49,16 +49,24 @@ module Luca
       @suite ||= load_environment.try(:[],"apps").try(:[], application)
     end
 
+    # which files contain the actual specs
     def self.get_specs application
       get_suite( application ).try(:[],"specs") || []
     end
 
+    # which stylesheets ( if any ) are required to serve the spec harness
     def self.get_stylesheets application
       get_suite( application ).try(:[],"stylesheets") || []
     end
 
+    # which javascripts should we build and serve into a sprockets manifest
     def self.get_javascripts application
       get_suite( application ).try(:[],"scripts") || []
+    end
+
+    # which assets to include directly 
+    def self.get_assets application
+      get_suite( application ).try(:[],"assets") || []
     end
 
     def self.create_tempfile type, contents
@@ -91,6 +99,7 @@ module Luca
     end
 
     get "/specs/:application" do
+      @assets = self.class.get_assets( params[:application] )
       erb :spec_harness
     end
   end
