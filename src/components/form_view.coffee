@@ -23,8 +23,6 @@ Luca.components.FormView = Luca.core.Container.extend
     "click .submit-button" : "submitHandler"
     "click .reset-button" : "resetHandler"
   
-  labelAlign: 'top'
-
   toolbar: true
   
   initialize: (@options={})->
@@ -49,9 +47,9 @@ Luca.components.FormView = Luca.core.Container.extend
       el.html @formControlsTemplate || Luca.templates["components/bootstrap_form_controls"](@)  
 
   applyStyles: ()->
-    return @applyBootstrapStyles() if Luca.enableBootstrap
+    @applyBootstrapStyles() if Luca.enableBootstrap
 
-    @$el.addClass( "label-align-#{ @labelAlign }")
+    @$el.addClass( "label-align-#{ @labelAlign }") if @labelAlign
     @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass    
 
   applyBootstrapStyles: ()->

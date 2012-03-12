@@ -1,5 +1,7 @@
 .form-actions
-  %button.btn.btn-primary
-    %i.icon-ok Save Changes
-  %button.btn
-    %i.icon-remove Cancel
+  %a.btn.btn-primary
+    %i.icon-ok.icon-white
+    Save Changes
+  %a.btn
+    %i.icon-remove 
+    Cancel

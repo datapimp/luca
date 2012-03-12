@@ -48,7 +48,6 @@
         this.tabContainerWrapper().addClass('grid-3');
         this.tabContentWrapper().addClass('grid-9');
         if (this.tabVerticalOffset) {
-          console.log("Yeah dawg");
           return this.tabContainerWrapper().css('padding-top', this.tabVerticalOffset);
         }
       }

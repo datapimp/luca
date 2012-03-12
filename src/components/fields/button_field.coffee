@@ -24,13 +24,16 @@ Luca.fields.ButtonField = Luca.core.Field.extend
 
     Luca.core.Field::initialize.apply @, arguments
 
+    @template = "fields/button_field_link" if @icon_class?.length
+
   afterInitialize: ()->
     @input_id ||= _.uniqueId('button')
     @input_name ||= @name ||= @input_id
     @input_value ||= @label ||= @text
     @input_type ||= "button"
     @input_class ||= @class
-    @input_class = "btn #{ @input_class }" if Luca.enableBootstrap
+    @icon_class ||= ""
+    @icon_class = "icon-#{ @icon_class }" if @icon_class.length and !@icon_class.match(/^icon-/)
 
   setValue: ()-> true
 

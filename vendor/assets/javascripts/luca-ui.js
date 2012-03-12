@@ -212,7 +212,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <button class=\'btn btn-primary\'>\n    <i class=\'icon-ok\'>Save Changes</i>\n  </button>\n  <button class=\'btn\'>\n    <i class=\'icon-remove\'>Cancel</i>\n  </button>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <a class=\'btn btn-primary\'>\n    <i class=\'icon-ok icon-white\'></i>\n    Save Changes\n  </a>\n  <a class=\'btn\'>\n    <i class=\'icon-remove\'></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -244,7 +244,11 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');};
+  Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'btn ', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class=\'btn ', input_class ,'\'>\n  '); if(icon_class.length) { __p.push('\n  <i class=\'', icon_class ,'\'></i>\n  '); } __p.push('\n  ', input_value ,'\n</a>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1348,6 +1352,19 @@
     },
     render: function() {
       return $(this.container).append(this.$el);
+    },
+    afterRender: function() {
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.core.Container.prototype.afterRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (this.css) {
+        console.log("Yes Yes Yall", this.css, this.$el);
+        return _(this.css).each(function(value, property) {
+          return _this.$el.css(property, value);
+        });
+      }
     }
   });
 
@@ -1402,7 +1419,6 @@
         this.tabContainerWrapper().addClass('grid-3');
         this.tabContentWrapper().addClass('grid-9');
         if (this.tabVerticalOffset) {
-          console.log("Yeah dawg");
           return this.tabContainerWrapper().css('padding-top', this.tabVerticalOffset);
         }
       }
@@ -1625,10 +1641,14 @@
       return this.trigger("button:click");
     },
     initialize: function(options) {
+      var _ref;
       this.options = options != null ? options : {};
       _.extend(this.options);
       _.bindAll(this, "click_handler");
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+      Luca.core.Field.prototype.initialize.apply(this, arguments);
+      if ((_ref = this.icon_class) != null ? _ref.length : void 0) {
+        return this.template = "fields/button_field_link";
+      }
     },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('button'));
@@ -1636,8 +1656,9 @@
       this.input_value || (this.input_value = this.label || (this.label = this.text));
       this.input_type || (this.input_type = "button");
       this.input_class || (this.input_class = this["class"]);
-      if (Luca.enableBootstrap) {
-        return this.input_class = "btn " + this.input_class;
+      this.icon_class || (this.icon_class = "");
+      if (this.icon_class.length && !this.icon_class.match(/^icon-/)) {
+        return this.icon_class = "icon-" + this.icon_class;
       }
     },
     setValue: function() {
@@ -1977,7 +1998,6 @@
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
     },
-    labelAlign: 'top',
     toolbar: true,
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -1999,8 +2019,8 @@
       });
     },
     applyStyles: function() {
-      if (Luca.enableBootstrap) return this.applyBootstrapStyles();
-      this.$el.addClass("label-align-" + this.labelAlign);
+      if (Luca.enableBootstrap) this.applyBootstrapStyles();
+      if (this.labelAlign) this.$el.addClass("label-align-" + this.labelAlign);
       if (this.fieldLayoutClass) return this.$el.addClass(this.fieldLayoutClass);
     },
     applyBootstrapStyles: function() {

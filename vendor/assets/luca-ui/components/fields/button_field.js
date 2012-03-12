@@ -15,10 +15,14 @@
       return this.trigger("button:click");
     },
     initialize: function(options) {
+      var _ref;
       this.options = options != null ? options : {};
       _.extend(this.options);
       _.bindAll(this, "click_handler");
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+      Luca.core.Field.prototype.initialize.apply(this, arguments);
+      if ((_ref = this.icon_class) != null ? _ref.length : void 0) {
+        return this.template = "fields/button_field_link";
+      }
     },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('button'));
@@ -26,8 +30,9 @@
       this.input_value || (this.input_value = this.label || (this.label = this.text));
       this.input_type || (this.input_type = "button");
       this.input_class || (this.input_class = this["class"]);
-      if (Luca.enableBootstrap) {
-        return this.input_class = "btn " + this.input_class;
+      this.icon_class || (this.icon_class = "");
+      if (this.icon_class.length && !this.icon_class.match(/^icon-/)) {
+        return this.icon_class = "icon-" + this.icon_class;
       }
     },
     setValue: function() {

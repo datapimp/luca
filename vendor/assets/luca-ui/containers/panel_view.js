@@ -15,6 +15,19 @@
     },
     render: function() {
       return $(this.container).append(this.$el);
+    },
+    afterRender: function() {
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.core.Container.prototype.afterRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (this.css) {
+        console.log("Yes Yes Yall", this.css, this.$el);
+        return _(this.css).each(function(value, property) {
+          return _this.$el.css(property, value);
+        });
+      }
     }
   });
 

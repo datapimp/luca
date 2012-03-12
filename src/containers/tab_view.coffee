@@ -52,7 +52,6 @@ Luca.containers.TabView = Luca.containers.CardView.extend
       @tabContentWrapper().addClass('grid-9')
 
       if @tabVerticalOffset
-        console.log "Yeah dawg"
         @tabContainerWrapper().css('padding-top', @tabVerticalOffset )
 
   highlightSelectedTab: ()->

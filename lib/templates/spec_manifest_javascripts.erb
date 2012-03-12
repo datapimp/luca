@@ -1,0 +1,7 @@
+<% for script in @javascripts %>
+<% if File.directory?(script) %>
+//= require_tree <%= script %>
+<% else %>
+//= require <%= script %>
+<% end %>
+<% end %>

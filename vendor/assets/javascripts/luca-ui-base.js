@@ -212,7 +212,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <button class=\'btn btn-primary\'>\n    <i class=\'icon-ok\'>Save Changes</i>\n  </button>\n  <button class=\'btn\'>\n    <i class=\'icon-remove\'>Cancel</i>\n  </button>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <a class=\'btn btn-primary\'>\n    <i class=\'icon-ok icon-white\'></i>\n    Save Changes\n  </a>\n  <a class=\'btn\'>\n    <i class=\'icon-remove\'></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -244,7 +244,11 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');};
+  Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'btn ', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class=\'btn ', input_class ,'\'>\n  '); if(icon_class.length) { __p.push('\n  <i class=\'', icon_class ,'\'></i>\n  '); } __p.push('\n  ', input_value ,'\n</a>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1348,6 +1352,19 @@
     },
     render: function() {
       return $(this.container).append(this.$el);
+    },
+    afterRender: function() {
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.core.Container.prototype.afterRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (this.css) {
+        console.log("Yes Yes Yall", this.css, this.$el);
+        return _(this.css).each(function(value, property) {
+          return _this.$el.css(property, value);
+        });
+      }
     }
   });
 
@@ -1402,7 +1419,6 @@
         this.tabContainerWrapper().addClass('grid-3');
         this.tabContentWrapper().addClass('grid-9');
         if (this.tabVerticalOffset) {
-          console.log("Yeah dawg");
           return this.tabContainerWrapper().css('padding-top', this.tabVerticalOffset);
         }
       }

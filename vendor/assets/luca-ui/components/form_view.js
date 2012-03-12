@@ -8,7 +8,6 @@
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
     },
-    labelAlign: 'top',
     toolbar: true,
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -30,8 +29,8 @@
       });
     },
     applyStyles: function() {
-      if (Luca.enableBootstrap) return this.applyBootstrapStyles();
-      this.$el.addClass("label-align-" + this.labelAlign);
+      if (Luca.enableBootstrap) this.applyBootstrapStyles();
+      if (this.labelAlign) this.$el.addClass("label-align-" + this.labelAlign);
       if (this.fieldLayoutClass) return this.$el.addClass(this.fieldLayoutClass);
     },
     applyBootstrapStyles: function() {
