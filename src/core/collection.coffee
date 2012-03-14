@@ -219,6 +219,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   # it won't even bother fetching it it will just run
   # as if reset was already triggered
   onceLoaded: (fn, options={autoFetch:true})->
+    console.log "Calling once loaded on", @, @name
     if @length > 0 and not @fetching
       fn.apply @, [@]
       return
@@ -228,6 +229,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     q = @
     @bind "reset", ()->
       console.log "Unbinding once loaded", q.name
+      
       wrapped()
       @unbind "reset", @ 
 

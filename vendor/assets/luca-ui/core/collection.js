@@ -141,6 +141,7 @@
           autoFetch: true
         };
       }
+      console.log("Calling once loaded on", this, this.name);
       if (this.length > 0 && !this.fetching) {
         fn.apply(this, [this]);
         return;

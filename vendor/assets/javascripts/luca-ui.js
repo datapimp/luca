@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.6.0",
+    VERSION: "0.6.1",
     core: {},
     containers: {},
     components: {},
@@ -594,6 +594,7 @@
           autoFetch: true
         };
       }
+      console.log("Calling once loaded on", this, this.name);
       if (this.length > 0 && !this.fetching) {
         fn.apply(this, [this]);
         return;
