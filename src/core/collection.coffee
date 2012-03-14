@@ -172,11 +172,11 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   loadFromBootstrap: ()->
     return unless @bootstrap_cache_key
     @reset @cached_models()
-
+    @trigger "bootstrapped", @
+    
   # an alias for loadFromBootstrap which is a bit more descriptive
   bootstrap: ()-> 
     @loadFromBootstrap()
-    @trigger "bootstrapped", @
 
   # cached_models is a reference to the Luca.Collection.cache object
   # key'd on whatever this collection's bootstrap_cache_key is set to be

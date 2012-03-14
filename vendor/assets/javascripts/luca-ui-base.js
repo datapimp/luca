@@ -562,11 +562,11 @@
     },
     loadFromBootstrap: function() {
       if (!this.bootstrap_cache_key) return;
-      return this.reset(this.cached_models());
+      this.reset(this.cached_models());
+      return this.trigger("bootstrapped", this);
     },
     bootstrap: function() {
-      this.loadFromBootstrap();
-      return this.trigger("bootstrapped", this);
+      return this.loadFromBootstrap();
     },
     cached_models: function() {
       return Luca.Collection.cache(this.bootstrap_cache_key);
