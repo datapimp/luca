@@ -112,7 +112,8 @@
       return this.reset(this.cached_models());
     },
     bootstrap: function() {
-      return this.loadFromBootstrap();
+      this.loadFromBootstrap();
+      return this.trigger("bootstrapped", this);
     },
     cached_models: function() {
       return Luca.Collection.cache(this.bootstrap_cache_key);
@@ -134,14 +135,13 @@
       }
     },
     onceLoaded: function(fn, options) {
-      var q, wrapped,
+      var wrapped,
         _this = this;
       if (options == null) {
         options = {
           autoFetch: true
         };
       }
-      console.log("Calling once loaded on", this, this.name);
       if (this.length > 0 && !this.fetching) {
         fn.apply(this, [this]);
         return;
@@ -149,9 +149,7 @@
       wrapped = function() {
         return fn.apply(_this, [_this]);
       };
-      q = this;
       this.bind("reset", function() {
-        console.log("Unbinding once loaded", q.name);
         wrapped();
         return this.unbind("reset", this);
       });

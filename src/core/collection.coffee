@@ -174,7 +174,9 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @reset @cached_models()
 
   # an alias for loadFromBootstrap which is a bit more descriptive
-  bootstrap: ()-> @loadFromBootstrap()
+  bootstrap: ()-> 
+    @loadFromBootstrap()
+    @trigger "bootstrapped", @
 
   # cached_models is a reference to the Luca.Collection.cache object
   # key'd on whatever this collection's bootstrap_cache_key is set to be
@@ -219,17 +221,13 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   # it won't even bother fetching it it will just run
   # as if reset was already triggered
   onceLoaded: (fn, options={autoFetch:true})->
-    console.log "Calling once loaded on", @, @name
     if @length > 0 and not @fetching
       fn.apply @, [@]
       return
 
     wrapped = ()=> fn.apply @,[@]
 
-    q = @
     @bind "reset", ()->
-      console.log "Unbinding once loaded", q.name
-      
       wrapped()
       @unbind "reset", @ 
 
