@@ -134,7 +134,7 @@
       }
     },
     onceLoaded: function(fn, options) {
-      var wrapped,
+      var q, wrapped,
         _this = this;
       if (options == null) {
         options = {
@@ -148,9 +148,11 @@
       wrapped = function() {
         return fn.apply(_this, [_this]);
       };
+      q = this;
       this.bind("reset", function() {
+        console.log("Unbinding once loaded", q.name);
         wrapped();
-        return _this.unbind("reset", wrapped);
+        return this.unbind("reset", this);
       });
       if (!(this.fetching || !options.autoFetch)) return this.fetch();
     },

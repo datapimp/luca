@@ -223,9 +223,11 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
       fn.apply @, [@]
       return
 
-    wrapped = _.once ()=> fn.apply @,[@]
+    wrapped = ()=> fn.apply @,[@]
 
+    q = @
     @bind "reset", ()->
+      console.log "Unbinding once loaded", q.name
       wrapped()
       @unbind "reset", @ 
 
