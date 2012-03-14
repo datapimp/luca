@@ -21,6 +21,16 @@ describe "The Collection Manager", ->
     collection = @manager.getOrCreate("sample_collection")
     expect( collection.url ).toEqual "/models"
 
+describe "Adding Collections", ->
+  manager = new Luca.CollectionManager
+  first   = new Luca.Collection([],name:"added",prop:"val2")
+  second  = new Luca.Collection([],name:"added",prop:"val1")
+
+  manager.add("added", first)
+  manager.add("added", second)
+
+  expect( manager.get("added") ).toEqual( first )
+
 describe "The Scope Functionality", ->
   scope = "one"
 
@@ -34,7 +44,7 @@ describe "The Scope Functionality", ->
   expect( manager.get("baby").pluck('id') ).toEqual([1,2])
   expect( manager.get("baby") ).toBeDefined()
   expect( manager.get("baby") ).toEqual( babyone )
-  expect( manager.allCollections().length ).toEqual(1) 
+  expect( manager.allCollections().length ).toEqual(1)
 
   scope = "two"
 
@@ -43,9 +53,9 @@ describe "The Scope Functionality", ->
   expect( manager.get("baby").pluck('id') ).toEqual([3,4])
   expect( manager.get("baby") ).toBeDefined()
   expect( manager.get("baby") ).toEqual( babytwo )
-  expect( manager.allCollections().length ).toEqual(1) 
+  expect( manager.allCollections().length ).toEqual(1)
 
-  scope = "one" 
+  scope = "one"
   expect( manager.get("baby").pluck('id') ).toEqual([1,2])
 
 

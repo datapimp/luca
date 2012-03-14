@@ -83,8 +83,6 @@ createFakeServer = ->
   ])
   server
 
-
-
 spyMatchers = "called calledOnce calledTwice calledThrice calledBefore calledAfter calledOn alwaysCalledOn calledWith alwaysCalledWith calledWithExactly alwaysCalledWithExactly".split(" ")
 i = spyMatchers.length
 spyMatcherHash = {}
@@ -106,10 +104,11 @@ while i--
 for j of unusualMatchers
   spyMatcherHash[unusualMatchers[j]] = getMatcherFunction(j)
 
-window.sinonJasmine = 
+window.sinonJasmine =
   getMatchers: ->
     spyMatcherHash
 
+#### Loadup Jasmine
 beforeEach ->
   @server = createFakeServer()
 

@@ -50,7 +50,7 @@ class Luca.CollectionManager
     instances.push(@)
 
   add:(key, collection)->
-    @currentScope()[ key ] = collection
+    @currentScope()[ key ] ||= collection
 
   allCollections: ()->
     _( @currentScope() ).values()

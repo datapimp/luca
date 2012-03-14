@@ -1,7 +1,7 @@
 _.mixin( _.string )
 
 window.Luca =
-  VERSION: "0.6.1"
+  VERSION: "0.6.2"
   core: {}
   containers: {}
   components: {}
@@ -105,6 +105,6 @@ Luca.util.isIE = ()->
     return false
   catch e
     return true
-    
+
 $ do ->
   $('body').addClass('luca-ui-enabled')
