@@ -952,6 +952,7 @@
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
       instances.push(this);
+      if (!_.isUndefined(this.collectionNames)) this.loadCollections();
     }
 
     CollectionManager.prototype.add = function(key, collection) {
@@ -1012,6 +1013,26 @@
       classified = _(key).chain().capitalize().camelize().value();
       guess = (this.collectionNamespace || (window || global))[classified];
       return guess;
+    };
+
+    CollectionManager.prototype.loadCollections = function(names) {
+      var collectionDidLoad,
+        _this = this;
+      collectionDidLoad = function(collection) {
+        collection.unbind("reset");
+        return _this.trigger("collection_manager:collection_loaded", collection);
+      };
+      return _(names).each(function(name) {
+        var collection;
+        collection = _this.getOrCreate(name);
+        collection.bind("reset", collectionDidLoad);
+        return collection.fetch();
+      });
+    };
+
+    CollectionManager.prototype.collectionDidLoad = function(collection, callback) {
+      this.trigger("collection_manager:collection_loaded", collection);
+      return collection.unbind("reset");
     };
 
     CollectionManager.prototype.private = function(key, collectionOptions, initialModels) {
@@ -3492,6 +3513,53 @@
     expect(manager.allCollections().length).toEqual(1);
     scope = "one";
     return expect(manager.get("baby").pluck('id')).toEqual([1, 2]);
+  });
+
+  describe("Loading collections", function() {
+    var App;
+    App = {
+      collections: {}
+    };
+    App.collections.LocalCollection = Luca.Collection.extend({
+      name: "local",
+      url: "/local_models"
+    });
+    App.collections.RemoteCollection = Luca.Collection.extend({
+      name: "remote",
+      url: "/remote_models",
+      fetch: function() {
+        console.log("my remote fetch");
+        return true;
+      }
+    });
+    beforeEach(function() {
+      return this.manager = new Luca.CollectionManager({
+        name: "manager",
+        collectionNamespace: App.collections,
+        collectionNames: ["local", "remote"]
+      });
+    });
+    it("should have local collection created", function() {
+      return console.log(this.manager.get("local"));
+    });
+    it("should have local collection loaded", function() {
+      return expect(true).toEqual(true);
+    });
+    it("should have remote collection created", function() {
+      return expect(true).toEqual(true);
+    });
+    it("should have remote collection loaded", function() {
+      return expect(true).toEqual(true);
+    });
+    it("should broadcast that local collection is loaded", function() {
+      return expect(true).toEqual(true);
+    });
+    it("should broadcast that remote collection is loaded", function() {
+      return expect(true).toEqual(true);
+    });
+    return it("should broadcast that all initial collections are loaded", function() {
+      return expect(true).toEqual(true);
+    });
   });
 
 }).call(this);
