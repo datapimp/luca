@@ -58,4 +58,39 @@ describe "The Scope Functionality", ->
   scope = "one"
   expect( manager.get("baby").pluck('id') ).toEqual([1,2])
 
+describe "Loading collections", ->
+  App = collections: {}
 
+  exampleSpy = sinon.spy()
+  sampleSpy  = sinon.spy()
+
+  App.collections.ExampleCollection = Luca.Collection.extend
+    name: "example"
+    url: "/example_models"
+    fetch: ()->
+      exampleSpy.call()
+      @reset([{id: 1}])
+
+  App.collections.SampleCollection = Luca.Collection.extend
+    name: "sample"
+    url: "/sample_models"
+    fetch: ()->
+      sampleSpy.call()
+      @reset([{id: 4}])
+
+  manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections, collectionNames: ["example", "sample"])
+
+
+  it "should have example collection created", ->
+    collection = manager.get("example")
+    expect(collection.url).toEqual ("/example_models")
+
+  it "should have example collection fetched", ->
+    expect(exampleSpy).toHaveBeenCalled()
+
+  it "should have sample collection created", ->
+    collection = manager.get("sample")
+    expect(collection.url).toEqual ("/sample_models")
+
+  it "should have sample collection loaded", ->
+    expect(sampleSpy).toHaveBeenCalled()

@@ -49,6 +49,9 @@ class Luca.CollectionManager
     # with for their collectionEvents configuration handling
     instances.push(@)
 
+    unless _.isUndefined(@collectionNames)
+      @loadInitialCollections()
+
   add:(key, collection)->
     @currentScope()[ key ] ||= collection
 
@@ -58,11 +61,10 @@ class Luca.CollectionManager
   # create a collection from just a key.
   # if you pass the private option, it will
   # skip registering this collection
-  create: (key, collectionOptions={}, initialModels=[], private=false)->
+  create: (key, collectionOptions={}, initialModels=[])->
     CollectionClass = collectionOptions.base
     CollectionClass ||= @guessCollectionClass(key)
-
-    collectionOptions.registerWith = "" if private or collectionOptions.private
+    collectionOptions.name = "" if collectionOptions.private
 
     collection = new CollectionClass(initialModels,collectionOptions)
 
@@ -114,8 +116,24 @@ class Luca.CollectionManager
   guessCollectionClass: (key)->
     classified = _( key ).chain().capitalize().camelize().value()
     guess = (@collectionNamespace || (window || global) )[ classified ]
-
+    guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
     guess
+
+  # load collection, iterates over each name you have passed for the
+  # your collections in the currentScope, makes sure they exist and
+  # fetched
+  loadInitialCollections: ()->
+    collectionDidLoad = (collection) =>
+      collection.unbind "reset"
+      @trigger "collection_manager:collection_loaded", collection.name
+
+    _(@collectionNames).each (name) =>
+      collection = @getOrCreate(name)
+      collection.bind "reset", ()->
+        collectionDidLoad(collection)
+      collection.fetch()
+
+    @trigger "collection_manager:all_collections_loaded"
 
   # in most cases, the collections we use can be used only once
   # and any reset events should be respected, bound to, etc.  however
