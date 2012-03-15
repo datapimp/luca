@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.6.1",
+    VERSION: "0.6.4",
     core: {},
     containers: {},
     components: {},
@@ -472,9 +472,11 @@
       if (this.manager) {
         this.name || (this.name = this.cached());
         this.name = _.isFunction(this.name) ? this.name() : this.name;
-        this.bind("after:initialize", function() {
-          return _this.register(_this.manager, _this.name, _this);
-        });
+        if (!(this.private || this.anonymous)) {
+          this.bind("after:initialize", function() {
+            return _this.register(_this.manager, _this.name, _this);
+          });
+        }
       }
       if (this.useLocalStorage === true && (window.localStorage != null)) {
         table = this.bootstrap_cache_key || this.name;
@@ -953,7 +955,8 @@
     }
 
     CollectionManager.prototype.add = function(key, collection) {
-      return this.currentScope()[key] = collection;
+      var _base;
+      return (_base = this.currentScope())[key] || (_base[key] = collection);
     };
 
     CollectionManager.prototype.allCollections = function() {

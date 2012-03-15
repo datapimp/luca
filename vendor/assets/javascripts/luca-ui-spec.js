@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.6.1",
+    VERSION: "0.6.4",
     core: {},
     containers: {},
     components: {},
@@ -472,9 +472,11 @@
       if (this.manager) {
         this.name || (this.name = this.cached());
         this.name = _.isFunction(this.name) ? this.name() : this.name;
-        this.bind("after:initialize", function() {
-          return _this.register(_this.manager, _this.name, _this);
-        });
+        if (!(this.private || this.anonymous)) {
+          this.bind("after:initialize", function() {
+            return _this.register(_this.manager, _this.name, _this);
+          });
+        }
       }
       if (this.useLocalStorage === true && (window.localStorage != null)) {
         table = this.bootstrap_cache_key || this.name;
@@ -953,7 +955,8 @@
     }
 
     CollectionManager.prototype.add = function(key, collection) {
-      return this.currentScope()[key] = collection;
+      var _base;
+      return (_base = this.currentScope())[key] || (_base[key] = collection);
     };
 
     CollectionManager.prototype.allCollections = function() {
@@ -2727,7 +2730,7 @@
 }).call(this);
 (function() {
 
-
+  describe("The Card View", function() {});
 
 }).call(this);
 (function() {
@@ -2792,7 +2795,7 @@
       collection.fetch();
       return expect(spy.called).toBeTruthy();
     });
-    return it("should automatically parse a response with a root in it", function() {
+    it("should automatically parse a response with a root in it", function() {
       var collection;
       collection = new Luca.Collection([], {
         root: "root",
@@ -2801,6 +2804,15 @@
       collection.fetch();
       this.server.respond();
       return expect(collection.length).toEqual(2);
+    });
+    return it("should attempt to register with a collection manager", function() {
+      var collection, registerSpy;
+      registerSpy = sinon.spy();
+      collection = new Luca.Collection([], {
+        name: "registered",
+        register: registerSpy
+      });
+      return expect(registerSpy).toHaveBeenCalled();
     });
   });
 
@@ -2949,7 +2961,7 @@
       });
       return expect(window.other_manager.get("other_collection")).toEqual(collection);
     });
-    return it("should find a collection manager by string", function() {
+    it("should find a collection manager by string", function() {
       var collection;
       window.find_mgr_by_string = new Luca.CollectionManager();
       collection = new Luca.Collection([], {
@@ -2957,6 +2969,18 @@
         manager: "find_mgr_by_string"
       });
       return expect(collection.manager).toBeDefined();
+    });
+    return it("should not register with a collection manager if it is marked as private", function() {
+      var manager, private, registerSpy;
+      manager = new Luca.CollectionManager();
+      registerSpy = sinon.spy();
+      private = new Luca.Collection([], {
+        name: "private",
+        manager: manager,
+        private: true,
+        register: registerSpy
+      });
+      return expect(registerSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -3412,6 +3436,22 @@
       collection = this.manager.getOrCreate("sample_collection");
       return expect(collection.url).toEqual("/models");
     });
+  });
+
+  describe("Adding Collections", function() {
+    var first, manager, second;
+    manager = new Luca.CollectionManager;
+    first = new Luca.Collection([], {
+      name: "added",
+      prop: "val2"
+    });
+    second = new Luca.Collection([], {
+      name: "added",
+      prop: "val1"
+    });
+    manager.add("added", first);
+    manager.add("added", second);
+    return expect(manager.get("added")).toEqual(first);
   });
 
   describe("The Scope Functionality", function() {
