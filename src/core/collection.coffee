@@ -54,8 +54,9 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
       @name ||= @cached()
       @name = if _.isFunction( @name ) then @name() else @name
 
-      @bind "after:initialize", ()=>
-        @register( @manager, @name, @)
+      unless @private or @anonymous
+        @bind "after:initialize", ()=>
+          @register( @manager, @name, @)
 
     # by passing useLocalStorage = true to your collection definition
     # you will bypass the RESTful persistence layer and just persist everything
@@ -173,9 +174,9 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     return unless @bootstrap_cache_key
     @reset @cached_models()
     @trigger "bootstrapped", @
-    
+
   # an alias for loadFromBootstrap which is a bit more descriptive
-  bootstrap: ()-> 
+  bootstrap: ()->
     @loadFromBootstrap()
 
   # cached_models is a reference to the Luca.Collection.cache object
@@ -229,7 +230,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
     @bind "reset", ()->
       wrapped()
-      @unbind "reset", @ 
+      @unbind "reset", @
 
     unless @fetching or not options.autoFetch
       @fetch()

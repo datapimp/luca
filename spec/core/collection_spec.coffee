@@ -27,6 +27,15 @@ describe "Luca.Collection", ->
     @server.respond()
     expect( collection.length ).toEqual(2)
 
+  it "should attempt to register with a collection manager", ->
+    registerSpy = sinon.spy()
+
+    collection = new Luca.Collection [],
+      name:"registered"
+      register: registerSpy
+
+    expect( registerSpy ).toHaveBeenCalled()
+
 describe "The ifLoaded helper", ->
   it "should fire the passed callback automatically if there are models", ->
     spy = sinon.spy()
@@ -131,6 +140,20 @@ describe "Registering with the collection manager", ->
       manager: "find_mgr_by_string"
 
     expect( collection.manager ).toBeDefined()
+
+  it "should not register with a collection manager if it is marked as private", ->
+    manager = new Luca.CollectionManager()
+
+    registerSpy = sinon.spy()
+
+    private = new Luca.Collection [],
+      name: "private"
+      manager: manager
+      private: true
+      register: registerSpy
+
+    expect( registerSpy ).not.toHaveBeenCalled()
+
 
 describe "The Model Bootstrap", ->
   window.ModelBootstrap =

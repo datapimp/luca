@@ -1,12 +1,12 @@
 describe "Luca.View", ->
   Custom = Luca.View.extend
     clickHandler: sinon.spy()
-    autoBindEventHandlers: true 
+    autoBindEventHandlers: true
 
   it "should be defined", ->
     expect(Luca.View).toBeDefined()
 
-  it "should extend itself with the passed options", -> 
+  it "should extend itself with the passed options", ->
     view = new Luca.View(name:"custom")
     expect(view.name).toEqual("custom")
 
@@ -23,14 +23,15 @@ describe "Luca.View", ->
     expect( view ).toHaveTriggered("after:initialize")
 
   it "should auto-bind event handlers", ->
+    # pending
 
 
 
 describe "Hooks", ->
   it "should have before and after render hooks", ->
     Custom = Luca.View.extend
-      beforeRender: sinon.spy()  
-      afterRender: sinon.spy() 
+      beforeRender: sinon.spy()
+      afterRender: sinon.spy()
 
     view = new Custom()
 
@@ -59,9 +60,9 @@ describe "The Collection Events API", ->
     name: "sample"
 
   SampleView = Luca.View.extend
-    resetHandler: sinon.spy() 
+    resetHandler: sinon.spy()
     collectionEvents:
-      "sample reset" : "resetHandler"    
+      "sample reset" : "resetHandler"
 
   class SampleManager extends Luca.CollectionManager
     collectionNamespace: App.collections
