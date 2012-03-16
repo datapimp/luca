@@ -952,6 +952,7 @@
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
       instances.push(this);
+      if (!_.isUndefined(this.collectionNames)) this.loadCollections();
     }
 
     CollectionManager.prototype.add = function(key, collection) {
@@ -1012,6 +1013,26 @@
       classified = _(key).chain().capitalize().camelize().value();
       guess = (this.collectionNamespace || (window || global))[classified];
       return guess;
+    };
+
+    CollectionManager.prototype.loadCollections = function(names) {
+      var collectionDidLoad,
+        _this = this;
+      collectionDidLoad = function(collection) {
+        collection.unbind("reset");
+        return _this.trigger("collection_manager:collection_loaded", collection);
+      };
+      return _(names).each(function(name) {
+        var collection;
+        collection = _this.getOrCreate(name);
+        collection.bind("reset", collectionDidLoad);
+        return collection.fetch();
+      });
+    };
+
+    CollectionManager.prototype.collectionDidLoad = function(collection, callback) {
+      this.trigger("collection_manager:collection_loaded", collection);
+      return collection.unbind("reset");
     };
 
     CollectionManager.prototype.private = function(key, collectionOptions, initialModels) {
