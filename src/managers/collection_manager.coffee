@@ -20,7 +20,7 @@
 # If you don't want this, you can either do it the old fashioned way
 # or just use the private option to get an unregistered instance.
 #
-#
+
 #### View Event Binding Interface
 #
 # Luca.Views can specify a @collectionEvents property very similar to
@@ -49,8 +49,10 @@ class Luca.CollectionManager
     # with for their collectionEvents configuration handling
     instances.push(@)
 
-    unless _.isUndefined(@collectionNames)
+    if @collectionNames
+      @createCollectionLoader()
       @loadInitialCollections()
+
 
   add:(key, collection)->
     @currentScope()[ key ] ||= collection
@@ -134,6 +136,33 @@ class Luca.CollectionManager
       collection.fetch()
 
     @trigger "collection_manager:all_collections_loaded"
+
+  # You can provide your own template for the collection loader modal
+  # if you want to. Default implementation uses twitter bootstrap modal and
+  # progress bar (http://twitter.github.com/bootstrap/). You template
+  # should have `progress-modal` id for the modal and contain `progress`, `bar`
+  # and `message` classes
+  collectionLoaderTemplate: Luca.templates["containers/progress_modal"]()
+
+  createCollectionLoader: ()->
+    $('body').append(@collectionLoadeTemplate)
+
+    collectionsLoaded = 0
+    collectionsTotal  = @collectionNames.length
+
+    $('#progress-modal').modal('show')
+
+    @bind "collection_manager:collection_loaded", (name)->
+      progress = parseInt((collectionsLoaded / collectionsTotal) * 100)
+
+      $('#progress-modal .progress .bar').attr("style", "width: #{progress}%;")
+      $('#progress-modal .message').html("Loaded #{ _(name).chain().humanize().titleize().value() }...")
+
+    @bind "collection_manager:all_collections_loaded", ()=>
+      $('#progress-modal .message').html("All done!")
+      _.delay ()->
+        $('#progress-modal').modal('hide')
+      , 400
 
   # in most cases, the collections we use can be used only once
   # and any reset events should be respected, bound to, etc.  however
