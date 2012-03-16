@@ -80,7 +80,6 @@ describe "Loading collections", ->
 
   manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections, collectionNames: ["example", "sample"])
 
-
   it "should have example collection created", ->
     collection = manager.get("example")
     expect(collection.url).toEqual ("/example_models")
