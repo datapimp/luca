@@ -50,7 +50,9 @@ class Luca.CollectionManager
     instances.push(@)
 
     if @collectionNames
-      @loader = new Luca.containers.CollectionLoaderView() if @useProgressLoader
+      if @useProgressLoader
+        @loader = new Luca.components.CollectionLoaderView(manager: @)
+
       @loadInitialCollections()
 
   add:(key, collection)->
