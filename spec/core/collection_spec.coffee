@@ -114,12 +114,13 @@ describe "The onceLoaded helper", ->
     expect( spy.called ).toBeFalsy()
 
 describe "Registering with the collection manager", ->
-  window.mgr = new Luca.CollectionManager()
 
   it "should be able to find a default collection manager", ->
-    expect( Luca.CollectionManager.get() ).toEqual( window.mgr )
+    mgr = new Luca.CollectionManager()
+    expect( Luca.CollectionManager.get() ).toEqual(mgr)
 
   it "should automatically register with the manager if I specify a name", ->
+    mgr = new Luca.CollectionManager()
     collection = new Luca.Collection([],name:"auto_register")
     expect( mgr.get("auto_register") ).toEqual(collection)
 

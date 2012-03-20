@@ -49,13 +49,22 @@ class Luca.CollectionManager
     # with for their collectionEvents configuration handling
     instances.push(@)
 
+    # model to maintain state of the collection manager
+    @state = new Backbone.Model
+
     if @collectionNames
+
+      @state.set({loaded_collections_count: 0, collections_count: @collectionNames.length })
+      @state.bind "change:loaded_collections_count", @collectionCountDidChange
+
       if @useProgressLoader
-        @loader = new Luca.components.CollectionLoaderView(manager: @)
+        @loader = new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
 
       @loadInitialCollections()
 
-  add:(key, collection)->
+    @
+
+  add: (key, collection)->
     @currentScope()[ key ] ||= collection
 
   allCollections: ()->
@@ -128,7 +137,7 @@ class Luca.CollectionManager
   loadInitialCollections: ()->
     collectionDidLoad = (collection) =>
       collection.unbind "reset"
-      @trigger "collection_manager:collection_loaded", collection.name
+      @trigger "collection_loaded", collection.name
 
     _(@collectionNames).each (name) =>
       collection = @getOrCreate(name)
@@ -136,8 +145,14 @@ class Luca.CollectionManager
         collectionDidLoad(collection)
       collection.fetch()
 
-    @trigger "collection_manager:all_collections_loaded"
+  collectionCountDidChange: ()->
+    @trigger "all_collections_loaded" if @totalCollectionsCount() == @loadedCollectionsCount()
 
+  totalCollectionsCount: ()->
+    @state.get("collections_count")
+
+  loadedCollectionsCount: ()->
+    @state.get("loaded_collections_count")
   # in most cases, the collections we use can be used only once
   # and any reset events should be respected, bound to, etc.  however
   # if this ever isn't the case, you can create an instance

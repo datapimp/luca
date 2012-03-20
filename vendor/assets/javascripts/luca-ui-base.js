@@ -216,6 +216,10 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
+  Luca.templates["components/collection_loader_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'modal\' id=\'progress-model\' stype=\'display: none;\'>\n  <div class=\'progress progress-info progress-striped active\'>\n    <div class=\'bar\' style=\'width: 0%;\'></div>\n  </div>\n  <div class=\'message\'>\n    Initializing...\n  </div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
   Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-form-view-wrapper\' id=\'', cid ,'-wrapper\'>\n  <div class=\'form-view-header\'>\n    <div class=\'toolbar-container top\' id=\'', cid ,'-top-toolbar-container\'></div>\n  </div>\n  '); if(legend){ __p.push('\n  <fieldset>\n    <legend>\n      ', legend ,'\n    </legend>\n    <div class=\'form-view-flash-container\'></div>\n    <div class=\'form-view-body\'></div>\n  </fieldset>\n  '); } else { __p.push('\n  <ul class=\'form-view-flash-container\'></ul>\n  <div class=\'form-view-body\'></div>\n  '); } __p.push('\n  <div class=\'form-view-footer\'>\n    <div class=\'toolbar-container bottom\' id=\'', cid ,'-bottom-toolbar-container\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
@@ -952,7 +956,22 @@
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
       instances.push(this);
-      if (!_.isUndefined(this.collectionNames)) this.loadCollections();
+      this.state = new Backbone.Model;
+      if (this.collectionNames) {
+        this.state.set({
+          loaded_collections_count: 0,
+          collections_count: this.collectionNames.length
+        });
+        this.state.bind("change:loaded_collections_count", this.collectionCountDidChange);
+        if (this.useProgressLoader) {
+          this.loader = new Luca.components.CollectionLoaderView({
+            manager: this,
+            name: "collection_loader_view"
+          });
+        }
+        this.loadInitialCollections();
+      }
+      this;
     }
 
     CollectionManager.prototype.add = function(key, collection) {
@@ -964,16 +983,13 @@
       return _(this.currentScope()).values();
     };
 
-    CollectionManager.prototype.create = function(key, collectionOptions, initialModels, private) {
+    CollectionManager.prototype.create = function(key, collectionOptions, initialModels) {
       var CollectionClass, collection;
       if (collectionOptions == null) collectionOptions = {};
       if (initialModels == null) initialModels = [];
-      if (private == null) private = false;
       CollectionClass = collectionOptions.base;
       CollectionClass || (CollectionClass = this.guessCollectionClass(key));
-      if (private || collectionOptions.private) {
-        collectionOptions.registerWith = "";
-      }
+      if (collectionOptions.private) collectionOptions.name = "";
       collection = new CollectionClass(initialModels, collectionOptions);
       this.add(key, collection);
       return collection;
@@ -1012,27 +1028,39 @@
       var classified, guess;
       classified = _(key).chain().capitalize().camelize().value();
       guess = (this.collectionNamespace || (window || global))[classified];
+      guess || (guess = (this.collectionNamespace || (window || global))["" + classified + "Collection"]);
       return guess;
     };
 
-    CollectionManager.prototype.loadCollections = function(names) {
+    CollectionManager.prototype.loadInitialCollections = function() {
       var collectionDidLoad,
         _this = this;
       collectionDidLoad = function(collection) {
         collection.unbind("reset");
-        return _this.trigger("collection_manager:collection_loaded", collection);
+        return _this.trigger("collection_loaded", collection.name);
       };
-      return _(names).each(function(name) {
+      return _(this.collectionNames).each(function(name) {
         var collection;
         collection = _this.getOrCreate(name);
-        collection.bind("reset", collectionDidLoad);
+        collection.bind("reset", function() {
+          return collectionDidLoad(collection);
+        });
         return collection.fetch();
       });
     };
 
-    CollectionManager.prototype.collectionDidLoad = function(collection, callback) {
-      this.trigger("collection_manager:collection_loaded", collection);
-      return collection.unbind("reset");
+    CollectionManager.prototype.collectionCountDidChange = function() {
+      if (this.totalCollectionsCount() === this.loadedCollectionsCount()) {
+        return this.trigger("all_collections_loaded");
+      }
+    };
+
+    CollectionManager.prototype.totalCollectionsCount = function() {
+      return this.state.get("collections_count");
+    };
+
+    CollectionManager.prototype.loadedCollectionsCount = function() {
+      return this.state.get("loaded_collections_count");
     };
 
     CollectionManager.prototype.private = function(key, collectionOptions, initialModels) {

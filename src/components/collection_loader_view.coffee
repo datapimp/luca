@@ -14,23 +14,21 @@ Luca.components.CollectionLoaderView = Luca.components.Template.extend
     @container ||= $('body')
     @manager   ||= Luca.CollectionManager.get()
 
-    @collectionsLoaded = 0
-    @collectionsTotal  = @manager.collectionNames.length
-
     @setupBindings()
 
   modalContainer: ()->
     $("#progress-modal", @el)
 
   setupBindings: ()->
-    @manager.bind "collection_manager:collection_loaded", (name)=>
-      @collectionsLoaded += 1
-      progress = parseInt((@collectionsLoaded / @collectionsTotal) * 100)
+    @manager.bind "collection_loaded", (name)=>
+      loaded   = @manager.loadedCollectionsCount()
+      total    = @manager.totalCollectionsCount()
+      progress = parseInt((loaded / total) * 100)
 
       @modalContainer().find('.progress .bar').attr("style", "width: #{progress}%;")
       @modalContainer().find('.message').html("Loaded #{ _(name).chain().humanize().titleize().value() }...")
 
-    @manager.bind "collection_manager:all_collections_loaded", ()=>
+    @manager.bind "all_collections_loaded", ()=>
       @modalContainer().find('.message').html("All done!")
       _.delay ()=>
         @modalContainer().modal('hide')
