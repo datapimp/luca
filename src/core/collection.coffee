@@ -136,7 +136,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified
   applyParams: (params)->
-    @base_params ||= Luca.Collection.baseParams()
+    @base_params ||= _( Luca.Collection.baseParams() ).clone()
     _.extend @base_params, params
 
   # Collection Manager Registry

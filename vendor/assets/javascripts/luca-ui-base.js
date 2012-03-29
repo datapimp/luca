@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.6.6",
+    VERSION: "0.6.7",
     core: {},
     containers: {},
     components: {},
@@ -541,7 +541,7 @@
       }));
     },
     applyParams: function(params) {
-      this.base_params || (this.base_params = Luca.Collection.baseParams());
+      this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
       return _.extend(this.base_params, params);
     },
     register: function(collectionManager, key, collection) {
