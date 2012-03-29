@@ -16,7 +16,6 @@ To run the sandbox:
 
 visit http://localhost:9292
 
-
 Using it with Rails
 -------------------
 ```ruby
