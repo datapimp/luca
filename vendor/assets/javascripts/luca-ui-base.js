@@ -408,7 +408,8 @@
         });
       }
       this.trigger("after:initialize", this);
-      return this.registerCollectionEvents();
+      this.registerCollectionEvents();
+      return this.delegateEvents();
     },
     $container: function() {
       return $(this.container);

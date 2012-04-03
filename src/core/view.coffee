@@ -115,6 +115,8 @@ _.extend Luca.View.prototype,
 
     @registerCollectionEvents()
 
+    @delegateEvents()
+
   $container: ()-> $(@container)
   #### Hooks or Auto Event Binding
   #

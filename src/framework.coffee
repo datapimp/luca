@@ -21,6 +21,15 @@ window.Luca =
 # problem on our own!
 Luca.enableBootstrap = true
 
+Luca.isBackboneModel = (obj)->
+  _.isFunction(obj?.set) and _.isFunction(obj?.get) and _.isObject(obj?.attributes)
+
+Luca.isBackboneView = (obj)->
+  _.isFunction(obj?.render) and !_.isUndefined(obj?.el)
+
+Luca.isBackboneCollection = (obj)->
+  _.isFunction(obj?.fetch) and _.isFunction(obj?.reset)
+
 # adds an additional namespace to look for luca ui
 # components.  useful for when you define a bunch of
 # components in your own application's namespace

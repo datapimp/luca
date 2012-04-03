@@ -408,7 +408,8 @@
         });
       }
       this.trigger("after:initialize", this);
-      return this.registerCollectionEvents();
+      this.registerCollectionEvents();
+      return this.delegateEvents();
     },
     $container: function() {
       return $(this.container);
@@ -2792,28 +2793,52 @@
 (function() {
 
   describe('The Form View', function() {
-    return describe('Generating a form from a model', function() {
-      return beforeEach(function() {
-        var Model;
-        Model = Backbone.Model.extend({
-          schema: {
-            field0: "hidden",
-            field1: "text",
-            field3: "boolean",
-            field4: "blob",
-            field5: {
-              collection: "sample"
-            }
+    beforeEach(function() {
+      var FormView, Model;
+      FormView = new Luca.components.FormView({
+        components: [
+          {
+            ctype: 'hidden_field',
+            name: 'field0'
+          }, {
+            ctype: "text_field",
+            label: "Field One",
+            name: "field1"
+          }, {
+            ctype: "checkbox_field",
+            label: "Field Three",
+            name: "field3"
+          }, {
+            name: "field4",
+            label: "Field Four",
+            ctype: "text_area_field"
           }
-        });
-        return this.model = new Model({
-          field0: 1,
-          field1: "jonathan",
-          field3: true,
-          field4: "what up player?"
-        });
+        ]
+      });
+      Model = Backbone.Model.extend({
+        schema: {
+          field0: "hidden",
+          field2: "text",
+          field1: "text",
+          field3: "boolean",
+          field4: "blob",
+          field5: {
+            collection: "sample"
+          }
+        }
+      });
+      this.form = new FormView();
+      return this.model = new Model({
+        field0: 1,
+        field1: "jonathan",
+        field3: true,
+        field4: "what up player?"
       });
     });
+    it("should create a form", function() {
+      return expect(this.form).toBeDefined();
+    });
+    return it("should ");
   });
 
 }).call(this);

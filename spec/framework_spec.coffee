@@ -30,19 +30,44 @@ describe "The Luca Framework", ->
     expect(value).toEqual("haha")
 
   it "should create an instance of a class by ctype", ->
-    object = 
+    object =
       ctype: "template"
-      template: "components/form_view"    
+      template: "components/form_view"
 
     component = Luca.util.lazyComponent(object)
     expect( _.isFunction(component.render) ).toBeTruthy()
 
   it "should find a created view in the cache", ->
     template = new Luca.components.Template
-      template: "components/form_view"    
+      template: "components/form_view"
       name: 'test_template'
 
     expect(Luca.cache("test_template")).toBeDefined()
 
+  it "should detect if an object is probably a backbone view", ->
+    obj =
+      render: sinon.spy()
+      el: true
 
-describe 
+    expect( Luca.isBackboneView(obj) ).toEqual true
+    expect( Luca.isBackboneView({}) ).toEqual false
+
+  it "should detect if an object is probably a backbone collection", ->
+    obj =
+      fetch: sinon.spy()
+      reset: sinon.spy()
+
+    expect( Luca.isBackboneCollection(obj) ).toEqual true
+    expect( Luca.isBackboneCollection({}) ).toEqual false
+
+  it "should detect if an object is probably a backbone model", ->
+    obj =
+      set: sinon.spy()
+      get: sinon.spy()
+      attributes: {}
+
+    expect( Luca.isBackboneModel(obj) ).toEqual true
+    expect( Luca.isBackboneModel({}) ).toEqual false
+
+
+describe
