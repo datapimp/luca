@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.0",
+    VERSION: "0.7.2",
     core: {},
     containers: {},
     components: {},
@@ -21,6 +21,18 @@
   };
 
   Luca.enableBootstrap = true;
+
+  Luca.isBackboneModel = function(obj) {
+    return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
+  };
+
+  Luca.isBackboneView = function(obj) {
+    return _.isFunction(obj != null ? obj.render : void 0) && !_.isUndefined(obj != null ? obj.el : void 0);
+  };
+
+  Luca.isBackboneCollection = function(obj) {
+    return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
+  };
 
   Luca.registry.addNamespace = function(identifier) {
     Luca.registry.namespaces.push(identifier);
@@ -2240,8 +2252,7 @@
       return fields;
     },
     loadModel: function(current_model) {
-      var event, fields, form,
-        _this = this;
+      var event, fields, form;
       this.current_model = current_model;
       form = this;
       fields = this.getFields();
@@ -2250,14 +2261,7 @@
         event = "before:load:" + (this.current_model.isNew() ? "new" : "existing");
         this.trigger(event, this, this.current_model);
       }
-      _(fields).each(function(field) {
-        var field_name, value;
-        field_name = field.input_name || field.name;
-        value = _.isFunction(_this.current_model[field_name]) ? _this.current_model[field_name].apply(_this, form) : _this.current_model.get(field_name);
-        if (field.readOnly !== true) {
-          return field != null ? field.setValue(value) : void 0;
-        }
-      });
+      this.setValues(this.current_model);
       this.trigger("after:load", this, this.current_model);
       if (this.current_model) {
         return this.trigger("after:load:" + (this.current_model.isNew() ? "new" : "existing"), this, this.current_model);
@@ -2277,31 +2281,52 @@
         }
       });
     },
-    getValues: function(reject_blank, skip_buttons) {
-      if (reject_blank == null) reject_blank = false;
-      if (skip_buttons == null) skip_buttons = true;
+    setValues: function(source, options) {
+      var fields,
+        _this = this;
+      if (options == null) options = {};
+      source || (source = this.currentModel());
+      fields = this.getFields();
+      _(fields).each(function(field) {
+        var field_name, value;
+        field_name = field.input_name || field.name;
+        if (value = source[field_name]) {
+          if (_.isFunction(value)) value = value.apply(_this);
+        }
+        if (!value && Luca.isBackboneModel(source)) value = source.get(field_name);
+        if (field.readOnly !== true) {
+          return field != null ? field.setValue(value) : void 0;
+        }
+      });
+      if ((options.silent != null) !== true) return this.syncFormWithModel();
+    },
+    getValues: function(options) {
+      options || (options = {});
+      if (options.reject_blank == null) options.reject_blank = true;
+      if (options.skip_buttons == null) options.skip_buttons = true;
       return _(this.getFields()).inject(function(memo, field) {
-        var skip, value;
+        var key, skip, value;
         value = field.getValue();
+        key = field.input_name || field.name;
         skip = false;
-        if (skip_buttons && field.ctype === "button_field") skip = true;
-        if (reject_blank && _.isBlank(value)) skip = true;
+        if (options.skip_buttons && field.ctype === "button_field") skip = true;
+        if (options.reject_blank === true && _.isBlank(value)) skip = true;
         if (field.input_name === "id" && _.isBlank(value)) skip = true;
-        if (!skip) memo[field.input_name || name] = value;
+        if (skip !== true) memo[key] = value;
         return memo;
       }, {});
     },
     submit_success_handler: function(model, response, xhr) {
       this.trigger("after:submit", this, model, response);
-      if (response && response.success) {
+      if (response && (response != null ? response.success : void 0) === true) {
         return this.trigger("after:submit:success", this, model, response);
       } else {
         return this.trigger("after:submit:error", this, model, response);
       }
     },
-    submit_fatal_error_handler: function() {
-      this.trigger.apply(["after:submit", this].concat(arguments));
-      return this.trigger.apply(["after:submit:fatal_error", this].concat(arguments));
+    submit_fatal_error_handler: function(model, response, xhr) {
+      this.trigger("after:submit", this, model, response);
+      return this.trigger("after:submit:fatal_error", this, model, response);
     },
     submit: function(save, saveOptions) {
       if (save == null) save = true;
@@ -2309,12 +2334,20 @@
       _.bindAll(this, "submit_success_handler", "submit_fatal_error_handler");
       saveOptions.success || (saveOptions.success = this.submit_success_handler);
       saveOptions.error || (saveOptions.error = this.submit_fatal_error_handler);
-      this.current_model.set(this.getValues());
+      this.syncFormWithModel();
       if (!save) return;
       return this.current_model.save(this.current_model.toJSON(), saveOptions);
     },
-    currentModel: function() {
+    currentModel: function(options) {
+      if (options == null) options = {};
+      if (options === true || (options != null ? options.refresh : void 0) === true) {
+        this.syncFormWithModel();
+      }
       return this.current_model;
+    },
+    syncFormWithModel: function() {
+      var _ref;
+      return (_ref = this.current_model) != null ? _ref.set(this.getValues()) : void 0;
     },
     setLegend: function(legend) {
       this.legend = legend;
@@ -2795,11 +2828,15 @@
   describe('The Form View', function() {
     beforeEach(function() {
       var FormView, Model;
-      FormView = new Luca.components.FormView({
+      FormView = Luca.components.FormView.extend({
         components: [
           {
             ctype: 'hidden_field',
-            name: 'field0'
+            name: 'id'
+          }, {
+            ctype: "text_field",
+            label: "Field Two",
+            name: "field2"
           }, {
             ctype: "text_field",
             label: "Field One",
@@ -2812,6 +2849,10 @@
             name: "field4",
             label: "Field Four",
             ctype: "text_area_field"
+          }, {
+            name: "field5",
+            ctype: "button_field",
+            label: "Click Me"
           }
         ]
       });
@@ -2838,7 +2879,211 @@
     it("should create a form", function() {
       return expect(this.form).toBeDefined();
     });
-    return it("should ");
+    it("should load the model", function() {
+      this.form.loadModel(this.model);
+      return expect(this.form.currentModel()).toEqual(this.model);
+    });
+    it("should set the field values from the model when loaded", function() {
+      var values;
+      this.form.render();
+      this.form.loadModel(this.model);
+      values = this.form.getValues();
+      return expect(values.field1).toEqual("jonathan");
+    });
+    it("should render the components", function() {
+      this.form.render();
+      expect(this.form.$el.html()).toContain("Field Four");
+      expect(this.form.$el.html()).toContain("Field One");
+      return expect(this.form.$el.html()).toContain("Click Me");
+    });
+    it("should allow me to set the values of the form fields with a hash", function() {
+      var values;
+      this.form.render();
+      this.form.setValues({
+        field1: "yes",
+        field2: "no"
+      });
+      values = this.form.getValues();
+      expect(values.field1).toEqual("yes");
+      return expect(values.field2).toEqual("no");
+    });
+    it("should sync the model with the form field values", function() {
+      this.form.render();
+      this.form.loadModel(this.model);
+      this.form.setValues({
+        field1: "yes"
+      });
+      return expect(this.form.getValues().field1).toEqual("yes");
+    });
+    describe("Loading A New Model", function() {
+      beforeEach(function() {
+        this.form.spiedEvents = {};
+        this.form.render();
+        return this.form.loadModel(this.model);
+      });
+      it("should have triggered before load", function() {
+        return expect(this.form).toHaveTriggered("before:load");
+      });
+      it("should have triggered after load", function() {
+        return expect(this.form).toHaveTriggered("after:load");
+      });
+      it("should have triggered before:load:new", function() {
+        return expect(this.form).toHaveTriggered("before:load:new");
+      });
+      return it("should have triggered after:load:new", function() {
+        return expect(this.form).toHaveTriggered("after:load:new");
+      });
+    });
+    describe("Loading An Existing Model", function() {
+      beforeEach(function() {
+        this.form.spiedEvents = {};
+        this.form.render();
+        this.model.set({
+          id: "one"
+        });
+        return this.form.loadModel(this.model);
+      });
+      it("should have triggered before:load:existing", function() {
+        return expect(this.form).toHaveTriggered("before:load:existing");
+      });
+      it("should have triggered after:load:new", function() {
+        return expect(this.form).toHaveTriggered("after:load:existing");
+      });
+      return it("should apply the form values in the currentModel call if specified", function() {
+        this.form.getField("field1").setValue("sup baby?");
+        expect(this.form.currentModel().get("field1")).not.toEqual("sup baby?");
+        this.form.getField("field1").setValue("sup baby boo?");
+        expect(this.form.currentModel({
+          refresh: false
+        }).get("field1")).not.toEqual("sup baby boo?");
+        return expect(this.form.currentModel({
+          refresh: true
+        }).get("field1")).toEqual("sup baby boo?");
+      });
+    });
+    describe("The Fields Accessors", function() {
+      beforeEach(function() {
+        return this.form.render();
+      });
+      it("should provide access to fields", function() {
+        return expect(this.form.getFields().length).toEqual(6);
+      });
+      return it("should allow me to access a field by its name", function() {
+        return expect(this.form.getField("field1")).toBeDefined();
+      });
+    });
+    describe("The Set Values Function", function() {
+      beforeEach(function() {
+        this.form.render();
+        return this.form.loadModel(this.model);
+      });
+      it("should set the values on the field", function() {
+        this.form.setValues({
+          field1: "andyadontstop"
+        });
+        return expect(this.form.getField("field1").getValue()).toEqual("andyadontstop");
+      });
+      it("should set the values on the model", function() {
+        this.form.setValues({
+          field1: "krs-one"
+        });
+        expect(this.form.getField("field1").getValue()).toEqual("krs-one");
+        return expect(this.model.get("field1")).toEqual("krs-one");
+      });
+      return it("should skip syncing with the model if passed silent", function() {
+        this.form.setValues({
+          field1: "yesyesyall"
+        }, {
+          silent: true
+        });
+        expect(this.form.getField("field1").getValue()).toEqual("yesyesyall");
+        return expect(this.model.get("field1")).not.toEqual("yesyesyall");
+      });
+    });
+    describe("The Get Values Function", function() {
+      beforeEach(function() {
+        this.model.set({
+          field1: "one",
+          field2: "two",
+          field3: void 0,
+          field4: ""
+        });
+        this.form.render();
+        this.form.loadModel(this.model);
+        return this.values = this.form.getValues();
+      });
+      it("should skip the button fields by default", function() {
+        return expect(_(this.values).keys()).not.toContain("field5");
+      });
+      it("should include the button fields if asked", function() {
+        var values;
+        values = this.form.getValues({
+          skip_buttons: false
+        });
+        return expect(_(values).keys()).toContain("field5");
+      });
+      it("should skip blank fields by default", function() {
+        var values;
+        values = this.form.getValues();
+        return expect(_(values).keys()).not.toContain("field4");
+      });
+      it("should include blank fields if asked", function() {
+        var values;
+        values = this.form.getValues({
+          reject_blank: false
+        });
+        return expect(_(values).keys()).toContain("field4");
+      });
+      return it("should skip blank id fields", function() {
+        return expect(_(this.values).keys()).not.toContain("id");
+      });
+    });
+    return describe("Events", function() {
+      beforeEach(function() {
+        this.form.render();
+        return this.form.loadModel(this.model);
+      });
+      describe("Submit Handlers", function() {
+        beforeEach(function() {
+          return this.form.spiedEvents = {};
+        });
+        it("should trigger after submit events", function() {
+          this.form.submit_success_handler(this.model, {
+            success: true
+          });
+          expect(this.form).toHaveTriggered("after:submit");
+          return expect(this.form).toHaveTriggered("after:submit:success");
+        });
+        it("should trigger after submit error events", function() {
+          this.form.submit_success_handler(this.model, {
+            success: false
+          });
+          expect(this.form).toHaveTriggered("after:submit");
+          return expect(this.form).toHaveTriggered("after:submit:error");
+        });
+        return it("should trigger fatal error events", function() {
+          this.form.submit_fatal_error_handler();
+          expect(this.form).toHaveTriggered("after:submit");
+          return expect(this.form).toHaveTriggered("after:submit:fatal_error");
+        });
+      });
+      return describe("Resetting the Form", function() {
+        it("should trigger before and after reset", function() {
+          this.form.resetHandler({
+            currentTarget: 1
+          });
+          expect(this.form).toHaveTriggered("before:reset");
+          return expect(this.form).toHaveTriggered("after:reset");
+        });
+        return it("should call reset", function() {
+          this.form.reset = sinon.spy();
+          this.form.resetHandler({
+            currentTarget: 1
+          });
+          return expect(this.form.reset).toHaveBeenCalled();
+        });
+      });
+    });
   });
 
 }).call(this);
@@ -3651,13 +3896,41 @@
       component = Luca.util.lazyComponent(object);
       return expect(_.isFunction(component.render)).toBeTruthy();
     });
-    return it("should find a created view in the cache", function() {
+    it("should find a created view in the cache", function() {
       var template;
       template = new Luca.components.Template({
         template: "components/form_view",
         name: 'test_template'
       });
       return expect(Luca.cache("test_template")).toBeDefined();
+    });
+    it("should detect if an object is probably a backbone view", function() {
+      var obj;
+      obj = {
+        render: sinon.spy(),
+        el: true
+      };
+      expect(Luca.isBackboneView(obj)).toEqual(true);
+      return expect(Luca.isBackboneView({})).toEqual(false);
+    });
+    it("should detect if an object is probably a backbone collection", function() {
+      var obj;
+      obj = {
+        fetch: sinon.spy(),
+        reset: sinon.spy()
+      };
+      expect(Luca.isBackboneCollection(obj)).toEqual(true);
+      return expect(Luca.isBackboneCollection({})).toEqual(false);
+    });
+    return it("should detect if an object is probably a backbone model", function() {
+      var obj;
+      obj = {
+        set: sinon.spy(),
+        get: sinon.spy(),
+        attributes: {}
+      };
+      expect(Luca.isBackboneModel(obj)).toEqual(true);
+      return expect(Luca.isBackboneModel({})).toEqual(false);
     });
   });
 

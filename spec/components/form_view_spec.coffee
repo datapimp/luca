@@ -73,6 +73,73 @@ describe 'The Form View', ->
     @form.setValues(field1:"yes")
     expect( @form.getValues().field1 ).toEqual "yes"
 
+  describe "Loading A New Model", ->
+    beforeEach ->
+      @form.spiedEvents = {}
+      @form.render()
+      @form.loadModel(@model)
+
+    it "should have triggered before load", ->
+      expect( @form ).toHaveTriggered("before:load")
+
+    it "should have triggered after load", ->
+      expect( @form ).toHaveTriggered("after:load")
+
+    it "should have triggered before:load:new", ->
+      expect( @form ).toHaveTriggered("before:load:new")
+
+    it "should have triggered after:load:new", ->
+      expect( @form ).toHaveTriggered("after:load:new")
+
+  describe "Loading An Existing Model", ->
+    beforeEach ->
+      @form.spiedEvents = {}
+      @form.render()
+      @model.set(id:"one")
+      @form.loadModel(@model)
+
+    it "should have triggered before:load:existing", ->
+      expect( @form ).toHaveTriggered("before:load:existing")
+
+    it "should have triggered after:load:new", ->
+      expect( @form ).toHaveTriggered("after:load:existing")
+
+    it "should apply the form values in the currentModel call if specified", ->
+      @form.getField("field1").setValue("sup baby?")
+      expect( @form.currentModel().get("field1") ).not.toEqual("sup baby?")
+      @form.getField("field1").setValue("sup baby boo?")
+      expect( @form.currentModel(refresh:false).get("field1") ).not.toEqual("sup baby boo?")
+      expect( @form.currentModel(refresh:true).get("field1") ).toEqual("sup baby boo?")
+
+  describe "The Fields Accessors", ->
+    beforeEach ->
+      @form.render()
+
+    it "should provide access to fields", ->
+      expect( @form.getFields().length ).toEqual 6
+
+    it "should allow me to access a field by its name",->
+      expect( @form.getField("field1") ).toBeDefined()
+
+  describe "The Set Values Function", ->
+    beforeEach ->
+      @form.render()
+      @form.loadModel(@model)
+
+    it "should set the values on the field", ->
+      @form.setValues({field1:"andyadontstop"})
+      expect( @form.getField("field1").getValue() ).toEqual "andyadontstop"
+
+    it "should set the values on the model", ->
+      @form.setValues(field1:"krs-one")
+      expect( @form.getField("field1").getValue() ).toEqual "krs-one"
+      expect( @model.get("field1") ).toEqual "krs-one"
+
+    it "should skip syncing with the model if passed silent", ->
+      @form.setValues({field1:"yesyesyall"},silent:true)
+      expect( @form.getField("field1").getValue() ).toEqual "yesyesyall"
+      expect( @model.get("field1") ).not.toEqual "yesyesyall"
+
   describe "The Get Values Function", ->
     beforeEach ->
       @model.set(field1:"one",field2:"two",field3:undefined,field4:"")
@@ -88,10 +155,8 @@ describe 'The Form View', ->
       expect( _(values).keys() ).toContain("field5")
 
     it "should skip blank fields by default", ->
-      window.debugMode = true
       values = @form.getValues()
       expect( _(values).keys() ).not.toContain("field4")
-      window.debugMode = false
 
     it "should include blank fields if asked", ->
       values = @form.getValues(reject_blank:false)
@@ -100,4 +165,37 @@ describe 'The Form View', ->
     it "should skip blank id fields", ->
       expect( _(@values).keys() ).not.toContain("id")
 
+  describe "Events", ->
+    beforeEach ->
+      @form.render()
+      @form.loadModel(@model)
 
+    describe "Submit Handlers", ->
+      beforeEach ->
+        @form.spiedEvents = {}
+
+      it "should trigger after submit events", ->
+        @form.submit_success_handler(@model,success:true)
+        expect( @form ).toHaveTriggered("after:submit")
+        expect( @form ).toHaveTriggered("after:submit:success")
+
+      it "should trigger after submit error events", ->
+        @form.submit_success_handler(@model,success:false)
+        expect( @form ).toHaveTriggered("after:submit")
+        expect( @form ).toHaveTriggered("after:submit:error")
+
+      it "should trigger fatal error events", ->
+        @form.submit_fatal_error_handler()
+        expect( @form ).toHaveTriggered("after:submit")
+        expect( @form ).toHaveTriggered("after:submit:fatal_error")
+
+    describe "Resetting the Form", ->
+      it "should trigger before and after reset", ->
+        @form.resetHandler(currentTarget:1)
+        expect( @form ).toHaveTriggered "before:reset"
+        expect( @form ).toHaveTriggered "after:reset"
+
+      it "should call reset", ->
+        @form.reset = sinon.spy()
+        @form.resetHandler(currentTarget:1)
+        expect( @form.reset ).toHaveBeenCalled()

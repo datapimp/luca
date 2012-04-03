@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.0",
+    VERSION: "0.7.2",
     core: {},
     containers: {},
     components: {},
@@ -21,6 +21,18 @@
   };
 
   Luca.enableBootstrap = true;
+
+  Luca.isBackboneModel = function(obj) {
+    return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
+  };
+
+  Luca.isBackboneView = function(obj) {
+    return _.isFunction(obj != null ? obj.render : void 0) && !_.isUndefined(obj != null ? obj.el : void 0);
+  };
+
+  Luca.isBackboneCollection = function(obj) {
+    return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
+  };
 
   Luca.registry.addNamespace = function(identifier) {
     Luca.registry.namespaces.push(identifier);

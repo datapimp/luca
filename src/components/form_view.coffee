@@ -88,7 +88,6 @@ Luca.components.FormView = Luca.core.Container.extend
     Luca.core.Container::beforeLayout?.apply @, arguments
     @$el.html Luca.templates["components/form_view"]( @ )
 
-
   prepareComponents: ()->
     container = $('.form-view-body', @el)
     _( @components ).each (component)->
@@ -156,7 +155,9 @@ Luca.components.FormView = Luca.core.Container.extend
       catch e
         console.log "Error Clearing", @, field
 
-  setValues: (source)->
+  # set the values on the form
+  # without syncing
+  setValues: (source, options={})->
     source ||= @currentModel()
     fields = @getFields()
 
@@ -171,6 +172,8 @@ Luca.components.FormView = Luca.core.Container.extend
         value = source.get(field_name)
 
       field?.setValue( value ) unless field.readOnly is true
+
+    @syncFormWithModel() unless options.silent? is true
 
   getValues: (options)->
     options ||= {}
@@ -187,9 +190,6 @@ Luca.components.FormView = Luca.core.Container.extend
       skip = true if options.reject_blank is true and _.isBlank(value)
       skip = true if field.input_name is "id" and _.isBlank(value)
 
-      if window.debugMode is true and key is "field4"
-        console.log "Skip?", skip, "Reject Blank", options.reject_blank, "is blank?", _.isBlank(value), "value", value
-
       memo[ key ] = value unless skip is true
 
       memo
@@ -198,14 +198,14 @@ Luca.components.FormView = Luca.core.Container.extend
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
 
-    if response and response.success
+    if response and response?.success is true
       @trigger "after:submit:success", @, model, response
     else
       @trigger "after:submit:error", @, model, response
 
-  submit_fatal_error_handler: ()->
-    @trigger.apply ["after:submit", @].concat(arguments)
-    @trigger.apply ["after:submit:fatal_error", @].concat(arguments)
+  submit_fatal_error_handler: (model, response, xhr)->
+    @trigger "after:submit", @, model, response
+    @trigger "after:submit:fatal_error", @, model, response
 
   submit: (save=true, saveOptions={})->
     _.bindAll @, "submit_success_handler", "submit_fatal_error_handler"
@@ -217,11 +217,14 @@ Luca.components.FormView = Luca.core.Container.extend
     return unless save
     @current_model.save( @current_model.toJSON(), saveOptions )
 
-  currentModel: ()->
+  currentModel: (options={})->
+    if options is true or options?.refresh is true
+      @syncFormWithModel()
+
     @current_model
 
   syncFormWithModel: ()->
-    @currentModel()?.set( @getValues() )
+    @current_model?.set( @getValues() )
 
   setLegend: (@legend)->
     $('fieldset legend', @el).first().html(@legend)

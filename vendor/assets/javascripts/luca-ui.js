@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.0",
+    VERSION: "0.7.2",
     core: {},
     containers: {},
     components: {},
@@ -21,6 +21,18 @@
   };
 
   Luca.enableBootstrap = true;
+
+  Luca.isBackboneModel = function(obj) {
+    return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
+  };
+
+  Luca.isBackboneView = function(obj) {
+    return _.isFunction(obj != null ? obj.render : void 0) && !_.isUndefined(obj != null ? obj.el : void 0);
+  };
+
+  Luca.isBackboneCollection = function(obj) {
+    return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
+  };
 
   Luca.registry.addNamespace = function(identifier) {
     Luca.registry.namespaces.push(identifier);
@@ -2240,8 +2252,7 @@
       return fields;
     },
     loadModel: function(current_model) {
-      var event, fields, form,
-        _this = this;
+      var event, fields, form;
       this.current_model = current_model;
       form = this;
       fields = this.getFields();
@@ -2250,14 +2261,7 @@
         event = "before:load:" + (this.current_model.isNew() ? "new" : "existing");
         this.trigger(event, this, this.current_model);
       }
-      _(fields).each(function(field) {
-        var field_name, value;
-        field_name = field.input_name || field.name;
-        value = _.isFunction(_this.current_model[field_name]) ? _this.current_model[field_name].apply(_this, form) : _this.current_model.get(field_name);
-        if (field.readOnly !== true) {
-          return field != null ? field.setValue(value) : void 0;
-        }
-      });
+      this.setValues(this.current_model);
       this.trigger("after:load", this, this.current_model);
       if (this.current_model) {
         return this.trigger("after:load:" + (this.current_model.isNew() ? "new" : "existing"), this, this.current_model);
@@ -2277,31 +2281,52 @@
         }
       });
     },
-    getValues: function(reject_blank, skip_buttons) {
-      if (reject_blank == null) reject_blank = false;
-      if (skip_buttons == null) skip_buttons = true;
+    setValues: function(source, options) {
+      var fields,
+        _this = this;
+      if (options == null) options = {};
+      source || (source = this.currentModel());
+      fields = this.getFields();
+      _(fields).each(function(field) {
+        var field_name, value;
+        field_name = field.input_name || field.name;
+        if (value = source[field_name]) {
+          if (_.isFunction(value)) value = value.apply(_this);
+        }
+        if (!value && Luca.isBackboneModel(source)) value = source.get(field_name);
+        if (field.readOnly !== true) {
+          return field != null ? field.setValue(value) : void 0;
+        }
+      });
+      if ((options.silent != null) !== true) return this.syncFormWithModel();
+    },
+    getValues: function(options) {
+      options || (options = {});
+      if (options.reject_blank == null) options.reject_blank = true;
+      if (options.skip_buttons == null) options.skip_buttons = true;
       return _(this.getFields()).inject(function(memo, field) {
-        var skip, value;
+        var key, skip, value;
         value = field.getValue();
+        key = field.input_name || field.name;
         skip = false;
-        if (skip_buttons && field.ctype === "button_field") skip = true;
-        if (reject_blank && _.isBlank(value)) skip = true;
+        if (options.skip_buttons && field.ctype === "button_field") skip = true;
+        if (options.reject_blank === true && _.isBlank(value)) skip = true;
         if (field.input_name === "id" && _.isBlank(value)) skip = true;
-        if (!skip) memo[field.input_name || name] = value;
+        if (skip !== true) memo[key] = value;
         return memo;
       }, {});
     },
     submit_success_handler: function(model, response, xhr) {
       this.trigger("after:submit", this, model, response);
-      if (response && response.success) {
+      if (response && (response != null ? response.success : void 0) === true) {
         return this.trigger("after:submit:success", this, model, response);
       } else {
         return this.trigger("after:submit:error", this, model, response);
       }
     },
-    submit_fatal_error_handler: function() {
-      this.trigger.apply(["after:submit", this].concat(arguments));
-      return this.trigger.apply(["after:submit:fatal_error", this].concat(arguments));
+    submit_fatal_error_handler: function(model, response, xhr) {
+      this.trigger("after:submit", this, model, response);
+      return this.trigger("after:submit:fatal_error", this, model, response);
     },
     submit: function(save, saveOptions) {
       if (save == null) save = true;
@@ -2309,12 +2334,20 @@
       _.bindAll(this, "submit_success_handler", "submit_fatal_error_handler");
       saveOptions.success || (saveOptions.success = this.submit_success_handler);
       saveOptions.error || (saveOptions.error = this.submit_fatal_error_handler);
-      this.current_model.set(this.getValues());
+      this.syncFormWithModel();
       if (!save) return;
       return this.current_model.save(this.current_model.toJSON(), saveOptions);
     },
-    currentModel: function() {
+    currentModel: function(options) {
+      if (options == null) options = {};
+      if (options === true || (options != null ? options.refresh : void 0) === true) {
+        this.syncFormWithModel();
+      }
       return this.current_model;
+    },
+    syncFormWithModel: function() {
+      var _ref;
+      return (_ref = this.current_model) != null ? _ref.set(this.getValues()) : void 0;
     },
     setLegend: function(legend) {
       this.legend = legend;
