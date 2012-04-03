@@ -1258,7 +1258,7 @@
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous, _ref;
+      var current, previous, _ref, _ref2;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
         silent = false;
@@ -1274,10 +1274,6 @@
       if (!current) return;
       if (!silent) this.trigger("before:card:switch", previous, current);
       _(this.card_containers).each(function(container) {
-        var _ref;
-        if ((_ref = container.trigger) != null) {
-          _ref.apply(container, ["deactivation", this, previous, current]);
-        }
         return container.hide();
       });
       if (!current.previously_activated) {
@@ -1288,8 +1284,13 @@
       this.activeCard = index;
       if (!silent) {
         this.trigger("after:card:switch", previous, current);
-        if ((_ref = current.trigger) != null) {
-          _ref.apply(current, ["activation", this, previous, current]);
+        if (previous != null) {
+          if ((_ref = previous.trigger) != null) {
+            _ref.apply(previous, ["deactivation", this, previous, current]);
+          }
+        }
+        if ((_ref2 = current.trigger) != null) {
+          _ref2.apply(current, ["activation", this, previous, current]);
         }
       }
       if (_.isFunction(callback)) {
@@ -3145,7 +3146,26 @@
 }).call(this);
 (function() {
 
-
+  describe('The Luca Container', function() {
+    beforeEach(function() {
+      return this.container = new Luca.core.Container({
+        components: [
+          {
+            name: "component_one",
+            ctype: "template",
+            markup: "markup for component one"
+          }, {
+            name: "component_two",
+            ctype: "template",
+            markup: "markup for component two"
+          }
+        ]
+      });
+    });
+    return it("should trigger after initialize", function() {
+      return expect(this.container).toHaveTriggered("after:initialize");
+    });
+  });
 
 }).call(this);
 (function() {

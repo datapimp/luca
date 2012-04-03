@@ -4,12 +4,12 @@
 # which is responsible for laying out the many components
 # it contains, assigning them to a DOM container, and
 # automatically instantiating and rendering the components
-# in their proper place.  
-Luca.core.Container = Luca.View.extend 
+# in their proper place.
+Luca.core.Container = Luca.View.extend
   className: 'luca-ui-container'
 
   componentClass: 'luca-ui-panel'
-  
+
   isContainer: true
 
   hooks:[
@@ -30,12 +30,12 @@ Luca.core.Container = Luca.View.extend
     @setupHooks( Luca.core.Container::hooks )
 
     Luca.View::initialize.apply @, arguments
-  
+
   #### Rendering Pipeline
   #
   # A container has nested components.  these components
   # are automatically rendered inside their own DOM element
-  # and then CSS configuration is generally applied to these 
+  # and then CSS configuration is generally applied to these
   # DOM elements.  Each component is assigned to this DOM
   # element by specifying a @container property on the component.
   #
@@ -63,28 +63,28 @@ Luca.core.Container = Luca.View.extend
   #   createComponents()
   #   renderComponents() ->
   #     calls render() on each component, starting this whole cycle
-  #     
+  #
   # afterComponents()
   #
   # DOM Injection
   #
   # render()
   # afterRender()
-  # 
+  #
   # For Components which are originally hidden
   # ( card view, tab view, etc )
   #
-  # firstActivation() 
+  # firstActivation()
   #
   beforeRender: ()->
     @debug "container before render"
-    @doLayout() 
+    @doLayout()
     @doComponents()
 
   doLayout: ()->
     @debug "container do layout"
     @trigger "before:layout", @
-    @prepareLayout()    
+    @prepareLayout()
     @trigger "after:layout", @
 
   doComponents: ()->
@@ -98,12 +98,12 @@ Luca.core.Container = Luca.View.extend
 
   applyPanelConfig: (panel, panelIndex)->
     style_declarations = []
-    
+
     style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height
     style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width
     style_declarations.push "float: #{ panel.float }" if panel.float
-    
-    config = 
+
+    config =
       classes: panel?.classes || @componentClass
       id: "#{ @cid }-#{ panelIndex }"
       style: style_declarations.join(';')
@@ -116,14 +116,14 @@ Luca.core.Container = Luca.View.extend
     @debug "container prepare layout"
     @componentContainers = _( @components ).map (component, index) =>
       @applyPanelConfig.apply @, [ component, index ]
-    
+
     if @appendContainers
       _( @componentContainers ).each (container)=>
-        @$el.append Luca.templates["containers/basic"](container) 
+        @$el.append Luca.templates["containers/basic"](container)
 
   # prepare components is where you would set necessary object
   # attributes on the components themselves.
-  prepareComponents: ()-> 
+  prepareComponents: ()->
     @debug "container prepare components"
     @components = _( @components ).map (object, index) =>
       panel = @componentContainers[ index ]
@@ -132,8 +132,9 @@ Luca.core.Container = Luca.View.extend
       object
 
   createComponents: ()->
-    @debug "container create components"
-    map = @componentIndex = 
+    return if @componentsCreated is true
+
+    map = @componentIndex =
       name_index: {}
       cid_index: {}
 
@@ -151,22 +152,24 @@ Luca.core.Container = Luca.View.extend
       # with their passed options, so this is a workaround
       if !component.container and component.options.container
         component.container = component.options.container
-      
+
       if map and component.cid?
         map.cid_index[ component.cid ] = index
-      
+
       if map and component.name?
         map.name_index[ component.name ] = index
 
       component
-    
-    @debug "components created", @components
+
+    @componentsCreated = true
+    map
+
   # Trigger the Rendering Pipeline process on all of the nested
   # components
   renderComponents: (@debugMode="")->
     @debug "container render components"
-    _(@components).each (component)=> 
-      component.getParent = ()=> @ 
+    _(@components).each (component)=>
+      component.getParent = ()=> @
       $( component.container ).append $(component.el)
 
       try
@@ -177,7 +180,7 @@ Luca.core.Container = Luca.View.extend
         console.log e.stack
 
   #### Container Activation
-  # 
+  #
   # When a container is first activated is a good time to perform
   # operations which are not needed unless that component becomes
   # visible.  This first activation event should be relayed to all
@@ -185,13 +188,13 @@ Luca.core.Container = Luca.View.extend
   # other components, such as a CardView or TabContainer
   # will trigger first:activation on the components as they become
   # displayed.
-  firstActivation: ()->  
+  firstActivation: ()->
     _( @components ).each (component)=>
       activator = @
-      
+
       # apply the first:activation trigger on the component, in the context of the component
       # passing as arguments the component itself, and the component doing the activation
-      unless component?.previously_activated is true 
+      unless component?.previously_activated is true
         component?.trigger?.apply component, ["first:activation", [component, activator] ]
         component.previously_activated = true
 
@@ -210,22 +213,25 @@ Luca.core.Container = Luca.View.extend
 
     _.flatten( components )
 
-  findComponentByName: (name, deep=false)-> 
+  findComponentByName: (name, deep=false)->
     @findComponent(name, "name_index", deep)
 
-  findComponentById: (id, deep=false)-> 
+  findComponentById: (id, deep=false)->
     @findComponent(id, "cid_index", deep)
 
   findComponent: (needle, haystack="name", deep=false)->
+    @createComponents() unless @componentsCreated is true
+
+
     position = @componentIndex?[ haystack ][ needle ]
     component = @components?[ position ]
 
     return component if component
-    
+
     if deep is true
       sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
       sub_container?.findComponent?(needle, haystack, true)
-  
+
   # run a function for each component in this container
   # and any nested containers in those components, recursively
   # pass false as the second argument to skip the deep recursion
@@ -233,24 +239,24 @@ Luca.core.Container = Luca.View.extend
     _( @components ).each (component)=>
       fn.apply component, [component]
       component?.eachComponent?.apply component, [fn,deep] if deep
-  
+
   indexOf: (name)->
     names = _( @components ).pluck('name')
     _( names ).indexOf(name)
-  
+
   activeComponent: ()->
     return @ unless @activeItem
     return @components[ @activeItem ]
 
   componentElements: ()-> $(".#{ @componentClass }", @el)
- 
-  getComponent: (needle)-> 
+
+  getComponent: (needle)->
     @components[ needle ]
-  
-  rootComponent: ()-> 
+
+  rootComponent: ()->
     !@getParent?
 
-  getRootComponent: ()-> 
+  getRootComponent: ()->
     if @rootComponent() then @ else @getParent().getRootComponent()
 
 Luca.register "container", "Luca.core.Container"
