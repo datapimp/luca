@@ -812,7 +812,7 @@
     createComponents: function() {
       var map,
         _this = this;
-      this.debug("container create components");
+      if (this.componentsCreated === true) return;
       map = this.componentIndex = {
         name_index: {},
         cid_index: {}
@@ -829,7 +829,8 @@
         }
         return component;
       });
-      return this.debug("components created", this.components);
+      this.componentsCreated = true;
+      return map;
     },
     renderComponents: function(debugMode) {
       var _this = this;
@@ -891,6 +892,7 @@
       var component, position, sub_container, _ref, _ref2;
       if (haystack == null) haystack = "name";
       if (deep == null) deep = false;
+      if (this.componentsCreated !== true) this.createComponents();
       position = (_ref = this.componentIndex) != null ? _ref[haystack][needle] : void 0;
       component = (_ref2 = this.components) != null ? _ref2[position] : void 0;
       if (component) return component;

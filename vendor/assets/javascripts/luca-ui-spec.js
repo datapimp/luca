@@ -812,7 +812,7 @@
     createComponents: function() {
       var map,
         _this = this;
-      this.debug("container create components");
+      if (this.componentsCreated === true) return;
       map = this.componentIndex = {
         name_index: {},
         cid_index: {}
@@ -829,7 +829,8 @@
         }
         return component;
       });
-      return this.debug("components created", this.components);
+      this.componentsCreated = true;
+      return map;
     },
     renderComponents: function(debugMode) {
       var _this = this;
@@ -891,6 +892,7 @@
       var component, position, sub_container, _ref, _ref2;
       if (haystack == null) haystack = "name";
       if (deep == null) deep = false;
+      if (this.componentsCreated !== true) this.createComponents();
       position = (_ref = this.componentIndex) != null ? _ref[haystack][needle] : void 0;
       component = (_ref2 = this.components) != null ? _ref2[position] : void 0;
       if (component) return component;
@@ -2822,7 +2824,57 @@
 }).call(this);
 (function() {
 
-  describe("The Card View", function() {});
+  describe("The Card View", function() {
+    beforeEach(function() {
+      this.cardView = new Luca.containers.CardView({
+        activeItem: 0,
+        components: [
+          {
+            markup: "component one",
+            name: "one",
+            one: true
+          }, {
+            markup: "component two",
+            name: "two",
+            two: true,
+            firstActivation: sinon.spy()
+          }, {
+            markup: "component three",
+            name: "three",
+            three: true
+          }
+        ]
+      });
+      return this.cardView.render();
+    });
+    it("should be able to find the cards by name", function() {
+      expect(this.cardView.find("one")).toBeDefined();
+      return expect(this.cardView.find("one").one).toEqual(true);
+    });
+    it("should start with the first component active", function() {
+      var _ref;
+      return expect((_ref = this.cardView.activeComponent()) != null ? _ref.name : void 0).toEqual("one");
+    });
+    it("should be able to activate components by name", function() {
+      var _ref;
+      this.cardView.activate("two");
+      return expect((_ref = this.cardView.activeComponent()) != null ? _ref.name : void 0).toEqual("two");
+    });
+    it("shouldn't fire first activation on a component", function() {
+      var _ref;
+      return expect((_ref = this.cardView.find("two")) != null ? _ref.firstActivation : void 0).not.toHaveBeenCalled();
+    });
+    it("should fire firstActivation on a component", function() {
+      var _ref;
+      this.cardView.activate("two");
+      return expect((_ref = this.cardView.find("two")) != null ? _ref.firstActivation : void 0).toHaveBeenCalled();
+    });
+    return it("should fire deactivation on a component", function() {
+      this.cardView.find("one").spiedEvents = {};
+      this.cardView.activate("two");
+      return expect(this.cardView.find("one")).toHaveTriggered("deactivation");
+    });
+  });
 
 }).call(this);
 (function() {
@@ -3153,17 +3205,77 @@
           {
             name: "component_one",
             ctype: "template",
-            markup: "markup for component one"
+            markup: "markup for component one",
+            id: "c1",
+            value: 1,
+            spy: sinon.spy()
           }, {
             name: "component_two",
             ctype: "template",
-            markup: "markup for component two"
+            markup: "markup for component two",
+            id: "c2",
+            value: 0,
+            spy: sinon.spy()
+          }, {
+            name: "component_three",
+            ctype: "container",
+            id: "c3",
+            value: 1,
+            spy: sinon.spy(),
+            components: [
+              {
+                ctype: "template",
+                name: "component_four",
+                markup: "markup for component four",
+                spy: sinon.spy()
+              }
+            ]
           }
         ]
       });
     });
-    return it("should trigger after initialize", function() {
+    it("should trigger after initialize", function() {
       return expect(this.container).toHaveTriggered("after:initialize");
+    });
+    it("should have some components", function() {
+      return expect(this.container.components.length).toEqual(3);
+    });
+    it("should render the container and all of the sub views", function() {
+      var html;
+      this.container.render();
+      html = $(this.container.el).html();
+      expect(html).toContain("markup for component one");
+      return expect(html).toContain("markup for component two");
+    });
+    it("should render the container and all of the nested sub views", function() {
+      var html;
+      this.container.render();
+      html = $(this.container.el).html();
+      return expect(html).toContain("markup for component four");
+    });
+    it("should select all components matching a key/value combo", function() {
+      var components;
+      components = this.container.select("value", 1);
+      return expect(components.length).toEqual(2);
+    });
+    it("should run a function on each component", function() {
+      this.container.eachComponent(function(c) {
+        return c.spy();
+      });
+      return _(this.container.components).each(function(component) {
+        return expect(component.spy).toHaveBeenCalled();
+      });
+    });
+    it("should run a function on each component including nested", function() {
+      this.container.render();
+      this.container.eachComponent(function(c) {
+        return c.spy();
+      });
+      return expect(Luca.cache("component_four").spy).toHaveBeenCalled();
+    });
+    return it("should be able to find a component by name", function() {
+      expect(this.container.findComponentByName("component_one")).toBeDefined();
+      return expect(this.container.findComponentByName("undefined")).not.toBeDefined();
     });
   });
 
