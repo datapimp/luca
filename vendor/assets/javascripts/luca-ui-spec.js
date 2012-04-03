@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.6.8",
+    VERSION: "0.6.9",
     core: {},
     containers: {},
     components: {},
@@ -1260,7 +1260,7 @@
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous, _ref, _ref2;
+      var current, previous, _ref, _ref2, _ref3, _ref4;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
         silent = false;
@@ -1275,6 +1275,18 @@
       }
       if (!current) return;
       if (!silent) this.trigger("before:card:switch", previous, current);
+      if (!silent) {
+        if (previous != null) {
+          if ((_ref = previous.trigger) != null) {
+            _ref.apply(previous, ["before:deactivation", this, previous, current]);
+          }
+        }
+        if (previous != null) {
+          if ((_ref2 = previous.trigger) != null) {
+            _ref2.apply(previous, ["before:activation", this, previous, current]);
+          }
+        }
+      }
       _(this.card_containers).each(function(container) {
         return container.hide();
       });
@@ -1286,13 +1298,11 @@
       this.activeCard = index;
       if (!silent) {
         this.trigger("after:card:switch", previous, current);
-        if (previous != null) {
-          if ((_ref = previous.trigger) != null) {
-            _ref.apply(previous, ["deactivation", this, previous, current]);
-          }
+        if ((_ref3 = current.trigger) != null) {
+          _ref3.apply(previous, ["deactivation", this, previous, current]);
         }
-        if ((_ref2 = current.trigger) != null) {
-          _ref2.apply(current, ["activation", this, previous, current]);
+        if ((_ref4 = current.trigger) != null) {
+          _ref4.apply(current, ["activation", this, previous, current]);
         }
       }
       if (_.isFunction(callback)) {
