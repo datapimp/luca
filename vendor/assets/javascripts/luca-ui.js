@@ -1274,15 +1274,15 @@
         current = this.getComponent(index);
       }
       if (!current) return;
-      if (!silent) this.trigger("before:card:switch", previous, current);
       if (!silent) {
+        this.trigger("before:card:switch", previous, current);
         if (previous != null) {
           if ((_ref = previous.trigger) != null) {
             _ref.apply(previous, ["before:deactivation", this, previous, current]);
           }
         }
-        if (previous != null) {
-          if ((_ref2 = previous.trigger) != null) {
+        if (current != null) {
+          if ((_ref2 = current.trigger) != null) {
             _ref2.apply(previous, ["before:activation", this, previous, current]);
           }
         }
@@ -1298,7 +1298,7 @@
       this.activeCard = index;
       if (!silent) {
         this.trigger("after:card:switch", previous, current);
-        if ((_ref3 = current.trigger) != null) {
+        if ((_ref3 = previous.trigger) != null) {
           _ref3.apply(previous, ["deactivation", this, previous, current]);
         }
         if ((_ref4 = current.trigger) != null) {

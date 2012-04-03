@@ -64,11 +64,11 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     return unless current
 
-    @trigger "before:card:switch", previous, current unless silent
 
     unless silent
+      @trigger "before:card:switch", previous, current
       previous?.trigger?.apply(previous,["before:deactivation", @, previous, current])
-      previous?.trigger?.apply(previous,["before:activation", @, previous, current])
+      current?.trigger?.apply(previous,["before:activation", @, previous, current])
 
     _( @card_containers ).each (container)->
       container.hide()
@@ -83,7 +83,7 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     unless silent
       @trigger "after:card:switch", previous, current
-      current.trigger?.apply(previous, ["deactivation", @, previous, current])
+      previous.trigger?.apply(previous, ["deactivation", @, previous, current])
       current.trigger?.apply(current, ["activation", @, previous, current])
 
 
