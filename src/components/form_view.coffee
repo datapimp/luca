@@ -132,7 +132,10 @@ Luca.components.FormView = Luca.core.Container.extend
     fields = @getFields()
 
     @trigger "before:load", @, @current_model
+
     if @current_model
+      @current_model.beforeFormLoad?.apply(@current_model, @)
+
       event = "before:load:#{ (if @current_model.isNew() then "new" else "existing")}"
       @trigger event, @, @current_model
 

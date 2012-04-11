@@ -77,7 +77,11 @@ describe 'The Form View', ->
     beforeEach ->
       @form.spiedEvents = {}
       @form.render()
+      @model.beforeFormLoad = sinon.spy()
       @form.loadModel(@model)
+
+    it "should call before form load", ->
+      expect( @model.beforeFormLoad ).toHaveBeenCalled()
 
     it "should have triggered before load", ->
       expect( @form ).toHaveTriggered("before:load")
@@ -96,7 +100,11 @@ describe 'The Form View', ->
       @form.spiedEvents = {}
       @form.render()
       @model.set(id:"one")
+      @model.beforeFormLoad = sinon.spy()
       @form.loadModel(@model)
+
+    it "should call before form load", ->
+      expect( @model.beforeFormLoad ).toHaveBeenCalled()
 
     it "should have triggered before:load:existing", ->
       expect( @form ).toHaveTriggered("before:load:existing")

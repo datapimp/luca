@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.2",
+    VERSION: "0.7.3",
     core: {},
     containers: {},
     components: {},
@@ -2252,12 +2252,15 @@
       return fields;
     },
     loadModel: function(current_model) {
-      var event, fields, form;
+      var event, fields, form, _ref;
       this.current_model = current_model;
       form = this;
       fields = this.getFields();
       this.trigger("before:load", this, this.current_model);
       if (this.current_model) {
+        if ((_ref = this.current_model.beforeFormLoad) != null) {
+          _ref.apply(this.current_model, this);
+        }
         event = "before:load:" + (this.current_model.isNew() ? "new" : "existing");
         this.trigger(event, this, this.current_model);
       }
