@@ -1,0 +1,3 @@
+0.7.3:
+  - Models being loaded by the FormView will now call
+    beforeFormLoad methods if they exist on those models
