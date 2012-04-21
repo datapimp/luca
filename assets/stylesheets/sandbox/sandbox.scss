@@ -1,4 +1,29 @@
+body {
+  background-color: #333;
+}
 #container, #viewport {
-  width: 1024px;
-  margin: 40px auto;
+  width: 1000px;
+  margin: 50px auto;
+}
+
+#canvas_container {
+  canvas {
+    background-color: #ccc;
+    margin: 10px auto;
+    border: 1px solid #000;
+    width: 1000px;
+    height: 500px;
+  }
+}
+
+#editor_container {
+  background-color: #333;
+}
+
+#coffee-script-editor {
+  position: relative;
+  bottom: 0px;
+  left: 0px;
+  height: 500px;
+  width: 1000px;
 }

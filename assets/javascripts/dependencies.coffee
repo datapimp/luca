@@ -4,4 +4,6 @@
 #= require ./dependencies/backbone-min.js
 #= require ./dependencies/backbone-query.min.js
 #= require ./dependencies/bootstrap.min
-#= require ./dependencies/prettify
+#= require ./dependencies/ace/ace-noconflict.js
+#= require ./dependencies/ace/mode-coffee-noconflict.js
+#= require ./dependencies/ace/theme-twilight-noconflict.js
