@@ -19,7 +19,7 @@ Sandbox.views.Editor = Luca.View.extend
 
   setupEditor: ()->
     @editor = ace.edit("coffee-script-editor")
-    @editor.setTheme "ace/theme/twilight"
+    @editor.setTheme "ace/theme/monokai"
     @editor.session.setMode("ace/mode/coffee")
     @editor.setShowPrintMargin false
     @editor.getSession().setUseWrapMode(true);
@@ -30,7 +30,6 @@ Sandbox.views.Editor = Luca.View.extend
     Luca.cache("canvas")
 
   onChange: _.idleShort ()->
-    console.log "change"
     try
       code = @editor.session.getValue()
       @newCompiled = CoffeeScript.compile(code,bare:true)
@@ -40,6 +39,5 @@ Sandbox.views.Editor = Luca.View.extend
         @oldCompiled = @newCompiled
 
     catch error
-      console.log "Compile Error", error.message
-
+      false
 
