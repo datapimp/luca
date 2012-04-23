@@ -134,14 +134,14 @@ _.extend Luca.View.prototype,
   setupHooks: (set)->
     set ||= @hooks
 
-    _(set).each (event)=>
-      parts = event.split(':')
+    _(set).each (eventId)=>
+      parts = eventId.split(':')
       prefix = parts.shift()
 
       parts = _( parts ).map (p)-> _.capitalize(p)
       fn = prefix + parts.join('')
 
-      @bind event, ()=> @[fn].apply @, arguments if @[fn]
+      @bind eventId, ()=> @[fn].apply @, arguments if @[fn]
 
 
   #### Luca.Collection and Luca.CollectionManager integration
