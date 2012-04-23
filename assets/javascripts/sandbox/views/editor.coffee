@@ -19,7 +19,7 @@ Sandbox.views.Editor = Luca.View.extend
 
   setupEditor: ()->
     @editor = ace.edit("coffee-script-editor")
-    @editor.setTheme "ace/theme/monokai"
+    @editor.setTheme "ace/theme/twilight"
     @editor.session.setMode("ace/mode/coffee")
     @editor.setShowPrintMargin false
     @editor.getSession().setUseWrapMode(true);
