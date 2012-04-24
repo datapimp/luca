@@ -24,6 +24,7 @@ Sandbox.views.Editor = Luca.View.extend
     @editor.setShowPrintMargin false
     @editor.getSession().setUseWrapMode(true);
     @editor.getSession().on('change', @onChange)
+    @editor.session.setValue( localStorage.getItem("canvas-tool-editor-content") )
     @editor
 
   canvas: _.memoize ()->
@@ -32,6 +33,7 @@ Sandbox.views.Editor = Luca.View.extend
   onChange: _.idleShort ()->
     try
       code = @editor.session.getValue()
+      localStorage.setItem("canvas-tool-editor-content", code)
       @newCompiled = CoffeeScript.compile(code,bare:true)
 
       if @newCompiled isnt @oldCompiled
