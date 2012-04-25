@@ -2,8 +2,33 @@ class window.Stage
   constructor: (options={})->
     _.extend @, options
     @stageActors ||= window.stageActors ||= {}
-
     @restart()
+
+  getActorsInLayer: (z)->
+    _( @sortedActors ).select (a)->
+      parseInt( a.z || 1 ) is z
+
+  toggleAnimation: (button)->
+    if @started?
+      button.html "Play"
+      @stop()
+    else
+      button.html "Pause"
+      @start()
+
+  toggleStats: (button)->
+    if @showingStats?
+      button.html "Stats On"
+      @hideStats()
+    else
+      button.html "Stats Off"
+      @showStats()
+
+  hideStats: ()->
+    # TODO
+
+  showStats: ()->
+    # TODO
 
   restart: ()->
     @stop()
@@ -11,9 +36,12 @@ class window.Stage
     @start()
 
   stop: ()->
+    @started = undefined
     clearInterval(@tickInterval) if @tickInterval
 
   start: ()->
+    return if @started?
+
     date = new Date
     @started = date.getTime()
 
@@ -25,9 +53,12 @@ class window.Stage
 
   reset: ()->
     @stageActors = window.stageActors = {}
+    @sortedActors = []
 
   clear: ()->
     @canvas.width = @canvas.width
+
+  sortedActors: []
 
   add: (object={})->
     object.id ||= _.uniqueId("object")
@@ -44,5 +75,6 @@ class window.Stage
     timeDiff = lastTime - @started
 
     _( @sortedActors ).each (actor)->
-      actor.runTicks(lastTime,timeDiff)
+      actor.runTicks?(lastTime,timeDiff)
       actor.draw(lastTime,timeDiff)
+      actor.runAfter?(lastTime, timeDiff )

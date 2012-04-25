@@ -1,6 +1,7 @@
 Sandbox.Application = Luca.Application.extend
   name: 'sandbox_application'
   el: '#viewport'
+
   components:[
     ctype: 'controller'
     name: 'main_controller'

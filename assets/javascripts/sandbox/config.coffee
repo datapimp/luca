@@ -6,6 +6,16 @@
 Luca.registry.addNamespace 'Sandbox.views'
 Luca.Collection.namespace = Sandbox.collections
 
+Sandbox.keys =
+  ENTER: 13
+  ESCAPE: 27
+  KEYLEFT: 37
+  KEYUP: 38
+  KEYRIGHT: 39
+  KEYDOWN: 40
+  SPACEBAR: 32
+  FORWARDSLASH: 191
+
 UnderscoreMixins =
   classify: (string)-> str = _(string).camelize(); str.charAt(0).toUpperCase() + str.substring(1)
 

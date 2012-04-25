@@ -2,28 +2,30 @@ body {
   background-color: #333;
 }
 #container, #viewport {
-  width: 1000px;
-  margin: 50px auto;
+  width: 960px;
+  height: 100%;
 }
 
 #canvas_container {
+  float: left;
+  width: 30%;
   canvas {
     background-color: #ccc;
     margin: 10px auto;
     border: 1px solid #000;
-    width: 1000px;
-    height: 500px;
+    float: left;
   }
 }
 
+
 #editor_container {
   background-color: #333;
+  float: left;
+  width: 70%;
 }
 
 #coffee-script-editor {
   position: relative;
   bottom: 0px;
   left: 0px;
-  height: 500px;
-  width: 1000px;
 }
