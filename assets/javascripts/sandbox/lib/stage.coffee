@@ -21,12 +21,7 @@ class window.Stage
       @drawAll()
     , @frameRate
 
-  actors: ()-> _( @stageActors ).values()
-
   frameRate: 16
-
-  each: (iterator)->
-    _( @actors() ).each( iterator )
 
   reset: ()->
     @stageActors = window.stageActors = {}
@@ -40,12 +35,14 @@ class window.Stage
     object.context = @context
     object.stage = @
 
+    @sortedActors = _( _( @stageActors ).values() ).sortBy (a)-> parseInt(a.z || 1)
+
   drawAll: ()->
     date = new Date
     @clear()
     lastTime = date.getTime()
     timeDiff = lastTime - @started
 
-    @each (actor)->
+    _( @sortedActors ).each (actor)->
       actor.runTicks(lastTime,timeDiff)
       actor.draw(lastTime,timeDiff)

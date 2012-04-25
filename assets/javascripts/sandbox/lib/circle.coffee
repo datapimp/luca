@@ -1,6 +1,12 @@
 class window.Circle extends Sandbox.Actor
   constructor:(options={})->
     _.extend @, options
+    if @stage?
+      @stage.add(@)
+
+  x: 0
+  y: 0
+  z: 0
 
   clone: ()->
     new window.Circle
@@ -8,18 +14,48 @@ class window.Circle extends Sandbox.Actor
       y: @y
       color: @color
       radius: @radius
+      strokeStyle: @strokeStyle
+      strokeWidth: @strokeWidth
+      ticks: @ticks
+      velocity: @velocity
+      hDirection: @hDirection
+      vDirection: @vDirection
+
+  bottomBorder: ()->
+    @y + @radius
+
+  leftBorder: ()->
+    @x - @radius
+
+  rightBorder: ()->
+    @x + @radius
+
+  topBorder: ()->
+    @y - @radius
+
+  distanceFromBottom: ()->
+    @stage.canvas.height - @bottomBorder()
+
+  distanceFromTop: ()->
+    0 + @topBorder()
+
+  distanceFromRight: ()->
+    @stage.canvas.width - @rightBorder()
+
+  distanceFromLeft: ()->
+    0 + @leftBorder()
 
   atBottomEdge: ()->
-    @y + @radius >= @stage.canvas.height
+    @distanceFromBottom() <= 0
 
   atTopEdge: ()->
-    @y - @radius <= 0
+    @distanceFromTop() <= 0
 
   atRightEdge: ()->
-    @x + @radius >= @stage.canvas.width
+    @distanceFromRight() <= 0
 
   atLeftEdge: ()->
-    @x - @radius <= 0
+    @distanceFromLeft() <= 0
 
   hDirection: 1
   vDirection: 1
@@ -45,14 +81,13 @@ class window.Circle extends Sandbox.Actor
 
   move: ()->
     @stayInBounds()
-    @x = @x + @horizontalSpeed()
-    @y = @y + @verticalSpeed()
-
-
+    unless @frozen is true
+      @x = @x + @horizontalSpeed()
+      @y = @y + @verticalSpeed()
 
   growthInterval: 0.025
   growthMinimum: 5
-  growthMaximum: 40
+  growthMaximum: 75
 
   grow: ()->
     @dir ||= @growthInterval
