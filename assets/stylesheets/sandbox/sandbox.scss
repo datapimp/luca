@@ -7,13 +7,14 @@ body {
 }
 
 #canvas_container {
-  float: left;
-  width: 30%;
+  width: 100%;
+  overflow: hidden;
   canvas {
     background-color: #ccc;
     margin: 10px auto;
-    border: 1px solid #000;
-    float: left;
+    width: 450px;
+    height: 450px;
+    display: block;
   }
 }
 

@@ -2,6 +2,7 @@
 class Sandbox.Actor
   constructor: (options)->
     _.extend @, options
+    @stage ||= window.stage if window.stage
     @stage.add(@) if @stage?.add?
 
   center: ()->
