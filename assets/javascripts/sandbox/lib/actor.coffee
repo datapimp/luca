@@ -86,6 +86,9 @@ class Sandbox.Actor
   verticalSpeed: ()->
     @velocity.vertical * @vDirection
 
+  skip: ()->
+    @hidden is true
+
   printStats: ()->
     stats = [
       "x: #{ @x }"
@@ -93,6 +96,7 @@ class Sandbox.Actor
       "z: #{ @z }"
       "h: #{ @horizontalSpeed() }"
       "v: #{ @verticalSpeed() }"
+      "collissions: #{ @collisions().length }"
     ]
     @context.font = "16pt Calibri";
     @context.fillStyle = "#fff";
