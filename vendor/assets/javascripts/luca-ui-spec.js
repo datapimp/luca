@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.3",
+    VERSION: "0.7.4",
     core: {},
     containers: {},
     components: {},
@@ -429,15 +429,15 @@
     setupHooks: function(set) {
       var _this = this;
       set || (set = this.hooks);
-      return _(set).each(function(event) {
+      return _(set).each(function(eventId) {
         var fn, parts, prefix;
-        parts = event.split(':');
+        parts = eventId.split(':');
         prefix = parts.shift();
         parts = _(parts).map(function(p) {
           return _.capitalize(p);
         });
         fn = prefix + parts.join('');
-        return _this.bind(event, function() {
+        return _this.bind(eventId, function() {
           if (_this[fn]) return _this[fn].apply(_this, arguments);
         });
       });
@@ -477,6 +477,7 @@
       if (models == null) models = [];
       this.options = options;
       _.extend(this, this.options);
+      this._reset();
       if (this.cached) {
         this.bootstrap_cache_key = _.isFunction(this.cached) ? this.cached() : this.cached;
       }
@@ -505,6 +506,12 @@
       }
       if (this.useNormalUrl !== true) this.__wrapUrl();
       Backbone.Collection.prototype.initialize.apply(this, [models, this.options]);
+      if (models) {
+        this.reset(models, {
+          silent: true,
+          parse: options != null ? options.parse : void 0
+        });
+      }
       return this.trigger("after:initialize");
     },
     __wrapUrl: function() {

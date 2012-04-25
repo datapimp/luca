@@ -27,6 +27,8 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   initialize: (models=[], @options)->
     _.extend @, @options
 
+    @_reset()
+
     # By specifying a @cached property or method, you can instruct
     # Luca.Collection instances where to pull an array of model attributes
     # usually done with the bootstrap functionality provided.
@@ -80,6 +82,9 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @__wrapUrl() unless @useNormalUrl is true
 
     Backbone.Collection.prototype.initialize.apply @, [models, @options]
+
+    if models
+      @reset models, silent: true, parse: options?.parse
 
     @trigger "after:initialize"
 
