@@ -1446,7 +1446,6 @@
         _ref.apply(this, arguments);
       }
       if (this.css) {
-        console.log("Yes Yes Yall", this.css, this.$el);
         return _(this.css).each(function(value, property) {
           return _this.$el.css(property, value);
         });
