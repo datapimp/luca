@@ -15,7 +15,6 @@ Luca.containers.PanelView = Luca.core.Container.extend
   afterRender: ()->
     Luca.core.Container::afterRender?.apply @, arguments
     if @css
-      console.log "Yes Yes Yall", @css, @$el 
       _( @css ).each (value,property)=>
         @$el.css(property,value)
 
