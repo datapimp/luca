@@ -1602,10 +1602,11 @@
       }
     ],
     initialize: function(options) {
-      var _this = this;
+      var _base,
+        _this = this;
       this.options = options != null ? options : {};
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
-      this.collectionManager = new Luca.CollectionManager();
+      this.collectionManager || (this.collectionManager = (typeof (_base = Luca.CollectionManager).get === "function" ? _base.get() : void 0) || new Luca.CollectionManager());
       this.state = new Backbone.Model(this.defaultState);
       return this.bind("ready", function() {
         return _this.render();

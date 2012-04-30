@@ -15,7 +15,7 @@ Luca.Application = Luca.containers.Viewport.extend
   initialize: (@options={})->
     Luca.containers.Viewport::initialize.apply @, arguments
 
-    @collectionManager = new Luca.CollectionManager()
+    @collectionManager ||= Luca.CollectionManager.get?() || new Luca.CollectionManager()
 
     @state = new Backbone.Model( @defaultState )
 
