@@ -122,7 +122,8 @@ Luca.core.Container = Luca.View.extend
 
     if @appendContainers
       _( @componentContainers ).each (container)=>
-        @$el.append Luca.templates["containers/basic"](container)
+        @$el.append Luca.templates["containers/basic"](container) unless container.appended?
+        container.appended = true
 
   # prepare components is where you would set necessary object
   # attributes on the components themselves.

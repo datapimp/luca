@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.5",
+    VERSION: "0.7.6",
     core: {},
     containers: {},
     components: {},
@@ -816,7 +816,10 @@
       });
       if (this.appendContainers) {
         return _(this.componentContainers).each(function(container) {
-          return _this.$el.append(Luca.templates["containers/basic"](container));
+          if (container.appended == null) {
+            _this.$el.append(Luca.templates["containers/basic"](container));
+          }
+          return container.appended = true;
         });
       }
     },
