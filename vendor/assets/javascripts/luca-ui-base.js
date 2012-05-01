@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.4",
+    VERSION: "0.7.5",
     core: {},
     containers: {},
     components: {},
@@ -763,7 +763,7 @@
     className: 'luca-ui-container',
     componentClass: 'luca-ui-panel',
     isContainer: true,
-    hooks: ["before:components", "before:layout", "after:components", "after:layout", "first:activation"],
+    hooks: ["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"],
     rendered: false,
     components: [],
     initialize: function(options) {
@@ -788,6 +788,7 @@
       this.trigger("before:components", this, this.components);
       this.prepareComponents();
       this.createComponents();
+      this.trigger("before:render:components", this, this.components);
       this.renderComponents();
       return this.trigger("after:components", this, this.components);
     },
