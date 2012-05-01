@@ -13,10 +13,11 @@ Luca.core.Container = Luca.View.extend
   isContainer: true
 
   hooks:[
-    "before:components",
-    "before:layout",
-    "after:components",
-    "after:layout",
+    "before:components"
+    "before:render:components"
+    "before:layout"
+    "after:components"
+    "after:layout"
     "first:activation"
   ]
 
@@ -61,6 +62,7 @@ Luca.core.Container = Luca.View.extend
   # beforeComponents()
   # prepareComponents()
   #   createComponents()
+  #   beforeRenderComponents()
   #   renderComponents() ->
   #     calls render() on each component, starting this whole cycle
   #
@@ -93,6 +95,7 @@ Luca.core.Container = Luca.View.extend
     @trigger "before:components", @, @components
     @prepareComponents()
     @createComponents()
+    @trigger "before:render:components", @, @components
     @renderComponents()
     @trigger "after:components", @, @components
 
