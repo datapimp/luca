@@ -1779,6 +1779,60 @@
 }).call(this);
 (function() {
 
+  Luca.components.DevelopmentConsole = Luca.View.extend({
+    name: "development_console",
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      return Luca.View.prototype.initialize.apply(this, arguments);
+    },
+    beforeRender: function() {
+      this.$el.append(this.make("div", {
+        "class": "luca-ui-development-console"
+      }));
+      this.console_el = this.$('.luca-ui-development-console');
+      console.log("Turning into console", this.console_el, this.$el);
+      return this.console = this.console_el.console({
+        promptLabel: "Coffee> ",
+        animateScroll: true,
+        promptHistory: true,
+        commandValidate: function(line) {
+          var valid;
+          valid = true;
+          if (line === "") valid = false;
+          try {
+            if (CoffeeScript.compile(line)) {
+              valid = true;
+            } else {
+              valid = false;
+            }
+          } catch (error) {
+            valid = false;
+          }
+          return valid;
+        },
+        commandHandle: function(line) {
+          var compiled, ret, val;
+          line = _(line).strip();
+          if (!line.match(/^return/)) line = "return " + line;
+          compiled = CoffeeScript.compile(line);
+          try {
+            ret = eval(compiled);
+            val = ret != null ? JSON.stringify(ret) : true;
+            return val;
+          } catch (error) {
+            if (error.message.match(/circular structure to JSON/)) {
+              return ret.toString();
+            }
+            return error.toString();
+          }
+        }
+      });
+    }
+  });
+
+}).call(this);
+(function() {
+
   Luca.fields.ButtonField = Luca.core.Field.extend({
     form_field: true,
     readOnly: true,

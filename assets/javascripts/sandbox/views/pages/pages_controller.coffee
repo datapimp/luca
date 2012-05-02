@@ -23,6 +23,10 @@ Sandbox.views.PagesController = Luca.components.Controller.extend
       ctype: 'grid_demo'
       name: 'grid_demo'
       title: 'Collection Grid'
+    ,
+      ctype: 'development_console'
+      name: 'development_console'
+      title: "Development Console"
     ]
   ]
 

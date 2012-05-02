@@ -83,6 +83,39 @@ Column container
 .grid-12 {
   width: 96.753%;
   margin: 0; }
+.luca-ui-development-console {
+  font-size: 14px;
+  margin-top: 1em; }
+
+.luca-ui-development-console div.jquery-console-inner {
+  width: 900px;
+  height: 200px;
+  background: #efefef;
+  padding: 0.5em;
+  overflow: auto; }
+
+.luca-ui-development-console div.jquery-console-prompt-box {
+  color: #444;
+  font-family: monospace; }
+
+.luca-ui-development-console div.jquery-console-focus span.jquery-console-cursor {
+  background: #333;
+  color: #eee;
+  font-weight: bold; }
+
+.luca-ui-development-console div.jquery-console-message-error {
+  color: #ef0505;
+  font-family: sans-serif;
+  font-weight: bold;
+  padding: 0.1em; }
+
+.luca-ui-development-console div.jquery-console-message-success {
+  color: #187718;
+  font-family: monospace;
+  padding: 0.1em; }
+
+.luca-ui-development-console span.jquery-console-prompt-label {
+  font-weight: bold; }
 .luca-ui-form-view-wrapper {
   width: 100%;
   float: left;
