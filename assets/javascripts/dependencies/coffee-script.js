@@ -1,0 +1,1 @@
+../../../vendor/assets/javascripts/coffee-script.js

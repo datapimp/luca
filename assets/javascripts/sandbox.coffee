@@ -1,4 +1,4 @@
-#= require ./luca-ui-development-dependencies.coffee
+#= require ./development-console
 #= require ./sandbox/config
 #= require_tree ./sandbox/templates
 #= require_tree ./sandbox/views
