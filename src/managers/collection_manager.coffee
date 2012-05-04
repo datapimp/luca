@@ -52,13 +52,12 @@ class Luca.CollectionManager
     # model to maintain state of the collection manager
     @state = new Backbone.Model
 
-    if @collectionNames
-
+    if @initialCollections
       @state.set({loaded_collections_count: 0, collections_count: @collectionNames.length })
       @state.bind "change:loaded_collections_count", @collectionCountDidChange
 
       if @useProgressLoader
-        @loader = new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
+        @loaderView ||= new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
 
       @loadInitialCollections()
 
@@ -139,7 +138,7 @@ class Luca.CollectionManager
       collection.unbind "reset"
       @trigger "collection_loaded", collection.name
 
-    _(@collectionNames).each (name) =>
+    _(@initialCollections).each (name) =>
       collection = @getOrCreate(name)
       collection.bind "reset", ()->
         collectionDidLoad(collection)

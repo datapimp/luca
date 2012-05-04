@@ -983,17 +983,17 @@
       _.extend(this, Backbone.Events);
       instances.push(this);
       this.state = new Backbone.Model;
-      if (this.collectionNames) {
+      if (this.initialCollections) {
         this.state.set({
           loaded_collections_count: 0,
           collections_count: this.collectionNames.length
         });
         this.state.bind("change:loaded_collections_count", this.collectionCountDidChange);
         if (this.useProgressLoader) {
-          this.loader = new Luca.components.CollectionLoaderView({
+          this.loaderView || (this.loaderView = new Luca.components.CollectionLoaderView({
             manager: this,
             name: "collection_loader_view"
-          });
+          }));
         }
         this.loadInitialCollections();
       }
@@ -1065,7 +1065,7 @@
         collection.unbind("reset");
         return _this.trigger("collection_loaded", collection.name);
       };
-      return _(this.collectionNames).each(function(name) {
+      return _(this.initialCollections).each(function(name) {
         var collection;
         collection = _this.getOrCreate(name);
         collection.bind("reset", function() {
@@ -1781,16 +1781,17 @@
 
   Luca.components.DevelopmentConsole = Luca.View.extend({
     name: "development_console",
+    className: 'luca-ui-development-console',
     initialize: function(options) {
       this.options = options != null ? options : {};
-      return Luca.View.prototype.initialize.apply(this, arguments);
+      Luca.View.prototype.initialize.apply(this, arguments);
+      if (this.modal) return this.$el.addClass('luca-ui-modal');
     },
     beforeRender: function() {
       this.$el.append(this.make("div", {
-        "class": "luca-ui-development-console"
+        "class": "console-inner"
       }));
-      this.console_el = this.$('.luca-ui-development-console');
-      console.log("Turning into console", this.console_el, this.$el);
+      this.console_el = this.$('.console-inner');
       return this.console = this.console_el.console({
         promptLabel: "Coffee> ",
         animateScroll: true,
@@ -1810,15 +1811,21 @@
           }
           return valid;
         },
+        returnValue: function(val) {
+          return val != null ? val.toString() : void 0;
+        },
+        parseLine: function(line) {
+          _(line).strip();
+          line = line.replace(/^return/, ' ');
+          return "return " + line;
+        },
         commandHandle: function(line) {
-          var compiled, ret, val;
-          line = _(line).strip();
-          if (!line.match(/^return/)) line = "return " + line;
-          compiled = CoffeeScript.compile(line);
+          var compiled, ret;
+          if (line === "") return;
+          compiled = CoffeeScript.compile(this.parseLine(line));
           try {
             ret = eval(compiled);
-            val = ret != null ? JSON.stringify(ret) : true;
-            return val;
+            return this.returnValue(ret);
           } catch (error) {
             if (error.message.match(/circular structure to JSON/)) {
               return ret.toString();

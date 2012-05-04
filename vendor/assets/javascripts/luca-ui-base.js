@@ -983,17 +983,17 @@
       _.extend(this, Backbone.Events);
       instances.push(this);
       this.state = new Backbone.Model;
-      if (this.collectionNames) {
+      if (this.initialCollections) {
         this.state.set({
           loaded_collections_count: 0,
           collections_count: this.collectionNames.length
         });
         this.state.bind("change:loaded_collections_count", this.collectionCountDidChange);
         if (this.useProgressLoader) {
-          this.loader = new Luca.components.CollectionLoaderView({
+          this.loaderView || (this.loaderView = new Luca.components.CollectionLoaderView({
             manager: this,
             name: "collection_loader_view"
-          });
+          }));
         }
         this.loadInitialCollections();
       }
@@ -1065,7 +1065,7 @@
         collection.unbind("reset");
         return _this.trigger("collection_loaded", collection.name);
       };
-      return _(this.collectionNames).each(function(name) {
+      return _(this.initialCollections).each(function(name) {
         var collection;
         collection = _this.getOrCreate(name);
         collection.bind("reset", function() {

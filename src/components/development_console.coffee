@@ -1,20 +1,22 @@
 Luca.components.DevelopmentConsole = Luca.View.extend
   name: "development_console"
+  className: 'luca-ui-development-console'
 
   initialize: (@options={})->
     Luca.View::initialize.apply @, arguments
+    if @modal
+      @$el.addClass 'luca-ui-modal'
 
   beforeRender: ()->
-    @$el.append @make("div",class:"luca-ui-development-console")
+    @$el.append @make("div",class:"console-inner")
 
-    @console_el = @$('.luca-ui-development-console')
-
-    console.log "Turning into console", @console_el, @$el
+    @console_el = @$('.console-inner')
 
     @console = @console_el.console
       promptLabel: "Coffee> "
       animateScroll: true
       promptHistory: true
+      autoFocus: true
       commandValidate: (line)->
         valid = true
 
@@ -30,39 +32,24 @@ Luca.components.DevelopmentConsole = Luca.View.extend
 
         valid
 
-      commandHandle: (line)->
-        line = _( line ).strip()
-        line = "return #{ line }" unless line.match(/^return/)
+      returnValue: (val)->
+        val?.toString()
 
-        compiled = CoffeeScript.compile(line)
+      parseLine: (line)->
+        _( line ).strip()
+        line = line.replace(/^return/,' ')
+        "return #{ line }"
+
+      commandHandle: (line)->
+        return if line is ""
+
+        compiled = CoffeeScript.compile( @parseLine(line) )
+
         try
           ret = eval(compiled)
-          val = if ret? then JSON.stringify( ret ) else true
-          return val
+          return @returnValue(ret)
         catch error
           if error.message.match /circular structure to JSON/
             return ret.toString()
 
           error.toString()
-
-
-
-
-
- #          var controller2 = console2.console({
- #          promptLabel: 'JavaScript> ',
- #          commandValidate:function(line){
- #            if (line == "") return false;
- #            else return true;
- #          },
- #          commandHandle:function(line){
- #              try { var ret = eval(line);
- #                    if (typeof ret != 'undefined') return ret.toString();
- #                    else return true; }
- #              catch (e) { return e.toString(); }
- #          },
- #          animateScroll:true,
- #          promptHistory:true,
- #          welcomeMessage:'Enter some JavaScript expressions to evaluate.'
- #        });
- #        controller2.promptText('5 * 4');

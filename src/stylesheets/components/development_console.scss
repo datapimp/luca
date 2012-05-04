@@ -1,15 +1,42 @@
-      .luca-ui-development-console { font-size: 14px; margin-top:1em }
-      .luca-ui-development-console div.jquery-console-inner
-       { width:900px; height:200px; background:#efefef; padding:0.5em;
-         overflow:auto }
-      .luca-ui-development-console div.jquery-console-prompt-box
-       { color:#444; font-family:monospace; }
-      .luca-ui-development-console div.jquery-console-focus span.jquery-console-cursor
-       { background:#333; color:#eee; font-weight:bold }
-      .luca-ui-development-console div.jquery-console-message-error
-       { color:#ef0505; font-family:sans-serif; font-weight:bold;
-         padding:0.1em; }
-      .luca-ui-development-console div.jquery-console-message-success
-       { color:#187718; font-family:monospace;
-         padding:0.1em; }
-      .luca-ui-development-console span.jquery-console-prompt-label { font-weight:bold }
+.luca-ui-development-console.luca-ui-modal {
+  position: absolute;
+  left: 50%;
+  margin-left: -375px;
+  width: 750px;
+  height: 500px;
+}
+
+.luca-ui-development-console {
+  background: rgba(0,0,0,0.9);
+  font-size: 16px;
+  margin-top: 1em;
+  font-family: "Monaco";
+ .console-inner {
+    color: #fff;
+    height: 600px;
+    width: 800px;
+    max-height: 600px;
+   .jquery-console-inner {
+      height: 599px;
+      width: 799px;
+      overflow: auto;
+      padding: 0.5em;
+   }
+
+   .jquery-console-focus .jquery-console-cursor {
+      font-weight: bold;
+      color: #fff;
+      background: rgba(255,255,255,0.2);
+   }
+
+   .jquery-console-message-error {
+      font-weight: bold;
+      color: #ef0505;
+      padding: 0.1em;
+   }
+
+   .jquery-console-prompt-label {
+      font-weight: bold;
+   }
+ }
+}
