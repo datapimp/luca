@@ -78,7 +78,7 @@ describe "Loading collections", ->
       sampleSpy.call()
       @reset([{id: 4}])
 
-  manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections, collectionNames: ["example", "sample"])
+  manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections, initialCollections: ["example", "sample"])
 
   it "should have example collection created", ->
     collection = manager.get("example")

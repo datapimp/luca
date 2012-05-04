@@ -53,7 +53,7 @@ class Luca.CollectionManager
     @state = new Backbone.Model
 
     if @initialCollections
-      @state.set({loaded_collections_count: 0, collections_count: @collectionNames.length })
+      @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
       @state.bind "change:loaded_collections_count", @collectionCountDidChange
 
       if @useProgressLoader

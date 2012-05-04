@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.7",
+    VERSION: "0.7.9",
     core: {},
     containers: {},
     components: {},
@@ -986,7 +986,7 @@
       if (this.initialCollections) {
         this.state.set({
           loaded_collections_count: 0,
-          collections_count: this.collectionNames.length
+          collections_count: this.initialCollections.length
         });
         this.state.bind("change:loaded_collections_count", this.collectionCountDidChange);
         if (this.useProgressLoader) {
@@ -1796,6 +1796,7 @@
         promptLabel: "Coffee> ",
         animateScroll: true,
         promptHistory: true,
+        autoFocus: true,
         commandValidate: function(line) {
           var valid;
           valid = true;
