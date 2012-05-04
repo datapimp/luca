@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.9",
+    VERSION: "0.7.91",
     core: {},
     containers: {},
     components: {},
@@ -2588,7 +2588,7 @@
       return this.header.append("<tr>" + headers + "</tr>");
     },
     render_row: function(row, row_index) {
-      var alt_class, cells, model_id, _ref,
+      var altClass, cells, model_id, _ref,
         _this = this;
       model_id = (row != null ? row.get : void 0) && (row != null ? row.attributes : void 0) ? row.get('id') : '';
       this.trigger("before:render:row", row, row_index);
@@ -2600,9 +2600,9 @@
         return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
       if (this.alternateRowClasses) {
-        alt_class = row_index % 2 === 0 ? "even" : "odd";
+        altClass = row_index % 2 === 0 ? "even" : "odd";
       }
-      return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='grid-view-row " + alt_class + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
+      return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='grid-view-row " + altClass + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
     },
     cell_renderer: function(row, column, columnIndex) {
       var source;

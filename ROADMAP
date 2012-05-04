@@ -1,1 +1,2 @@
 - Use Backbone.Model as state machine for views and collections
+- Make DevelopmentConsole compile function.toString output back to coffee
