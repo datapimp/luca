@@ -176,6 +176,7 @@ Luca.components.GridView = Luca.View.extend
 
       "<td style='#{ style }' class='column-#{ col_index }'>#{ display }</td>"
 
+    altClass = ''
     if @alternateRowClasses
       altClass = if row_index % 2 is 0 then "even" else "odd"
 

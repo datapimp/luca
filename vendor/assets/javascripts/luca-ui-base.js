@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.91",
+    VERSION: "0.7.92",
     core: {},
     containers: {},
     components: {},

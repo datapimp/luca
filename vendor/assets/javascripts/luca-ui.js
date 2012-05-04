@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.91",
+    VERSION: "0.7.92",
     core: {},
     containers: {},
     components: {},
@@ -2599,6 +2599,7 @@
         display = _.isUndefined(value) ? "" : value;
         return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
+      altClass = '';
       if (this.alternateRowClasses) {
         altClass = row_index % 2 === 0 ? "even" : "odd";
       }
