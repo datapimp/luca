@@ -163,6 +163,9 @@ Luca.components.GridView = Luca.View.extend
 
     @header.append("<tr>#{ headers }</tr>")
 
+  getRowEl: (id)->
+    @$ "[data-record-id=#{ id }]", 'table'
+
   render_row: (row,row_index)->
     model_id = if row?.get and row?.attributes then row.get('id') else ''
 

@@ -33,6 +33,7 @@ Luca.components.DevelopmentConsole = Luca.View.extend
         valid
 
       returnValue: (val)->
+        return "undefined" unless val?
         val?.toString()
 
       parseLine: (line)->
