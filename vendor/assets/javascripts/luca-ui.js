@@ -470,6 +470,43 @@
 }).call(this);
 (function() {
 
+  Luca.Model = Backbone.Model.extend({
+    initialize: function() {
+      var attr, dependencies, _ref, _results,
+        _this = this;
+      Backbone.Model.prototype.initialize(this, arguments);
+      if (_.isUndefined(this.computed)) return;
+      _ref = this.computed;
+      _results = [];
+      for (attr in _ref) {
+        dependencies = _ref[attr];
+        this.on("change:" + attr, function() {
+          var param;
+          param = {};
+          param["_" + attr] = _this[attr].call(_this);
+          return _this.set(param);
+        });
+        _results.push(_(dependencies).each(function(dep) {
+          _this.on("change:" + dep, function() {
+            return _this.trigger("change:" + attr);
+          });
+          if (_this.has(dep)) return _this.trigger("change:" + attr);
+        }));
+      }
+      return _results;
+    },
+    get: function(attr) {
+      var _ref;
+      if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
+        attr = "_" + attr;
+      }
+      return Backbone.Model.prototype.get.call(this, attr);
+    }
+  });
+
+}).call(this);
+(function() {
+
   Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend({
     initialize: function(models, options) {
       var table,

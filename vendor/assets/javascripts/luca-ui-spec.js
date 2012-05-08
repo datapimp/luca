@@ -470,6 +470,43 @@
 }).call(this);
 (function() {
 
+  Luca.Model = Backbone.Model.extend({
+    initialize: function() {
+      var attr, dependencies, _ref, _results,
+        _this = this;
+      Backbone.Model.prototype.initialize(this, arguments);
+      if (_.isUndefined(this.computed)) return;
+      _ref = this.computed;
+      _results = [];
+      for (attr in _ref) {
+        dependencies = _ref[attr];
+        this.on("change:" + attr, function() {
+          var param;
+          param = {};
+          param["_" + attr] = _this[attr].call(_this);
+          return _this.set(param);
+        });
+        _results.push(_(dependencies).each(function(dep) {
+          _this.on("change:" + dep, function() {
+            return _this.trigger("change:" + attr);
+          });
+          if (_this.has(dep)) return _this.trigger("change:" + attr);
+        }));
+      }
+      return _results;
+    },
+    get: function(attr) {
+      var _ref;
+      if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
+        attr = "_" + attr;
+      }
+      return Backbone.Model.prototype.get.call(this, attr);
+    }
+  });
+
+}).call(this);
+(function() {
+
   Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend({
     initialize: function(models, options) {
       var table,
@@ -3653,6 +3690,84 @@
 (function() {
 
 
+
+}).call(this);
+(function() {
+
+  describe("Luca.Model with computed attribute", function() {
+    var App;
+    App = {
+      models: {}
+    };
+    App.models.Sample = Luca.Model.extend({
+      computed: {
+        fullName: ['firstName', 'lastName']
+      },
+      fullName: function() {
+        return "" + (this.get("firstName")) + " " + (this.get("lastName"));
+      }
+    });
+    App.models.SampleWithoutCallback = Luca.Model.extend({
+      computed: {
+        fullName: ['firstName', 'lastName']
+      }
+    });
+    it("should have it undefined if dependences are not set", function() {
+      var model;
+      model = new App.models.Sample;
+      return expect(model.get("fullName")).toEqual(void 0);
+    });
+    it("should have it undefined if callback function is not present", function() {
+      var model;
+      model = new App.models.SampleWithoutCallback;
+      return expect(model.get("fullName")).toEqual(void 0);
+    });
+    it("should not call it's callback if dependences are not set", function() {
+      var model, spy;
+      model = new App.models.Sample;
+      spy = sinon.spy(model, "fullName");
+      return expect(spy.called).toEqual(false);
+    });
+    it("should not call it's callback if dependencies stay the same", function() {
+      var model, spy;
+      model = new App.models.Sample;
+      model.set({
+        firstName: "Nickolay",
+        lastName: "Schwarz"
+      });
+      spy = sinon.spy(model, "fullName");
+      model.set({
+        lastName: "Schwarz"
+      });
+      return expect(spy.called).toEqual(false);
+    });
+    it("should call it's callback when dependencies change", function() {
+      var model, spy;
+      model = new App.models.Sample;
+      spy = sinon.spy(model, "fullName");
+      model.set({
+        firstName: "Nickolay"
+      });
+      return expect(spy.called).toEqual(true);
+    });
+    it("should be gettable as a value of the callback", function() {
+      var model;
+      model = new App.models.Sample;
+      model.set({
+        firstName: "Nickolay",
+        lastName: "Schwarz"
+      });
+      return expect(model.get("fullName")).toEqual(model.fullName());
+    });
+    return it("should have it set on constructor if dependencies are supplied", function() {
+      var model;
+      model = new App.models.Sample({
+        firstName: "Nickolay",
+        lastName: "Schwarz"
+      });
+      return expect(model.get("fullName")).toEqual(model.fullName());
+    });
+  });
 
 }).call(this);
 (function() {
