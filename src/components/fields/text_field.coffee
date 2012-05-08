@@ -16,6 +16,7 @@ Luca.fields.TextField = Luca.core.Field.extend
     @input_id ||= _.uniqueId('field') 
     @input_name ||= @name 
     @label ||= @name
+    @input_class ||= @class
 
     if @prepend
       @$el.addClass('input-prepend')  

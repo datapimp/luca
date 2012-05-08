@@ -288,7 +288,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n<span class=\'add-on\'>\n  ', addOn ,'\n</span>\n'); } __p.push('\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n<span class=\'add-on\'>\n  ', addOn ,'\n</span>\n'); } __p.push('\n<input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1813,6 +1813,7 @@
           return valid;
         },
         returnValue: function(val) {
+          if (val == null) return "undefined";
           return val != null ? val.toString() : void 0;
         },
         parseLine: function(line) {
@@ -2130,6 +2131,7 @@
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
+      this.input_class || (this.input_class = this["class"]);
       if (this.prepend) {
         this.$el.addClass('input-prepend');
         this.addOn = this.prepend;
@@ -2586,6 +2588,9 @@
         return "<th style='" + style + "' class='column-" + column_index + "'>" + column.header + "</th>";
       });
       return this.header.append("<tr>" + headers + "</tr>");
+    },
+    getRowEl: function(id) {
+      return this.$("[data-record-id=" + id + "]", 'table');
     },
     render_row: function(row, row_index) {
       var altClass, cells, model_id, _ref,
