@@ -47,4 +47,4 @@ describe "Luca.Model with computed attribute", ->
 
   it "should have it set on constructor if dependencies are supplied", ->
     model = new App.models.Sample({firstName:"Nickolay", lastName: "Schwarz"})
-    expect(model.get("fullName")).toEqual(model.fullName())
+    expect(model.get("fullName")).toEqual('Nickolay Schwarz')

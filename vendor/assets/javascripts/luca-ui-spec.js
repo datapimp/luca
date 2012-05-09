@@ -476,15 +476,13 @@
         _this = this;
       Backbone.Model.prototype.initialize(this, arguments);
       if (_.isUndefined(this.computed)) return;
+      this._computed = {};
       _ref = this.computed;
       _results = [];
       for (attr in _ref) {
         dependencies = _ref[attr];
         this.on("change:" + attr, function() {
-          var param;
-          param = {};
-          param["_" + attr] = _this[attr].call(_this);
-          return _this.set(param);
+          return _this._computed[attr] = _this[attr].call(_this);
         });
         _results.push(_(dependencies).each(function(dep) {
           _this.on("change:" + dep, function() {
@@ -498,9 +496,10 @@
     get: function(attr) {
       var _ref;
       if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
-        attr = "_" + attr;
+        return this._computed[attr];
+      } else {
+        return Backbone.Model.prototype.get.call(this, attr);
       }
-      return Backbone.Model.prototype.get.call(this, attr);
     }
   });
 
@@ -3765,7 +3764,7 @@
         firstName: "Nickolay",
         lastName: "Schwarz"
       });
-      return expect(model.get("fullName")).toEqual(model.fullName());
+      return expect(model.get("fullName")).toEqual('Nickolay Schwarz');
     });
   });
 

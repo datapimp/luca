@@ -10,11 +10,11 @@ Luca.Model = Backbone.Model.extend
 
     return if _.isUndefined(@computed)
 
+    @_computed = {}
+
     for attr, dependencies of @computed
       @on "change:#{attr}", ()=>
-        param = {}
-        param["_#{attr}"] = @[attr].call @
-        @set(param)
+        @_computed[attr] = @[attr].call @
 
       _(dependencies).each (dep)=>
         @on "change:#{dep}", ()=>
@@ -22,5 +22,7 @@ Luca.Model = Backbone.Model.extend
         @trigger "change:#{attr}" if @has(dep)
 
   get: (attr)->
-    attr = "_#{attr}" if @computed?.hasOwnProperty(attr)
-    Backbone.Model::get.call @, attr
+    if @computed?.hasOwnProperty(attr)
+      @_computed[attr]
+    else
+      Backbone.Model::get.call @, attr
