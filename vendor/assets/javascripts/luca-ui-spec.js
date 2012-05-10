@@ -464,6 +464,11 @@
           throw e;
         }
       });
+    },
+    registerEvent: function(selector, handler) {
+      this.events || (this.events = {});
+      this.events[selector] = handler;
+      return this.delegateEvents();
     }
   });
 

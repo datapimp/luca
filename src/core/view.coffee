@@ -190,3 +190,8 @@ _.extend Luca.View.prototype,
       catch e
         console.log "Error Binding To Collection in registerCollectionEvents", @
         throw e
+
+  registerEvent: (selector, handler)->
+    @events ||= {}
+    @events[ selector ] = handler
+    @delegateEvents()
