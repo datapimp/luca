@@ -82,7 +82,7 @@ Luca.components.GridView = Luca.View.extend
   defaultHeight: 285
 
   setDimensions: (offset)->
-    @height ||= @defaultHeigh         t
+    @height ||= @defaultHeight
 
     $('.luca-ui-g-view-body', @el).height( @height )
     $('tbody.scrollable', @el).height( @height - 23 )

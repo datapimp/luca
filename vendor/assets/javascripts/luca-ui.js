@@ -2542,7 +2542,7 @@
     defaultHeight: 285,
     setDimensions: function(offset) {
       var _this = this;
-      this.height || (this.height = this.defaultHeigh(t));
+      this.height || (this.height = this.defaultHeight);
       $('.luca-ui-g-view-body', this.el).height(this.height);
       $('tbody.scrollable', this.el).height(this.height - 23);
       this.container_width = (function() {
