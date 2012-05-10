@@ -1,7 +1,7 @@
 _.mixin( _.string )
 
 window.Luca =
-  VERSION: "0.7.93"
+  VERSION: "0.8"
   core: {}
   containers: {}
   components: {}

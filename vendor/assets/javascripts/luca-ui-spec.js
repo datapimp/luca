@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.92",
+    VERSION: "0.8",
     core: {},
     containers: {},
     components: {},
@@ -368,16 +368,18 @@
         }));
         if (!this.deferrable_trigger) this.immediate_trigger = true;
         if (this.immediate_trigger === true) {
-          return this.deferrable.fetch();
+          this.deferrable.fetch();
         } else {
-          return this.bind(this.deferrable_trigger, _.once(function() {
+          this.bind(this.deferrable_trigger, _.once(function() {
             return _this.deferrable.fetch();
           }));
         }
+        return this;
       } else {
         this.trigger("before:render", this);
         _base.apply(this, arguments);
-        return this.trigger("after:render", this);
+        this.trigger("after:render", this);
+        return this;
       }
     };
     return Luca.View.originalExtend.apply(this, [definition]);
@@ -3030,190 +3032,13 @@
       expect(values.field1).toEqual("yes");
       return expect(values.field2).toEqual("no");
     });
-    it("should sync the model with the form field values", function() {
+    return it("should sync the model with the form field values", function() {
       this.form.render();
       this.form.loadModel(this.model);
       this.form.setValues({
         field1: "yes"
       });
       return expect(this.form.getValues().field1).toEqual("yes");
-    });
-    describe("Loading A New Model", function() {
-      beforeEach(function() {
-        this.form.spiedEvents = {};
-        this.form.render();
-        this.model.beforeFormLoad = sinon.spy();
-        return this.form.loadModel(this.model);
-      });
-      it("should call before form load", function() {
-        return expect(this.model.beforeFormLoad).toHaveBeenCalled();
-      });
-      it("should have triggered before load", function() {
-        return expect(this.form).toHaveTriggered("before:load");
-      });
-      it("should have triggered after load", function() {
-        return expect(this.form).toHaveTriggered("after:load");
-      });
-      it("should have triggered before:load:new", function() {
-        return expect(this.form).toHaveTriggered("before:load:new");
-      });
-      return it("should have triggered after:load:new", function() {
-        return expect(this.form).toHaveTriggered("after:load:new");
-      });
-    });
-    describe("Loading An Existing Model", function() {
-      beforeEach(function() {
-        this.form.spiedEvents = {};
-        this.form.render();
-        this.model.set({
-          id: "one"
-        });
-        this.model.beforeFormLoad = sinon.spy();
-        return this.form.loadModel(this.model);
-      });
-      it("should call before form load", function() {
-        return expect(this.model.beforeFormLoad).toHaveBeenCalled();
-      });
-      it("should have triggered before:load:existing", function() {
-        return expect(this.form).toHaveTriggered("before:load:existing");
-      });
-      it("should have triggered after:load:new", function() {
-        return expect(this.form).toHaveTriggered("after:load:existing");
-      });
-      return it("should apply the form values in the currentModel call if specified", function() {
-        this.form.getField("field1").setValue("sup baby?");
-        expect(this.form.currentModel().get("field1")).not.toEqual("sup baby?");
-        this.form.getField("field1").setValue("sup baby boo?");
-        expect(this.form.currentModel({
-          refresh: false
-        }).get("field1")).not.toEqual("sup baby boo?");
-        return expect(this.form.currentModel({
-          refresh: true
-        }).get("field1")).toEqual("sup baby boo?");
-      });
-    });
-    describe("The Fields Accessors", function() {
-      beforeEach(function() {
-        return this.form.render();
-      });
-      it("should provide access to fields", function() {
-        return expect(this.form.getFields().length).toEqual(6);
-      });
-      return it("should allow me to access a field by its name", function() {
-        return expect(this.form.getField("field1")).toBeDefined();
-      });
-    });
-    describe("The Set Values Function", function() {
-      beforeEach(function() {
-        this.form.render();
-        return this.form.loadModel(this.model);
-      });
-      it("should set the values on the field", function() {
-        this.form.setValues({
-          field1: "andyadontstop"
-        });
-        return expect(this.form.getField("field1").getValue()).toEqual("andyadontstop");
-      });
-      it("should set the values on the model", function() {
-        this.form.setValues({
-          field1: "krs-one"
-        });
-        expect(this.form.getField("field1").getValue()).toEqual("krs-one");
-        return expect(this.model.get("field1")).toEqual("krs-one");
-      });
-      return it("should skip syncing with the model if passed silent", function() {
-        this.form.setValues({
-          field1: "yesyesyall"
-        }, {
-          silent: true
-        });
-        expect(this.form.getField("field1").getValue()).toEqual("yesyesyall");
-        return expect(this.model.get("field1")).not.toEqual("yesyesyall");
-      });
-    });
-    describe("The Get Values Function", function() {
-      beforeEach(function() {
-        this.model.set({
-          field1: "one",
-          field2: "two",
-          field3: void 0,
-          field4: ""
-        });
-        this.form.render();
-        this.form.loadModel(this.model);
-        return this.values = this.form.getValues();
-      });
-      it("should skip the button fields by default", function() {
-        return expect(_(this.values).keys()).not.toContain("field5");
-      });
-      it("should include the button fields if asked", function() {
-        var values;
-        values = this.form.getValues({
-          skip_buttons: false
-        });
-        return expect(_(values).keys()).toContain("field5");
-      });
-      it("should skip blank fields by default", function() {
-        var values;
-        values = this.form.getValues();
-        return expect(_(values).keys()).not.toContain("field4");
-      });
-      it("should include blank fields if asked", function() {
-        var values;
-        values = this.form.getValues({
-          reject_blank: false
-        });
-        return expect(_(values).keys()).toContain("field4");
-      });
-      return it("should skip blank id fields", function() {
-        return expect(_(this.values).keys()).not.toContain("id");
-      });
-    });
-    return describe("Events", function() {
-      beforeEach(function() {
-        this.form.render();
-        return this.form.loadModel(this.model);
-      });
-      describe("Submit Handlers", function() {
-        beforeEach(function() {
-          return this.form.spiedEvents = {};
-        });
-        it("should trigger after submit events", function() {
-          this.form.submit_success_handler(this.model, {
-            success: true
-          });
-          expect(this.form).toHaveTriggered("after:submit");
-          return expect(this.form).toHaveTriggered("after:submit:success");
-        });
-        it("should trigger after submit error events", function() {
-          this.form.submit_success_handler(this.model, {
-            success: false
-          });
-          expect(this.form).toHaveTriggered("after:submit");
-          return expect(this.form).toHaveTriggered("after:submit:error");
-        });
-        return it("should trigger fatal error events", function() {
-          this.form.submit_fatal_error_handler();
-          expect(this.form).toHaveTriggered("after:submit");
-          return expect(this.form).toHaveTriggered("after:submit:fatal_error");
-        });
-      });
-      return describe("Resetting the Form", function() {
-        it("should trigger before and after reset", function() {
-          this.form.resetHandler({
-            currentTarget: 1
-          });
-          expect(this.form).toHaveTriggered("before:reset");
-          return expect(this.form).toHaveTriggered("after:reset");
-        });
-        return it("should call reset", function() {
-          this.form.reset = sinon.spy();
-          this.form.resetHandler({
-            currentTarget: 1
-          });
-          return expect(this.form.reset).toHaveBeenCalled();
-        });
-      });
     });
   });
 

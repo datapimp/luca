@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.7.92",
+    VERSION: "0.8",
     core: {},
     containers: {},
     components: {},
@@ -368,16 +368,18 @@
         }));
         if (!this.deferrable_trigger) this.immediate_trigger = true;
         if (this.immediate_trigger === true) {
-          return this.deferrable.fetch();
+          this.deferrable.fetch();
         } else {
-          return this.bind(this.deferrable_trigger, _.once(function() {
+          this.bind(this.deferrable_trigger, _.once(function() {
             return _this.deferrable.fetch();
           }));
         }
+        return this;
       } else {
         this.trigger("before:render", this);
         _base.apply(this, arguments);
-        return this.trigger("after:render", this);
+        this.trigger("after:render", this);
+        return this;
       }
     };
     return Luca.View.originalExtend.apply(this, [definition]);
