@@ -1,9 +1,9 @@
-.luca-ui-grid-view-wrapper
-  .grid-view-header
+.luca-ui-g-view-wrapper
+  .g-view-header
     .toolbar-container.top
-  .grid-view-body
-    %table.luca-ui-grid-view.scrollable-table{:width=>"100%",:cellpadding=>0,:cellspacing=>0}
+  .luca-ui-g-view-body
+    %table.luca-ui-g-view.scrollable-table{:width=>"100%",:cellpadding=>0,:cellspacing=>0}
       %thead.fixed
       %tbody.scrollable
-  .grid-view-footer
+  .luca-ui-g-view-footer
     .toolbar-container.bottom

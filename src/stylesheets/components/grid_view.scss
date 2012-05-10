@@ -1,17 +1,17 @@
 
-.scrollable-grid-view {
+.scrollable-g-view {
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
-  .grid-view-body {
+  .luca-ui-g-view-body {
     clear: both;
     overflow: auto;
   }
 
   /* Reset overflow value to hidden for all non-IE browsers. */
-  .grid-view-body {
+  .luca-ui-g-view-body {
     overflow: hidden;
   }
-  
-  .grid-view-body .empty-text-wrapper {
+
+  .luca-ui-g-view-body .empty-text-wrapper {
     display: block;
     margin: 10px auto;
     width: 30%;
@@ -22,12 +22,12 @@
     }
   }
   /* define width of table. IE browsers only                 */
-  .grid-view-body table {
+  .luca-ui-g-view-body table {
   }
 
   /* define width of table. Add 16px to width for scrollbar.           */
   /* All other non-IE browsers.                                        */
-  .grid-view-body table {
+  .luca-ui-g-view-body table {
   }
 
   /* set table header to a fixed position. WinIE 6.x only                                       */
@@ -93,7 +93,7 @@
 
 }
 
-.grid-view-footer {
+.luca-ui-g-view-footer {
   .toolbar-container {
     float: left;
     width: 100%;

@@ -15,6 +15,10 @@
 
 .luca-ui-tab-view.tabs-left {
   .tab-selector-container {
+    ul.nav-tabs {
+      padding: 0px;
+    }
+
     float: left;
   }
   .tab-content {

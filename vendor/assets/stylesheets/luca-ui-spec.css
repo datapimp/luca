@@ -147,7 +147,7 @@ Column container
     margin: 0px auto; }
     .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field, .form-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
       float: left; }
-.scrollable-grid-view {
+.scrollable-g-view {
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
   /* Reset overflow value to hidden for all non-IE browsers. */
   /* define width of table. IE browsers only                 */
@@ -173,55 +173,55 @@ Column container
   /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
   /* All other non-IE browsers.                                            */
   /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */ }
-  .scrollable-grid-view .grid-view-body {
+  .scrollable-g-view .luca-ui-g-view-body {
     clear: both;
     overflow: auto; }
-  .scrollable-grid-view .grid-view-body {
+  .scrollable-g-view .luca-ui-g-view-body {
     overflow: hidden; }
-  .scrollable-grid-view .grid-view-body .empty-text-wrapper {
+  .scrollable-g-view .luca-ui-g-view-body .empty-text-wrapper {
     display: block;
     margin: 10px auto;
     width: 30%;
     padding: 50px;
     text-align: center; }
-    .scrollable-grid-view .grid-view-body .empty-text-wrapper p {
+    .scrollable-g-view .luca-ui-g-view-body .empty-text-wrapper p {
       color: #aaa; }
-  .scrollable-grid-view thead.fixed tr {
+  .scrollable-g-view thead.fixed tr {
     position: relative; }
-  .scrollable-grid-view thead.fixed tr {
+  .scrollable-g-view thead.fixed tr {
     display: block; }
-  .scrollable-grid-view thead.fixed th {
+  .scrollable-g-view thead.fixed th {
     font-weight: bold;
     text-align: left; }
-  .scrollable-grid-view thead.fixed a, .scrollable-grid-view thead.fixed a:link, .scrollable-grid-view thead.fixed a:visited {
+  .scrollable-g-view thead.fixed a, .scrollable-g-view thead.fixed a:link, .scrollable-g-view thead.fixed a:visited {
     color: #FFF;
     display: block;
     text-decoration: none;
     width: 100%; }
-  .scrollable-grid-view thead.fixed a:hover {
+  .scrollable-g-view thead.fixed a:hover {
     color: #FFF;
     display: block;
     text-decoration: underline;
     width: 100%; }
-  .scrollable-grid-view tbody.scrollable {
+  .scrollable-g-view tbody.scrollable {
     display: block;
     overflow: auto;
     width: 100%; }
-  .scrollable-grid-view thead.fixed th {
+  .scrollable-g-view thead.fixed th {
     padding: 5px; }
-  .scrollable-grid-view tbody.scrollable td {
+  .scrollable-g-view tbody.scrollable td {
     padding: 5px; }
 
-.grid-view-footer .toolbar-container {
+.luca-ui-g-view-footer .toolbar-container {
   float: left;
   width: 100%;
   clear: both;
   display: block; }
-  .grid-view-footer .toolbar-container .luca-ui-toolbar {
+  .luca-ui-g-view-footer .toolbar-container .luca-ui-toolbar {
     display: block;
     float: right;
     clear: right; }
-    .grid-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
+    .luca-ui-g-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
       float: left; }
 .luca-ui-toolbar-wrapper {
   clear: both;
@@ -246,6 +246,8 @@ Column container
 
 .luca-ui-tab-view.tabs-left .tab-selector-container {
   float: left; }
+  .luca-ui-tab-view.tabs-left .tab-selector-container ul.nav-tabs {
+    padding: 0px; }
 .luca-ui-tab-view.tabs-left .tab-content {
   float: left; }
 

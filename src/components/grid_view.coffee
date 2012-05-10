@@ -1,13 +1,15 @@
 Luca.components.GridView = Luca.View.extend
-  events:
-    "dblclick .grid-view-row" : "double_click_handler"
-    "click .grid-view-row": "click_handler"
+  autoBindEventHandlers: true
 
-  className: 'luca-ui-grid-view'
+  events:
+    "dblclick .luca-ui-g-row" : "double_click_handler"
+    "click .luca-ui-g-row": "click_handler"
+
+  className: 'luca-ui-g-view'
 
   scrollable: true
 
-  emptyText: 'No Results To display'
+  emptyText: 'No Results To display.'
 
   # available options are striped, condensed, bordered
   # or any combination of these, split up by space
@@ -22,6 +24,8 @@ Luca.components.GridView = Luca.View.extend
     "row:click",
     "after:collection:load"
   ]
+
+  rowClass: "luca-ui-g-row"
 
   initialize: (@options={})->
     _.extend @, @options
@@ -40,11 +44,11 @@ Luca.components.GridView = Luca.View.extend
   beforeRender: ()->
     @trigger "before:grid:render", @
 
-    @$el.addClass 'scrollable-grid-view' if @scrollable
+    @$el.addClass 'scrollable-g-view' if @scrollable
 
     @$el.html Luca.templates["components/grid_view"]()
 
-    @table  = $('table.luca-ui-grid-view', @el)
+    @table  = $('table.luca-ui-g-view', @el)
     @header = $("thead", @table)
     @body   = $("tbody", @table)
     @footer = $("tfoot", @table)
@@ -74,19 +78,23 @@ Luca.components.GridView = Luca.View.extend
       toolbar.container = @toolbarContainers( toolbar.position )
       toolbar.render()
 
-  setDimensions: (offset)->
-    @height ||= 285
+  defaultWidth: 756
+  defaultHeight: 285
 
-    $('.grid-view-body', @el).height( @height )
+  setDimensions: (offset)->
+    @height ||= @defaultHeigh         t
+
+    $('.luca-ui-g-view-body', @el).height( @height )
     $('tbody.scrollable', @el).height( @height - 23 )
 
     @container_width = do => $(@container).width()
-    @width = if @container_width > 0 then @container_width else 756
+
+    @width = if @container_width > 0 then @container_width else @defaultWidth
 
     #@width += offset if offset
 
-    $('.grid-view-body', @el).width( @width )
-    $('.grid-view-body table', @el).width( @width )
+    $('.luca-ui-g-view-body', @el).width( @width )
+    $('.luca-ui-g-view-body table', @el).width( @width )
 
     @setDefaultColumnWidths()
 
@@ -94,8 +102,8 @@ Luca.components.GridView = Luca.View.extend
     difference = newWidth - @width
     @width = newWidth
 
-    $('.grid-view-body', @el).width( @width )
-    $('.grid-view-body table', @el).width( @width )
+    $('.luca-ui-g-view-body', @el).width( @width )
+    $('.luca-ui-g-view-body table', @el).width( @width )
 
     if @columns.length > 0
       distribution = difference / @columns.length
@@ -167,6 +175,8 @@ Luca.components.GridView = Luca.View.extend
     @$ "[data-record-id=#{ id }]", 'table'
 
   render_row: (row,row_index)->
+    rowClass = @rowClass
+
     model_id = if row?.get and row?.attributes then row.get('id') else ''
 
     @trigger "before:render:row", row, row_index
@@ -183,7 +193,7 @@ Luca.components.GridView = Luca.View.extend
     if @alternateRowClasses
       altClass = if row_index % 2 is 0 then "even" else "odd"
 
-    @body?.append("<tr data-record-id='#{ model_id }' data-row-index='#{ row_index }' class='grid-view-row #{ altClass }' id='row-#{ row_index }'>#{ cells }</tr>")
+    @body?.append("<tr data-record-id='#{ model_id }' data-row-index='#{ row_index }' class='#{ rowClass } #{ altClass }' id='row-#{ row_index }'>#{ cells }</tr>")
 
   cell_renderer: (row, column, columnIndex )->
     if _.isFunction column.renderer
@@ -206,7 +216,7 @@ Luca.components.GridView = Luca.View.extend
     record = @collection.at( rowIndex )
     @trigger "row:click", @, record, rowIndex
 
-    $('.grid-view-row', @body ).removeClass('selected-row')
+    $(".#{ @rowClass }", @body ).removeClass('selected-row')
     me.addClass('selected-row')
 
 Luca.register "grid_view","Luca.components.GridView"

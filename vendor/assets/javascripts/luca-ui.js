@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.8",
+    VERSION: "0.8.05",
     core: {},
     containers: {},
     components: {},
@@ -236,7 +236,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-grid-view-wrapper\'>\n  <div class=\'grid-view-header\'>\n    <div class=\'toolbar-container top\'></div>\n  </div>\n  <div class=\'grid-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-grid-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'grid-view-footer\'>\n    <div class=\'toolbar-container bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'>\n    <div class=\'toolbar-container top\'></div>\n  </div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'>\n    <div class=\'toolbar-container bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -2482,15 +2482,17 @@
 (function() {
 
   Luca.components.GridView = Luca.View.extend({
+    autoBindEventHandlers: true,
     events: {
-      "dblclick .grid-view-row": "double_click_handler",
-      "click .grid-view-row": "click_handler"
+      "dblclick .luca-ui-g-row": "double_click_handler",
+      "click .luca-ui-g-row": "click_handler"
     },
-    className: 'luca-ui-grid-view',
+    className: 'luca-ui-g-view',
     scrollable: true,
-    emptyText: 'No Results To display',
+    emptyText: 'No Results To display.',
     tableStyle: 'striped',
     hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click", "after:collection:load"],
+    rowClass: "luca-ui-g-row",
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -2508,9 +2510,9 @@
       var _ref,
         _this = this;
       this.trigger("before:grid:render", this);
-      if (this.scrollable) this.$el.addClass('scrollable-grid-view');
+      if (this.scrollable) this.$el.addClass('scrollable-g-view');
       this.$el.html(Luca.templates["components/grid_view"]());
-      this.table = $('table.luca-ui-grid-view', this.el);
+      this.table = $('table.luca-ui-g-view', this.el);
       this.header = $("thead", this.table);
       this.body = $("tbody", this.table);
       this.footer = $("tfoot", this.table);
@@ -2536,17 +2538,19 @@
         return toolbar.render();
       });
     },
+    defaultWidth: 756,
+    defaultHeight: 285,
     setDimensions: function(offset) {
       var _this = this;
-      this.height || (this.height = 285);
-      $('.grid-view-body', this.el).height(this.height);
+      this.height || (this.height = this.defaultHeigh(t));
+      $('.luca-ui-g-view-body', this.el).height(this.height);
       $('tbody.scrollable', this.el).height(this.height - 23);
       this.container_width = (function() {
         return $(_this.container).width();
       })();
-      this.width = this.container_width > 0 ? this.container_width : 756;
-      $('.grid-view-body', this.el).width(this.width);
-      $('.grid-view-body table', this.el).width(this.width);
+      this.width = this.container_width > 0 ? this.container_width : this.defaultWidth;
+      $('.luca-ui-g-view-body', this.el).width(this.width);
+      $('.luca-ui-g-view-body table', this.el).width(this.width);
       return this.setDefaultColumnWidths();
     },
     resize: function(newWidth) {
@@ -2554,8 +2558,8 @@
         _this = this;
       difference = newWidth - this.width;
       this.width = newWidth;
-      $('.grid-view-body', this.el).width(this.width);
-      $('.grid-view-body table', this.el).width(this.width);
+      $('.luca-ui-g-view-body', this.el).width(this.width);
+      $('.luca-ui-g-view-body table', this.el).width(this.width);
       if (this.columns.length > 0) {
         distribution = difference / this.columns.length;
         return _(this.columns).each(function(col, index) {
@@ -2636,8 +2640,9 @@
       return this.$("[data-record-id=" + id + "]", 'table');
     },
     render_row: function(row, row_index) {
-      var altClass, cells, model_id, _ref,
+      var altClass, cells, model_id, rowClass, _ref,
         _this = this;
+      rowClass = this.rowClass;
       model_id = (row != null ? row.get : void 0) && (row != null ? row.attributes : void 0) ? row.get('id') : '';
       this.trigger("before:render:row", row, row_index);
       cells = _(this.columns).map(function(column, col_index) {
@@ -2651,7 +2656,7 @@
       if (this.alternateRowClasses) {
         altClass = row_index % 2 === 0 ? "even" : "odd";
       }
-      return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='grid-view-row " + altClass + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
+      return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='" + rowClass + " " + altClass + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
     },
     cell_renderer: function(row, column, columnIndex) {
       var source;
@@ -2677,7 +2682,7 @@
       rowIndex = my.data('row-index');
       record = this.collection.at(rowIndex);
       this.trigger("row:click", this, record, rowIndex);
-      $('.grid-view-row', this.body).removeClass('selected-row');
+      $("." + this.rowClass, this.body).removeClass('selected-row');
       return me.addClass('selected-row');
     }
   });
