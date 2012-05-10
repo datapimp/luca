@@ -90,6 +90,7 @@ Luca.components.GridView = Luca.View.extend
     @container_width = do => $(@container).width()
 
     @width = if @container_width > 0 then @container_width else @defaultWidth
+    @width = _([@width, (@maxWidth || @width)]).max()
 
     #@width += offset if offset
 

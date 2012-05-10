@@ -1,9 +1,9 @@
 Luca.fields.ButtonField = Luca.core.Field.extend
   form_field: true
-  
+
   readOnly: true
 
-  events: 
+  events:
     "click input" : "click_handler"
 
   hooks:[
@@ -11,7 +11,7 @@ Luca.fields.ButtonField = Luca.core.Field.extend
   ]
 
   className: 'luca-ui-field luca-ui-button-field'
-  
+
   template: 'fields/button_field'
 
   click_handler: (e)->
@@ -34,6 +34,7 @@ Luca.fields.ButtonField = Luca.core.Field.extend
     @input_class ||= @class
     @icon_class ||= ""
     @icon_class = "icon-#{ @icon_class }" if @icon_class.length and !@icon_class.match(/^icon-/)
+    @icon_class += " icon-white" if @white
 
   setValue: ()-> true
 

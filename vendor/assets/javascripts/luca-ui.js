@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.8.05",
+    VERSION: "0.8.06",
     core: {},
     containers: {},
     components: {},
@@ -1917,8 +1917,9 @@
       this.input_class || (this.input_class = this["class"]);
       this.icon_class || (this.icon_class = "");
       if (this.icon_class.length && !this.icon_class.match(/^icon-/)) {
-        return this.icon_class = "icon-" + this.icon_class;
+        this.icon_class = "icon-" + this.icon_class;
       }
+      if (this.white) return this.icon_class += " icon-white";
     },
     setValue: function() {
       return true;
@@ -2549,6 +2550,7 @@
         return $(_this.container).width();
       })();
       this.width = this.container_width > 0 ? this.container_width : this.defaultWidth;
+      this.width = _([this.width, this.maxWidth || this.width]).max();
       $('.luca-ui-g-view-body', this.el).width(this.width);
       $('.luca-ui-g-view-body table', this.el).width(this.width);
       return this.setDefaultColumnWidths();
