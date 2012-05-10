@@ -30,10 +30,9 @@ Luca.View.extend = (definition)->
 
     return @ unless $(container) and @$el
 
-
     $(container).append( @$el )
-    @
 
+    return @
 
   definition.render = ()->
     if @deferrable
@@ -56,10 +55,14 @@ Luca.View.extend = (definition)->
         @bind @deferrable_trigger, _.once ()=>
           @deferrable.fetch()
 
+      return @
+
     else
       @trigger "before:render", @
       _base.apply(@, arguments)
       @trigger "after:render", @
+
+      return @
 
   Luca.View.originalExtend.apply @, [definition]
 
