@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.8.06",
+    VERSION: "0.8.1",
     core: {},
     containers: {},
     components: {},
@@ -913,7 +913,8 @@
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
           console.log(e.message);
-          return console.log(e.stack);
+          console.log(e.stack);
+          if ((Luca.silenceRenderErrors != null) !== true) throw e;
         }
       });
     },
@@ -2335,8 +2336,24 @@
         return component.container = container;
       });
     },
+    afterComponents: function() {
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.core.Container.prototype.afterComponents) != null) {
+        _ref.apply(this, arguments);
+      }
+      return this.eachField(function(field) {
+        field.getForm = function() {
+          return this;
+        };
+        return field.getModel = function() {
+          return this.currentModel();
+        };
+      });
+    },
     render: function() {
-      return $(this.container).append(this.$el);
+      $(this.container).append(this.$el);
+      return this;
     },
     wrapper: function() {
       return this.$el.parents('.luca-ui-form-view-wrapper');
@@ -2352,6 +2369,9 @@
         toolbar = Luca.util.lazyComponent(toolbar);
         return toolbar.render();
       });
+    },
+    eachField: function(iterator) {
+      return _(this.getFields()).map(iterator);
     },
     getField: function(name) {
       return _(this.getFields('name', name)).first();

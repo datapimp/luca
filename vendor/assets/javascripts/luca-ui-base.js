@@ -3,7 +3,7 @@
   _.mixin(_.string);
 
   window.Luca = {
-    VERSION: "0.8.06",
+    VERSION: "0.8.1",
     core: {},
     containers: {},
     components: {},
@@ -913,7 +913,8 @@
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
           console.log(e.message);
-          return console.log(e.stack);
+          console.log(e.stack);
+          if ((Luca.silenceRenderErrors != null) !== true) throw e;
         }
       });
     },

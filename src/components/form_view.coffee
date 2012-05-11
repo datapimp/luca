@@ -93,8 +93,15 @@ Luca.components.FormView = Luca.core.Container.extend
     _( @components ).each (component)->
       component.container = container
 
+  afterComponents: ()->
+    Luca.core.Container::afterComponents?.apply(@, arguments)
+    @eachField (field)=>
+      field.getForm = ()-> @
+      field.getModel = ()-> @currentModel()
+
   render: ()->
     $( @container ).append( @$el )
+    @
 
   wrapper: ()->
     @$el.parents('.luca-ui-form-view-wrapper')
@@ -107,6 +114,9 @@ Luca.components.FormView = Luca.core.Container.extend
         toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
         toolbar = Luca.util.lazyComponent(toolbar)
         toolbar.render()
+
+  eachField: (iterator)->
+    _( @getFields() ).map( iterator )
 
   getField: (name)->
     _( @getFields('name', name) ).first()

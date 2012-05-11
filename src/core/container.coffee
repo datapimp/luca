@@ -182,6 +182,7 @@ Luca.core.Container = Luca.View.extend
         console.log "Error Rendering Component #{ component.name || component.cid }", component
         console.log e.message
         console.log e.stack
+        throw e unless Luca.silenceRenderErrors? is true
 
   #### Container Activation
   #

@@ -1,3 +1,7 @@
 0.7.3:
   - Models being loaded by the FormView will now call
     beforeFormLoad methods if they exist on those models
+0.8.1
+  - Adds many style fixes for GridView
+  - Fixes style conflicts for Bootstrap grid-* css selectors
+  - Adds getForm() and getModel() methods to Luca.Field classes that belong to a form
