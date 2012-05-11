@@ -8,8 +8,8 @@
     containers: {},
     components: {},
     modules: {},
-    fields: {},
     util: {},
+    fields: {},
     registry: {
       classes: {},
       namespaces: ["Luca.containers", "Luca.components"]
