@@ -36,6 +36,18 @@ describe "Luca.Collection", ->
 
     expect( registerSpy ).toHaveBeenCalled()
 
+  it "should query collection with filter", ->
+    models = []
+    models.push id: i, key: 'value' for i in [0..9]
+    models[3].key = 'specialValue'
+
+    collection = new Luca.Collection models
+
+    collection.applyFilter key: 'specialValue'
+
+    expect(collection.length).toBe 1
+    expect(collection.first().get('key')).toBe 'specialValue'
+
 describe "The ifLoaded helper", ->
   it "should fire the passed callback automatically if there are models", ->
     spy = sinon.spy()
