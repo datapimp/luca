@@ -268,6 +268,14 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-horizontal\'>\n  <div class=\'control-group\'>\n    <label for=\'', input_id ,'\'>\n      ', label ,'\n    </label>\n    <div class=\'controls\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["fields/checkbox_array_item"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  <input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'checkbox\' value=\'', value ,'\' />\n  ', label ,'\n</label>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
   Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n  <input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n</label>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
@@ -1928,6 +1936,89 @@
   });
 
   Luca.register("button_field", "Luca.fields.ButtonField");
+
+}).call(this);
+(function() {
+
+  Luca.fields.CheckboxArray = Luca.core.Field.extend({
+    template: "fields/checkbox_array",
+    events: {
+      "click input": "clickHandler"
+    },
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      _.extend(this, Luca.modules.Deferrable);
+      _.bindAll(this, "populateCheckboxes", "clickHandler", "_updateModel");
+      Luca.core.Field.prototype.initialize.apply(this, arguments);
+      this.input_id || (this.input_id = _.uniqueId('field'));
+      this.input_name || (this.input_name = this.name);
+      this.label || (this.label = this.name);
+      this.valueField || (this.valueField = "id");
+      this.displayField || (this.displayField = "name");
+      return this.selectedItems = [];
+    },
+    afterInitialize: function(options) {
+      this.options = options != null ? options : {};
+      try {
+        this.configure_collection();
+      } catch (e) {
+        console.log("Error Configuring Collection", this, e.message);
+      }
+      return this.collection.bind("reset", this.populateCheckboxes);
+    },
+    afterRender: function() {
+      var _ref, _ref2;
+      if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
+        return this.populateCheckboxes();
+      } else {
+        return this.collection.trigger("reset");
+      }
+    },
+    clickHandler: function(event) {
+      var checkbox;
+      checkbox = event.target;
+      if (checkbox.checked) {
+        this.selectedItems.push(checkbox.value);
+      } else {
+        if (this.selectedItems.indexOf(checkbox.value) !== -1) {
+          this.selectedItems = _.without(this.selectedItems, [checkbox.value]);
+        }
+      }
+      return this._updateModel();
+    },
+    populateCheckboxes: function() {
+      var controls,
+        _this = this;
+      controls = $(this.el).find('.controls');
+      controls.empty();
+      this.selectedItems = this.getModel().get(this.name);
+      this.collection.each(function(model) {
+        var input_id, label, value;
+        value = model.get(_this.valueField);
+        label = model.get(_this.displayField);
+        input_id = _.uniqueId('field');
+        controls.append(Luca.templates["fields/checkbox_array_item"]({
+          label: label,
+          value: value,
+          input_id: input_id,
+          input_name: _this.input_name
+        }));
+        if (_this.selectedItems.indexOf(value) !== -1) {
+          return _this.$("#" + input_id).attr("checked", "checked");
+        }
+      });
+      return $(this.container).append(this.$el);
+    },
+    _updateModel: function() {
+      var attributes;
+      attributes = {};
+      attributes[this.name] = this.selectedItems;
+      return this.getModel().set(attributes);
+    }
+  });
+
+  Luca.register("checkbox_array", "Luca.fields.CheckboxArray");
 
 }).call(this);
 (function() {
