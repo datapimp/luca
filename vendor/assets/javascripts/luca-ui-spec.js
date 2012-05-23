@@ -2344,10 +2344,10 @@
       }
       return this.eachField(function(field) {
         field.getForm = function() {
-          return this;
+          return _this;
         };
         return field.getModel = function() {
-          return this.currentModel();
+          return _this.currentModel();
         };
       });
     },

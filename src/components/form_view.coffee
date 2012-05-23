@@ -96,8 +96,8 @@ Luca.components.FormView = Luca.core.Container.extend
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)
     @eachField (field)=>
-      field.getForm = ()-> @
-      field.getModel = ()-> @currentModel()
+      field.getForm = ()=> @
+      field.getModel = ()=> @currentModel()
 
   render: ()->
     $( @container ).append( @$el )
