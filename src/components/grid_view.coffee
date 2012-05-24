@@ -2,10 +2,22 @@ Luca.components.GridView = Luca.View.extend
   autoBindEventHandlers: true
 
   events:
-    "dblclick .luca-ui-g-row" : "double_click_handler"
-    "click .luca-ui-g-row": "click_handler"
+    "dblclick table tbody tr" : "double_click_handler"
+    "click table tbody tr": "click_handler"
 
   className: 'luca-ui-g-view'
+
+  rowClass: "luca-ui-g-row"
+
+  wrapperClass: "luca-ui-g-view-wrapper"
+
+  # add whatever additional container classes you want
+  # to be applied to the wrapper here
+  additionalWrapperClasses: []
+
+  # add additional style declarations to the wrapper if you like
+  # these will be added by jquery.css and accept the same syntax
+  wrapperStyles: {}
 
   scrollable: true
 
@@ -15,17 +27,30 @@ Luca.components.GridView = Luca.View.extend
   # or any combination of these, split up by space
   tableStyle: 'striped'
 
+  # we have to specify height to make the scrollable table portion work
+  defaultHeight: 285
+
+  # unless we specify the width ourselves
+  # the width of the grid will automatically be set to the width of the container
+  # and if it can't be determined, then it will be set to the default
+  defaultWidth: 756
+
+  # the grid should never outgrow its container
+  maxWidth: undefined
+
+  # hooks is configuration sugar
+  # the before:grid:render trigger
+  # will automatically fire the
+  # beforeGridRender function
   hooks:[
-    "before:grid:render",
-    "before:render:header",
-    "before:render:row",
-    "after:grid:render",
-    "row:double:click",
-    "row:click",
+    "before:grid:render"
+    "before:render:header"
+    "before:render:row"
+    "after:grid:render"
+    "row:double:click"
+    "row:click"
     "after:collection:load"
   ]
-
-  rowClass: "luca-ui-g-row"
 
   initialize: (@options={})->
     _.extend @, @options
@@ -33,31 +58,31 @@ Luca.components.GridView = Luca.View.extend
 
     Luca.View::initialize.apply( @, arguments )
 
-    _.bindAll @, "double_click_handler", "click_handler"
-
     @configure_collection()
 
     @collection.bind "reset", (collection) =>
       @refresh()
       @trigger "after:collection:load", collection
 
+    # if a model changes, then we will update the row's contents
+    # by rerendering that row's cells
+    @collection.bind "change", (model)=>
+      rowEl = @getRowEl( model.id || model.get('id') || model.cid )
+      cells = @render_row(model, @indexOf(model), cellsOnly: true )
+      $( rowEl ).html( cells )
+
   beforeRender: ()->
     @trigger "before:grid:render", @
 
-    @$el.addClass 'scrollable-g-view' if @scrollable
-
     @$el.html Luca.templates["components/grid_view"]()
 
-    @table  = $('table.luca-ui-g-view', @el)
-    @header = $("thead", @table)
-    @body   = $("tbody", @table)
-    @footer = $("tfoot", @table)
+    @table      = @$ 'table.luca-ui-g-view'
+    @header     = @$ "thead"
+    @body       = @$ "tbody"
+    @footer     = @$ "tfoot"
+    @wrapper    = @$ ".#{ @wrapperClass }"
 
-    if Luca.enableBootstrap
-      @table.addClass('table')
-
-    _( @tableStyle?.split(" ") ).each (style)=>
-      @table.addClass("table-#{ style }")
+    @applyCssClasses()
 
     @setDimensions() if @scrollable
 
@@ -69,6 +94,18 @@ Luca.components.GridView = Luca.View.extend
 
     $(@container).append @$el
 
+  applyCssClasses: ()->
+    @$el.addClass 'scrollable-g-view' if @scrollable
+
+    _( @additionalWrapperClasses ).each (containerClass)=>
+      @wrapper?.addClass( containerClass )
+
+    if Luca.enableBootstrap
+      @table.addClass('table')
+
+    _( @tableStyle?.split(" ") ).each (style)=>
+      @table.addClass("table-#{ style }")
+
   toolbarContainers:(position="bottom")->
     $(".toolbar-container.#{ position }", @el)
 
@@ -78,24 +115,21 @@ Luca.components.GridView = Luca.View.extend
       toolbar.container = @toolbarContainers( toolbar.position )
       toolbar.render()
 
-  defaultWidth: 756
-  defaultHeight: 285
-
   setDimensions: (offset)->
     @height ||= @defaultHeight
 
-    $('.luca-ui-g-view-body', @el).height( @height )
-    $('tbody.scrollable', @el).height( @height - 23 )
+    @$('.luca-ui-g-view-body').height( @height )
+    @$('tbody.scrollable').height( @height - 23 )
 
     @container_width = do => $(@container).width()
 
-    @width = if @container_width > 0 then @container_width else @defaultWidth
+    @width ||= if @container_width > 0 then @container_width else @defaultWidth
+
+    # don't let the grid outgrow its maxWidth
     @width = _([@width, (@maxWidth || @width)]).max()
 
-    #@width += offset if offset
-
-    $('.luca-ui-g-view-body', @el).width( @width )
-    $('.luca-ui-g-view-body table', @el).width( @width )
+    @$('.luca-ui-g-view-body').width @width
+    @$('.luca-ui-g-view-body table').width @width
 
     @setDefaultColumnWidths()
 
@@ -103,8 +137,8 @@ Luca.components.GridView = Luca.View.extend
     difference = newWidth - @width
     @width = newWidth
 
-    $('.luca-ui-g-view-body', @el).width( @width )
-    $('.luca-ui-g-view-body table', @el).width( @width )
+    @$('.luca-ui-g-view-body').width( @width )
+    @$('.luca-ui-g-view-body table').width( @width )
 
     if @columns.length > 0
       distribution = difference / @columns.length
@@ -130,7 +164,6 @@ Luca.components.GridView = Luca.View.extend
       parseInt(column.width ||= default_column_width)
 
     @padLastColumn()
-
 
   lastColumn: ()->
     @columns[ @columns.length - 1 ]
@@ -175,7 +208,7 @@ Luca.components.GridView = Luca.View.extend
   getRowEl: (id)->
     @$ "[data-record-id=#{ id }]", 'table'
 
-  render_row: (row,row_index)->
+  render_row: (row,row_index, options={})->
     rowClass = @rowClass
 
     model_id = if row?.get and row?.attributes then row.get('id') else ''
@@ -190,11 +223,17 @@ Luca.components.GridView = Luca.View.extend
 
       "<td style='#{ style }' class='column-#{ col_index }'>#{ display }</td>"
 
+    return cells if options.cellsOnly
+
     altClass = ''
     if @alternateRowClasses
       altClass = if row_index % 2 is 0 then "even" else "odd"
 
-    @body?.append("<tr data-record-id='#{ model_id }' data-row-index='#{ row_index }' class='#{ rowClass } #{ altClass }' id='row-#{ row_index }'>#{ cells }</tr>")
+    content = "<tr data-record-id='#{ model_id }' data-row-index='#{ row_index }' class='#{ rowClass } #{ altClass }' id='row-#{ row_index }'>#{ cells }</tr>"
+
+    return content if options.contentOnly is true
+
+    @body?.append(content)
 
   cell_renderer: (row, column, columnIndex )->
     if _.isFunction column.renderer

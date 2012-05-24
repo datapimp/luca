@@ -29,6 +29,10 @@
       background: rgba(255,255,255,0.2);
    }
 
+   .jquery-console-message {
+    margin:10px 0px;
+   }
+
    .jquery-console-message-error {
       font-weight: bold;
       color: #ef0505;
@@ -37,6 +41,7 @@
 
    .jquery-console-prompt-label {
       font-weight: bold;
+      color: yellow;
    }
  }
 }

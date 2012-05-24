@@ -157,7 +157,7 @@ Luca.components.FormView = Luca.core.Container.extend
       @trigger "after:load:#{ (if @current_model.isNew() then "new" else "existing")}", @, @current_model
 
   reset: ()->
-    @loadModel( @current_model )
+    @loadModel( @current_model ) if @current_model?
 
   clear: ()->
     @current_model = if @defaultModel? then @defaultModel() else undefined
@@ -188,9 +188,7 @@ Luca.components.FormView = Luca.core.Container.extend
 
     @syncFormWithModel() unless options.silent? is true
 
-  getValues: (options)->
-    options ||= {}
-
+  getValues: (options={})->
     options.reject_blank = true unless options.reject_blank?
     options.skip_buttons = true unless options.skip_buttons?
 
@@ -199,9 +197,16 @@ Luca.components.FormView = Luca.core.Container.extend
       key = field.input_name || field.name
 
       skip = false
+
+      # don't include the values of buttons in our values hash
       skip = true if options.skip_buttons and field.ctype is "button_field"
-      skip = true if options.reject_blank is true and _.string.isBlank(value)
-      skip = true if field.input_name is "id" and _.string.isBlank(value)
+
+      # if the value is blank and we are passed reject_blank in the options
+      # then we should not include this field in our hash.  however, if the
+      # field is setup to send blanks, then we will send this value anyway
+      if _.string.isBlank( value )
+        skip = true if options.reject_blank and !field.send_blanks
+        skip = true if field.input_name is "id"
 
       memo[ key ] = value unless skip is true
 

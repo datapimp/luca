@@ -64,7 +64,7 @@ Luca.View.extend = (definition)->
 
       return @
 
-  Luca.View.originalExtend.apply @, [definition]
+  Luca.View.originalExtend.call(@, definition)
 
 _.extend Luca.View.prototype,
   debug: ()->
@@ -72,7 +72,7 @@ _.extend Luca.View.prototype,
     console.log [(@name || @cid),message] for message in arguments
 
   trigger: ()->
-    if Luca.enableGlobalObserver
+    if Luca.enableGlobalObserver and @observeEvents is true
       Luca.ViewObserver ||= new Luca.Observer(type:"view")
       Luca.ViewObserver.relay @, arguments
 
