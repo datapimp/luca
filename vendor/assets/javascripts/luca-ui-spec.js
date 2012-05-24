@@ -1532,7 +1532,7 @@
       return this.bind("after:card:switch", this.highlightSelectedTab);
     },
     activeTabSelector: function() {
-      return this.tabSelectors().eq(this.activeCard);
+      return this.tabSelectors().eq(this.activeCard || this.activeTab || this.activeItem);
     },
     prepareLayout: function() {
       var _this = this;

@@ -23,7 +23,7 @@ Luca.containers.TabView = Luca.containers.CardView.extend
     @bind "after:card:switch", @highlightSelectedTab
 
   activeTabSelector: ()->
-    @tabSelectors().eq( @activeCard )
+    @tabSelectors().eq( @activeCard || @activeTab || @activeItem )
 
   prepareLayout: ()->
     @card_containers = _( @cards ).map (card, index)=>
