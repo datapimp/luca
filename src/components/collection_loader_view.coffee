@@ -24,9 +24,10 @@ Luca.components.CollectionLoaderView = Luca.components.Template.extend
       loaded   = @manager.loadedCollectionsCount()
       total    = @manager.totalCollectionsCount()
       progress = parseInt((loaded / total) * 100)
+      collectionName = _.string.titleize( _.string.humanize( name ) )
 
       @modalContainer().find('.progress .bar').attr("style", "width: #{progress}%;")
-      @modalContainer().find('.message').html("Loaded #{ _(name).chain().humanize().titleize().value() }...")
+      @modalContainer().find('.message').html("Loaded #{ collectionName }...")
 
     @manager.bind "all_collections_loaded", ()=>
       @modalContainer().find('.message').html("All done!")

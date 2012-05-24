@@ -125,7 +125,7 @@ class Luca.CollectionManager
     @get(key) || @create(key,collectionOptions,initialModels,false)
 
   guessCollectionClass: (key)->
-    classified = _( key ).chain().capitalize().camelize().value()
+    classified = Luca.util.classify( key )
     guess = (@collectionNamespace || (window || global) )[ classified ]
     guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
     guess

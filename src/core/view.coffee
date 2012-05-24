@@ -141,7 +141,7 @@ _.extend Luca.View.prototype,
       parts = eventId.split(':')
       prefix = parts.shift()
 
-      parts = _( parts ).map (p)-> _.capitalize(p)
+      parts = _( parts ).map (p)-> _.string.capitalize(p)
       fn = prefix + parts.join('')
 
       @bind eventId, ()=> @[fn].apply @, arguments if @[fn]

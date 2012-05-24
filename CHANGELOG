@@ -1,7 +1,16 @@
 0.7.3:
   - Models being loaded by the FormView will now call
     beforeFormLoad methods if they exist on those models
+
 0.8.1
   - Adds many style fixes for GridView
   - Fixes style conflicts for Bootstrap grid-* css selectors
   - Adds getForm() and getModel() methods to Luca.Field classes that belong to a form
+
+0.8.2
+  - Adds checkbox group field component ( thanks nick desteffen )
+
+0.8.3
+  - Stop mixing in underscore.string onto the global underscore object
+  - the ctype property used to create objects from hashes, can now be named 'type'
+  - Adds Luca.util.classify function for converting strings into class names

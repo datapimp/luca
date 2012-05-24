@@ -1,5 +1,3 @@
-_.mixin( _.string )
-
 window.Luca =
   VERSION: "0.8.2"
   core: {}
@@ -8,12 +6,12 @@ window.Luca =
   modules: {}
   util: {}
   fields: {}
-  registry:
-    classes: {}
-    namespaces:["Luca.containers","Luca.components"]
   component_cache:
     cid_index: {}
     name_index: {}
+  registry:
+    classes: {}
+    namespaces:["Luca.containers","Luca.components"]
 
 
 # let's use the Twitter 2.0 Bootstrap Framework
@@ -58,11 +56,17 @@ Luca.cache = (needle, component)->
   Luca.component_cache.cid_index[ lookup_id ]
 
 # Takes an string like "deep.nested.value" and an object like window
-# and returns the value of window.deep.nested.value
+# and returns the value of window.deep.nested.value.  useful for defining
+# references on objects which don't yet exist, as strings, which get
+# evaluated at runtime when such references will be available
 Luca.util.nestedValue = (accessor, source_object)->
   _( accessor.split(/\./) ).inject (obj,key)->
     obj = obj?[key]
   , source_object
+
+# turns a word like form_view into FormView
+Luca.util.classify = (string="")->
+  _.string.camelize( _.string.capitalize( string ) )
 
 # Lookup a component in the Luca component registry
 # by it's ctype identifier.  If it doesn't exist,
@@ -72,16 +76,18 @@ Luca.registry.lookup = (ctype)->
 
   return c if c?
 
-  className = _.camelize _.capitalize( ctype )
+  className = Luca.util.classify(ctype)
 
   parents = _( Luca.registry.namespaces ).map (namespace)-> Luca.util.nestedValue(namespace, (window || global))
 
   _.first _.compact _( parents ).map (parent)-> parent[className]
 
-# creates a new object from a hash with a ctype property
-# matching something in the Luca registry
+# one of the main benefits of Luca is the ability to structure your app as
+# large blocks of JSON configuration.  In order to convert an object into
+# a Luca component, we lookup the object's class by converting its ctype / type
+# property into a class that has been registered in the component registry
 Luca.util.lazyComponent = (config)->
-  ctype = config.ctype
+  ctype = config.ctype || config.type
 
   componentClass = Luca.registry.lookup( ctype )
 
@@ -96,7 +102,7 @@ Luca.register = (component, constructor_class)->
   exists = Luca.registry.classes[component]
 
   if exists?
-    throw "Can not register component with the signature #{ component }. Already exists"
+    console.log "Can not register component with the signature #{ component }. Already exists"
   else
     Luca.registry.classes[component] = constructor_class
 

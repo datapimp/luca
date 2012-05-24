@@ -200,8 +200,8 @@ Luca.components.FormView = Luca.core.Container.extend
 
       skip = false
       skip = true if options.skip_buttons and field.ctype is "button_field"
-      skip = true if options.reject_blank is true and _.isBlank(value)
-      skip = true if field.input_name is "id" and _.isBlank(value)
+      skip = true if options.reject_blank is true and _.string.isBlank(value)
+      skip = true if field.input_name is "id" and _.string.isBlank(value)
 
       memo[ key ] = value unless skip is true
 
