@@ -1,7 +1,5 @@
 (function() {
 
-  _.mixin(_.string);
-
   window.Luca = {
     VERSION: "0.8.2",
     core: {},
@@ -10,13 +8,13 @@
     modules: {},
     util: {},
     fields: {},
-    registry: {
-      classes: {},
-      namespaces: ["Luca.containers", "Luca.components"]
-    },
     component_cache: {
       cid_index: {},
       name_index: {}
+    },
+    registry: {
+      classes: {},
+      namespaces: ["Luca.containers", "Luca.components"]
     }
   };
 
@@ -59,11 +57,16 @@
     }, source_object);
   };
 
+  Luca.util.classify = function(string) {
+    if (string == null) string = "";
+    return _.string.camelize(_.string.capitalize(string));
+  };
+
   Luca.registry.lookup = function(ctype) {
     var c, className, parents;
     c = Luca.registry.classes[ctype];
     if (c != null) return c;
-    className = _.camelize(_.capitalize(ctype));
+    className = Luca.util.classify(ctype);
     parents = _(Luca.registry.namespaces).map(function(namespace) {
       return Luca.util.nestedValue(namespace, window || global);
     });
@@ -74,7 +77,7 @@
 
   Luca.util.lazyComponent = function(config) {
     var componentClass, constructor, ctype;
-    ctype = config.ctype;
+    ctype = config.ctype || config.type;
     componentClass = Luca.registry.lookup(ctype);
     if (!componentClass) {
       throw "Invalid Component Type: " + ctype + ".  Did you forget to register it?";
@@ -87,7 +90,7 @@
     var exists;
     exists = Luca.registry.classes[component];
     if (exists != null) {
-      throw "Can not register component with the signature " + component + ". Already exists";
+      return console.log("Can not register component with the signature " + component + ". Already exists");
     } else {
       return Luca.registry.classes[component] = constructor_class;
     }
@@ -444,7 +447,7 @@
         parts = eventId.split(':');
         prefix = parts.shift();
         parts = _(parts).map(function(p) {
-          return _.capitalize(p);
+          return _.string.capitalize(p);
         });
         fn = prefix + parts.join('');
         return _this.bind(eventId, function() {
@@ -1104,7 +1107,7 @@
 
     CollectionManager.prototype.guessCollectionClass = function(key) {
       var classified, guess;
-      classified = _(key).chain().capitalize().camelize().value();
+      classified = Luca.util.classify(key);
       guess = (this.collectionNamespace || (window || global))[classified];
       guess || (guess = (this.collectionNamespace || (window || global))["" + classified + "Collection"]);
       return guess;
