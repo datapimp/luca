@@ -393,7 +393,7 @@
         return this;
       }
     };
-    return Luca.View.originalExtend.apply(this, [definition]);
+    return Luca.View.originalExtend.call(this, definition);
   };
 
   _.extend(Luca.View.prototype, {
@@ -408,7 +408,7 @@
       return _results;
     },
     trigger: function() {
-      if (Luca.enableGlobalObserver) {
+      if (Luca.enableGlobalObserver && this.observeEvents === true) {
         Luca.ViewObserver || (Luca.ViewObserver = new Luca.Observer({
           type: "view"
         }));
@@ -1713,7 +1713,6 @@
       return (_ref = Luca.containers.Viewport.prototype.beforeRender) != null ? _ref.apply(this, arguments) : void 0;
     },
     boot: function() {
-      console.log("Sup?");
       return this.trigger("ready");
     },
     collection: function() {
@@ -2512,7 +2511,7 @@
       }
     },
     reset: function() {
-      return this.loadModel(this.current_model);
+      if (this.current_model != null) return this.loadModel(this.current_model);
     },
     clear: function() {
       var _this = this;
@@ -2545,7 +2544,7 @@
       if ((options.silent != null) !== true) return this.syncFormWithModel();
     },
     getValues: function(options) {
-      options || (options = {});
+      if (options == null) options = {};
       if (options.reject_blank == null) options.reject_blank = true;
       if (options.skip_buttons == null) options.skip_buttons = true;
       return _(this.getFields()).inject(function(memo, field) {
@@ -2554,8 +2553,10 @@
         key = field.input_name || field.name;
         skip = false;
         if (options.skip_buttons && field.ctype === "button_field") skip = true;
-        if (options.reject_blank === true && _.string.isBlank(value)) skip = true;
-        if (field.input_name === "id" && _.string.isBlank(value)) skip = true;
+        if (_.string.isBlank(value)) {
+          if (options.reject_blank && !field.send_blanks) skip = true;
+          if (field.input_name === "id") skip = true;
+        }
         if (skip !== true) memo[key] = value;
         return memo;
       }, {});
@@ -2607,47 +2608,68 @@
   Luca.components.GridView = Luca.View.extend({
     autoBindEventHandlers: true,
     events: {
-      "dblclick .luca-ui-g-row": "double_click_handler",
-      "click .luca-ui-g-row": "click_handler"
+      "dblclick table tbody tr": "double_click_handler",
+      "click table tbody tr": "click_handler"
     },
     className: 'luca-ui-g-view',
+    rowClass: "luca-ui-g-row",
+    wrapperClass: "luca-ui-g-view-wrapper",
+    additionalWrapperClasses: [],
+    wrapperStyles: {},
     scrollable: true,
     emptyText: 'No Results To display.',
     tableStyle: 'striped',
+    defaultHeight: 285,
+    defaultWidth: 756,
+    maxWidth: void 0,
     hooks: ["before:grid:render", "before:render:header", "before:render:row", "after:grid:render", "row:double:click", "row:click", "after:collection:load"],
-    rowClass: "luca-ui-g-row",
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
       Luca.View.prototype.initialize.apply(this, arguments);
-      _.bindAll(this, "double_click_handler", "click_handler");
       this.configure_collection();
-      return this.collection.bind("reset", function(collection) {
+      this.collection.bind("reset", function(collection) {
         _this.refresh();
         return _this.trigger("after:collection:load", collection);
       });
+      return this.collection.bind("change", function(model) {
+        var cells, rowEl;
+        rowEl = _this.getRowEl(model.id || model.get('id') || model.cid);
+        cells = _this.render_row(model, _this.indexOf(model), {
+          cellsOnly: true
+        });
+        return $(rowEl).html(cells);
+      });
     },
     beforeRender: function() {
-      var _ref,
-        _this = this;
       this.trigger("before:grid:render", this);
-      if (this.scrollable) this.$el.addClass('scrollable-g-view');
       this.$el.html(Luca.templates["components/grid_view"]());
-      this.table = $('table.luca-ui-g-view', this.el);
-      this.header = $("thead", this.table);
-      this.body = $("tbody", this.table);
-      this.footer = $("tfoot", this.table);
-      if (Luca.enableBootstrap) this.table.addClass('table');
-      _((_ref = this.tableStyle) != null ? _ref.split(" ") : void 0).each(function(style) {
-        return _this.table.addClass("table-" + style);
-      });
+      this.table = this.$('table.luca-ui-g-view');
+      this.header = this.$("thead");
+      this.body = this.$("tbody");
+      this.footer = this.$("tfoot");
+      this.wrapper = this.$("." + this.wrapperClass);
+      this.applyCssClasses();
       if (this.scrollable) this.setDimensions();
       this.renderHeader();
       this.emptyMessage();
       this.renderToolbars();
       return $(this.container).append(this.$el);
+    },
+    applyCssClasses: function() {
+      var _ref,
+        _this = this;
+      if (this.scrollable) this.$el.addClass('scrollable-g-view');
+      _(this.additionalWrapperClasses).each(function(containerClass) {
+        var _ref;
+        return (_ref = _this.wrapper) != null ? _ref.addClass(containerClass) : void 0;
+      });
+      if (Luca.enableBootstrap) this.table.addClass('table');
+      return _((_ref = this.tableStyle) != null ? _ref.split(" ") : void 0).each(function(style) {
+        return _this.table.addClass("table-" + style);
+      });
     },
     toolbarContainers: function(position) {
       if (position == null) position = "bottom";
@@ -2661,20 +2683,18 @@
         return toolbar.render();
       });
     },
-    defaultWidth: 756,
-    defaultHeight: 285,
     setDimensions: function(offset) {
       var _this = this;
       this.height || (this.height = this.defaultHeight);
-      $('.luca-ui-g-view-body', this.el).height(this.height);
-      $('tbody.scrollable', this.el).height(this.height - 23);
+      this.$('.luca-ui-g-view-body').height(this.height);
+      this.$('tbody.scrollable').height(this.height - 23);
       this.container_width = (function() {
         return $(_this.container).width();
       })();
-      this.width = this.container_width > 0 ? this.container_width : this.defaultWidth;
+      this.width || (this.width = this.container_width > 0 ? this.container_width : this.defaultWidth);
       this.width = _([this.width, this.maxWidth || this.width]).max();
-      $('.luca-ui-g-view-body', this.el).width(this.width);
-      $('.luca-ui-g-view-body table', this.el).width(this.width);
+      this.$('.luca-ui-g-view-body').width(this.width);
+      this.$('.luca-ui-g-view-body table').width(this.width);
       return this.setDefaultColumnWidths();
     },
     resize: function(newWidth) {
@@ -2682,8 +2702,8 @@
         _this = this;
       difference = newWidth - this.width;
       this.width = newWidth;
-      $('.luca-ui-g-view-body', this.el).width(this.width);
-      $('.luca-ui-g-view-body table', this.el).width(this.width);
+      this.$('.luca-ui-g-view-body').width(this.width);
+      this.$('.luca-ui-g-view-body table').width(this.width);
       if (this.columns.length > 0) {
         distribution = difference / this.columns.length;
         return _(this.columns).each(function(col, index) {
@@ -2763,9 +2783,10 @@
     getRowEl: function(id) {
       return this.$("[data-record-id=" + id + "]", 'table');
     },
-    render_row: function(row, row_index) {
-      var altClass, cells, model_id, rowClass, _ref,
+    render_row: function(row, row_index, options) {
+      var altClass, cells, content, model_id, rowClass, _ref,
         _this = this;
+      if (options == null) options = {};
       rowClass = this.rowClass;
       model_id = (row != null ? row.get : void 0) && (row != null ? row.attributes : void 0) ? row.get('id') : '';
       this.trigger("before:render:row", row, row_index);
@@ -2776,11 +2797,14 @@
         display = _.isUndefined(value) ? "" : value;
         return "<td style='" + style + "' class='column-" + col_index + "'>" + display + "</td>";
       });
+      if (options.cellsOnly) return cells;
       altClass = '';
       if (this.alternateRowClasses) {
         altClass = row_index % 2 === 0 ? "even" : "odd";
       }
-      return (_ref = this.body) != null ? _ref.append("<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='" + rowClass + " " + altClass + "' id='row-" + row_index + "'>" + cells + "</tr>") : void 0;
+      content = "<tr data-record-id='" + model_id + "' data-row-index='" + row_index + "' class='" + rowClass + " " + altClass + "' id='row-" + row_index + "'>" + cells + "</tr>";
+      if (options.contentOnly === true) return content;
+      return (_ref = this.body) != null ? _ref.append(content) : void 0;
     },
     cell_renderer: function(row, column, columnIndex) {
       var source;

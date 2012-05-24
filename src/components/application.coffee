@@ -61,9 +61,7 @@ Luca.Application = Luca.containers.Viewport.extend
   # sort of data processing, whatever your application requires to run outside
   # of the views
   boot: ()->
-    console.log "Sup?"
     @trigger "ready"
-
 
   # delegate to the collection manager's get or create function.
   # use App.collection() to create or access existing collections

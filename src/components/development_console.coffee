@@ -7,10 +7,6 @@ Luca.components.DevelopmentConsole = Luca.View.extend
     if @modal
       @$el.addClass 'luca-ui-modal'
 
-  events:
-    "keypress *" : (e)->
-      console.log "Keypress", e
-
   beforeRender: ()->
     @$el.append @make("div",class:"console-inner")
 
@@ -36,66 +32,25 @@ Luca.components.DevelopmentConsole = Luca.View.extend
 
         valid
 
+      returnValue: (val)->
+        return "undefined" unless val?
+        val?.toString() || ""
+
       parseLine: (line)->
         line = _.string.strip(line)
         line = line.replace(/^return/,' ')
-        line = @detectUnderscoreCommand(line)
-        line = @handleMultiLine(line)
 
-        "return(1)"
-
-      returnValue: (val)->
-        return "undefined" unless val?
-
-        if _.isFunction(val) or _.isString(val) or _.isNumber(val)
-          return val.toString()
-
-        if _.isArray(val) or _.isObject(val)
-          return JSON.stringify(val)
-
-        return val.toString() || ""
-
-
-      handleMultiLine: (line)->
-        line
-
-      detectUnderscoreCommand: (line)->
-        if line.match /^cd\s+/
-          context = line.replace(/cd\s+/,'')
-          @context = eval( context )
-          line = "'setting context to #{ context }'"
-
-        if line.match /^k\s+/
-          line = line.replace(/^k\s+/,'_.keys ')
-
-        if line.match /^v\s+/
-          line = line.replace(/^v\s+/,'_.values ')
-
-        if line.match /^f\s+/
-          line = line.replace(/^f\s+/,'_.functions ')
-
-        line
-
-      clear: ()->
-        @console.reset()
+        "return #{ line }"
 
       commandHandle: (line)->
         return if line is ""
 
-        @context ||= @
-
-        parsed = @parseLine(line)
-
-        code = ()->
-          compiled = CoffeeScript.compile( parsed, bare: true )
-          eval(compiled)
+        compiled = CoffeeScript.compile( @parseLine(line) )
 
         try
-          clear = @clear
-          returnValue = code.call(@context)
+          ret = eval(compiled)
+          return @returnValue(ret)
         catch error
-          console.log "Error", error.message
-
           if error.message.match /circular structure to JSON/
             return ret.toString()
 

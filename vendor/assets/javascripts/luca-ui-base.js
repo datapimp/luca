@@ -393,7 +393,7 @@
         return this;
       }
     };
-    return Luca.View.originalExtend.apply(this, [definition]);
+    return Luca.View.originalExtend.call(this, definition);
   };
 
   _.extend(Luca.View.prototype, {
@@ -408,7 +408,7 @@
       return _results;
     },
     trigger: function() {
-      if (Luca.enableGlobalObserver) {
+      if (Luca.enableGlobalObserver && this.observeEvents === true) {
         Luca.ViewObserver || (Luca.ViewObserver = new Luca.Observer({
           type: "view"
         }));
