@@ -2002,7 +2002,9 @@
         _this = this;
       controls = $(this.el).find('.controls');
       controls.empty();
-      this.selectedItems = this.getModel().get(this.name);
+      if (!_.isUndefined(this.getModel())) {
+        this.selectedItems = this.getModel().get(this.name);
+      }
       this.collection.each(function(model) {
         var input_id, label, value;
         value = model.get(_this.valueField);
