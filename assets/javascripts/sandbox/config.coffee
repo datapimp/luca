@@ -1,4 +1,4 @@
-(window || global).Sandbox =
+window.Sandbox =
   views: {}
   collections: {}
   models: {}

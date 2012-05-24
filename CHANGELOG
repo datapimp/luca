@@ -14,3 +14,6 @@
   - Stop mixing in underscore.string onto the global underscore object
   - the ctype property used to create objects from hashes, can now be named 'type'
   - Adds Luca.util.classify function for converting strings into class names
+
+0.8.4
+  - Fixes bug in development console

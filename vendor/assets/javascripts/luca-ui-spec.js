@@ -1,7 +1,7 @@
 (function() {
 
   window.Luca = {
-    VERSION: "0.8.2",
+    VERSION: "0.8.3",
     core: {},
     containers: {},
     components: {},
@@ -1759,6 +1759,13 @@
 }).call(this);
 (function() {
 
+  Luca.components.CollectionInspector = Luca.View.extend({
+    name: "collection_inspector"
+  });
+
+}).call(this);
+(function() {
+
   Luca.components.CollectionLoaderView = Luca.components.Template.extend({
     className: 'luca-ui-collection-loader-view',
     template: "components/collection_loader_view",
@@ -1870,10 +1877,10 @@
         },
         returnValue: function(val) {
           if (val == null) return "undefined";
-          return val != null ? val.toString() : void 0;
+          return (val != null ? val.toString() : void 0) || "";
         },
         parseLine: function(line) {
-          _(line).strip();
+          line = _.string.strip(line);
           line = line.replace(/^return/, ' ');
           return "return " + line;
         },

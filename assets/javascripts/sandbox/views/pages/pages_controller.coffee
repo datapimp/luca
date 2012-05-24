@@ -1,4 +1,6 @@
 Sandbox.views.PagesController = Luca.components.Controller.extend
+  # the main component is the tab view which
+  # has its own individual demos
   components:[
     ctype: 'tab_view'
     name: 'pages_tab_view'
@@ -27,6 +29,10 @@ Sandbox.views.PagesController = Luca.components.Controller.extend
       ctype: 'development_console'
       name: 'development_console'
       title: "Development Console"
+    ,
+      ctype: "collection_inspector"
+      name: "collection_inspector"
+      title: "Collection Inspector"
     ]
   ]
 
