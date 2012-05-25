@@ -1,13 +1,13 @@
-Luca.containers.PanelView = Luca.core.Container.extend
+_.component('Luca.containers.PanelView').extends('Luca.core.Container').with
   className: 'luca-ui-panel'
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @, arguments
-  
+
   afterLayout: ()->
     if @template
       contents = ( Luca.templates || JST )[ @template ]( @ )
-      @$el.html(contents) 
+      @$el.html(contents)
 
   render: ()->
     $(@container).append @$el
@@ -19,5 +19,5 @@ Luca.containers.PanelView = Luca.core.Container.extend
         @$el.css(property,value)
 
 
-    
+
 

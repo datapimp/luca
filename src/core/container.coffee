@@ -5,7 +5,8 @@
 # it contains, assigning them to a DOM container, and
 # automatically instantiating and rendering the components
 # in their proper place.
-Luca.core.Container = Luca.View.extend
+_.component('Luca.core.Container').extends('Luca.View').with
+
   className: 'luca-ui-container'
 
   componentClass: 'luca-ui-panel'
@@ -263,5 +264,3 @@ Luca.core.Container = Luca.View.extend
 
   getRootComponent: ()->
     if @rootComponent() then @ else @getParent().getRootComponent()
-
-Luca.register "container", "Luca.core.Container"

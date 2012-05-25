@@ -1,5 +1,4 @@
-Luca.fields.TextAreaField = Luca.core.Field.extend
-  form_field: true
+_.component('Luca.fields.TextAreaField').extends('Luca.core.Field').with
 
   events:
     "keydown input" : "keydown_handler"
@@ -16,8 +15,8 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
 
     Luca.core.Field::initialize.apply @, arguments
 
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @label ||= @name
     @input_class ||= @class
     @inputStyles ||= "height:#{ @height };width:#{ @width }"
@@ -27,7 +26,7 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
 
   getValue: ()->
     $( @field() ).val()
-  
+
   field: ()->
     @input = $("textarea##{ @input_id }", @el)
 
@@ -39,5 +38,3 @@ Luca.fields.TextAreaField = Luca.core.Field.extend
 
   focus_handler: (e)->
     me = my = $( e.currentTarget )
-
-Luca.register "text_area_field", "Luca.fields.TextAreaField"

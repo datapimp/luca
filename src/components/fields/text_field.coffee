@@ -1,6 +1,4 @@
-Luca.fields.TextField = Luca.core.Field.extend
-  form_field: true
-
+_.component('Luca.fields.TextField').extends('Luca.core.Field').with
   events:
     "keydown input" : "keydown_handler"
     "blur input" : "blur_handler"
@@ -13,15 +11,15 @@ Luca.fields.TextField = Luca.core.Field.extend
     _.bindAll @, "keydown_handler", "blur_handler", "focus_handler"
     Luca.core.Field::initialize.apply @, arguments
 
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @label ||= @name
     @input_class ||= @class
 
     if @prepend
-      @$el.addClass('input-prepend')  
+      @$el.addClass('input-prepend')
       @addOn = @prepend
-    
+
     if @append
       @$el.addClass('input-append')
       @addOn = @append
@@ -33,11 +31,6 @@ Luca.fields.TextField = Luca.core.Field.extend
 
   focus_handler: (e)->
     me = my = $( e.currentTarget )
-  
+
   change_handler: (e)->
     @trigger "on:change", @, e
-
-
-Luca.register "text_field", "Luca.fields.TextField"
-
-

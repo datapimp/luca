@@ -1,9 +1,8 @@
-Luca.fields.SelectField = Luca.core.Field.extend
-  form_field: true
+_.component('Luca.fields.SelectField').extends('Luca.core.Field').with
 
   events:
     "change select" : "change_handler"
-  
+
   hooks:[
     "after:select"
   ]
@@ -17,16 +16,16 @@ Luca.fields.SelectField = Luca.core.Field.extend
   blankValue: ''
 
   blankText: 'Select One'
- 
+
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
     _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
     Luca.core.Field::initialize.apply @, arguments
-    
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @label ||= @name
     @retainValue = true if _.isUndefined @retainValue
 
@@ -43,7 +42,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
     @collection.bind "before:fetch", @beforeFetch
     @collection.bind "reset", @populateOptions
- 
+
   # if the select field is configured with a data property
   # then parse that data into the proper format.  either
   # an array of objects with the valueField and displayField
@@ -57,7 +56,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
 
       hash
 
- 
+
   afterRender: ()->
     @input = $('select', @el)
 
@@ -65,7 +64,7 @@ Luca.fields.SelectField = Luca.core.Field.extend
       @populateOptions()
     else
       @collection.trigger("reset")
-  
+
   setValue: (value)->
     @currentValue = value
     Luca.core.Field::setValue.apply @, arguments
@@ -74,18 +73,18 @@ Luca.fields.SelectField = Luca.core.Field.extend
     @resetOptions()
 
   change_handler: (e)->
-    @trigger "on:change", @, e 
-    
+    @trigger "on:change", @, e
+
   resetOptions: ()->
     @input.html('')
-    
+
     if @includeBlank
       @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
 
   populateOptions: ()->
     @resetOptions()
-    
+
     if @collection?.each?
       @collection.each (model) =>
         value = model.get( @valueField )
@@ -93,8 +92,6 @@ Luca.fields.SelectField = Luca.core.Field.extend
         selected = "selected" if @selected and value is @selected
         option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
         @input.append( option )
-    
+
     @trigger "after:populate:options", @
     @setValue( @currentValue )
-
-Luca.register "select_field", "Luca.fields.SelectField"

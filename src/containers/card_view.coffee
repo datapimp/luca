@@ -1,4 +1,4 @@
-Luca.containers.CardView = Luca.core.Container.extend
+_.component("Luca.containers.CardView").extends("Luca.core.Container").with
   componentType: 'card_view'
 
   className: 'luca-ui-card-view-wrapper'
@@ -89,5 +89,3 @@ Luca.containers.CardView = Luca.core.Container.extend
 
     if _.isFunction(callback)
       callback.apply @, [@,previous,current]
-
-Luca.register 'card_view', "Luca.containers.CardView"

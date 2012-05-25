@@ -1,16 +1,15 @@
-Luca.components.Toolbar = Luca.core.Container.extend
+_.component('Luca.components.Toolbar').extends('Luca.core.Container').with
+
   className: 'luca-ui-toolbar'
-  
+
   position: 'bottom'
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @, arguments
 
   prepareComponents: ()->
-    _( @components ).each (component)=> 
+    _( @components ).each (component)=>
       component.container = @el
 
   render: ()->
     $(@container).append(@el)
-
-Luca.register "toolbar", "Luca.components.Toolbar"

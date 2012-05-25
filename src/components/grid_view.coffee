@@ -1,4 +1,5 @@
-Luca.components.GridView = Luca.View.extend
+_.component('Luca.components.GridView').extend('Luca.View').with
+
   autoBindEventHandlers: true
 
   events:
@@ -258,5 +259,3 @@ Luca.components.GridView = Luca.View.extend
 
     $(".#{ @rowClass }", @body ).removeClass('selected-row')
     me.addClass('selected-row')
-
-Luca.register "grid_view","Luca.components.GridView"

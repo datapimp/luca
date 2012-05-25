@@ -1,5 +1,5 @@
 window.Luca =
-  VERSION: "0.8.3"
+  VERSION: "0.8.5"
   core: {}
   containers: {}
   components: {}
@@ -13,6 +13,12 @@ window.Luca =
     classes: {}
     namespaces:["Luca.containers","Luca.components"]
 
+
+# The Global Observer is very helpful in development
+# it observes every event triggered on every view, collection, model
+# and allows you to inspect / respond to them.  Use in production
+# may have performance impacts which has not been tested
+Luca.enableGlobalObserver = false
 
 # let's use the Twitter 2.0 Bootstrap Framework
 # for what it is best at, and not try to solve this
@@ -59,10 +65,13 @@ Luca.cache = (needle, component)->
 # and returns the value of window.deep.nested.value.  useful for defining
 # references on objects which don't yet exist, as strings, which get
 # evaluated at runtime when such references will be available
-Luca.util.nestedValue = (accessor, source_object)->
+Luca.util.resolve = (accessor, source_object)->
   _( accessor.split(/\./) ).inject (obj,key)->
     obj = obj?[key]
   , source_object
+
+# A better name for Luca.util.nestedValue
+Luca.util.nestedValue = Luca.util.resolve
 
 # turns a word like form_view into FormView
 Luca.util.classify = (string="")->
@@ -80,7 +89,7 @@ Luca.registry.lookup = (ctype)->
 
   parents = _( Luca.registry.namespaces ).map (namespace)-> Luca.util.nestedValue(namespace, (window || global))
 
-  _.first _.compact _( parents ).map (parent)-> parent[className]
+  _( parents ).chain().map((parent)-> parent[className]).compact().value()?[0]
 
 # one of the main benefits of Luca is the ability to structure your app as
 # large blocks of JSON configuration.  In order to convert an object into
@@ -101,8 +110,8 @@ Luca.util.lazyComponent = (config)->
 Luca.register = (component, constructor_class)->
   exists = Luca.registry.classes[component]
 
-  if exists?
-    console.log "Can not register component with the signature #{ component }. Already exists"
+  if exists? and !window.TestRun?
+    console.log "Attempting to register component with the signature #{ component }. Already exists"
   else
     Luca.registry.classes[component] = constructor_class
 
@@ -121,5 +130,107 @@ Luca.util.isIE = ()->
   catch e
     return true
 
+# This is a convenience method for accessing the templates
+# available to the client side app, either the ones which ship with Luca
+# available in Luca.templates ( these take precedence ) or
+# the app's own templates which are usually available in JST
+
+# optionally, passing in variables will compile the template for you, instead
+# of returning a reference to the function which you would then call yourself
+Luca.template = (template_name, variables)->
+  window.JST ||= {}
+
+  luca = Luca.templates?[ template_name ]
+  jst = JST?[ template_name ]
+
+  unless luca? or jst?
+    needle = new RegExp("#{ template_name }$")
+
+    luca = _( Luca.templates ).detect (fn,template_id)->
+      needle.exec( template_id )
+
+    jst = _( JST ).detect (fn,template_id)->
+      needle.exec( template_id )
+
+  throw "Could not find template with #{ template_name }" unless luca || jst
+
+  template = luca || jst
+
+  return template(variables) if variables?
+
+  template
+
+#### Component Definition And Inheritance
+#
+# this is a nice way of extending / inheriting
+# this allows for syntactic sugar such as:
+#
+# Luca.define("TestClass").extends("Luca.View").with
+#   property: "value"
+#   name: "whatever"
+#
+# All instances of TestClass defined this way, will have
+# _className properties of 'TestClass' as well as a reference
+# to the extended class 'Luca.View' so that you can inspect
+# an instance of TestClass and know that it inherits from 'Luca.View'
+class DefineProxy
+  constructor:(componentName)->
+    @namespace = (window || global)
+    @componentId = @componentName = componentName
+
+    if componentName.match(/\./)
+      @namespaced = true
+      parts = componentName.split('.')
+      @componentId = parts.pop()
+      @namespace = parts.join('.')
+
+      # automatically add the namespace to the namespace registry
+      Luca.registry.addNamespace( parts.join('.') )
+
+  in: (@namespace)-> @
+  from: (@superClassName)-> @
+  extends: (@superClassName)-> @
+  extend: (@superClassName)-> @
+  with: (properties)->
+    at = if @namespaced then Luca.util.resolve(@namespace, (window || global)) else (window||global)
+
+    if @namespaced and _.isUndefined(at)
+      eval("window.#{ @namespace } = {}")
+      at = Luca.util.resolve(@namespace,(window || global))
+
+    at[@componentId] = Luca.extend(@superClassName,@componentName, properties)
+
+    # automatically register this with the component registry
+    Luca.register( _.string.underscored(@componentId), @componentName)
+
+    at[@componentId]
+
+Luca.define = (componentName)->
+  new DefineProxy(componentName)
+
+# An alias for Luca.define
+# which I think reads better:
+#
+# Luca.component('Whatever').extends('Something').with(enhancements)
+Luca.component = Luca.define
+
+Luca.extend = (superClassName, childName, properties={})->
+  superClass = Luca.util.resolve( superClassName, (window || global) )
+
+  unless _.isFunction(superClass?.extend)
+    throw "#{ superClassName } is not a valid component to extend from"
+
+  properties._className = childName
+
+  properties._superClass = ()->
+    superClass._className ||= superClassName
+    superClass
+
+  superClass.extend(properties)
+
+_.mixin
+  component: Luca.define
+
+#### Once We Are Ready To go....
 $ do ->
   $('body').addClass('luca-ui-enabled')

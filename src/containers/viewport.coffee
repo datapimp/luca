@@ -1,4 +1,5 @@
-Luca.containers.Viewport = Luca.containers.CardView.extend
+_.component('Luca.containers.Viewport').extend('Luca.containers.CardView').with
+
   activeItem: 0
 
   className: 'luca-ui-viewport'
@@ -7,10 +8,8 @@ Luca.containers.Viewport = Luca.containers.CardView.extend
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply(@, arguments)
-
     $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
 
   render: ()->
-    console.log "Rendering Viewport"
     @$el.addClass('luca-ui-viewport')
 

@@ -35,6 +35,9 @@ Luca.View.extend = (definition)->
     return @
 
   definition.render = ()->
+    if @layoutTemplate?
+      @$el.html()
+
     if @deferrable
       @trigger "before:render", @
 
@@ -67,6 +70,12 @@ Luca.View.extend = (definition)->
   Luca.View.originalExtend.call(@, definition)
 
 _.extend Luca.View.prototype,
+  applyStyles: (styles={})->
+    for setting, value  of styles
+      @$el.css(setting,value)
+
+    @
+
   debug: ()->
     return unless @debugMode or window.LucaDebugMode?
     console.log [(@name || @cid),message] for message in arguments

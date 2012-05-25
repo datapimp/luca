@@ -1,12 +1,10 @@
-Luca.containers.SplitView = Luca.core.Container.extend 
+_.component('Luca.containers.SplitView').extends('Luca.core.Container').with
   layout: '100'
 
   componentType: 'split_view'
 
   containerTemplate: 'containers/basic'
 
-  className: 'luca-ui-split-view' 
-  
-  componentClass: 'luca-ui-panel'
+  className: 'luca-ui-split-view'
 
-Luca.register 'split_view', "Luca.containers.SplitView"
+  componentClass: 'luca-ui-panel'

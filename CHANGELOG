@@ -17,3 +17,18 @@
 
 0.8.4
   - Fixes bug in development console
+  - Colorizes Development Console
+  - Introduces Luca.template helper to find template by regex in Luca.templates
+    or window.JST.  Optionally compiling the template if you pass variables to it.
+  - Introduces Luca.View.applyStyles which delegates to @$el.css
+
+0.8.5
+  - Luca.define() can be used to extend components, and retain references
+    to the inheritance chain.  Components defined this way will have
+    _className attributes as well as _superClass() references.  This
+    allows for introspection of components as well as advanced
+    querying of the Luca Component Cache
+
+  _ Added _.component as an alias to Luca.define
+
+  - All Luca components have been migrated over to the new Luca.define() API

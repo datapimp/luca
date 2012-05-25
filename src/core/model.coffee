@@ -4,7 +4,7 @@
 # few useful patterns:
 #
 #   - computed properties support
-Luca.Model = Backbone.Model.extend
+_.component('Luca.Model').extends('Backbone.Model').with
   initialize: ()->
     Backbone.Model::initialize @, arguments
 

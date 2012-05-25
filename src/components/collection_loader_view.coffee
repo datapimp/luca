@@ -2,8 +2,10 @@
 # You can provide your own template for the collection loader modal
 # if you want to. Default implementation uses twitter bootstrap modal and
 # progress bar (http://twitter.github.com/bootstrap/). You template
-# should have contain `progress`, `bar` and `message` classes
-Luca.components.CollectionLoaderView = Luca.components.Template.extend
+# should contain `progress`, `bar` and `message` classes
+_.component('Luca.components.CollectionLoaderView')
+.extends('Luca.components.Template').with
+
   className: 'luca-ui-collection-loader-view'
 
   template: "components/collection_loader_view"
@@ -34,5 +36,3 @@ Luca.components.CollectionLoaderView = Luca.components.Template.extend
       _.delay ()=>
         @modalContainer().modal('hide')
       , 400
-
-Luca.register "collection_loader_view","Luca.components.CollectionLoaderView"

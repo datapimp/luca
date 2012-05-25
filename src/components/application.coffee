@@ -1,4 +1,4 @@
-Luca.Application = Luca.containers.Viewport.extend
+_.component('Luca.Application').extends('Luca.containers.Viewport').with
 
   components:[
     ctype: 'controller'

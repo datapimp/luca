@@ -1,10 +1,11 @@
-Luca.core.Field = Luca.View.extend
+_.component('Luca.core.Field').extends('Luca.View').with
+
   className: 'luca-ui-text-field luca-ui-field'
-  
+
   isField: true
 
   template: 'fields/text_field'
-   
+
   labelAlign: 'top'
 
   hooks:[
@@ -24,8 +25,8 @@ Luca.core.Field = Luca.View.extend
     _.extend @, @options
     Luca.View::initialize.apply(@, arguments)
 
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @helperText ||= ""
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     @inputStyles ||= ""
@@ -43,26 +44,26 @@ Luca.core.Field = Luca.View.extend
 
     @$el.html Luca.templates[ @template ]( @ )
     @input = $('input', @el)
-  
+
   change_handler: (e)->
-    @trigger "on:change", @, e 
+    @trigger "on:change", @, e
 
   disable: ()->
     $("input",@el).attr('disabled', true)
-  
-  enable: ()->
-    $("input", @el).attr('disabled', false)  
 
-  getValue: ()-> 
+  enable: ()->
+    $("input", @el).attr('disabled', false)
+
+  getValue: ()->
     @input.attr('value')
 
   render: ()->
     $( @container ).append( @$el )
 
-  setValue: (value)-> 
+  setValue: (value)->
     @input.attr('value', value)
-  
+
   updateState: (state)->
-    _( @statuses ).each (cls)=> 
+    _( @statuses ).each (cls)=>
       @$el.removeClass(cls)
       @$el.addClass(state)

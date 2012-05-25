@@ -1,7 +1,8 @@
 (function() {
+  var DefineProxy;
 
   window.Luca = {
-    VERSION: "0.8.3",
+    VERSION: "0.8.5",
     core: {},
     containers: {},
     components: {},
@@ -17,6 +18,8 @@
       namespaces: ["Luca.containers", "Luca.components"]
     }
   };
+
+  Luca.enableGlobalObserver = false;
 
   Luca.enableBootstrap = true;
 
@@ -51,11 +54,13 @@
     return Luca.component_cache.cid_index[lookup_id];
   };
 
-  Luca.util.nestedValue = function(accessor, source_object) {
+  Luca.util.resolve = function(accessor, source_object) {
     return _(accessor.split(/\./)).inject(function(obj, key) {
       return obj = obj != null ? obj[key] : void 0;
     }, source_object);
   };
+
+  Luca.util.nestedValue = Luca.util.resolve;
 
   Luca.util.classify = function(string) {
     if (string == null) string = "";
@@ -63,16 +68,16 @@
   };
 
   Luca.registry.lookup = function(ctype) {
-    var c, className, parents;
+    var c, className, parents, _ref;
     c = Luca.registry.classes[ctype];
     if (c != null) return c;
     className = Luca.util.classify(ctype);
     parents = _(Luca.registry.namespaces).map(function(namespace) {
       return Luca.util.nestedValue(namespace, window || global);
     });
-    return _.first(_.compact(_(parents).map(function(parent) {
+    return (_ref = _(parents).chain().map(function(parent) {
       return parent[className];
-    })));
+    }).compact().value()) != null ? _ref[0] : void 0;
   };
 
   Luca.util.lazyComponent = function(config) {
@@ -89,8 +94,8 @@
   Luca.register = function(component, constructor_class) {
     var exists;
     exists = Luca.registry.classes[component];
-    if (exists != null) {
-      return console.log("Can not register component with the signature " + component + ". Already exists");
+    if ((exists != null) && !(window.TestRun != null)) {
+      return console.log("Attempting to register component with the signature " + component + ". Already exists");
     } else {
       return Luca.registry.classes[component] = constructor_class;
     }
@@ -117,6 +122,102 @@
       return true;
     }
   };
+
+  Luca.template = function(template_name, variables) {
+    var jst, luca, needle, template, _ref;
+    window.JST || (window.JST = {});
+    luca = (_ref = Luca.templates) != null ? _ref[template_name] : void 0;
+    jst = typeof JST !== "undefined" && JST !== null ? JST[template_name] : void 0;
+    if (!((luca != null) || (jst != null))) {
+      needle = new RegExp("" + template_name + "$");
+      luca = _(Luca.templates).detect(function(fn, template_id) {
+        return needle.exec(template_id);
+      });
+      jst = _(JST).detect(function(fn, template_id) {
+        return needle.exec(template_id);
+      });
+    }
+    if (!(luca || jst)) throw "Could not find template with " + template_name;
+    template = luca || jst;
+    if (variables != null) return template(variables);
+    return template;
+  };
+
+  DefineProxy = (function() {
+
+    function DefineProxy(componentName) {
+      var parts;
+      this.namespace = window || global;
+      this.componentId = this.componentName = componentName;
+      if (componentName.match(/\./)) {
+        this.namespaced = true;
+        parts = componentName.split('.');
+        this.componentId = parts.pop();
+        this.namespace = parts.join('.');
+        Luca.registry.addNamespace(parts.join('.'));
+      }
+    }
+
+    DefineProxy.prototype["in"] = function(namespace) {
+      this.namespace = namespace;
+      return this;
+    };
+
+    DefineProxy.prototype.from = function(superClassName) {
+      this.superClassName = superClassName;
+      return this;
+    };
+
+    DefineProxy.prototype["extends"] = function(superClassName) {
+      this.superClassName = superClassName;
+      return this;
+    };
+
+    DefineProxy.prototype.extend = function(superClassName) {
+      this.superClassName = superClassName;
+      return this;
+    };
+
+    DefineProxy.prototype["with"] = function(properties) {
+      var at;
+      at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
+      if (this.namespaced && _.isUndefined(at)) {
+        eval("window." + this.namespace + " = {}");
+        at = Luca.util.resolve(this.namespace, window || global);
+      }
+      at[this.componentId] = Luca.extend(this.superClassName, this.componentName, properties);
+      Luca.register(_.string.underscored(this.componentId), this.componentName);
+      return at[this.componentId];
+    };
+
+    return DefineProxy;
+
+  })();
+
+  Luca.define = function(componentName) {
+    return new DefineProxy(componentName);
+  };
+
+  Luca.component = Luca.define;
+
+  Luca.extend = function(superClassName, childName, properties) {
+    var superClass;
+    if (properties == null) properties = {};
+    superClass = Luca.util.resolve(superClassName, window || global);
+    if (!_.isFunction(superClass != null ? superClass.extend : void 0)) {
+      throw "" + superClassName + " is not a valid component to extend from";
+    }
+    properties._className = childName;
+    properties._superClass = function() {
+      superClass._className || (superClass._className = superClassName);
+      return superClass;
+    };
+    return superClass.extend(properties);
+  };
+
+  _.mixin({
+    component: Luca.define
+  });
 
   $((function() {
     return $('body').addClass('luca-ui-enabled');
@@ -371,6 +472,7 @@
     });
     definition.render = function() {
       var _this = this;
+      if (this.layoutTemplate != null) this.$el.html();
       if (this.deferrable) {
         this.trigger("before:render", this);
         this.deferrable.bind(this.deferrable_event, _.once(function() {
@@ -397,6 +499,15 @@
   };
 
   _.extend(Luca.View.prototype, {
+    applyStyles: function(styles) {
+      var setting, value;
+      if (styles == null) styles = {};
+      for (setting in styles) {
+        value = styles[setting];
+        this.$el.css(setting, value);
+      }
+      return this;
+    },
     debug: function() {
       var message, _i, _len, _results;
       if (!(this.debugMode || (window.LucaDebugMode != null))) return;
@@ -488,7 +599,7 @@
 }).call(this);
 (function() {
 
-  Luca.Model = Backbone.Model.extend({
+  _.component('Luca.Model')["extends"]('Backbone.Model')["with"]({
     initialize: function() {
       var attr, dependencies, _ref, _results,
         _this = this;
@@ -754,7 +865,7 @@
 }).call(this);
 (function() {
 
-  Luca.core.Field = Luca.View.extend({
+  _.component('Luca.core.Field')["extends"]('Luca.View')["with"]({
     className: 'luca-ui-text-field luca-ui-field',
     isField: true,
     template: 'fields/text_field',
@@ -813,7 +924,7 @@
 }).call(this);
 (function() {
 
-  Luca.core.Container = Luca.View.extend({
+  _.component('Luca.core.Container')["extends"]('Luca.View')["with"]({
     className: 'luca-ui-container',
     componentClass: 'luca-ui-panel',
     isContainer: true,
@@ -1020,8 +1131,6 @@
     }
   });
 
-  Luca.register("container", "Luca.core.Container");
-
 }).call(this);
 (function() {
   var instances;
@@ -1221,7 +1330,7 @@
 }).call(this);
 (function() {
 
-  Luca.containers.SplitView = Luca.core.Container.extend({
+  _.component('Luca.containers.SplitView')["extends"]('Luca.core.Container')["with"]({
     layout: '100',
     componentType: 'split_view',
     containerTemplate: 'containers/basic',
@@ -1229,12 +1338,10 @@
     componentClass: 'luca-ui-panel'
   });
 
-  Luca.register('split_view', "Luca.containers.SplitView");
-
 }).call(this);
 (function() {
 
-  Luca.containers.ColumnView = Luca.core.Container.extend({
+  _.component('Luca.containers.ColumnView')["extends"]('Luca.core.Container')["with"]({
     componentType: 'column_view',
     className: 'luca-ui-column-view',
     components: [],
@@ -1281,12 +1388,10 @@
     }
   });
 
-  Luca.register('column_view', "Luca.containers.ColumnView");
-
 }).call(this);
 (function() {
 
-  Luca.containers.CardView = Luca.core.Container.extend({
+  _.component("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
     componentType: 'card_view',
     className: 'luca-ui-card-view-wrapper',
     activeCard: 0,
@@ -1390,12 +1495,10 @@
     }
   });
 
-  Luca.register('card_view', "Luca.containers.CardView");
-
 }).call(this);
 (function() {
 
-  Luca.containers.ModalView = Luca.core.Container.extend({
+  _.component('Luca.containers.ModalView')["extends"]('Luca.core.Container')["with"]({
     componentType: 'modal_view',
     className: 'luca-ui-modal-view',
     components: [],
@@ -1477,12 +1580,10 @@
     }
   });
 
-  Luca.register("modal_view", "Luca.containers.ModalView");
-
 }).call(this);
 (function() {
 
-  Luca.containers.PanelView = Luca.core.Container.extend({
+  _.component('Luca.containers.PanelView')["extends"]('Luca.core.Container')["with"]({
     className: 'luca-ui-panel',
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -1515,7 +1616,7 @@
 }).call(this);
 (function() {
 
-  Luca.containers.TabView = Luca.containers.CardView.extend({
+  _.component('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
     events: {
       "click ul.nav-tabs li": "select"
     },
@@ -1595,7 +1696,7 @@
 }).call(this);
 (function() {
 
-  Luca.containers.Viewport = Luca.containers.CardView.extend({
+  _.component('Luca.containers.Viewport').extend('Luca.containers.CardView')["with"]({
     activeItem: 0,
     className: 'luca-ui-viewport',
     fullscreen: true,
@@ -1605,7 +1706,6 @@
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
     },
     render: function() {
-      console.log("Rendering Viewport");
       return this.$el.addClass('luca-ui-viewport');
     }
   });

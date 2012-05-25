@@ -1,6 +1,6 @@
 # The RecordManager is a high level component which incorporates
 # a filterable grid, and an editor form responsible for editing
-# the records in that grid. 
+# the records in that grid.
 #
 # it provides convenience methods for accesing those components.
 #
@@ -8,9 +8,8 @@
 # which work together.  inter-component communication should be handled
 # by parent containers, and not individual components, which should
 # usually not be aware of other components.
-
-# Work in progress
-Luca.components.RecordManager = Luca.containers.CardView.extend
+_.component('Luca.components.RecordManager')
+.extend('Luca.containers.CardView').with
 
   events:
     "click .record-manager-grid .edit-link" : "edit_handler"
@@ -19,12 +18,12 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
     "click .add-button" : "add_handler"
     "click .refresh-button" : "filter_handler"
     "click .back-to-search-button" : "back_to_search_handler"
-  
+
   record_manager: true
 
   initialize: (@options={})->
     Luca.containers.CardView::initialize.apply @, arguments
-    
+
     throw "Record Managers must specify a name" unless @name
 
     _.bindAll @, "add_handler", "edit_handler", "filter_handler", "reset_filter_handler"
@@ -32,7 +31,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
     _.extend @components[0][0], @filterConfig if @filterConfig
     _.extend @components[0][1], @gridConfig if @gridConfig
     _.extend @components[1][0], @editorConfig if @editorConfig
-  
+
     @bind "after:card:switch", () =>
       @trigger("activation:search", @) if @activeCard is 0
       @trigger("activation:editor", @) if @activeCard is 1
@@ -47,7 +46,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
     ]
   ,
     ctype: 'form_view'
-  ]   
+  ]
 
   getSearch: (activate=false, reset=true)->
     @activate(0) if activate is true
@@ -74,7 +73,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
   beforeRender: ()->
     @$el.addClass("#{ @resource }-manager")
     Luca.containers.CardView::beforeRender?.apply @, arguments
-    
+
     @$el.addClass("#{ @resource } record-manager")
     @$el.data('resource', @resource)
 
@@ -87,18 +86,18 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
   # components are responsible for component communication.
   #
   # child components should not be aware of other components
-  # in the layout.  Their parents should be responsible for 
+  # in the layout.  Their parents should be responsible for
   # controlling how they interact.  listening to events on one,
   # changing state, inducing effects in the others
   afterRender: ()->
-    Luca.containers.CardView::afterRender?.apply @, arguments 
+    Luca.containers.CardView::afterRender?.apply @, arguments
 
     manager = @
     grid = @getGrid()
     filter = @getFilter()
     editor = @getEditor()
     collection = @getCollection()
-   
+
     # when a row is double clicked on the grid
     # then we edit that row
     grid.bind "row:double:click", (grid,model,index)->
@@ -111,7 +110,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
 
     editor.bind "after:submit", ()=>
       $('.form-view-body', @el).spin(false)
-    
+
     editor.bind "after:submit:fatal_error", ()=>
       $('.form-view-flash-container', @el ).append "<li class='error'>There was an internal server error saving this record.  Please contact developers@benchprep.com to report this error.</li>"
       $('.form-view-body', @el).spin(false)
@@ -119,10 +118,10 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
     editor.bind "after:submit:error", (form, model, response)=>
       _( response.errors ).each (error)=>
         $('.form-view-flash-container', @el ).append "<li class='error'>#{ error }</li>"
-    
+
     editor.bind "after:submit:success", (form, model, response)=>
       $('.form-view-flash-container', @el).append "<li class='success'>Successfully Saved Record</li>"
-      
+
       model.set( response.result )
       form.loadModel( model )
 
@@ -132,13 +131,13 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
         $('.form-view-flash-container li.success', @el).fadeOut(1000)
         $('.form-view-flash-container', @el).html('')
       , 4000
-    
+
     filter.eachComponent (component)=>
       try
         component.bind "on:change", @filter_handler
       catch e
         undefined
-  
+
   firstActivation: ()->
     @getGrid().trigger "first:activation", @, @getGrid()
     @getFilter().trigger "first:activation", @, @getGrid()
@@ -149,16 +148,16 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
     grid = @getGrid()
     filter = @getFilter()
     editor = @getEditor()
-    
+
     # refresh the select fields in the filter
     filter.clear()
 
     grid.applyFilter()
-  
+
   manageRecord: (record_id)->
     model = @getCollection().get(record_id)
     return @loadModel(model) if model
-    
+
     console.log "Could Not Find Model, building and fetching"
 
     model = @buildModel()
@@ -186,7 +185,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
   createModel: ()->
     @loadModel(@buildModel())
 
-  ##### DOM Event Handlers 
+  ##### DOM Event Handlers
   reset_filter_handler: (e)->
     @getFilter().clear()
     @getGrid().applyFilter( @getFilter().getValues() )
@@ -197,7 +196,7 @@ Luca.components.RecordManager = Luca.containers.CardView.extend
   edit_handler: (e)->
     me = my = $( e.currentTarget )
     record_id = my.parents('tr').data('record-id')
-  
+
     if record_id
       model = @getGrid().collection.get( record_id )
 

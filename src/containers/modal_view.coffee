@@ -1,4 +1,4 @@
-Luca.containers.ModalView = Luca.core.Container.extend 
+_.component('Luca.containers.ModalView').extends('Luca.core.Container').with
   componentType: 'modal_view'
 
   className: 'luca-ui-modal-view'
@@ -22,18 +22,18 @@ Luca.containers.ModalView = Luca.core.Container.extend
     opacity: 80
     onOpen: (modal)->
       @onOpen.apply @
-      @onModalOpen.apply modal, [modal, @] 
-    onClose: (modal)-> 
+      @onModalOpen.apply modal, [modal, @]
+    onClose: (modal)->
       @onClose.apply @
       @onModalClose.apply modal, [modal, @]
-  
+
   modalOptions: {}
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
 
-    _( @defaultModalOptions ).each (value,setting) => @modalOptions[ setting ] ||= value 
+    _( @defaultModalOptions ).each (value,setting) => @modalOptions[ setting ] ||= value
 
     @modalOptions.onOpen = _.bind( @modalOptions.onOpen, @)
     @modalOptions.onClose = _.bind( @modalOptions.onClose, @)
@@ -66,7 +66,7 @@ Luca.containers.ModalView = Luca.core.Container.extend
       object.container =  @el
       object
 
-  afterInitialize: ()-> 
+  afterInitialize: ()->
     @$el.hide()
     @render() if @renderOnInitialize
 
@@ -81,5 +81,3 @@ Luca.containers.ModalView = Luca.core.Container.extend
 
   hide: ()->
     @trigger "before:hide", @
-
-Luca.register "modal_view","Luca.containers.ModalView"

@@ -1,21 +1,20 @@
-Luca.fields.CheckboxField = Luca.core.Field.extend
-  form_field: true
+_.component('Luca.fields.CheckboxField').extends('Luca.core.Field').with
 
   events:
     "change input" : "change_handler"
 
   change_handler: (e)->
     me = my = $(e.currentTarget)
-    
+
     @trigger "on:change", @, e
-    
+
     if me.checked is true
       @trigger "checked"
     else
       @trigger "unchecked"
 
   className: 'luca-ui-checkbox-field luca-ui-field'
-  
+
   template: 'fields/checkbox_field'
 
   hooks: ["checked","unchecked"]
@@ -27,8 +26,8 @@ Luca.fields.CheckboxField = Luca.core.Field.extend
     Luca.core.Field::initialize.apply @, arguments
 
   afterInitialize: ()->
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @input_value ||= 1
     @label ||= @name
 
@@ -37,5 +36,3 @@ Luca.fields.CheckboxField = Luca.core.Field.extend
 
   getValue:()->
     @input.attr('checked') is true
-
-Luca.register "checkbox_field", "Luca.fields.CheckboxField"

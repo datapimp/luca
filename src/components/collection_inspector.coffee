@@ -1,2 +1,2 @@
-Luca.components.CollectionInspector = Luca.View.extend
+_.component('Luca.components.CollectionInspector').extends('Luca.View').with
   name: "collection_inspector"

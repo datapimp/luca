@@ -1,5 +1,5 @@
-Luca.fields.CheckboxArray = Luca.core.Field.extend
-  
+_.component('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
+
   template: "fields/checkbox_array"
 
   events:
@@ -12,8 +12,8 @@ Luca.fields.CheckboxArray = Luca.core.Field.extend
 
     Luca.core.Field::initialize.apply @, arguments
 
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @label ||= @name
     @valueField ||= "id"
     @displayField ||= "name"
@@ -39,8 +39,8 @@ Luca.fields.CheckboxArray = Luca.core.Field.extend
       @selectedItems.push(checkbox.value)
     else
       if @selectedItems.indexOf(checkbox.value) isnt -1
-        @selectedItems = _.without(@selectedItems, [checkbox.value]) 
-    
+        @selectedItems = _.without(@selectedItems, [checkbox.value])
+
     @_updateModel()
 
   populateCheckboxes: ()->
@@ -53,12 +53,10 @@ Luca.fields.CheckboxArray = Luca.core.Field.extend
       input_id = _.uniqueId('field')
       controls.append(Luca.templates["fields/checkbox_array_item"]({label: label, value: value, input_id: input_id, input_name: @input_name}))
       @$("##{input_id}").attr("checked", "checked") unless @selectedItems.indexOf(value) is -1
-    
+
     $(@container).append(@$el)
 
   _updateModel: ()->
     attributes = {}
     attributes[@name] = @selectedItems
     @getModel().set(attributes)
-
-Luca.register "checkbox_array", "Luca.fields.CheckboxArray"

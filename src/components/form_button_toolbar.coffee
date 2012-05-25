@@ -1,10 +1,12 @@
-Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
+_.component('Luca.components.FormButtonToolbar')
+.extends('Luca.components.Toolbar').with
+
   className: 'luca-ui-form-toolbar form-actions'
 
   position: 'bottom'
 
   includeReset: false
-  
+
   render: ()->
     $(@container).append(@el)
 
@@ -22,5 +24,3 @@ Luca.components.FormButtonToolbar = Luca.components.Toolbar.extend
         ctype: 'button_field'
         label: 'Reset'
         class: 'btn reset-button'
-
-Luca.register "form_button_toolbar", "Luca.components.FormButtonToolbar"

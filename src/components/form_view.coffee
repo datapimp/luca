@@ -1,4 +1,5 @@
-Luca.components.FormView = Luca.core.Container.extend
+_.component("Luca.components.FormView").extends('Luca.core.Container').with
+
   tagName: 'form'
 
   className: 'luca-ui-form-view'
@@ -246,5 +247,3 @@ Luca.components.FormView = Luca.core.Container.extend
 
   setLegend: (@legend)->
     $('fieldset legend', @el).first().html(@legend)
-
-Luca.register 'form_view', 'Luca.components.FormView'

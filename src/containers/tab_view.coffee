@@ -1,4 +1,5 @@
-Luca.containers.TabView = Luca.containers.CardView.extend
+_.component('Luca.containers.TabView').extends('Luca.containers.CardView').with
+
   events:
     "click ul.nav-tabs li" : "select"
 

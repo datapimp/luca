@@ -1,5 +1,7 @@
-Luca.components.DevelopmentConsole = Luca.View.extend
+_.component('Luca.components.DevelopmentConsole').extends('Luca.View').with
+
   name: "development_console"
+
   className: 'luca-ui-development-console'
 
   initialize: (@options={})->

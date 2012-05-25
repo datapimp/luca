@@ -1,5 +1,4 @@
-Luca.fields.FileUploadField = Luca.core.Field.extend
-  form_field: true
+_.component('Luca.fields.FileUploadField').extends('Luca.core.Field').with
 
   template: 'fields/file_upload_field'
 
@@ -7,9 +6,7 @@ Luca.fields.FileUploadField = Luca.core.Field.extend
     Luca.core.Field::initialize.apply @, arguments
 
   afterInitialize: ()->
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @label ||= @name
     @helperText ||= ""
-
-Luca.register "file_upload_field", "Luca.fields.FileUploadField"

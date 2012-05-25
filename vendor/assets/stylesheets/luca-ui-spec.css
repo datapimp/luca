@@ -109,12 +109,15 @@ Column container
       font-weight: bold;
       color: #fff;
       background: rgba(255, 255, 255, 0.2); }
+    .luca-ui-development-console .console-inner .jquery-console-message {
+      margin: 10px 0px; }
     .luca-ui-development-console .console-inner .jquery-console-message-error {
       font-weight: bold;
       color: #ef0505;
       padding: 0.1em; }
     .luca-ui-development-console .console-inner .jquery-console-prompt-label {
-      font-weight: bold; }
+      font-weight: bold;
+      color: yellow; }
 .luca-ui-form-view-wrapper {
   width: 100%;
   float: left;

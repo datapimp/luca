@@ -70,4 +70,36 @@ describe "The Luca Framework", ->
     expect( Luca.isBackboneModel({}) ).toEqual false
 
 
-describe
+describe "Luca Component Definition", ->
+  beforeEach ->
+    Luca.define("Luca.random.ComponentDefinition").extends("Luca.View").with
+      property: "value"
+
+  it "should create the namespace for us", ->
+    expect( Luca.random ).toBeDefined()
+
+  it "should automatically register the namespace in the registry", ->
+    expect( Luca.registry.namespaces ).toContain 'Luca.random'
+
+  it "should automatically register the component in the registry", ->
+    expect( Luca.registry.lookup("component_definition") ).toBeDefined()
+
+  it "should reference the name of the extending class", ->
+    instance = new Luca.random.ComponentDefinition
+    expect( instance._className ).toEqual "Luca.random.ComponentDefinition"
+
+  it "should reference the extended class", ->
+    instance = new Luca.random.ComponentDefinition
+    expect( instance._superClass() ).toEqual Luca.View
+
+  it "should reference the name of the extended class", ->
+    instance = new Luca.random.ComponentDefinition
+    expect( instance._superClass()._className ).toEqual 'Luca.View'
+
+  it "should use the backbone.extend functionality properly", ->
+    instance = new Luca.random.ComponentDefinition
+    expect( instance.property ).toEqual "value"
+
+  it "should alias to _.component", ->
+    proxy = _.component('Luca.random.ComponentDefition')
+    expect( proxy.with ).toBeDefined()

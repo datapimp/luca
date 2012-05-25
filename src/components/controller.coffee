@@ -1,4 +1,6 @@
-Luca.components.Controller = Luca.containers.CardView.extend
+_.component('Luca.components.Controller')
+.extends('Luca.containers.CardView').with
+
   initialize: (@options)->
     Luca.containers.CardView::initialize.apply @, arguments
 

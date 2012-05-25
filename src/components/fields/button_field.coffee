@@ -1,5 +1,4 @@
-Luca.fields.ButtonField = Luca.core.Field.extend
-  form_field: true
+_.component('Luca.fields.ButtonField').extends('Luca.core.Field').with
 
   readOnly: true
 
@@ -37,5 +36,3 @@ Luca.fields.ButtonField = Luca.core.Field.extend
     @icon_class += " icon-white" if @white
 
   setValue: ()-> true
-
-Luca.register "button_field", "Luca.fields.ButtonField"

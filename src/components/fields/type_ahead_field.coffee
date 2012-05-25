@@ -1,10 +1,8 @@
-Luca.fields.TypeAheadField = Luca.fields.TextField.extend
-  form_field: true
-
+_.component('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
   className: 'luca-ui-field'
 
   afterInitialize: ()->
-    @input_id ||= _.uniqueId('field') 
-    @input_name ||= @name 
+    @input_id ||= _.uniqueId('field')
+    @input_name ||= @name
     @label ||= @name
-  
+
