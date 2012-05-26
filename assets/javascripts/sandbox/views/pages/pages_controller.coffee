@@ -33,6 +33,10 @@ Sandbox.views.PagesController = Luca.components.Controller.extend
       ctype: "collection_inspector"
       name: "collection_inspector"
       title: "Collection Inspector"
+    ,
+      ctype: "code_editor"
+      name: "code_editor"
+      title: "Code Editor"
     ]
   ]
 

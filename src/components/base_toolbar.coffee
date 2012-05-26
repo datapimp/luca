@@ -9,7 +9,7 @@ _.component('Luca.components.Toolbar').extends('Luca.core.Container').with
 
   prepareComponents: ()->
     _( @components ).each (component)=>
-      component.container = @el
+      component.container = @$el
 
   render: ()->
     $(@container).append(@el)

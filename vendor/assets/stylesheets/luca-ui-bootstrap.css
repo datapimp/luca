@@ -707,15 +707,16 @@ Column container
   background: rgba(0, 0, 0, 0.9);
   font-size: 16px;
   margin-top: 1em;
-  font-family: "Monaco"; }
+  font-family: "Monaco";
+  height: 620px;
+  width: 95%; }
   .luca-ui-development-console .console-inner {
     color: #fff;
     height: 600px;
-    width: 800px;
-    max-height: 600px; }
+    width: 100%; }
     .luca-ui-development-console .console-inner .jquery-console-inner {
-      height: 599px;
-      width: 799px;
+      height: 100%;
+      width: 100%;
       overflow: auto;
       padding: 0.5em; }
     .luca-ui-development-console .console-inner .jquery-console-focus .jquery-console-cursor {
@@ -731,6 +732,17 @@ Column container
     .luca-ui-development-console .console-inner .jquery-console-prompt-label {
       font-weight: bold;
       color: yellow; }
+
+.console-inner .array-inspector {
+  display: block;
+  width: 100%;
+  float: left;
+  clear: both;
+  margin: 10px 0px; }
+  .console-inner .array-inspector span {
+    float: left;
+    display: block;
+    padding: 5px; }
 .luca-ui-form-view-wrapper {
   width: 100%;
   float: left;

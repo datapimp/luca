@@ -11,14 +11,15 @@
   font-size: 16px;
   margin-top: 1em;
   font-family: "Monaco";
+  height: 620px;
+  width: 95%;
  .console-inner {
     color: #fff;
     height: 600px;
-    width: 800px;
-    max-height: 600px;
+    width: 100%;
    .jquery-console-inner {
-      height: 599px;
-      width: 799px;
+      height: 100%;
+      width: 100%;
       overflow: auto;
       padding: 0.5em;
    }
@@ -44,4 +45,19 @@
       color: yellow;
    }
  }
+}
+
+.console-inner {
+  .array-inspector {
+    display: block;
+    width: 100%;
+    float: left;
+    clear: both;
+    margin: 10px 0px;
+    span {
+      float: left;
+      display: block;
+      padding: 5px;
+    }
+  }
 }

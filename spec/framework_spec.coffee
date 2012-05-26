@@ -103,3 +103,7 @@ describe "Luca Component Definition", ->
   it "should alias to _.component", ->
     proxy = _.component('Luca.random.ComponentDefition')
     expect( proxy.with ).toBeDefined()
+
+  it "should allow me to set the namespace before the definition", ->
+    Luca.util.namespace("Luca.View")
+    expect( Luca.util.namespace() ).toEqual Luca.View

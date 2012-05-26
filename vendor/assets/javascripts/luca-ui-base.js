@@ -219,10 +219,6 @@
     component: Luca.define
   });
 
-  $((function() {
-    return $('body').addClass('luca-ui-enabled');
-  })());
-
 }).call(this);
 (function() {
 

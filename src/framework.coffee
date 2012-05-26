@@ -170,12 +170,23 @@ Luca.template = (template_name, variables)->
 #   name: "whatever"
 #
 # All instances of TestClass defined this way, will have
-# _className properties of 'TestClass' as well as a reference
+# displayName properties of 'TestClass' as well as a reference
 # to the extended class 'Luca.View' so that you can inspect
 # an instance of TestClass and know that it inherits from 'Luca.View'
+currentNamespace = (window || global)
+
+Luca.util.namespace = (namespace)->
+  return currentNamespace unless namespace?
+  currentNamespace = if _.isString(namespace) then Luca.util.resolve(namespace,(window||global)) else namespace
+
+  if currentNamespace?
+    return currentNamespace
+
+  currentNamespace = eval("(window||global).#{ namespace } = {}")
+
 class DefineProxy
   constructor:(componentName)->
-    @namespace = (window || global)
+    @namespace = Luca.util.namespace()
     @componentId = @componentName = componentName
 
     if componentName.match(/\./)
@@ -187,15 +198,24 @@ class DefineProxy
       # automatically add the namespace to the namespace registry
       Luca.registry.addNamespace( parts.join('.') )
 
+  # allow for specifying the namespace
   in: (@namespace)-> @
+
+  # allow for multiple ways of saying the same thing for readability purposes
   from: (@superClassName)-> @
   extends: (@superClassName)-> @
   extend: (@superClassName)-> @
-  with: (properties)->
-    at = if @namespaced then Luca.util.resolve(@namespace, (window || global)) else (window||global)
 
-    if @namespaced and _.isUndefined(at)
-      eval("window.#{ @namespace } = {}")
+  # which properties, methods, etc will you be extending the base class with?
+  with: (properties)->
+    at = if @namespaced
+      Luca.util.resolve(@namespace, (window || global))
+    else
+      (window||global)
+
+    # automatically create the namespace
+    if @namespaced and not at?
+      eval("(window||global).#{ @namespace } = {}")
       at = Luca.util.resolve(@namespace,(window || global))
 
     at[@componentId] = Luca.extend(@superClassName,@componentName, properties)
@@ -220,17 +240,13 @@ Luca.extend = (superClassName, childName, properties={})->
   unless _.isFunction(superClass?.extend)
     throw "#{ superClassName } is not a valid component to extend from"
 
-  properties._className = childName
+  properties.displayName = childName
 
   properties._superClass = ()->
-    superClass._className ||= superClassName
+    superClass.displayName ||= superClassName
     superClass
 
   superClass.extend(properties)
 
 _.mixin
   component: Luca.define
-
-#### Once We Are Ready To go....
-$ do ->
-  $('body').addClass('luca-ui-enabled')
