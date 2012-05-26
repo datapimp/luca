@@ -100,8 +100,8 @@ describe "Luca Component Definition", ->
     instance = new Luca.random.ComponentDefinition
     expect( instance.property ).toEqual "value"
 
-  it "should alias to _.component", ->
-    proxy = _.component('Luca.random.ComponentDefition')
+  it "should alias to _.def", ->
+    proxy = _.def('Luca.random.ComponentDefition')
     expect( proxy.with ).toBeDefined()
 
   it "should allow me to set the namespace before the definition", ->

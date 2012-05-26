@@ -1,4 +1,4 @@
-_.component("Luca.containers.CardView").extends("Luca.core.Container").with
+_.def("Luca.containers.CardView").extends("Luca.core.Container").with
   componentType: 'card_view'
 
   className: 'luca-ui-card-view-wrapper'

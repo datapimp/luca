@@ -1,4 +1,4 @@
-_.component('Luca.core.Field').extends('Luca.View').with
+_.def('Luca.core.Field').extends('Luca.View').with
 
   className: 'luca-ui-text-field luca-ui-field'
 

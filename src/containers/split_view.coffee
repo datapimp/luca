@@ -1,4 +1,4 @@
-_.component('Luca.containers.SplitView').extends('Luca.core.Container').with
+_.def('Luca.containers.SplitView').extends('Luca.core.Container').with
   layout: '100'
 
   componentType: 'split_view'

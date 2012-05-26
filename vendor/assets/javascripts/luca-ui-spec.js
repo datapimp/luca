@@ -595,7 +595,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.Model')["extends"]('Backbone.Model')["with"]({
+  _.def('Luca.Model')["extends"]('Backbone.Model')["with"]({
     initialize: function() {
       var attr, dependencies, _ref, _results,
         _this = this;
@@ -861,7 +861,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.core.Field')["extends"]('Luca.View')["with"]({
+  _.def('Luca.core.Field')["extends"]('Luca.View')["with"]({
     className: 'luca-ui-text-field luca-ui-field',
     isField: true,
     template: 'fields/text_field',
@@ -920,7 +920,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.core.Container')["extends"]('Luca.View')["with"]({
+  _.def('Luca.core.Container')["extends"]('Luca.View')["with"]({
     className: 'luca-ui-container',
     componentClass: 'luca-ui-panel',
     isContainer: true,
@@ -1326,7 +1326,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.SplitView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.SplitView')["extends"]('Luca.core.Container')["with"]({
     layout: '100',
     componentType: 'split_view',
     containerTemplate: 'containers/basic',
@@ -1337,7 +1337,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.ColumnView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.ColumnView')["extends"]('Luca.core.Container')["with"]({
     componentType: 'column_view',
     className: 'luca-ui-column-view',
     components: [],
@@ -1387,7 +1387,7 @@
 }).call(this);
 (function() {
 
-  _.component("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
+  _.def("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
     componentType: 'card_view',
     className: 'luca-ui-card-view-wrapper',
     activeCard: 0,
@@ -1494,7 +1494,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.ModalView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.ModalView')["extends"]('Luca.core.Container')["with"]({
     componentType: 'modal_view',
     className: 'luca-ui-modal-view',
     components: [],
@@ -1579,7 +1579,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.PanelView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.PanelView')["extends"]('Luca.core.Container')["with"]({
     className: 'luca-ui-panel',
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -1612,7 +1612,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
+  _.def('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
     events: {
       "click ul.nav-tabs li": "select"
     },
@@ -1692,7 +1692,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.Viewport').extend('Luca.containers.CardView')["with"]({
+  _.def('Luca.containers.Viewport').extend('Luca.containers.CardView')["with"]({
     activeItem: 0,
     className: 'luca-ui-viewport',
     fullscreen: true,
@@ -1714,7 +1714,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.Template')["extends"]('Luca.View')["with"]({
+  _.def('Luca.components.Template')["extends"]('Luca.View')["with"]({
     templateContainer: "Luca.templates",
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -1738,7 +1738,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.Application')["extends"]('Luca.containers.Viewport')["with"]({
+  _.def('Luca.Application')["extends"]('Luca.containers.Viewport')["with"]({
     components: [
       {
         ctype: 'controller',
@@ -1829,7 +1829,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.Toolbar')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.components.Toolbar')["extends"]('Luca.core.Container')["with"]({
     className: 'luca-ui-toolbar',
     position: 'bottom',
     initialize: function(options) {
@@ -1850,14 +1850,14 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.CollectionInspector')["extends"]('Luca.View')["with"]({
+  _.def('Luca.components.CollectionInspector')["extends"]('Luca.View')["with"]({
     name: "collection_inspector"
   });
 
 }).call(this);
 (function() {
 
-  _.component('Luca.components.CollectionLoaderView')["extends"]('Luca.components.Template')["with"]({
+  _.def('Luca.components.CollectionLoaderView')["extends"]('Luca.components.Template')["with"]({
     className: 'luca-ui-collection-loader-view',
     template: "components/collection_loader_view",
     initialize: function(options) {
@@ -1893,7 +1893,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.Controller')["extends"]('Luca.containers.CardView')["with"]({
+  _.def('Luca.components.Controller')["extends"]('Luca.containers.CardView')["with"]({
     initialize: function(options) {
       var _ref;
       this.options = options;
@@ -1931,7 +1931,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.DevelopmentConsole')["extends"]('Luca.View')["with"]({
+  _.def('Luca.components.DevelopmentConsole')["extends"]('Luca.View')["with"]({
     name: "development_console",
     className: 'luca-ui-development-console',
     initialize: function(options) {
@@ -1994,7 +1994,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.ButtonField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.ButtonField')["extends"]('Luca.core.Field')["with"]({
     readOnly: true,
     events: {
       "click input": "click_handler"
@@ -2037,7 +2037,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.CheckboxArray')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.CheckboxArray')["extends"]('Luca.core.Field')["with"]({
     template: "fields/checkbox_array",
     events: {
       "click input": "clickHandler"
@@ -2118,7 +2118,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.CheckboxField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.CheckboxField')["extends"]('Luca.core.Field')["with"]({
     events: {
       "change input": "change_handler"
     },
@@ -2158,7 +2158,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.FileUploadField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.FileUploadField')["extends"]('Luca.core.Field')["with"]({
     template: 'fields/file_upload_field',
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -2175,7 +2175,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.HiddenField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.HiddenField')["extends"]('Luca.core.Field')["with"]({
     template: 'fields/hidden_field',
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -2192,7 +2192,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.SelectField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.SelectField')["extends"]('Luca.core.Field')["with"]({
     events: {
       "change select": "change_handler"
     },
@@ -2286,7 +2286,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.TextAreaField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.TextAreaField')["extends"]('Luca.core.Field')["with"]({
     events: {
       "keydown input": "keydown_handler",
       "blur input": "blur_handler",
@@ -2331,7 +2331,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.TextField')["extends"]('Luca.core.Field')["with"]({
+  _.def('Luca.fields.TextField')["extends"]('Luca.core.Field')["with"]({
     events: {
       "keydown input": "keydown_handler",
       "blur input": "blur_handler",
@@ -2375,7 +2375,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.fields.TypeAheadField')["extends"]('Luca.fields.TextField')["with"]({
+  _.def('Luca.fields.TypeAheadField')["extends"]('Luca.fields.TextField')["with"]({
     className: 'luca-ui-field',
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
@@ -2387,7 +2387,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.FormButtonToolbar')["extends"]('Luca.components.Toolbar')["with"]({
+  _.def('Luca.components.FormButtonToolbar')["extends"]('Luca.components.Toolbar')["with"]({
     className: 'luca-ui-form-toolbar form-actions',
     position: 'bottom',
     includeReset: false,
@@ -2417,7 +2417,7 @@
 }).call(this);
 (function() {
 
-  _.component("Luca.components.FormView")["extends"]('Luca.core.Container')["with"]({
+  _.def("Luca.components.FormView")["extends"]('Luca.core.Container')["with"]({
     tagName: 'form',
     className: 'luca-ui-form-view',
     hooks: ["before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error"],
@@ -2667,7 +2667,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.GridView').extend('Luca.View')["with"]({
+  _.def('Luca.components.GridView').extend('Luca.View')["with"]({
     autoBindEventHandlers: true,
     events: {
       "dblclick table tbody tr": "double_click_handler",
@@ -2900,7 +2900,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.components.RecordManager').extend('Luca.containers.CardView')["with"]({
+  _.def('Luca.components.RecordManager').extend('Luca.containers.CardView')["with"]({
     events: {
       "click .record-manager-grid .edit-link": "edit_handler",
       "click .record-manager-filter .filter-button": "filter_handler",
@@ -4216,9 +4216,9 @@
       instance = new Luca.random.ComponentDefinition;
       return expect(instance.property).toEqual("value");
     });
-    return it("should alias to _.component", function() {
+    return it("should alias to _.def", function() {
       var proxy;
-      proxy = _.component('Luca.random.ComponentDefition');
+      proxy = _.def('Luca.random.ComponentDefition');
       return expect(proxy["with"]).toBeDefined();
     });
   });

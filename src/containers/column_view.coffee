@@ -1,4 +1,4 @@
-_.component('Luca.containers.ColumnView').extends('Luca.core.Container').with
+_.def('Luca.containers.ColumnView').extends('Luca.core.Container').with
   componentType: 'column_view'
 
   className: 'luca-ui-column-view'

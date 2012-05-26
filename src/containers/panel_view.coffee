@@ -1,4 +1,4 @@
-_.component('Luca.containers.PanelView').extends('Luca.core.Container').with
+_.def('Luca.containers.PanelView').extends('Luca.core.Container').with
   className: 'luca-ui-panel'
 
   initialize: (@options={})->

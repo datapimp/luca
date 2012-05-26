@@ -1,4 +1,4 @@
-_.component('Luca.containers.Viewport').extend('Luca.containers.CardView').with
+_.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
   activeItem: 0
 

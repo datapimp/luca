@@ -595,7 +595,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.Model')["extends"]('Backbone.Model')["with"]({
+  _.def('Luca.Model')["extends"]('Backbone.Model')["with"]({
     initialize: function() {
       var attr, dependencies, _ref, _results,
         _this = this;
@@ -861,7 +861,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.core.Field')["extends"]('Luca.View')["with"]({
+  _.def('Luca.core.Field')["extends"]('Luca.View')["with"]({
     className: 'luca-ui-text-field luca-ui-field',
     isField: true,
     template: 'fields/text_field',
@@ -920,7 +920,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.core.Container')["extends"]('Luca.View')["with"]({
+  _.def('Luca.core.Container')["extends"]('Luca.View')["with"]({
     className: 'luca-ui-container',
     componentClass: 'luca-ui-panel',
     isContainer: true,
@@ -1326,7 +1326,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.SplitView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.SplitView')["extends"]('Luca.core.Container')["with"]({
     layout: '100',
     componentType: 'split_view',
     containerTemplate: 'containers/basic',
@@ -1337,7 +1337,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.ColumnView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.ColumnView')["extends"]('Luca.core.Container')["with"]({
     componentType: 'column_view',
     className: 'luca-ui-column-view',
     components: [],
@@ -1387,7 +1387,7 @@
 }).call(this);
 (function() {
 
-  _.component("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
+  _.def("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
     componentType: 'card_view',
     className: 'luca-ui-card-view-wrapper',
     activeCard: 0,
@@ -1494,7 +1494,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.ModalView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.ModalView')["extends"]('Luca.core.Container')["with"]({
     componentType: 'modal_view',
     className: 'luca-ui-modal-view',
     components: [],
@@ -1579,7 +1579,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.PanelView')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.containers.PanelView')["extends"]('Luca.core.Container')["with"]({
     className: 'luca-ui-panel',
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -1612,7 +1612,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
+  _.def('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
     events: {
       "click ul.nav-tabs li": "select"
     },
@@ -1692,7 +1692,7 @@
 }).call(this);
 (function() {
 
-  _.component('Luca.containers.Viewport').extend('Luca.containers.CardView')["with"]({
+  _.def('Luca.containers.Viewport').extend('Luca.containers.CardView')["with"]({
     activeItem: 0,
     className: 'luca-ui-viewport',
     fullscreen: true,

@@ -29,6 +29,6 @@
     allows for introspection of components as well as advanced
     querying of the Luca Component Cache
 
-  _ Added _.component as an alias to Luca.define
+  _ Added _.def as an alias to Luca.define
 
   - All Luca components have been migrated over to the new Luca.define() API

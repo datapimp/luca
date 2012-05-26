@@ -1,4 +1,4 @@
-_.component('Luca.fields.TextField').extends('Luca.core.Field').with
+_.def('Luca.fields.TextField').extends('Luca.core.Field').with
   events:
     "keydown input" : "keydown_handler"
     "blur input" : "blur_handler"

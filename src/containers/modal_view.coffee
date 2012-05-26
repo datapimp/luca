@@ -1,4 +1,4 @@
-_.component('Luca.containers.ModalView').extends('Luca.core.Container').with
+_.def('Luca.containers.ModalView').extends('Luca.core.Container').with
   componentType: 'modal_view'
 
   className: 'luca-ui-modal-view'

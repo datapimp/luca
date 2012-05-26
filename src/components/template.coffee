@@ -1,4 +1,4 @@
-_.component('Luca.components.Template').extends('Luca.View').with
+_.def('Luca.components.Template').extends('Luca.View').with
 
   templateContainer: "Luca.templates"
 

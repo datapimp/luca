@@ -5,7 +5,7 @@
 # it contains, assigning them to a DOM container, and
 # automatically instantiating and rendering the components
 # in their proper place.
-_.component('Luca.core.Container').extends('Luca.View').with
+_.def('Luca.core.Container').extends('Luca.View').with
 
   className: 'luca-ui-container'
 

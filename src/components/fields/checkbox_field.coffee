@@ -1,4 +1,4 @@
-_.component('Luca.fields.CheckboxField').extends('Luca.core.Field').with
+_.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
 
   events:
     "change input" : "change_handler"

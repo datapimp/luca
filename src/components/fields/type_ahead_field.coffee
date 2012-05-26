@@ -1,4 +1,4 @@
-_.component('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
+_.def('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
   className: 'luca-ui-field'
 
   afterInitialize: ()->

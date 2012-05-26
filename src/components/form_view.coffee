@@ -1,4 +1,4 @@
-_.component("Luca.components.FormView").extends('Luca.core.Container').with
+_.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   tagName: 'form'
 

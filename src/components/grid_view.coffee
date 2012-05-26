@@ -1,4 +1,4 @@
-_.component('Luca.components.GridView').extend('Luca.View').with
+_.def('Luca.components.GridView').extend('Luca.View').with
 
   autoBindEventHandlers: true
 

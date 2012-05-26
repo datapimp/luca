@@ -1,4 +1,4 @@
-_.component('Luca.fields.ButtonField').extends('Luca.core.Field').with
+_.def('Luca.fields.ButtonField').extends('Luca.core.Field').with
 
   readOnly: true
 

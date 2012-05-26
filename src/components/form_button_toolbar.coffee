@@ -1,4 +1,4 @@
-_.component('Luca.components.FormButtonToolbar')
+_.def('Luca.components.FormButtonToolbar')
 .extends('Luca.components.Toolbar').with
 
   className: 'luca-ui-form-toolbar form-actions'
