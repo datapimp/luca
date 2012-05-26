@@ -37,6 +37,10 @@ describe "The Luca Framework", ->
     component = Luca.util.lazyComponent(object)
     expect( _.isFunction(component.render) ).toBeTruthy()
 
+  it "should create an instance of a class by passing a ctype string", ->
+    component = Luca.util.lazyComponent("panel_view")
+    expect( _.isFunction(component.render) ).toBeTruthy()
+
   it "should find a created view in the cache", ->
     template = new Luca.components.Template
       template: "components/form_view"
@@ -86,7 +90,7 @@ describe "Luca Component Definition", ->
 
   it "should reference the name of the extending class", ->
     instance = new Luca.random.ComponentDefinition
-    expect( instance._className ).toEqual "Luca.random.ComponentDefinition"
+    expect( instance.displayName ).toEqual "Luca.random.ComponentDefinition"
 
   it "should reference the extended class", ->
     instance = new Luca.random.ComponentDefinition
@@ -94,7 +98,7 @@ describe "Luca Component Definition", ->
 
   it "should reference the name of the extended class", ->
     instance = new Luca.random.ComponentDefinition
-    expect( instance._superClass()._className ).toEqual 'Luca.View'
+    expect( instance._superClass().displayName ).toEqual 'Luca.View'
 
   it "should use the backbone.extend functionality properly", ->
     instance = new Luca.random.ComponentDefinition

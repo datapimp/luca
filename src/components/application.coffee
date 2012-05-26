@@ -1,21 +1,55 @@
 _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
+  # automatically starts the @router
+  # if it exists, once the components
+  # for the application have been created
+  autoStartHistory: true
+
+  # we will create a collection manager singleton
+  # by default unless otherwise specified
+  useCollectionManager: true
+
+  # Luca plugin apps are apps which mount onto existing
+  # luca apps, and will not have the behavior of a main
+  # app which acts as a singleton
+  plugin: false
+
+  # by default, the application will use a controller
+  # component, which is a card view container which shows
+  # one view at a time.  this is useful for having an application
+  # with several 'sections' so to speak
+  useController: true
+
+  #### Nested Components
+
+  # applications have one component, the controller
+  # any components defined on the application class directly
+  # will get wrapped by the main controller unless you
+  # set useController = false
   components:[
-    ctype: 'controller'
-    name: 'main_controller'
-    defaultCard: 'welcome'
-    components:[
-      ctype: 'template'
-      name: 'welcome'
-      template: 'sample/welcome'
-      templateContainer: "Luca.templates"
-    ]
+    ctype: 'template'
+    name: 'welcome'
+    template: 'sample/welcome'
+    templateContainer: "Luca.templates"
   ]
 
   initialize: (@options={})->
+    unless @plugin is true
+      Luca.getApplication = ()-> @
+
     Luca.containers.Viewport::initialize.apply @, arguments
 
-    @collectionManager ||= Luca.CollectionManager.get?() || new Luca.CollectionManager()
+    if @useController is true
+      definedComponents = @components || []
+
+    @components = [
+      ctype: 'controller'
+      name: "main_controller"
+      components: definedComponents
+    ]
+
+    if @useCollectionManager is true
+      @collectionManager ||= Luca.CollectionManager.get?() || new Luca.CollectionManager()
 
     @state = new Backbone.Model( @defaultState )
 
@@ -50,7 +84,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
   beforeRender: ()->
     Luca.containers.Viewport::beforeRender?.apply @, arguments
-    #Backbone.history.start()
+    Backbone.history.start() if @router? and @autoStartHistory is true
 
   # boot should trigger the ready event, which will call the initial call
   # to render() your application, which will have a cascading effect on every
@@ -72,10 +106,19 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     @state.get(attribute)
 
   getMainController: ()->
-    @view("main_controler")
+    return @components[0] if @useController is true
+    Luca.cache('main_controller')
 
   set: (attributes)->
     @state.set(attributes)
 
-  view: (name)-> Luca.cache(name)
+  view: (name)->
+    Luca.cache(name)
+
+  #### Navigation Hooks
+  #
+  # delegate to the main controller so that we can switch the active section
+  navigate_to: (component_name, callback)->
+    @getMainController().navigate_to(component_name, callback)
+
 

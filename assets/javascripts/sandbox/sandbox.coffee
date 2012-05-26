@@ -1,13 +1,17 @@
 Sandbox.Application = Luca.Application.extend
   name: 'sandbox_application'
   el: '#viewport'
+  fluid: false
+
+  topNav:'top_navigation'
+
+  initialize: (@options={})->
+    Luca.Application::initialize.apply @, arguments
+    @router = new Sandbox.Router(app: @)
+
   components:[
-    ctype: 'controller'
-    name: 'main_controller'
-    components:[
-      ctype: 'pages_controller'
-      name: 'pages_controller'
-    ]
+    ctype: 'pages_controller'
+    name: 'pages'
   ]
 
 $ do ->

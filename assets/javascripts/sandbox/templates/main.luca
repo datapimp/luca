@@ -1,0 +1,9 @@
+.hero-unit
+  %h1 Smart Architecture
+  %p Luca is a development approach and a collection of tools that allow you to build fast web apps powered by Backbone.js and Twitter Bootstrap.
+
+  %a.btn.btn-large.btn-primary{:href=>"https://github.com/datapimp/luca"}
+    View Project on Github
+
+  %a.btn.btn-large{:href=>"#sandbox"}
+    Play Around

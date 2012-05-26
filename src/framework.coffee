@@ -89,14 +89,20 @@ Luca.registry.lookup = (ctype)->
 
   parents = _( Luca.registry.namespaces ).map (namespace)-> Luca.util.nestedValue(namespace, (window || global))
 
-  _( parents ).chain().map((parent)-> parent[className]).compact().value()?[0]
+  fullPath = _( parents ).chain().map((parent)->
+    parent[className]).compact().value()?[0]
+
 
 # one of the main benefits of Luca is the ability to structure your app as
 # large blocks of JSON configuration.  In order to convert an object into
 # a Luca component, we lookup the object's class by converting its ctype / type
 # property into a class that has been registered in the component registry
 Luca.util.lazyComponent = (config)->
-  ctype = config.ctype || config.type
+  if _.isObject(config)
+    ctype = config.ctype || config.type
+
+  if _.isString(config)
+    ctype = config
 
   componentClass = Luca.registry.lookup( ctype )
 
@@ -249,4 +255,4 @@ Luca.extend = (superClassName, childName, properties={})->
   superClass.extend(properties)
 
 _.mixin
-  component: Luca.define
+  def: Luca.define

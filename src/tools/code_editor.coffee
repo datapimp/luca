@@ -1,4 +1,4 @@
-Luca.define("Luca.components.CodeEditor").extends("Luca.containers.BasicPanel").with
+_.def("Luca.components.CodeEditor").extends("Luca.containers.BasicPanel").with
   name: "code_editor"
   initialize: (@options={})->
-    @_superClass()::initialize.apply(@, arguments)
+    Luca.containers.BasicPanel::initialize.apply(@, arguments)

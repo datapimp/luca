@@ -1,4 +1,4 @@
-Luca.define("Luca.containers.BasicPanel").extends("Luca.core.Container").with
+_.def("Luca.containers.BasicPanel").extends("Luca.core.Container").with
   name: "basic_panel"
 
   top_toolbar: {}
@@ -6,7 +6,7 @@ Luca.define("Luca.containers.BasicPanel").extends("Luca.core.Container").with
   bottom_toolbar: {}
 
   initialize: (@options={})->
-    @_superClass()::initialize.apply(@, arguments)
+    Luca.core.Container::initialize.apply(@, arguments)
 
   beforeRender: ()->
     @renderToolbars()

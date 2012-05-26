@@ -1,5 +1,5 @@
 (function() {
-  var DefineProxy;
+  var DefineProxy, currentNamespace;
 
   window.Luca = {
     VERSION: "0.8.5",
@@ -68,21 +68,22 @@
   };
 
   Luca.registry.lookup = function(ctype) {
-    var c, className, parents, _ref;
+    var c, className, fullPath, parents, _ref;
     c = Luca.registry.classes[ctype];
     if (c != null) return c;
     className = Luca.util.classify(ctype);
     parents = _(Luca.registry.namespaces).map(function(namespace) {
       return Luca.util.nestedValue(namespace, window || global);
     });
-    return (_ref = _(parents).chain().map(function(parent) {
+    return fullPath = (_ref = _(parents).chain().map(function(parent) {
       return parent[className];
     }).compact().value()) != null ? _ref[0] : void 0;
   };
 
   Luca.util.lazyComponent = function(config) {
     var componentClass, constructor, ctype;
-    ctype = config.ctype || config.type;
+    if (_.isObject(config)) ctype = config.ctype || config.type;
+    if (_.isString(config)) ctype = config;
     componentClass = Luca.registry.lookup(ctype);
     if (!componentClass) {
       throw "Invalid Component Type: " + ctype + ".  Did you forget to register it?";
@@ -143,11 +144,20 @@
     return template;
   };
 
+  currentNamespace = window || global;
+
+  Luca.util.namespace = function(namespace) {
+    if (namespace == null) return currentNamespace;
+    currentNamespace = _.isString(namespace) ? Luca.util.resolve(namespace, window || global) : namespace;
+    if (currentNamespace != null) return currentNamespace;
+    return currentNamespace = eval("(window||global)." + namespace + " = {}");
+  };
+
   DefineProxy = (function() {
 
     function DefineProxy(componentName) {
       var parts;
-      this.namespace = window || global;
+      this.namespace = Luca.util.namespace();
       this.componentId = this.componentName = componentName;
       if (componentName.match(/\./)) {
         this.namespaced = true;
@@ -181,8 +191,8 @@
     DefineProxy.prototype["with"] = function(properties) {
       var at;
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
-      if (this.namespaced && _.isUndefined(at)) {
-        eval("window." + this.namespace + " = {}");
+      if (this.namespaced && !(at != null)) {
+        eval("(window||global)." + this.namespace + " = {}");
         at = Luca.util.resolve(this.namespace, window || global);
       }
       at[this.componentId] = Luca.extend(this.superClassName, this.componentName, properties);
@@ -207,16 +217,16 @@
     if (!_.isFunction(superClass != null ? superClass.extend : void 0)) {
       throw "" + superClassName + " is not a valid component to extend from";
     }
-    properties._className = childName;
+    properties.displayName = childName;
     properties._superClass = function() {
-      superClass._className || (superClass._className = superClassName);
+      superClass.displayName || (superClass.displayName = superClassName);
       return superClass;
     };
     return superClass.extend(properties);
   };
 
   _.mixin({
-    component: Luca.define
+    def: Luca.define
   });
 
 }).call(this);
@@ -1387,6 +1397,23 @@
 }).call(this);
 (function() {
 
+  _.def("Luca.containers.BasicPanel")["extends"]("Luca.core.Container")["with"]({
+    name: "basic_panel",
+    top_toolbar: {},
+    bottom_toolbar: {},
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      return Luca.core.Container.prototype.initialize.apply(this, arguments);
+    },
+    beforeRender: function() {
+      return this.renderToolbars();
+    },
+    renderToolbars: function() {}
+  });
+
+}).call(this);
+(function() {
+
   _.def("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
     componentType: 'card_view',
     className: 'luca-ui-card-view-wrapper',
@@ -1579,6 +1606,11 @@
 }).call(this);
 (function() {
 
+
+
+}).call(this);
+(function() {
+
   _.def('Luca.containers.PanelView')["extends"]('Luca.core.Container')["with"]({
     className: 'luca-ui-panel',
     initialize: function(options) {
@@ -1696,14 +1728,37 @@
     activeItem: 0,
     className: 'luca-ui-viewport',
     fullscreen: true,
+    fluid: false,
+    wrapperClass: 'row',
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.core.Container.prototype.initialize.apply(this, arguments);
+      if (Luca.enableBootstrap === true) {
+        if (this.fluid === true) this.wrapperClass = "row-fluid";
+        this.$el.wrap("<div class='" + this.wrapperClass + "' />").addClass('span12');
+      }
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
     },
     render: function() {
-      return this.$el.addClass('luca-ui-viewport');
-    }
+      this.$el.addClass('luca-ui-viewport');
+      if (this.topNav != null) this.renderTopNavigation();
+      if (this.bottomNav != null) return this.renderBottomNavigation();
+    },
+    renderTopNavigation: function() {
+      console.log("Rendering Top Navigation");
+      if (_.isString(this.topNav)) {
+        this.topNav = new Luca.registry.lookup(this.topNav);
+      }
+      if (_.isObject(this.topNav)) {
+        if (!Luca.util.isBackboneView(this.topNav)) {
+          this.topNav = Luca.util.lazyComponent(this.topNav);
+        }
+      }
+      this.topNav.app = this;
+      console.log("Top Nav", this.topNav);
+      return this.$el.before(this.topNav.render().el);
+    },
+    renderBottomNavigation: function() {}
   });
 
 }).call(this);
