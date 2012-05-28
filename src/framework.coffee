@@ -25,6 +25,10 @@ Luca.enableGlobalObserver = false
 # problem on our own!
 Luca.enableBootstrap = true
 
+# For container views, if a component is defined with no ctype
+# then we will pick this one
+Luca.defaultComponentType = 'template'
+
 Luca.isBackboneModel = (obj)->
   _.isFunction(obj?.set) and _.isFunction(obj?.get) and _.isObject(obj?.attributes)
 
@@ -77,6 +81,14 @@ Luca.util.nestedValue = Luca.util.resolve
 Luca.util.classify = (string="")->
   _.string.camelize( _.string.capitalize( string ) )
 
+# looks up a method on an object
+Luca.util.hook = (eventId)->
+  parts = eventId.split(':')
+  prefix = parts.shift()
+
+  parts = _( parts ).map (p)-> _.string.capitalize(p)
+  fn = prefix + parts.join('')
+
 # Lookup a component in the Luca component registry
 # by it's ctype identifier.  If it doesn't exist,
 # check any other registered namespace
@@ -91,7 +103,6 @@ Luca.registry.lookup = (ctype)->
 
   fullPath = _( parents ).chain().map((parent)->
     parent[className]).compact().value()?[0]
-
 
 # one of the main benefits of Luca is the ability to structure your app as
 # large blocks of JSON configuration.  In order to convert an object into

@@ -1,9 +1,27 @@
 .hero-unit
-  %h1 Smart Architecture
-  %p Luca is a development approach and a collection of tools that allow you to build fast web apps powered by Backbone.js and Twitter Bootstrap.
+  %h1 Backbone Architecture
+  %p Luca is a development approach and a collection of tools that allow you to build very fast, very responsive applications for the desktop and mobile web browsers.
 
   %a.btn.btn-large.btn-primary{:href=>"https://github.com/datapimp/luca"}
     View Project on Github
 
   %a.btn.btn-large{:href=>"#sandbox"}
     Play Around
+
+%hr
+
+.row
+  .span8.offset2
+    %h2 Smart Architecture based on Backbone.js
+.row
+  .span4
+    %h3 Interchangeable
+    %p Luca is not a replacement for Backbone, it is a very smart use of Backbone's core classes.  Large apps require layers of abstraction and patterns for communication between various components, Luca provides these for you.  Everything in the framework extends Backbone core classes, and stays true to the Backbone philosophy.  Backbone is very good at what it does, but it is very low level.
+
+  .span4
+    %h3 Responsive Applications
+    %p The habits and practices Luca encourages guarantee you the snappiest user experience possible.  We have optimized the core Backbone Model, Collection, and View classes, and added several additional components and helpers with the aim of allowing you to build large applications without having to worry about them getting slower as they get larger.
+
+  .span4
+    %h3 Build Apps Quicker
+    %p We have extracted all of the common patterns and optimizations we have learned over the course of a year developing several large applications. Using Luca allows you to leverage the power of Backbone.js but only focus on what makes your app unique.

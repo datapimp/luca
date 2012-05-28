@@ -31,11 +31,6 @@ _.def('Luca.containers.ColumnView').extends('Luca.core.Container').with
 
     @columnWidths = _( @columnWidths ).map (val)-> "#{ val }%"
 
-  beforeComponents: ()->
-    @debug "column_view before components"
-    _( @components ).each (component)->
-      component.ctype ||= "panel_view"
-
   beforeLayout: ()->
     @debug "column_view before layout"
 

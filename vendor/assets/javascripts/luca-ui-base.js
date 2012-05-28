@@ -1739,23 +1739,25 @@
       }
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
     },
-    render: function() {
-      this.$el.addClass('luca-ui-viewport');
+    beforeRender: function() {
+      var _ref;
+      if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
       if (this.topNav != null) this.renderTopNavigation();
       if (this.bottomNav != null) return this.renderBottomNavigation();
     },
     renderTopNavigation: function() {
-      console.log("Rendering Top Navigation");
+      if (this.topNav == null) return;
       if (_.isString(this.topNav)) {
-        this.topNav = new Luca.registry.lookup(this.topNav);
+        this.topNav = Luca.util.lazyComponent(this.topNav);
       }
       if (_.isObject(this.topNav)) {
-        if (!Luca.util.isBackboneView(this.topNav)) {
+        if (!Luca.isBackboneView(this.topNav)) {
           this.topNav = Luca.util.lazyComponent(this.topNav);
         }
       }
       this.topNav.app = this;
-      console.log("Top Nav", this.topNav);
       return this.$el.before(this.topNav.render().el);
     },
     renderBottomNavigation: function() {}

@@ -9,6 +9,10 @@ Sandbox.Application = Luca.Application.extend
     Luca.Application::initialize.apply @, arguments
     @router = new Sandbox.Router(app: @)
 
+  beforeRender: ()->
+    @applyStyles("margin-top":"25px")
+    Luca.Application::beforeRender?.apply @, arguments
+
   components:[
     ctype: 'pages_controller'
     name: 'pages'

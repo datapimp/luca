@@ -34,9 +34,6 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   ]
 
   initialize: (@options={})->
-    unless @plugin is true
-      Luca.getApplication = ()-> @
-
     Luca.containers.Viewport::initialize.apply @, arguments
 
     if @useController is true
@@ -54,6 +51,10 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     @state = new Backbone.Model( @defaultState )
 
     @bind "ready", ()=> @render()
+
+
+    unless @plugin is true
+      Luca.getApplication = ()=> @
 
   activeView: ()->
     if active = @activeSubSection()

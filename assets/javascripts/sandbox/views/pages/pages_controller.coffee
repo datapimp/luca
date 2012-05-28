@@ -4,6 +4,7 @@ Sandbox.views.PagesController = Luca.components.Controller.extend
     template: 'main'
   ,
     name: "sandbox"
-    template: 'sandbox'
+    ctype: "basic_panel"
+    topToolbar: "panel_toolbar"
   ]
 

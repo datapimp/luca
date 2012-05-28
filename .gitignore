@@ -3,3 +3,4 @@
 luca.gemspec
 vendor/assets/javascripts/luca-ui
 vendor/assets/stylesheets/luca-ui
+node_modules

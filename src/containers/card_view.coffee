@@ -18,22 +18,13 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
 
   componentClass: 'luca-ui-card'
 
-  beforeLayout: ()->
-    @cards = _(@components).map (card,cardIndex) =>
-      classes: @componentClass
-      style: "display:#{ (if cardIndex is @activeCard then 'block' else 'none' )}"
-      id: "#{ @cid }-#{ cardIndex }"
+  appendContainers: true
 
+  # hide all but the active card
   prepareLayout: ()->
-    @card_containers = _( @cards ).map (card, index)=>
-      @$el.append Luca.templates["containers/basic"](card)
-      $("##{ card.id }")
-
-  prepareComponents: ()->
-    @components = _( @components ).map (object,index)=>
-      card = @cards[index]
-      object.container = "##{ card.id }"
-      object
+    Luca.core.Container::prepareLayout?.apply(@, arguments)
+    @$(".#{ @componentClass }").hide()
+    @$(".#{ @componentClass }").eq( @activeCard ).show()
 
   activeComponent: ()->
     @getComponent( @activeCard )
@@ -70,8 +61,7 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
       previous?.trigger?.apply(previous,["before:deactivation", @, previous, current])
       current?.trigger?.apply(previous,["before:activation", @, previous, current])
 
-    _( @card_containers ).each (container)->
-      container.hide()
+    @$(".#{ @componentClass }").hide()
 
     unless current.previously_activated
       current.trigger "first:activation"

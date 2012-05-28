@@ -29,7 +29,14 @@ _.def('Luca.core.Container').extends('Luca.View').with
   initialize: (@options={})->
     _.extend @, @options
 
-    @setupHooks( Luca.core.Container::hooks )
+    @setupHooks [
+      "before:components"
+      "before:render:components"
+      "before:layout"
+      "after:components"
+      "after:layout"
+      "first:activation"
+    ]
 
     Luca.View::initialize.apply @, arguments
 
@@ -117,6 +124,10 @@ _.def('Luca.core.Container').extends('Luca.View').with
   # its components.  Minimally you will want to set the
   # container property on each component.
   prepareLayout: ()->
+    if @layout
+      console.log "Picked up Lyout", Luca.template(@layout, @)
+      @$el.html Luca.template(@layout, @)
+
     @debug "container prepare layout"
     @componentContainers = _( @components ).map (component, index) =>
       @applyPanelConfig.apply @, [ component, index ]
@@ -126,13 +137,17 @@ _.def('Luca.core.Container').extends('Luca.View').with
         @$el.append Luca.templates["containers/basic"](container) unless container.appended?
         container.appended = true
 
-  # prepare components is where you would set necessary object
-  # attributes on the components themselves.
+  renderToEl: ()->
+    @el
+
+  # prepare components is where each component gets assigned a container to be rendered into
   prepareComponents: ()->
     @debug "container prepare components"
+
     @components = _( @components ).map (object, index) =>
+      object.cty
       panel = @componentContainers[ index ]
-      object.container = if @appendContainers then "##{ panel.id }" else @el
+      object.container = if @appendContainers then "##{ panel.id }" else @renderToEl()
 
       object
 
@@ -150,7 +165,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
       component = if _.isObject( object ) and object.render and object.trigger
         object
       else
-        object.ctype ||= Luca.defaultComponentType || "template"
+        object.type ||= object.ctype ||= ( Luca.defaultComponentType )
         Luca.util.lazyComponent( object )
 
       # if we're using base backbone views, then they don't extend themselves

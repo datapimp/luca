@@ -19,25 +19,25 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
     $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
 
-  render: ()->
-    @$el.addClass('luca-ui-viewport')
+  beforeRender: ()->
+    Luca.containers.CardView::beforeRender?.apply(@, arguments)
+
     @renderTopNavigation() if @topNav?
     @renderBottomNavigation() if @bottomNav?
 
   renderTopNavigation: ()->
-    console.log "Rendering Top Navigation"
+    return unless @topNav?
 
     if _.isString( @topNav )
-      @topNav = new Luca.registry.lookup(@topNav)
+      @topNav = Luca.util.lazyComponent(@topNav)
 
     if _.isObject( @topNav )
-      unless Luca.util.isBackboneView(@topNav)
+      unless Luca.isBackboneView(@topNav)
         @topNav = Luca.util.lazyComponent( @topNav )
 
     @topNav.app = @
 
-    console.log "Top Nav", @topNav
-    @$el.before( @topNav.render().el )
+    $('body').prepend( @topNav.render().el )
 
 
   renderBottomNavigation: ()->

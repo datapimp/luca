@@ -1,6 +1,4 @@
 #### Luca Base View
-Luca.View = Backbone.View.extend
-  base: 'Luca.View'
 
 # The Luca.View class adds some very commonly used patterns
 # and functionality to the stock Backbone.View class. Features
@@ -8,68 +6,8 @@ Luca.View = Backbone.View.extend
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
 
-Luca.View.originalExtend = Backbone.View.extend
+Luca.View = Backbone.View.extend
 
-# By overriding Backbone.View.extend we are able to intercept
-# some method definitions and add special behavior around them
-# mostly related to render()
-Luca.View.extend = (definition)->
-  #### Rendering
-  #
-  # Our base view class wraps the defined render() method
-  # of the views which inherit from it, and does things like
-  # trigger the before and after render events automatically.
-  # In addition, if the view has a deferrable property on it
-  # then it will make sure that the render method doesn't get called
-  # until.
-
-  _base = definition.render
-
-  _base ||= ()->
-    container = if _.isFunction(@container) then @container() else @container
-
-    return @ unless $(container) and @$el
-
-    $(container).append( @$el )
-
-    return @
-
-  definition.render = ()->
-    if @layoutTemplate?
-      @$el.html()
-
-    if @deferrable
-      @trigger "before:render", @
-
-      @deferrable.bind @deferrable_event, _.once ()=>
-        _base.apply(@, arguments)
-        @trigger "after:render", @
-
-      # we might not want to fetch immediately upon
-      # rendering, so we can pass a deferrable_trigger
-      # event and not fire the fetch until this event
-      # occurs
-      if !@deferrable_trigger
-        @immediate_trigger = true
-
-      if @immediate_trigger is true
-        @deferrable.fetch()
-      else
-        @bind @deferrable_trigger, _.once ()=>
-          @deferrable.fetch()
-
-      return @
-
-    else
-      @trigger "before:render", @
-      _base.apply(@, arguments)
-      @trigger "after:render", @
-
-      return @
-
-  Luca.View.originalExtend.call(@, definition)
-
-_.extend Luca.View.prototype,
   applyStyles: (styles={})->
     for setting, value  of styles
       @$el.css(setting,value)
@@ -147,13 +85,14 @@ _.extend Luca.View.prototype,
     set ||= @hooks
 
     _(set).each (eventId)=>
-      parts = eventId.split(':')
-      prefix = parts.shift()
+      fn = Luca.util.hook( eventId )
 
-      parts = _( parts ).map (p)-> _.string.capitalize(p)
-      fn = prefix + parts.join('')
+      callback = ()=>
+        @[fn]?.apply @, arguments
 
-      @bind eventId, ()=> @[fn].apply @, arguments if @[fn]
+      callback = _.once(callback) if eventId?.match(/once:/)
+
+      @bind eventId, callback
 
 
   #### Luca.Collection and Luca.CollectionManager integration
@@ -207,3 +146,66 @@ _.extend Luca.View.prototype,
     @events ||= {}
     @events[ selector ] = handler
     @delegateEvents()
+
+
+Luca.View.originalExtend = Backbone.View.extend
+
+# By overriding Backbone.View.extend we are able to intercept
+# some method definitions and add special behavior around them
+# mostly related to render()
+Luca.View.extend = (definition)->
+  #### Rendering
+  #
+  # Our base view class wraps the defined render() method
+  # of the views which inherit from it, and does things like
+  # trigger the before and after render events automatically.
+  # In addition, if the view has a deferrable property on it
+  # then it will make sure that the render method doesn't get called
+  # until.
+
+  _base = definition.render
+
+  _base ||= ()->
+    container = if _.isFunction(@container) then @container() else @container
+
+    return @ unless $(container) and @$el
+
+    $(container).append( @$el )
+
+    return @
+
+  definition.render = ()->
+    if @layoutTemplate?
+      @$el.html()
+
+    if @deferrable
+      @trigger "before:render", @
+
+      @deferrable.bind @deferrable_event, _.once ()=>
+        _base.apply(@, arguments)
+        @trigger "after:render", @
+
+      # we might not want to fetch immediately upon
+      # rendering, so we can pass a deferrable_trigger
+      # event and not fire the fetch until this event
+      # occurs
+      if !@deferrable_trigger
+        @immediate_trigger = true
+
+      if @immediate_trigger is true
+        @deferrable.fetch()
+      else
+        @bind @deferrable_trigger, _.once ()=>
+          @deferrable.fetch()
+
+      return @
+
+    else
+      @trigger "before:render", @
+      _base.apply(@, arguments)
+      @trigger "after:render", @
+
+      return @
+
+  Luca.View.originalExtend.call(@, definition)
+
