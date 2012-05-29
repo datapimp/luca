@@ -51,9 +51,8 @@ class App < Sinatra::Base
   get "/components" do
     if params[:component]
       component = params[:component]
-      contents = Luca::CodeBrowser.get_source_for( component )
-
-      {component:component, contents:contents}.to_json
+      source = Luca::CodeBrowser.get_source_for( component )
+      {className:component, source:source}.to_json
     else
       Luca::CodeBrowser.map_source
     end

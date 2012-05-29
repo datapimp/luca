@@ -4,6 +4,9 @@ parseRegistry = ()->
     ctype: ctype
 
 _.def("Luca.models.Component").extends("Luca.Model").with
+  url: ()->
+    "/components?component=#{ @get('className') }"
+
   root: ()->
     @get("className").split('.')[0]
 

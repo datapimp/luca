@@ -1,27 +1,3 @@
-# Luca.Collection
-#
-# Luca.Collection is an extenstion of Backbone.Collection which provides
-# a bunch of commonly used patterns for doing things like:
-#
-#   - setting base parameters used on every request to your REST API
-#
-#   - bootstrapping a collection of objects which are
-#     rendered in your markup on page load
-#
-#   - filtering with query string parameters against your API
-#
-#   - automatic interaction with your Luca.CollectionManager class
-#
-#   - make it easier to parse Rails style responses which include the root
-#     by specifying a @root parameter
-#
-#   - use backbone-query if available
-#
-#   - onceLoaded: run a callback once if there are models present, otherwise wait until
-#     the collection fetches
-#
-#   - ifLoaded: run a callback any time the model gets reset, or if there are already models
-#
 Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
   # cachedMethods refers to a list of methods on the collection
@@ -142,8 +118,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
     @trigger "after:initialize"
 
-  #### Automatic Query String Generation
-  #
   # Luca.Collections will append a query string to the URL
   # and will automatically do this for you without you having
   # to write a special url handler.  If you want to use a normal
@@ -198,8 +172,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @base_params ||= _( Luca.Collection.baseParams() ).clone()
     _.extend @base_params, params
 
-  # Collection Manager Registry
-  #
   # If this collection is to be registered with some global collection
   # tracker such as new Luca.CollectionManager() then we will register
   # ourselves automatically
@@ -340,8 +312,6 @@ _.extend Luca.Collection.prototype,
 
     Backbone.View.prototype.trigger.apply @, arguments
 
-#### Base Parameters
-#
 # Always include these parameters in every request to your REST API.
 #
 # either specify a function which returns a hash, or just a normal hash
@@ -354,8 +324,6 @@ Luca.Collection.baseParams = (obj)->
   if _.isObject( Luca.Collection._baseParams )
     Luca.Collection._baseParams
 
-#### Bootstrapped Models ( stuff loaded on page load )
-#
 # In order to make our Backbone Apps super fast it is a good practice
 # to pre-populate your collections by what is referred to as bootstrapping
 #

@@ -281,5 +281,31 @@ Luca.extend = (superClassName, childName, properties={})->
 
   superClass.extend(properties)
 
-_.mixin
+UnderscoreExtensions =
   def: Luca.define
+  # this function will ensure a function gets called at least once
+  # afrer x delay.  by setting defaults, we can use this on backbone
+  # view definitions
+  idle: (code, delay=1000)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+  idleShort: (code, delay=100)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+  idleLong: (code, delay=5000)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+_.mixin( UnderscoreExtensions )

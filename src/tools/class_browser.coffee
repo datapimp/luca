@@ -8,19 +8,26 @@ _.def("Luca.tools.ClassBrowser").extends("Luca.core.Container").with
     Luca.core.Container::beforeRender?.apply(@, arguments)
 
   prepareLayout: ()->
-    @$append @make("div",class:"left-column span3")
-    @$append @make("div",class:"right-column span9")
+    @$append @make("div",class:"left-column span4")
+    @$append @make("div",class:"right-column span8")
 
   prepareComponents: ()->
     @components[0].container = @$ '.left-column'
     @components[1].container = @$ '.right-column'
 
+  afterComponents: ()->
+    list = @components[0]
+    detail = @components[1]
+
+    list.bind "component:loaded", (model, response)->
+      detail.loadComponent( model )
+
   components:[
-    name: "class_browser_directory"
+    name: "class_browser_list"
     ctype: "class_browser_list"
   ,
     name: "class_browser_detail"
-    markup: "detail"
+    ctype: "class_browser_detail"
   ]
 
   bottomToolbar:

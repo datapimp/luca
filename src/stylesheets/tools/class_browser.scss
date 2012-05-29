@@ -1,0 +1,32 @@
+.luca-class-browser {
+  .class-browser-list {
+    min-height: 600px;
+    height: auto !important;
+    height: 600px;
+    ul.namespace a, ul.classList a {
+      cursor: pointer;
+    }
+
+    ul.namespace, ul.namespace ul.classList {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    ul.namespace {
+      padding-left: 10px;
+    }
+
+    ul.namespace li ul.classList {
+      padding-left: 20px;
+    }
+
+    ul.namespace li, ul.namespace .classList li {
+      list-style-type: none;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    .classList li {
+    }
+  }
+}
