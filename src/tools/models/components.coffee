@@ -5,13 +5,16 @@ parseRegistry = ()->
 
 _.def('Luca.collections.Components').extends('Luca.Collection').with
 
+  cache_key: "luca_components"
+
   name: "components"
 
   url: ()->
     "/luca/components"
 
-  initialize: (models, @options={})->
-    Luca.Collection::initialize.call(@, parseRegistry(), @options)
+  initialize: (models, options)->
+    Luca.Collection.cache @cache_key, parseRegistry()
+    Luca.Collection::initialize.apply(@, arguments)
 
   filterByNamespace: (namespace)->
     @query

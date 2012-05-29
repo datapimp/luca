@@ -85,8 +85,20 @@ Luca.View = Backbone.View.extend
   $append: (content)->
    @$bodyEl().append(content)
 
+  #### Containers
+  #
+  # Luca is heavily reliant on the concept of Container views.  Views which
+  # contain other views and handle inter-component communication between the
+  # component views.  The default render() operation consists of building the
+  # view's content, and then attaching that view to its container.
+  #
+  # 99% of the time this would happen automatically
+  $attach: ()->
+    @$container().append( @el )
+
   $container: ()->
     $(@container)
+
   #### Hooks or Auto Event Binding
   #
   # views which inherit from Luca.View can define hooks
@@ -181,14 +193,7 @@ customizeRender = (definition)->
 
   _base = definition.render
 
-  _base ||= ()->
-    container = if _.isFunction(@container) then @container() else @container
-
-    return @ unless $(container) and @$el
-
-    $(container).append( @$el )
-
-    return @
+  _base ||= Luca.View::$attach
 
   definition.render = ()->
     if @bodyTemplate and _( Luca.available_templates() ).include( @bodyTemplate )

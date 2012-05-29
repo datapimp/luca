@@ -17,7 +17,7 @@ _.def("Luca.tools.ClassBrowser").extends("Luca.core.Container").with
 
   components:[
     name: "class_browser_directory"
-    markup: "hi"
+    ctype: "class_browser_list"
   ,
     name: "class_browser_detail"
     markup: "detail"

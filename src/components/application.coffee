@@ -46,13 +46,23 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     ]
 
     if @useCollectionManager is true
-      @collectionManager ||= Luca.CollectionManager.get?() || new Luca.CollectionManager()
+      @collectionManager ||= Luca.CollectionManager.get?()
+      @collectionManager ||= new Luca.CollectionManager( @collectionManagerOptions||={} )
 
     @state = new Backbone.Model( @defaultState )
 
     @bind "ready", ()=> @render()
 
-    @setupKeyRouter() if @keyEvents?
+    # the keyRouter allows us to specify
+    # keyEvents on our application with an API very similar
+    # to the DOM events API for Backbone.View
+    #
+    # Example:
+    #
+    # keyEvents:
+    #   meta:
+    #     forwardslash: "altSlashHandler"
+    @setupKeyRouter() if @useKeyRouter is true and @keyEvents?
 
     unless @plugin is true
       Luca.getApplication = ()=> @

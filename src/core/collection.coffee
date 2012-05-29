@@ -29,11 +29,18 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
     @_reset()
 
-    # By specifying a @cached property or method, you can instruct
+    # By specifying a @cache_key property or method, you can instruct
     # Luca.Collection instances where to pull an array of model attributes
     # usually done with the bootstrap functionality provided.
-    if @cached
-      @bootstrap_cache_key = if _.isFunction( @cached ) then @cached() else @cached
+
+    # DEPRECATION NOTICE
+    if @cached and _.isString( @cached )
+      console.log 'The @cached property of Luca.Collection is being deprecated.  Please change to cache_key'
+
+    # TODO
+    # Change this from cached to cache_key
+    if @cache_key ||= @cached
+      @bootstrap_cache_key = if _.isFunction( @cache_key ) then @cache_key() else @cache_key
 
     if @registerAs or @registerWith
       console.log "This configuration API is deprecated.  use @name and @manager properties instead"
@@ -41,7 +48,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     # support the older configuration API
     @name ||= @registerAs
     @manager ||= @registerWith
-
 
     # if they specify a
     if @name and not @manager

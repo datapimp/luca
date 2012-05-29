@@ -47,3 +47,4 @@
 
 0.8.7
   - Luca.core.Container now uses bodyTemplate to render
+  - Luca.Collection.cached property is now deprecated.  use @cache_key instead
