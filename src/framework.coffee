@@ -1,5 +1,5 @@
 window.Luca =
-  VERSION: "0.8.5"
+  VERSION: "0.8.8"
   core: {}
   containers: {}
   components: {}

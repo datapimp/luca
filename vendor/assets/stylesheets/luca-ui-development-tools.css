@@ -153,7 +153,27 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   text-decoration: underline;
   color: white !important;
 }
+.luca-class-browser .class-browser-list {
+  min-height: 600px;
+  height: auto !important;
+  height: 600px; }
+  .luca-class-browser .class-browser-list ul.namespace a, .luca-class-browser .class-browser-list ul.classList a {
+    cursor: pointer; }
+  .luca-class-browser .class-browser-list ul.namespace, .luca-class-browser .class-browser-list ul.namespace ul.classList {
+    margin: 0px;
+    padding: 0px; }
+  .luca-class-browser .class-browser-list ul.namespace {
+    padding-left: 10px; }
+  .luca-class-browser .class-browser-list ul.namespace li ul.classList {
+    padding-left: 20px; }
+  .luca-class-browser .class-browser-list ul.namespace li, .luca-class-browser .class-browser-list ul.namespace .classList li {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px; }
+.CodeMirror-scroll {
+  height: 100%; }
 /*
+
 
 
  */

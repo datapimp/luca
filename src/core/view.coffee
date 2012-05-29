@@ -217,6 +217,9 @@ Luca.View = Backbone.View.extend
     _( @eventHandlerProperties() ).each (prop)->
       view[ prop ] = view.definitionClass()[prop]
 
+    if @autoBindEventHandlers is true
+      @bindAllEventHandlers()
+
     @delegateEvents()
 
   eventHandlerProperties: ()->

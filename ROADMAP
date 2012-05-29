@@ -1,2 +1,2 @@
-- Use Backbone.Model as state machine for views and collections
-- Make DevelopmentConsole compile function.toString output back to coffee
+- Make development mode options easily disabled
+- Add StateMachine model to all instances of Luca.View
