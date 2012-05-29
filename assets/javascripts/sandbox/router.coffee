@@ -1,10 +1,10 @@
 Sandbox.Router = Luca.Router.extend
   routes:
-    ""          : "default"
-    "sandbox"   : "sandbox"
+    ""                : "default"
+    "class_browser"   : "class_browser"
 
   default: ()->
     @app.navigate_to("pages").navigate_to "main"
 
-  sandbox: ()->
-    @app.navigate_to("pages").navigate_to "sandbox"
+  class_browser: ()->
+    @app.navigate_to("pages").navigate_to "class_browser"

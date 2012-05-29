@@ -52,6 +52,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     @bind "ready", ()=> @render()
 
+    @setupKeyRouter() if @keyEvents?
 
     unless @plugin is true
       Luca.getApplication = ()=> @
@@ -122,4 +123,44 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   navigate_to: (component_name, callback)->
     @getMainController().navigate_to(component_name, callback)
 
+  setupKeyRouter: ()->
+    return unless @keyEvents
 
+    @keyEvents.control_meta ||= {}
+
+    # allow for both meta_control, control_meta for the combo
+    _.extend(@keyEvents.control_meta, @keyEvents.meta_control) if @keyEvents.meta_control
+
+    router = _.bind(@keyRouter, @)
+
+    $( document ).keydown( router )
+
+  #### Key Router
+  #
+  # TODO: Define a syntax for mapping combinations of meta, control, and keycodes
+  # to some sort of method delegation system that the application handles.
+  keyRouter: (e)->
+    return unless e and @keyEvents
+
+    isInputEvent = $(e.target).is('input') || $(e.target).is('textarea')
+
+    return if isInputEvent
+
+    keyname = Luca.keyMap[ e.keyCode ]
+
+    return unless keyname
+
+    meta = e?.metaKey is true
+    control = e?.ctrlKey is true
+
+    source = @keyEvents
+    source = if meta then @keyEvents.meta else source
+    source = if control then @keyEvents.control else source
+    source = if meta and control then @keyEvents.meta_control else source
+
+    if keyEvent = source?[keyname]
+      console.log "Picked up Key Event", keyEvent
+      if @[keyEvent]?
+        @[keyEvent]?.call(@)
+      else
+        @trigger(keyEvent)

@@ -3,6 +3,7 @@ make = Backbone.View::make
 buildButton = (button, wrap=true)->
   wrapper = 'btn-group'
   wrapper += " #{ button.wrapper }" if button.wrapper?
+  wrapper += " align-#{ button.align }" if button.align?
 
   # if we're passed a group, then we need to just
   # wrap the contents of the buttons property in that group
@@ -16,8 +17,15 @@ buildButton = (button, wrap=true)->
   else
     label = button.label
 
+    if button.icon
+      white = "icon-white" if button.white
+      label = "<i class='#{ white } icon-#{ button.icon }' /> #{ label }"
+
     buttonAttributes =
       class: "btn"
+      "data-eventId" : button.eventId
+
+    buttonAttributes["class"] += " btn-#{ button.color }" if button.color?
 
     if button.dropdown
       label = "#{ label } <span class='caret'></span>"
@@ -26,7 +34,7 @@ buildButton = (button, wrap=true)->
 
       dropdownItems = _(button.dropdown).map (dropdownItem)=>
         link = make "a", {}, dropdownItem[1]
-        make "li", {"data-item": dropdownItem[0]}, link
+        make "li", {"data-eventId": dropdownItem[0]}, link
 
       dropdownEl = make "ul", {class:"dropdown-menu"}, dropdownItems
 
@@ -34,8 +42,11 @@ buildButton = (button, wrap=true)->
 
     # needs to be wrapped for proper rendering, but not
     # if it already is part of a group
+    autoWrapClass = "btn-group"
+    autoWrapClass += " align-#{ button.align }" if button.align?
+
     if wrap is true
-      return make "div", {class: "btn-group"}, [buttonEl,dropdownEl]
+      return make "div", {class: autoWrapClass}, [buttonEl,dropdownEl]
     else
       # for buttons which are already part f a group
       buttonEl
@@ -44,27 +55,62 @@ prepareButtons = (buttons, wrap=true)->
   _( buttons ).map (button)->
     buildButton(button, wrap)
 
+
+#### Panel Toolbar Component
+#
+# The Panel Toolbar is a collection of buttons and / or dropdowns
+# which are automatically created by BasicPanel classes, or can be
+# added to any other view component.
 _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
-  className: "btn-toolbar"
 
-  buttons:[
-    label: "hi"
-    dropdown: [
-      ["one","one"]
-      ["two","two"]
-    ]
-  ,
-    group: true
-    wrapper: 'span4 offset8'
-    buttons:[
-      label: "one"
-    ,
-      label: "two"
-    ]
-  ]
+  className: "luca-ui-toolbar btn-toolbar"
 
+  # @buttons is an array of button config objects
+
+  # button config accepts the following paramters:
+  #
+  # label       what should the button say
+  # eventId     what event should the button trigger
+  # dropdown    an array of arrays: [eventId, label]
+  # group       an array of button configs
+  # wrapper     a css class, in addition to btn-group
+  # icon        which icon do you want to use on this button?
+  # white       true or false: is it a white colored text?
+  # color       options are primary, info, success, warning, danger, inverse
+
+
+  buttons:[]
+
+  well: true
+
+  orientation: 'top'
+
+  events:
+    "click .btn, click .dropdown-menu li" : "clickHandler"
+
+  autoBindEventHandlers: true
+
+  # The Toolbar behaves by triggering events on the components which they
+  # belong to. Combined with Luca.View::setupHooks it is a clean way
+  # to organize actions
+  clickHandler: (e)->
+    me = my = $( e.target )
+    eventId = my.data('eventid')
+    @parent?.trigger(eventId)
+
+  beforeRender:()->
+    Luca.View::beforeRender?.apply(@, arguments)
+
+    if @well is true
+      @$el.addClass 'well'
+
+    @$el.addClass "toolbar-#{ @orientation }"
+
+    @applyStyles( @styles ) if @styles?
 
   render: ()->
-    elements = prepareButtons(@buttons)
-    _( elements ).each (element)=> @$el.append( element )
+    @$el.empty()
 
+    elements = prepareButtons(@buttons)
+    _( elements ).each (element)=>
+      @$el.append( element )

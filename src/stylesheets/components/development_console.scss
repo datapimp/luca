@@ -1,9 +1,8 @@
 .luca-ui-development-console.luca-ui-modal {
   position: absolute;
-  left: 50%;
-  margin-left: -375px;
-  width: 750px;
-  height: 500px;
+  top: 50px;
+  left: 410px;
+  width: 820px;
 }
 
 .luca-ui-development-console {
@@ -11,11 +10,8 @@
   font-size: 16px;
   margin-top: 1em;
   font-family: "Monaco";
-  height: 620px;
-  width: 95%;
  .console-inner {
     color: #fff;
-    height: 600px;
     width: 100%;
    .jquery-console-inner {
       height: 100%;

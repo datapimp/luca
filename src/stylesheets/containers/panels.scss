@@ -1,0 +1,17 @@
+.luca-ui-toolbar.toolbar-top {
+  float: left;
+  clear: both;
+  width: 100%;
+
+  .align-right {
+    float: right;
+  }
+
+  .btn-group {
+    margin: 0px 2px;
+  }
+
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  padding: 5px;
+}

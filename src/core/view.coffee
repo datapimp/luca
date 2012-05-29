@@ -5,7 +5,6 @@
 # such as auto event binding, the facilitation of deferred rendering
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
-
 Luca.View = Backbone.View.extend
 
   applyStyles: (styles={})->
@@ -67,7 +66,18 @@ Luca.View = Backbone.View.extend
 
     @delegateEvents()
 
-  $container: ()-> $(@container)
+  #### JQuery / DOM Selector Helpers
+  renderToEl: ()->
+    if @bodyElement then $( @bodyElement ) else $( @el )
+
+  $html: (content)->
+    @renderToEl().html( content )
+
+  $append: (content)->
+   @renderToEl().append(content)
+
+  $container: ()->
+    $(@container)
   #### Hooks or Auto Event Binding
   #
   # views which inherit from Luca.View can define hooks
@@ -150,10 +160,7 @@ Luca.View = Backbone.View.extend
 
 Luca.View.originalExtend = Backbone.View.extend
 
-# By overriding Backbone.View.extend we are able to intercept
-# some method definitions and add special behavior around them
-# mostly related to render()
-Luca.View.extend = (definition)->
+customizeRender = (definition)->
   #### Rendering
   #
   # Our base view class wraps the defined render() method
@@ -175,8 +182,8 @@ Luca.View.extend = (definition)->
     return @
 
   definition.render = ()->
-    if @layoutTemplate?
-      @$el.html()
+    if @bodyTemplate and _( Luca.available_templates() ).include( @bodyTemplate )
+      @$el.html( Luca.template(@bodyTemplate, @) )
 
     if @deferrable
       @trigger "before:render", @
@@ -207,5 +214,12 @@ Luca.View.extend = (definition)->
 
       return @
 
+  definition
+
+# By overriding Backbone.View.extend we are able to intercept
+# some method definitions and add special behavior around them
+# mostly related to render()
+Luca.View.extend = (definition)->
+  definition = customizeRender( definition )
   Luca.View.originalExtend.call(@, definition)
 

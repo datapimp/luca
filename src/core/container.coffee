@@ -90,6 +90,10 @@ _.def('Luca.core.Container').extends('Luca.View').with
     @debug "container before render"
     @doLayout()
     @doComponents()
+    @applyStyles( @styles ) if @styles?
+
+    # will only be run if the toolbar module has been mixed in
+    @renderToolbars?()
 
   doLayout: ()->
     @debug "container do layout"
@@ -124,10 +128,6 @@ _.def('Luca.core.Container').extends('Luca.View').with
   # its components.  Minimally you will want to set the
   # container property on each component.
   prepareLayout: ()->
-    if @layout
-      console.log "Picked up Lyout", Luca.template(@layout, @)
-      @$el.html Luca.template(@layout, @)
-
     @debug "container prepare layout"
     @componentContainers = _( @components ).map (component, index) =>
       @applyPanelConfig.apply @, [ component, index ]
@@ -136,9 +136,6 @@ _.def('Luca.core.Container').extends('Luca.View').with
       _( @componentContainers ).each (container)=>
         @$el.append Luca.templates["containers/basic"](container) unless container.appended?
         container.appended = true
-
-  renderToEl: ()->
-    @el
 
   # prepare components is where each component gets assigned a container to be rendered into
   prepareComponents: ()->
@@ -199,6 +196,34 @@ _.def('Luca.core.Container').extends('Luca.View').with
         console.log e.message
         console.log e.stack
         throw e unless Luca.silenceRenderErrors? is true
+
+  topToolbar: undefined
+
+  bottomToolbar: undefined
+
+  layout: "container"
+
+  # Luca containers are for rendering one or more 'components' into a specific element
+  # using various strategies depending on what type of a container it is
+  bodyElement: ".panel-body"
+
+  # Luca containers can have toolbars, these will get injected before or after the renderToEl
+  renderToolbars: ()->
+    _( ["top","left","right","bottom"] ).each (orientation)=>
+      if @["#{ orientation }Toolbar"]?
+        @renderToolbar( orientation, @["#{ orientation }Toolbar"] )
+
+  renderToolbar: (orientation="top", config={})->
+    attach = if ( orientation is "top" or orientation is "left" ) then "before" else "after"
+
+    unless @$("#{ orientation }-toolbar-container").length > 0
+      @renderToEl()[ attach ] "<div class='#{ orientation }-toolbar-container' />"
+
+      config.ctype ||= "panel_toolbar"
+      config.parent = @
+
+      toolbar = @["#{ orientation }Toolbar"] = Luca.util.lazyComponent(config)
+      @$("#{ orientation }-toolbar-container").append( toolbar.render().el )
 
   #### Container Activation
   #

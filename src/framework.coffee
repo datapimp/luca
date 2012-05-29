@@ -29,6 +29,22 @@ Luca.enableBootstrap = true
 # then we will pick this one
 Luca.defaultComponentType = 'template'
 
+Luca.keys =
+  ENTER: 13
+  ESCAPE: 27
+  KEYLEFT: 37
+  KEYUP: 38
+  KEYRIGHT: 39
+  KEYDOWN: 40
+  SPACEBAR: 32
+  FORWARDSLASH: 191
+
+# build a reverse map
+Luca.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
+  memo[value] = symbol.toLowerCase()
+  memo
+, {}
+
 Luca.isBackboneModel = (obj)->
   _.isFunction(obj?.set) and _.isFunction(obj?.get) and _.isObject(obj?.attributes)
 

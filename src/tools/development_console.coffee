@@ -5,14 +5,14 @@ inspectArray = (array)->
 
   lastPrompt.before("<div class='array-inspector'>#{ items.join('') }</div>")
 
-
-_.def('Luca.components.DevelopmentConsole').extends('Luca.View').with
-
+_.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
   name: "development_console"
 
   className: 'luca-ui-development-console'
 
   prompt:"Coffee> "
+
+  modal: true
 
   initialize: (@options={})->
     Luca.View::initialize.apply @, arguments
@@ -21,16 +21,27 @@ _.def('Luca.components.DevelopmentConsole').extends('Luca.View').with
 
     if @modal
       @$el.addClass 'luca-ui-modal'
+      @$el.addClass 'modal'
 
-  beforeRender: ()->
-    @$el.append @make("div",class:"console-inner")
+  render: ()->
+    return @ if @rendered is true
+    @setup()
+    Luca.ModalView::render?.apply(@, arguments)
+    @
 
-    @console_el = @$('.console-inner')
+  setup: ()->
+    @$append( @make("div",class:"console-wrapper") )
+    @bodyElement = @$('.console-wrapper')
+    @renderToEl().css(height:"500px",width:"800px")
+
+    @$append( @make("div",class:"console-inner") )
 
     console_name = @name
     devConsole = @
 
-    @console = @console_el.console
+    @rendered = true
+
+    @console ||= @$('.console-inner').console
       promptLabel: @prompt
       animateScroll: true
       promptHistory: true
@@ -88,3 +99,5 @@ _.def('Luca.components.DevelopmentConsole').extends('Luca.View').with
             return ret.toString()
 
           error.toString()
+
+    @

@@ -5,9 +5,14 @@ Sandbox.Application = Luca.Application.extend
 
   topNav:'top_navigation'
 
+  keyEvents:
+    meta:
+      forwardslash: "developmentConsole"
+
   initialize: (@options={})->
     Luca.Application::initialize.apply @, arguments
     @router = new Sandbox.Router(app: @)
+
 
   beforeRender: ()->
     @applyStyles("margin-top":"25px")
@@ -17,6 +22,11 @@ Sandbox.Application = Luca.Application.extend
     ctype: 'pages_controller'
     name: 'pages'
   ]
+
+  developmentConsole: ()->
+    @_developmentConsole ||= new Luca.tools.DevelopmentConsole()
+    @_developmentConsole.render().toggle()
+
 
 $ do ->
   (window || global).SandboxApp = new Sandbox.Application()
