@@ -275,6 +275,9 @@ Luca.extend = (superClassName, childName, properties={})->
 
   properties.displayName = childName
 
+  properties._class = ()->
+    Luca.util.resolve( properties.displayName, (window||global) )
+
   properties._superClass = ()->
     superClass.displayName ||= superClassName
     superClass
