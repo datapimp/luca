@@ -1,5 +1,47 @@
 #### Luca.Collection
 
+setupCollection = ()->
+  window.cachedMethodOne = 0
+  window.cachedMethodTwo = 0
+
+  window.CachedMethodCollection = Luca.Collection.extend
+    cachedMethods:["cachedMethodOne","cachedMethodTwo"]
+
+    cachedMethodOne: ()->
+      window.cachedMethodOne += 1
+
+    cachedMethodTwo: ()->
+      window.cachedMethodTwo += 1
+
+describe "Method Caching", ->
+  beforeEach ->
+    setupCollection()
+    @collection = new CachedMethodCollection()
+
+  afterEach ->
+    @collection = undefined
+    window.CachedMethodCollection = undefined
+
+  it "should call the method", ->
+    expect( @collection.cachedMethodOne() ).toEqual 1
+
+  it "should cache the value of the method", ->
+    _( 5 ).times ()=> @collection.cachedMethodOne()
+    expect( @collection.cachedMethodOne() ).toEqual 1
+
+  it "should refresh the method cache upon reset of the models", ->
+    _( 3 ).times ()=> @collection.cachedMethodOne()
+    expect( @collection.cachedMethodOne() ).toEqual 1
+    @collection.reset()
+    _( 3 ).times ()=> @collection.cachedMethodOne()
+    expect( @collection.cachedMethodOne() ).toEqual 2
+
+  it "should restore the collection to the original configuration", ->
+    @collection.restoreMethodCache()
+    _( 5 ).times ()=> @collection.cachedMethodOne()
+    expect( @collection.cachedMethodOne() ).toEqual 6
+
+
 describe "Luca.Collection", ->
   it "should accept a name and collection manager", ->
     mgr = new Luca.CollectionManager()

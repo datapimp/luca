@@ -48,3 +48,7 @@
 0.8.7
   - Luca.core.Container now uses bodyTemplate to render
   - Luca.Collection.cached property is now deprecated.  use @cache_key instead
+  - introducing Luca.Collection.cachedMethods property.  any method on the
+    collection which is listed here, will have its return value memoized upon
+    first being called.  Whenever the collection is reset or changed, this
+    value will be cleared, and then the next call will be cached, and so on

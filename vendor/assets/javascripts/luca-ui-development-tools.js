@@ -16264,19 +16264,73 @@ CodeMirror.defineMode('coffeescript', function(conf) {
 CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 (function() {
 
-  _.def("Luca.components.CodeEditor")["extends"]("Luca.containers.BasicPanel")["with"]({
-    name: "code_editor",
+  _.def("Luca.tools.ClassBrowser")["extends"]("Luca.core.Container")["with"]({
+    name: "class_browser",
+    className: "luca-class-browser row",
+    beforeRender: function() {
+      var _ref;
+      return (_ref = Luca.core.Container.prototype.beforeRender) != null ? _ref.apply(this, arguments) : void 0;
+    },
+    prepareLayout: function() {
+      this.$append(this.make("div", {
+        "class": "left-column span3"
+      }));
+      return this.$append(this.make("div", {
+        "class": "right-column span9"
+      }));
+    },
+    prepareComponents: function() {
+      this.components[0].container = this.$('.left-column');
+      return this.components[1].container = this.$('.right-column');
+    },
+    components: [
+      {
+        name: "class_browser_directory",
+        ctype: "class_browser_list"
+      }, {
+        name: "class_browser_detail",
+        markup: "detail"
+      }
+    ],
+    bottomToolbar: {
+      buttons: [
+        {
+          label: "Add New",
+          icon: "plus",
+          color: "primary",
+          white: true,
+          align: 'right'
+        }
+      ]
+    },
     initialize: function(options) {
       this.options = options != null ? options : {};
-      return Luca.containers.BasicPanel.prototype.initialize.apply(this, arguments);
+      return Luca.core.Container.prototype.initialize.apply(this, arguments);
     }
   });
 
 }).call(this);
 (function() {
 
-  _.def('Luca.components.CollectionInspector')["extends"]('Luca.View')["with"]({
-    name: "collection_inspector"
+  _.def("Luca.tools.CollectionInspector")["extends"]("Luca.View")["with"]({
+    name: "collection_inspector",
+    className: "collection-inspector"
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.tools.ClassBrowserList")["extends"]("Luca.View")["with"]({
+    tagName: "ul",
+    className: "nav nav-list",
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      return this.deferrable = this.collection = new Luca.collections.Components();
+    },
+    attach: _.once(Luca.View.prototype.$attach),
+    render: function() {
+      return this.attach();
+    }
   });
 
 }).call(this);
@@ -16292,26 +16346,48 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     return lastPrompt.before("<div class='array-inspector'>" + (items.join('')) + "</div>");
   };
 
-  _.def('Luca.components.DevelopmentConsole')["extends"]('Luca.View')["with"]({
+  _.def('Luca.tools.DevelopmentConsole')["extends"]('Luca.ModalView')["with"]({
+    hasBody: true,
     name: "development_console",
     className: 'luca-ui-development-console',
     prompt: "Coffee> ",
+    modal: true,
     initialize: function(options) {
       var console_name;
       this.options = options != null ? options : {};
       Luca.View.prototype.initialize.apply(this, arguments);
       console_name = this.name;
-      if (this.modal) return this.$el.addClass('luca-ui-modal');
+      if (this.modal) {
+        this.$el.addClass('luca-ui-modal');
+        return this.$el.addClass('modal');
+      }
     },
-    beforeRender: function() {
+    render: function() {
+      var _ref;
+      if (this.rendered === true) return this;
+      this.setup();
+      if ((_ref = Luca.ModalView.prototype.render) != null) {
+        _ref.apply(this, arguments);
+      }
+      return this;
+    },
+    setup: function() {
       var console_name, devConsole;
-      this.$el.append(this.make("div", {
+      this.$append(this.make("div", {
+        "class": "console-wrapper"
+      }));
+      this.bodyElement = this.$('.console-wrapper');
+      this.bodyEl().css({
+        height: "500px",
+        width: "800px"
+      });
+      this.$append(this.make("div", {
         "class": "console-inner"
       }));
-      this.console_el = this.$('.console-inner');
       console_name = this.name;
       devConsole = this;
-      return this.console = this.console_el.console({
+      this.rendered = true;
+      this.console || (this.console = this.$('.console-inner').console({
         promptLabel: this.prompt,
         animateScroll: true,
         promptHistory: true,
@@ -16366,6 +16442,39 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
             }
             return error.toString();
           }
+        }
+      }));
+      return this;
+    }
+  });
+
+}).call(this);
+(function() {
+  var parseRegistry;
+
+  parseRegistry = function() {
+    return _(Luca.registry.classes).map(function(className, ctype) {
+      return {
+        className: className,
+        ctype: ctype
+      };
+    });
+  };
+
+  _.def('Luca.collections.Components')["extends"]('Luca.Collection')["with"]({
+    cache_key: "luca_components",
+    name: "components",
+    url: function() {
+      return "/luca/components";
+    },
+    initialize: function(models, options) {
+      Luca.Collection.cache(this.cache_key, parseRegistry());
+      return Luca.Collection.prototype.initialize.apply(this, arguments);
+    },
+    filterByNamespace: function(namespace) {
+      return this.query({
+        className: {
+          $like: namespace
         }
       });
     }

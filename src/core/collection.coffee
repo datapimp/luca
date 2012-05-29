@@ -24,8 +24,56 @@
 #
 Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
+  # cachedMethods refers to a list of methods on the collection
+  # whose value gets cached once it is ran.  the collection then
+  # binds to change, add, remove, and reset events and then expires
+  # the cached value once these events are fired.
+
+  # cachedMethods expects an array of strings representing the method name
+  # or objects containing @method and @resetEvents properties.  by default
+  # @resetEvents are 'reset' and 'change'.
+  cachedMethods: []
+
+  restoreMethodCache: ()->
+    for name, config of @_methodCache
+      if config.original?
+        config.args = undefined
+        @[ name ] = config.original
+
+  clearMethodCache: ()->
+    for name, config of @_methodCache
+      oldValue = config.value
+      config.value = undefined
+
+  setupMethodCaching: ()->
+    collection = @
+    resetEvents = ["reset","change"]
+
+    cache = @_methodCache = {}
+
+    _( @cachedMethods ).each (method)->
+      # store a reference to the unwrapped version of the method
+      # and a placeholder for the cached value
+      cache[ method ] =
+        name: method
+        original: collection[method]
+        value: undefined
+
+      # wrap the collection method with a basic memoize operation
+      collection[ method ] = ()->
+        cache[method].value ||= cache[method].original.apply(collection)
+
+      # bind to events on the collection, which once triggered, will
+      # invalidate the cached value.  causing us to have to restore it
+      for resetEvent in resetEvents
+        collection.bind resetEvent, ()->
+          collection.clearMethodCache()
+
+
   initialize: (models=[], @options)->
     _.extend @, @options
+
+    @setupMethodCaching()
 
     @_reset()
 
@@ -87,7 +135,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
     @__wrapUrl() unless @useNormalUrl is true
 
-    Backbone.Collection.prototype.initialize.apply @, [models, @options]
+    Backbone.Collection::initialize.apply @, [models, @options]
 
     if models
       @reset models, silent: true, parse: options?.parse

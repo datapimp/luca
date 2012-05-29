@@ -149,7 +149,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
     @components = _( @components ).map (object, index) =>
       object.cty
       panel = @componentContainers[ index ]
-      object.container = if @appendContainers then "##{ panel.id }" else @bodyEl()
+      object.container = if @appendContainers then "##{ panel.id }" else @$bodyEl()
 
       object
 

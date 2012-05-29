@@ -1,20 +1,16 @@
 .luca-ui-development-console.luca-ui-modal {
   position: absolute;
-  left: 50%;
-  margin-left: -375px;
-  width: 750px;
-  height: 500px; }
+  top: 50px;
+  left: 410px;
+  width: 820px; }
 
 .luca-ui-development-console {
   background: rgba(0, 0, 0, 0.9);
   font-size: 16px;
   margin-top: 1em;
-  font-family: "Monaco";
-  height: 620px;
-  width: 95%; }
+  font-family: "Monaco"; }
   .luca-ui-development-console .console-inner {
     color: #fff;
-    height: 600px;
     width: 100%; }
     .luca-ui-development-console .console-inner .jquery-console-inner {
       height: 100%;
@@ -156,6 +152,21 @@
 .luca-ui-card {
   padding: 5px;
   width: 100%; }
+.luca-ui-toolbar {
+  float: left;
+  clear: both;
+  width: 100%;
+  padding: 5px; }
+  .luca-ui-toolbar .align-right {
+    float: right; }
+  .luca-ui-toolbar .btn-group {
+    margin: 0px 2px; }
+  .luca-ui-toolbar.toolbar-bottom {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px; }
+  .luca-ui-toolbar.toolbar-top {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px; }
 .luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view, .luca-ui-tab-view .luca-ui-card .luca-ui-card {
   overflow: hidden; }
 
