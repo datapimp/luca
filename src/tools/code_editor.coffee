@@ -43,22 +43,20 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
     try
       compiled = @compiler.apply(@, [@getValue()])
 
-      if compiled != @compiled
+      if @compiled and compiled != @compiled
         @trigger "code:change", compiled
-        @compiled = compiled
+
+      @compiled = compiled
     catch error
       #console.log "Error Compiling Coffeescript"
       #console.log error.message
 
   onCodeChange: (compiled)->
-    return unless compiled isnt @oldCompiled
-
-    console.log "Evaluating Code Change"
     evaluator = ()->
       eval( compiled )
 
     evaluator.call( window )
-    @oldCompiled = compiled
+
   getValue: ()->
     @editor.getValue()
 

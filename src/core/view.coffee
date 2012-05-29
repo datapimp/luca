@@ -55,9 +55,7 @@ Luca.View = Backbone.View.extend
     @setupHooks( unique )
 
     if @autoBindEventHandlers is true
-      _( @events ).each (handler,event)=>
-        if _.isString(handler)
-          _.bindAll @, handler
+      @bindAllEventHandlers()
 
 
     @trigger "after:initialize", @
@@ -65,6 +63,7 @@ Luca.View = Backbone.View.extend
     @registerCollectionEvents()
 
     @delegateEvents()
+
 
   #### JQuery / DOM Selector Helpers
   $bodyEl: ()->
@@ -178,6 +177,57 @@ Luca.View = Backbone.View.extend
     @events[ selector ] = handler
     @delegateEvents()
 
+  bindAllEventHandlers: ()->
+    _( @events ).each (handler,event)=>
+      if _.isString(handler)
+        _.bindAll @, handler
+
+  # which properties of this view instance are backbone views
+  viewProperties: ()->
+    propertyValues = _( @ ).values()
+
+    properties = _( propertyValues ).select (v)->
+      Luca.isBackboneView(v)
+
+    components = _( @components ).select (v)-> Luca.isBackboneView(v)
+
+    _([components,properties]).flatten()
+
+  # which properties of this view instance are backbone collections
+  collectionProperties: ()->
+    propertyValues = _( @ ).values()
+    _( propertyValues ).select (v)->
+      Luca.isBackboneCollection(v)
+
+  definitionClass: ()->
+    Luca.util.resolve(@displayName, window)?.prototype
+  # refreshCode happens whenever the Luca.Framework extension
+  # system is run after there are running instances of a given component
+
+  # in the context of views, what this means is that each eventHandler which
+  # is bound to a specific object via _.bind or _.bindAll, or autoBindEventHandlers
+  # is refreshed with the prototype method of the component that it inherits from,
+  # and then delegateEvents is called to refresh any of the updated event handlers
+
+  # in addition to this, all properties of the instance of a given view which are
+  # also backbone views will have the same process run against them
+  refreshCode: ()->
+    view = @
+
+    _( @eventHandlerProperties() ).each (prop)->
+      view[ prop ] = view.definitionClass()[prop]
+
+    @delegateEvents()
+
+  eventHandlerProperties: ()->
+    handlerIds = _( @events ).values()
+    _( handlerIds ).select (v)->
+      _.isString(v)
+
+  eventHandlerFunctions: ()->
+    handlerIds = _( @events ).values()
+    _( handlerIds ).map (handlerId)=>
+      if _.isFunction(handlerId) then handlerId else @[handlerId]
 
 Luca.View.originalExtend = Backbone.View.extend
 

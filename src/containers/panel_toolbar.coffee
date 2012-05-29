@@ -91,7 +91,7 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
   events:
     "click .btn, click .dropdown-menu li" : "clickHandler"
 
-  autoBindEventHandlers: true
+  #autoBindEventHandlers: true
 
   # The Toolbar behaves by triggering events on the components which they
   # belong to. Combined with Luca.View::setupHooks it is a clean way
