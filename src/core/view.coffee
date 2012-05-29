@@ -67,14 +67,23 @@ Luca.View = Backbone.View.extend
     @delegateEvents()
 
   #### JQuery / DOM Selector Helpers
-  renderToEl: ()->
-    if @bodyElement then $( @bodyElement ) else $( @el )
+  $bodyEl: ()->
+    @bodyElement ||= "div"
+    @bodyClassName ||= "view-body"
+
+    @bodyEl = "#{ @bodyElement }.#{ @bodyClassName }"
+
+    bodyEl = @$(@bodyEl)
+
+    return bodyEl if bodyEl.length > 0
+
+    @$el
 
   $html: (content)->
-    @renderToEl().html( content )
+    @$bodyEl().html( content )
 
   $append: (content)->
-   @renderToEl().append(content)
+   @$bodyEl().append(content)
 
   $container: ()->
     $(@container)

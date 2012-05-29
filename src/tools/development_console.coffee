@@ -6,6 +6,8 @@ inspectArray = (array)->
   lastPrompt.before("<div class='array-inspector'>#{ items.join('') }</div>")
 
 _.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
+  hasBody: true
+
   name: "development_console"
 
   className: 'luca-ui-development-console'
@@ -32,7 +34,7 @@ _.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
   setup: ()->
     @$append( @make("div",class:"console-wrapper") )
     @bodyElement = @$('.console-wrapper')
-    @renderToEl().css(height:"500px",width:"800px")
+    @bodyEl().css(height:"500px",width:"800px")
 
     @$append( @make("div",class:"console-inner") )
 

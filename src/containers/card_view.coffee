@@ -22,9 +22,12 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
 
   # hide all but the active card
   prepareLayout: ()->
-    Luca.core.Container::prepareLayout?.apply(@, arguments)
+    @componentContainers = Luca.core.Container::prepareLayout?.apply(@, arguments)
     @$(".#{ @componentClass }").hide()
     @$(".#{ @componentClass }").eq( @activeCard ).show()
+
+    @componentContainers
+
 
   activeComponent: ()->
     @getComponent( @activeCard )

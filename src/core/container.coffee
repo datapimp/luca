@@ -87,23 +87,24 @@ _.def('Luca.core.Container').extends('Luca.View').with
   # firstActivation()
   #
   beforeRender: ()->
-    @debug "container before render"
     @doLayout()
     @doComponents()
     @applyStyles( @styles ) if @styles?
 
-    # will only be run if the toolbar module has been mixed in
-    @renderToolbars?()
+    if @hasBody or @topToolbar or @bottomToolbar
+      @bodyElement ||= "div"
+      @bodyClassName ||= "view-body"
+      @$append( @make(@bodyElement,class:@bodyClassName) )
+
+      # will only be run if the toolbar module has been mixed in
+      @renderToolbars?() if @$bodyEl().length > 0
 
   doLayout: ()->
-    @debug "container do layout"
     @trigger "before:layout", @
-    @prepareLayout()
+    @componentContainers = @prepareLayout()
     @trigger "after:layout", @
 
   doComponents: ()->
-    @debug "container do components"
-
     @trigger "before:components", @, @components
     @prepareComponents()
     @createComponents()
@@ -127,24 +128,28 @@ _.def('Luca.core.Container').extends('Luca.View').with
   # creation / manipulation for how your container lays out
   # its components.  Minimally you will want to set the
   # container property on each component.
+
+  # NOTE:  prepareLayout is expected to return an array of containers
   prepareLayout: ()->
-    @debug "container prepare layout"
-    @componentContainers = _( @components ).map (component, index) =>
+    containers = _( @components ).map (component, index) =>
       @applyPanelConfig.apply @, [ component, index ]
 
+    # TODO. CLEANUP
+    # if the container depends on child containers, then they will
+    # have top append those for each of the components.  do so here
     if @appendContainers
-      _( @componentContainers ).each (container)=>
+      _( containers ).each (container)=>
         @$el.append Luca.templates["containers/basic"](container) unless container.appended?
         container.appended = true
 
+    containers
+
   # prepare components is where each component gets assigned a container to be rendered into
   prepareComponents: ()->
-    @debug "container prepare components"
-
     @components = _( @components ).map (object, index) =>
       object.cty
       panel = @componentContainers[ index ]
-      object.container = if @appendContainers then "##{ panel.id }" else @renderToEl()
+      object.container = if @appendContainers then "##{ panel.id }" else @bodyEl()
 
       object
 
@@ -201,13 +206,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
 
   bottomToolbar: undefined
 
-  layout: "container"
-
-  # Luca containers are for rendering one or more 'components' into a specific element
-  # using various strategies depending on what type of a container it is
-  bodyElement: ".panel-body"
-
-  # Luca containers can have toolbars, these will get injected before or after the renderToEl
+  # Luca containers can have toolbars, these will get injected before or after the bodyEl
   renderToolbars: ()->
     _( ["top","left","right","bottom"] ).each (orientation)=>
       if @["#{ orientation }Toolbar"]?
@@ -217,13 +216,14 @@ _.def('Luca.core.Container').extends('Luca.View').with
     attach = if ( orientation is "top" or orientation is "left" ) then "before" else "after"
 
     unless @$("#{ orientation }-toolbar-container").length > 0
-      @renderToEl()[ attach ] "<div class='#{ orientation }-toolbar-container' />"
+      @$bodyEl()[ attach ] "<div class='#{ orientation }-toolbar-container' />"
 
-      config.ctype ||= "panel_toolbar"
-      config.parent = @
+    config.ctype ||= "panel_toolbar"
+    config.parent = @
+    config.orientation = orientation
 
-      toolbar = @["#{ orientation }Toolbar"] = Luca.util.lazyComponent(config)
-      @$("#{ orientation }-toolbar-container").append( toolbar.render().el )
+    toolbar = @["#{ orientation }Toolbar"] = Luca.util.lazyComponent(config)
+    @$(".#{ orientation }-toolbar-container").append( toolbar.render().el )
 
   #### Container Activation
   #

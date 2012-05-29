@@ -32,3 +32,18 @@
   _ Added _.def as an alias to Luca.define
 
   - All Luca components have been migrated over to the new Luca.define() API
+
+0.8.6
+  - Luca.ModalView has been refactored to use Twitter Bootstrap Modal
+  - Luca.Application now has keyEvents API for handling keypress
+    events and delegating them properly
+  - Luca.containers.CardView has been refactored to be more inline with base container
+  - Luca.View gets $append, $html, $container jQuery helpers.  shortcut for @renderToEl().append, etc
+  - Luca.View gets @bodyElement, @bodyTemplate properties.
+      - @bodyTemplate references a JST template which automatically gets added
+      via $html if present, immediately when the view is rendered
+      - @bodyElement is where $append, $html will insert content, otherwise defaults to @$el
+  - Luca.View has $bodyEl() method which points to $(@bodyElement) or $(@el) ( default )
+
+0.8.7
+  - Luca.core.Container now uses bodyTemplate to render
