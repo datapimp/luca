@@ -1742,6 +1742,8 @@
     }
   });
 
+  _.def("Luca.containers.ModalView")["extends"]("Luca.ModalView")["with"]();
+
 }).call(this);
 (function() {
   var buildButton, make, prepareButtons;

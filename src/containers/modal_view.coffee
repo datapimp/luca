@@ -32,3 +32,4 @@ _.def("Luca.ModalView").extends("Luca.View").with
       keyboard: @closeOnEscape is true
       show: @showOnInitialize is true
 
+_.def("Luca.containers.ModalView").extends("Luca.ModalView").with()
