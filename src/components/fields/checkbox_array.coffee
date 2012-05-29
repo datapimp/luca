@@ -46,7 +46,9 @@ _.component('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
   populateCheckboxes: ()->
     controls = $(@el).find('.controls')
     controls.empty()
-    @selectedItems = @getModel().get(@name)
+    unless _.isUndefined(@getModel())
+      @selectedItems = @getModel().get(@name)
+
     @collection.each (model)=>
       value = model.get(@valueField)
       label = model.get(@displayField)
