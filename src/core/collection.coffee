@@ -31,7 +31,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
   # cachedMethods expects an array of strings representing the method name
   # or objects containing @method and @resetEvents properties.  by default
-  # @resetEvents are 'reset' and 'change'.
+  # @resetEvents are 'add','remove',reset' and 'change'.
   cachedMethods: []
 
   restoreMethodCache: ()->
@@ -47,7 +47,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
   setupMethodCaching: ()->
     collection = @
-    resetEvents = ["reset","change"]
+    resetEvents = ["reset","change","add","remove"]
 
     cache = @_methodCache = {}
 
