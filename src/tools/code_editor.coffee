@@ -13,22 +13,17 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
 
     @mode ||= "coffeescript"
     @theme ||= "monokai"
+    @keyMap ||= "vim"
     @compiler = compilers[@mode] || @compile
 
     @bind "code:change", @onCodeChange
 
+  beforeRender: ()->
+    @$html "<textarea></textarea>"
+
   afterRender: ()->
     _.defer ()=>
-      width = 700
-      height = 600
-
-      console.log "Setting Dimensions", height, width
-      @$el.height( height )
-      @$el.width( width )
-
-      @editor = window.CodeMirror( @$el[0], @editorOptions())
-
-      console.log @editor
+      @editor = window.CodeMirror.fromTextArea( @$('textarea')[0], @editorOptions())
       @restore()
 
   # if we don't have a special compiler for
@@ -64,6 +59,8 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
 
   editorOptions: ()->
     mode: @mode
+    theme: @theme
+    keyMap: @keyMap
     lineNumbers: true
     gutter: true
     autofocus: true
