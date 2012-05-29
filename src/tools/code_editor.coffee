@@ -31,10 +31,9 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
   compile: (code)-> code
 
   save: ()->
-    localStorage.setItem("editor-value", @getValue())
+    # implement
 
   restore: ()->
-    @editor.setValue localStorage.getItem("editor-value") || ""
     @editor.refresh()
 
   onEditorChange: ()->
@@ -48,12 +47,18 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
         @trigger "code:change", compiled
         @compiled = compiled
     catch error
-      console.log "Error Compiling Coffeescript"
-      console.log error.message
+      #console.log "Error Compiling Coffeescript"
+      #console.log error.message
 
-  onCodeChange: ()->
-    # Implement
+  onCodeChange: (compiled)->
+    return unless compiled isnt @oldCompiled
 
+    console.log "Evaluating Code Change"
+    evaluator = ()->
+      eval( compiled )
+
+    evaluator.call( window )
+    @oldCompiled = compiled
   getValue: ()->
     @editor.getValue()
 

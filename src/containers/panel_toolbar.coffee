@@ -17,6 +17,8 @@ buildButton = (button, wrap=true)->
   else
     label = button.label
 
+    button.eventId ||= _.string.dasherize( button.label.toLowerCase() )
+
     if button.icon
       white = "icon-white" if button.white
       label = "<i class='#{ white } icon-#{ button.icon }' /> #{ label }"
@@ -38,6 +40,7 @@ buildButton = (button, wrap=true)->
 
       dropdownEl = make "ul", {class:"dropdown-menu"}, dropdownItems
 
+    console.log "Making Button", @parent, buttonAttributes, button
     buttonEl = make "a", buttonAttributes, label
 
     # needs to be wrapped for proper rendering, but not
@@ -96,7 +99,7 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
   clickHandler: (e)->
     me = my = $( e.target )
     eventId = my.data('eventid')
-    @parent?.trigger(eventId)
+    console.log "Triggering EventId: #{ eventId } on ", @parent
 
   beforeRender:()->
     Luca.View::beforeRender?.apply(@, arguments)
