@@ -23,13 +23,12 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
 
     @bind "after:card:switch", @highlightSelectedTab
 
+  bodyElement: "div"
+
+  bodyClassName: 'tab-content'
+
   activeTabSelector: ()->
     @tabSelectors().eq( @activeCard || @activeTab || @activeItem )
-
-  prepareLayout: ()->
-    @card_containers = _( @cards ).map (card, index)=>
-      @$('.tab-content').append Luca.templates["containers/basic"](card)
-      $("##{ card.id }")
 
   beforeLayout: ()->
     @$el.addClass("tabs-#{ @tab_position }")
@@ -48,9 +47,10 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     @activeTabSelector().addClass('active')
 
     if Luca.enableBootstrap and @tab_position is "left" or @tab_position is "right"
-      @$el.addClass('grid-12')
-      @tabContainerWrapper().addClass('grid-3')
-      @tabContentWrapper().addClass('grid-9')
+      @$el.wrap("<div class='row' />")
+      @$el.addClass('span12')
+      @tabContainerWrapper().addClass('span3')
+      @tabContentWrapper().addClass('span9')
 
       if @tabVerticalOffset
         @tabContainerWrapper().css('padding-top', @tabVerticalOffset )

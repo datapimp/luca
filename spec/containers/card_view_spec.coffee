@@ -19,6 +19,13 @@ describe "The Card View", ->
 
     @cardView.render()
 
+  it "should create three card elements", ->
+    expect( @cardView.componentElements().length ).toEqual 3
+
+  it "should hide all but one of the card elements", ->
+    display = _( @cardView.$('.luca-ui-card') ).map (el)-> $(el).css('display')
+    expect( display ).toEqual(['block','none','none'])
+
   it "should be able to find the cards by name", ->
     expect( @cardView.find("one") ).toBeDefined()
     expect( @cardView.find("one").one ).toEqual true

@@ -85,17 +85,13 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @trigger "before:submit", @
     @submit()
 
-  beforeLayout: ()->
-    Luca.core.Container::beforeLayout?.apply @, arguments
-    @$el.html Luca.templates["components/form_view"]( @ )
-
-  prepareComponents: ()->
-    container = $('.form-view-body', @el)
-    _( @components ).each (component)->
-      component.container = container
+  bodyTemplate: ["components/form_view"]
+  bodyClassName: "form-view-body"
+  hasBody: true
 
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)
+
     @eachField (field)=>
       field.getForm = ()=> @
       field.getModel = ()=> @currentModel()
@@ -111,10 +107,10 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     $(".toolbar-container.#{ position }", @wrapper() ).first()
 
   renderToolbars: ()->
-      _( @toolbars ).each (toolbar)=>
-        toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
-        toolbar = Luca.util.lazyComponent(toolbar)
-        toolbar.render()
+    _( @toolbars ).each (toolbar)=>
+      toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
+      toolbar = Luca.util.lazyComponent(toolbar)
+      toolbar.render()
 
   eachField: (iterator)->
     _( @getFields() ).map( iterator )

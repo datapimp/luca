@@ -151,9 +151,7 @@ Luca.register = (component, prototypeName)->
     _( liveInstances ).each (instance)->
       instance?.refreshCode?.call(instance, prototypeDefinition)
 
-    console.log "Registering Already Existing Prototype Definition for #{ prototypeName }", liveInstances.length, liveInstances, _( liveInstances ).pluck('name')
-  else
-    Luca.registry.classes[component] = prototypeName
+  Luca.registry.classes[component] = prototypeName
 
 Luca.registry.findInstancesByClassName = (className)->
   instances = _( Luca.component_cache.cid_index ).values()

@@ -60,8 +60,8 @@ _.def("Luca.Collection").extends( source ).with
     # usually done with the bootstrap functionality provided.
 
     # DEPRECATION NOTICE
-    if @cached and _.isString( @cached )
-      console.log 'The @cached property of Luca.Collection is being deprecated.  Please change to cache_key'
+    if @cached
+      console.log 'The @cache_keyproperty of Luca.Collection is being deprecated.  Please change to cache_key'
 
     # TODO
     # Change this from cached to cache_key
@@ -85,7 +85,7 @@ _.def("Luca.Collection").extends( source ).with
     # to be scoped with some sort of unique id, as say some sort of belongsTo relationship
     # then you can specify @registerAs as a method()
     if @manager
-      @name ||= @cached()
+      @name ||= @cache_key()
       @name = if _.isFunction( @name ) then @name() else @name
 
       unless @private or @anonymous
@@ -202,7 +202,7 @@ _.def("Luca.Collection").extends( source ).with
 
   # A Luca.Collection will load models from the in memory model store
   # returned from Luca.Collection.cache, where the key returned from
-  # the @cached attribute or method matches the key of the model cache
+  # the @cache_keyattribute or method matches the key of the model cache
   loadFromBootstrap: ()->
     return unless @bootstrap_cache_key
     @reset @cached_models()
@@ -214,7 +214,7 @@ _.def("Luca.Collection").extends( source ).with
 
   # cached_models is a reference to the Luca.Collection.cache object
   # key'd on whatever this collection's bootstrap_cache_key is set to be
-  # via the @cached() interface
+  # via the @cache_key() interface
   cached_models: ()->
     Luca.Collection.cache( @bootstrap_cache_key )
 
@@ -331,7 +331,7 @@ Luca.Collection.baseParams = (obj)->
 #
 # Luca.Collections make it easier for you to do this cleanly and automatically
 #
-# by specifying a @cached property or method in your collection definition
+# by specifying a @cache_keyproperty or method in your collection definition
 # Luca.Collections will automatically look in this space to find models
 # and avoid a roundtrip to your API unless explicitly told to.
 Luca.Collection._bootstrapped_models = {}

@@ -7,6 +7,8 @@ Sandbox.Application = Luca.Application.extend
 
   useKeyRouter: true
 
+  height: 1000
+
   keyEvents:
     meta:
       forwardslash: "developmentConsole"

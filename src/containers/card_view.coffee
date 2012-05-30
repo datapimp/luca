@@ -20,17 +20,16 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
 
   appendContainers: true
 
-  # hide all but the active card
-  prepareLayout: ()->
-    @componentContainers = Luca.core.Container::prepareLayout?.apply(@, arguments)
-    @$(".#{ @componentClass }").hide()
-    @$(".#{ @componentClass }").eq( @activeCard ).show()
-
-    @componentContainers
-
+  activeComponentElement: ()->
+    @componentElements().eq( @activeCard )
 
   activeComponent: ()->
     @getComponent( @activeCard )
+
+  customizeContainerEl: (containerEl, panel, panelIndex)->
+    containerEl.style += if panelIndex is @activeCard then "display:block;" else "display:none;"
+
+    containerEl
 
   cycle: ()->
     nextIndex = if @activeCard < @components.length - 1 then @activeCard + 1 else 0
@@ -58,20 +57,18 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
 
     return unless current
 
-
     unless silent
       @trigger "before:card:switch", previous, current
       previous?.trigger?.apply(previous,["before:deactivation", @, previous, current])
       current?.trigger?.apply(previous,["before:activation", @, previous, current])
 
-    @$(".#{ @componentClass }").hide()
+    @$(">.#{ @componentClass }").hide()
 
     unless current.previously_activated
       current.trigger "first:activation"
       current.previously_activated = true
 
-    $( current.container ).show()
-
+    @activeComponentElement().show()
     @activeCard = index
 
     unless silent

@@ -46,13 +46,16 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
   populateCheckboxes: ()->
     controls = $(@el).find('.controls')
     controls.empty()
-    @selectedItems = @getModel().get(@name)
+    unless _.isUndefined(@getModel())
+      @selectedItems = @getModel().get(@name)
+
     @collection.each (model)=>
       value = model.get(@valueField)
       label = model.get(@displayField)
       input_id = _.uniqueId('field')
       controls.append(Luca.templates["fields/checkbox_array_item"]({label: label, value: value, input_id: input_id, input_name: @input_name}))
-      @$("##{input_id}").attr("checked", "checked") unless @selectedItems.indexOf(value) is -1
+
+      @$("##{input_id}").attr("checked", "checked") unless _( @selectedItems ).indexOf(value) is -1
 
     $(@container).append(@$el)
 

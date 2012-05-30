@@ -9,6 +9,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
 
   className: 'luca-ui-container'
 
+  componentTag: 'div'
   componentClass: 'luca-ui-panel'
 
   isContainer: true
@@ -97,11 +98,11 @@ _.def('Luca.core.Container').extends('Luca.View').with
       @$append( @make(@bodyElement,class:@bodyClassName) )
 
       # will only be run if the toolbar module has been mixed in
-      @renderToolbars?() if @$bodyEl().length > 0
+      @renderToolbars?()
 
   doLayout: ()->
     @trigger "before:layout", @
-    @componentContainers = @prepareLayout()
+    @prepareLayout()
     @trigger "after:layout", @
 
   doComponents: ()->
@@ -115,15 +116,23 @@ _.def('Luca.core.Container').extends('Luca.View').with
   applyPanelConfig: (panel, panelIndex)->
     style_declarations = []
 
-    style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height
-    style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width
+    style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
+    style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width?
     style_declarations.push "float: #{ panel.float }" if panel.float
 
     config =
-      classes: panel?.classes || @componentClass
+      class: panel?.classes || @componentClass
       id: "#{ @cid }-#{ panelIndex }"
       style: style_declarations.join(';')
+      "data-luca-owner" : @name || @cid
 
+    if @customizeContainerEl?
+     config = @customizeContainerEl( config, panel, panelIndex )
+
+    config
+
+  customizeContainerEl: (containerEl, panel, panelIndex)->
+    containerEl
   # prepare layout is where you would perform the DOM element
   # creation / manipulation for how your container lays out
   # its components.  Minimally you will want to set the
@@ -131,27 +140,30 @@ _.def('Luca.core.Container').extends('Luca.View').with
 
   # NOTE:  prepareLayout is expected to return an array of containers
   prepareLayout: ()->
-    containers = _( @components ).map (component, index) =>
-      @applyPanelConfig.apply @, [ component, index ]
-
-    # TODO. CLEANUP
-    # if the container depends on child containers, then they will
-    # have top append those for each of the components.  do so here
-    if @appendContainers
-      _( containers ).each (container)=>
-        @$el.append Luca.templates["containers/basic"](container) unless container.appended?
-        container.appended = true
-
-    containers
+    container = @
+    @componentContainers = _( @components ).map (component, index)->
+      container.applyPanelConfig(component, index)
 
   # prepare components is where each component gets assigned a container to be rendered into
   prepareComponents: ()->
-    @components = _( @components ).map (object, index) =>
-      object.cty
-      panel = @componentContainers[ index ]
-      object.container = if @appendContainers then "##{ panel.id }" else @$bodyEl()
+    _( @components ).each (component, index)=>
+      container = @componentContainers?[index]
 
-      object
+      # support a variety of the bad naming conventions
+      container.class = container.class || container.className || container.classes
+
+      if @appendContainers
+        panel = @make(@componentTag, container, '')
+
+        @$bodyEl().append( panel )
+
+        if index is @activeCard
+          $( panel ).show()
+        else
+          $( panel ).hide()
+
+
+      component.container = if @appendContainers then "##{ container.id }" else @$bodyEl()
 
   createComponents: ()->
     return if @componentsCreated is true
@@ -164,7 +176,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
       # you can include normal backbone views as components
       # you will want to make sure your render method handles
       # adding the views @$el to the appropriate @container
-      component = if _.isObject( object ) and object.render and object.trigger
+      component = if Luca.isBackboneView( object )
         object
       else
         object.type ||= object.ctype ||= ( Luca.defaultComponentType )
@@ -198,8 +210,11 @@ _.def('Luca.core.Container').extends('Luca.View').with
         component.render()
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
-        console.log e.message
-        console.log e.stack
+
+        if _.isObject(e)
+          console.log e.message
+          console.log e.stack
+
         throw e unless Luca.silenceRenderErrors? is true
 
   topToolbar: undefined
@@ -294,7 +309,8 @@ _.def('Luca.core.Container').extends('Luca.View').with
     return @ unless @activeItem
     return @components[ @activeItem ]
 
-  componentElements: ()-> $(".#{ @componentClass }", @el)
+  componentElements: ()->
+    $(">.#{ @componentClass }", @el)
 
   getComponent: (needle)->
     @components[ needle ]
