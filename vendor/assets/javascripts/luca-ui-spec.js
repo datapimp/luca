@@ -2,7 +2,7 @@
   var DefineProxy;
 
   window.Luca = {
-    VERSION: "0.8.59",
+    VERSION: "0.8.599",
     core: {},
     containers: {},
     components: {},
@@ -2107,7 +2107,7 @@
           input_id: input_id,
           input_name: _this.input_name
         }));
-        if (_this.selectedItems.indexOf(value) !== -1) {
+        if (_(_this.selectedItems).indexOf(value) !== -1) {
           return _this.$("#" + input_id).attr("checked", "checked");
         }
       });
@@ -2704,11 +2704,15 @@
       });
       return this.collection.bind("change", function(model) {
         var cells, rowEl;
-        rowEl = _this.getRowEl(model.id || model.get('id') || model.cid);
-        cells = _this.render_row(model, _this.indexOf(model), {
-          cellsOnly: true
-        });
-        return $(rowEl).html(cells);
+        try {
+          rowEl = _this.getRowEl(model.id || model.get('id') || model.cid);
+          cells = _this.render_row(model, _this.collection.indexOf(model), {
+            cellsOnly: true
+          });
+          return $(rowEl).html(cells);
+        } catch (error) {
+          return console.log("Error in change handler for GridView.collection", error, _this);
+        }
       });
     },
     beforeRender: function() {

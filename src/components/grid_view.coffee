@@ -68,9 +68,12 @@ _.component('Luca.components.GridView').extend('Luca.View').with
     # if a model changes, then we will update the row's contents
     # by rerendering that row's cells
     @collection.bind "change", (model)=>
-      rowEl = @getRowEl( model.id || model.get('id') || model.cid )
-      cells = @render_row(model, @indexOf(model), cellsOnly: true )
-      $( rowEl ).html( cells )
+      try
+        rowEl = @getRowEl( model.id || model.get('id') || model.cid )
+        cells = @render_row(model, @collection.indexOf(model), cellsOnly: true )
+        $( rowEl ).html( cells )
+      catch error
+        console.log "Error in change handler for GridView.collection", error, @
 
   beforeRender: ()->
     @trigger "before:grid:render", @
