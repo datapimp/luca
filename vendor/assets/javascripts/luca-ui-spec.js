@@ -2,7 +2,7 @@
   var DefineProxy;
 
   window.Luca = {
-    VERSION: "0.8.5",
+    VERSION: "0.8.59",
     core: {},
     containers: {},
     components: {},
