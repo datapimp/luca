@@ -34,6 +34,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
     # implement
 
   restore: ()->
+    @editor.setValue('')
     @editor.refresh()
 
   onEditorChange: ()->

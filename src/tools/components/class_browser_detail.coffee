@@ -5,5 +5,6 @@ _.def("Luca.tools.ClassBrowserDetail").extends('Luca.core.Container').with
 
   loadComponent: (model)->
     @components[0].compiled = undefined
-    @components[0].editor.setValue( model.get('contents') )
+    console.log model.get('source')
+    @components[0].editor.setValue( model.get('source') )
 

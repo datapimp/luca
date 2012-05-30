@@ -1,4 +1,4 @@
-Luca.Router = Backbone.Router.extend
+_.def("Luca.Router").extends("Backbone.Router").with
   routes:
     "" : "default"
 

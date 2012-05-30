@@ -41,7 +41,7 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
       @$el.append Luca.templates["containers/tab_selector_container"](@)
       @$el.append Luca.templates["containers/tab_view"](@)
 
-    Luca.containers.CardView::beforeLayout.apply @, arguments
+    Luca.containers.CardView::beforeLayout?.apply @, arguments
 
   beforeRender: ()->
     Luca.containers.CardView::beforeRender?.apply @, arguments

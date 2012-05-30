@@ -1,6 +1,4 @@
-_.def('Luca.components.Controller')
-.extends('Luca.containers.CardView').with
-
+_.def('Luca.components.Controller').extends('Luca.containers.CardView').with
   initialize: (@options)->
     Luca.containers.CardView::initialize.apply @, arguments
 

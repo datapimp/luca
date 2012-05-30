@@ -5,8 +5,7 @@
 # such as auto event binding, the facilitation of deferred rendering
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
-Luca.View = Backbone.View.extend
-
+_.def("Luca.View").extends("Backbone.View").with
   applyStyles: (styles={})->
     for setting, value  of styles
       @$el.css(setting,value)

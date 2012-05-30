@@ -536,7 +536,7 @@
 (function() {
   var customizeRender;
 
-  Luca.View = Backbone.View.extend({
+  _.def("Luca.View")["extends"]("Backbone.View")["with"]({
     applyStyles: function(styles) {
       var setting, value;
       if (styles == null) styles = {};
@@ -782,8 +782,13 @@
 
 }).call(this);
 (function() {
+  var source;
 
-  Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend({
+  source = 'Backbone.Collection';
+
+  if (Backbone.QueryCollection != null) source = 'Backbone.QueryCollection';
+
+  _.def("Luca.Collection")["extends"](source)["with"]({
     cachedMethods: [],
     restoreMethodCache: function() {
       var config, name, _ref, _results;
@@ -1909,6 +1914,7 @@
       });
     },
     beforeLayout: function() {
+      var _ref;
       this.$el.addClass("tabs-" + this.tab_position);
       if (this.tab_position === "below") {
         this.$el.append(Luca.templates["containers/tab_view"](this));
@@ -1917,7 +1923,7 @@
         this.$el.append(Luca.templates["containers/tab_selector_container"](this));
         this.$el.append(Luca.templates["containers/tab_view"](this));
       }
-      return Luca.containers.CardView.prototype.beforeLayout.apply(this, arguments);
+      return (_ref = Luca.containers.CardView.prototype.beforeLayout) != null ? _ref.apply(this, arguments) : void 0;
     },
     beforeRender: function() {
       var _ref;
@@ -2980,11 +2986,17 @@
       });
       return this.collection.bind("change", function(model) {
         var cells, rowEl;
-        rowEl = _this.getRowEl(model.id || model.get('id') || model.cid);
-        cells = _this.render_row(model, _this.indexOf(model), {
-          cellsOnly: true
-        });
-        return $(rowEl).html(cells);
+        console.log("Change Gridview Collection");
+        try {
+          rowEl = _this.getRowEl(model.id || model.get('id') || model.cid);
+          cells = _this.render_row(model, _this.collection.indexOf(model), {
+            cellsOnly: true
+          });
+          return $(rowEl).html(cells);
+        } catch (error) {
+          console.log(error, error.message);
+          return console.log("Error on COllection Change for GridView", _this);
+        }
       });
     },
     beforeRender: function() {
@@ -3209,7 +3221,7 @@
 }).call(this);
 (function() {
 
-  _.def('Luca.components.RecordManager').extend('Luca.containers.CardView')["with"]({
+  _.def('Luca.components.RecordManager')["extends"]('Luca.containers.CardView')["with"]({
     events: {
       "click .record-manager-grid .edit-link": "edit_handler",
       "click .record-manager-filter .filter-button": "filter_handler",
@@ -3416,7 +3428,7 @@
 }).call(this);
 (function() {
 
-  Luca.Router = Backbone.Router.extend({
+  _.def("Luca.Router")["extends"]("Backbone.Router")["with"]({
     routes: {
       "": "default"
     },

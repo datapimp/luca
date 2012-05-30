@@ -16858,6 +16858,7 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     },
     save: function() {},
     restore: function() {
+      this.editor.setValue('');
       return this.editor.refresh();
     },
     onEditorChange: function() {
@@ -16916,7 +16917,8 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     ],
     loadComponent: function(model) {
       this.components[0].compiled = void 0;
-      return this.components[0].editor.setValue(model.get('contents'));
+      console.log(model.get('source'));
+      return this.components[0].editor.setValue(model.get('source'));
     }
   });
 

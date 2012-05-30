@@ -36,6 +36,7 @@
 
 instances = []
 
+# _.def('Luca.CollectionManager').extends('Luca').with
 class Luca.CollectionManager
   __collections: {}
 
