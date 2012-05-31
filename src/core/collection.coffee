@@ -130,13 +130,14 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @base_params = Luca.Collection.baseParams()
     @
 
-  # Applying a filter to a collection, will automatically apply
-  # the filter parameters and then call fetch.  passing an additional
-  # options hash will pass these options to the call to @fetch()
-  # setting refresh to true, forcing a remote call to the REST API
+  # if filtering a collection should handle via a call to a REST API
+  # and return the filtered results that way, then leave this true
+  remoteFilter: true
+
   applyFilter: (filter={}, options={})->
+    options.refresh = @remoteFilter is true
     @applyParams(filter)
-    @fetch _.extend(options,refresh:true)
+    @fetch(options)
 
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified

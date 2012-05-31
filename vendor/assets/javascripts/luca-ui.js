@@ -2,7 +2,7 @@
   var DefineProxy;
 
   window.Luca = {
-    VERSION: "0.8.599",
+    VERSION: "0.8.6",
     core: {},
     containers: {},
     components: {},
@@ -717,13 +717,13 @@
       this.base_params = Luca.Collection.baseParams();
       return this;
     },
+    remoteFilter: true,
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
+      options.refresh = this.remoteFilter === true;
       this.applyParams(filter);
-      return this.fetch(_.extend(options, {
-        refresh: true
-      }));
+      return this.fetch(options);
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
