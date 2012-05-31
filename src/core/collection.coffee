@@ -18,15 +18,16 @@ _.def("Luca.Collection").extends( source ).with
         config.args = undefined
         @[ name ] = config.original
 
-  clearMethodCache: ()->
+  clearMethodCache: (method)->
+    @_methodCache[method].value = undefined
+
+  clearAllMethodsCache: ()->
     for name, config of @_methodCache
-      oldValue = config.value
-      config.value = undefined
+      @clearMethodCache(name)
 
   setupMethodCaching: ()->
     collection = @
-    resetEvents = ["reset","change","add","remove"]
-
+    membershipEvents = ["reset","add","remove"]
     cache = @_methodCache = {}
 
     _( @cachedMethods ).each (method)->
@@ -39,14 +40,20 @@ _.def("Luca.Collection").extends( source ).with
 
       # wrap the collection method with a basic memoize operation
       collection[ method ] = ()->
-        cache[method].value ||= cache[method].original.apply(collection)
+        cache[method].value ||= cache[method].original.apply collection, arguments
 
       # bind to events on the collection, which once triggered, will
       # invalidate the cached value.  causing us to have to restore it
-      for resetEvent in resetEvents
-        collection.bind resetEvent, ()->
-          collection.clearMethodCache()
+      for membershipEvent in membershipEvents
+        collection.bind membershipEvent, ()->
+          collection.clearAllMethodsCache()
 
+      dependencies = method.split(':')[1]
+
+      if dependencies
+        for dependency in dependencies.split(",")
+          collection.bind "change:#{dependency}", ()->
+            collection.clearMethodCache(method: method)
 
   initialize: (models=[], @options)->
     _.extend @, @options

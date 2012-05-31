@@ -803,24 +803,26 @@
       }
       return _results;
     },
-    clearMethodCache: function() {
-      var config, name, oldValue, _ref, _results;
+    clearMethodCache: function(method) {
+      return this._methodCache[method].value = void 0;
+    },
+    clearAllMethodsCache: function() {
+      var config, name, _ref, _results;
       _ref = this._methodCache;
       _results = [];
       for (name in _ref) {
         config = _ref[name];
-        oldValue = config.value;
-        _results.push(config.value = void 0);
+        _results.push(this.clearMethodCache(name));
       }
       return _results;
     },
     setupMethodCaching: function() {
-      var cache, collection, resetEvents;
+      var cache, collection, membershipEvents;
       collection = this;
-      resetEvents = ["reset", "change", "add", "remove"];
+      membershipEvents = ["reset", "add", "remove"];
       cache = this._methodCache = {};
       return _(this.cachedMethods).each(function(method) {
-        var resetEvent, _i, _len, _results;
+        var dependencies, dependency, membershipEvent, _i, _j, _len, _len2, _ref, _results;
         cache[method] = {
           name: method,
           original: collection[method],
@@ -828,16 +830,28 @@
         };
         collection[method] = function() {
           var _base;
-          return (_base = cache[method]).value || (_base.value = cache[method].original.apply(collection));
+          return (_base = cache[method]).value || (_base.value = cache[method].original.apply(collection, arguments));
         };
-        _results = [];
-        for (_i = 0, _len = resetEvents.length; _i < _len; _i++) {
-          resetEvent = resetEvents[_i];
-          _results.push(collection.bind(resetEvent, function() {
+        for (_i = 0, _len = membershipEvents.length; _i < _len; _i++) {
+          membershipEvent = membershipEvents[_i];
+          collection.bind(membershipEvent, function() {
             return collection.clearMethodCache();
-          }));
+          });
         }
-        return _results;
+        dependencies = method.split(':')[1];
+        if (dependencies) {
+          _ref = dependencies.split(",");
+          _results = [];
+          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+            dependency = _ref[_j];
+            _results.push(collection.bind("change:" + dependency, function() {
+              return collection.clearMethodCache({
+                method: method
+              });
+            }));
+          }
+          return _results;
+        }
       });
     },
     initialize: function(models, options) {
