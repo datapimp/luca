@@ -47,14 +47,17 @@ describe "DOM Helper Methods", ->
 
 
 describe "Deferrable Rendering", ->
+  DeferrableView = Luca.View.extend
+    name: "deferrable_view"
+
   beforeEach ->
     @spy = sinon.spy()
-    @collection = new Luca.Collection(url:"/test",fetch: @spy, cache_key:"haha")
-    @view = new Luca.View(deferrable:@collection)
+    @collection = new Luca.Collection(url:"/t",fetch: @spy, cache_key:"haha")
+    @view = new DeferrableView(deferrable:@collection)
 
-  it "should automatically call fetch on the collection once render is called", ->
+  it "should automatically call fetch on the collection ", ->
     @view.render()
-    expect( @spy ).toHaveBeenCalled()
+    expect( @collection ).toHaveTriggered("before:fetch")
 
 describe "The Render Wrapper", ->
 

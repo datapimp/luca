@@ -221,14 +221,15 @@ _.def('Luca.core.Container').extends('Luca.View').with
     attach = if ( orientation is "top" or orientation is "left" ) then "before" else "after"
 
     unless @$("#{ orientation }-toolbar-container").length > 0
-      @$bodyEl()[ attach ] "<div class='#{ orientation }-toolbar-container' />"
+      @$bodyEl()[ attach ] @make("div",id:"#{ @cid }-toolbar-#{ orientation }",class:"#{ orientation }-toolbar-container")
 
     config.ctype ||= "panel_toolbar"
     config.parent = @
     config.orientation = orientation
 
     toolbar = @["#{ orientation }Toolbar"] = Luca.util.lazyComponent(config)
-    @$(".#{ orientation }-toolbar-container").append( toolbar.render().el )
+
+    @$("##{ @cid }-toolbar-#{ orientation }").append( toolbar.render().el )
 
   #### Container Activation
   #

@@ -1,8 +1,9 @@
 
 .hero-unit
-  %h1 Backbone Architecture
-  %p Luca is a development approach and a collection of tools that allow you to build very fast, very responsive applications for the desktop and mobile web browsers.
-  %p We love Coffeescript, Backbone, Underscore, jQuery and Twitter Bootstrap for CSS and UI styling. We love Ruby on Rails or Sinatra for our API.  If you do too, Luca is the glue that binds all of these things together, and allows you to focus on making a unique, scalable application to run in the browser.
+  %h1 Luca.js. Smart Architecture.
+  %p Luca is a curated set of technology choices which support an opinionated approach to the design and architecture of large single web page applications.
+  %p We combine Backbone.js and Twitter Bootstrap with our own code to provide your development team with interface and information components which can be very easily arranged to work in any configuration you can design.
+  %p We aim to make building complex applications simple by trying to encourage the use of good design patterns.
 
   %a.btn.btn-large.btn-primary{:href=>"#class_browser"}
     View The Code

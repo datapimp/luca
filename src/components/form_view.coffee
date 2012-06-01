@@ -25,6 +25,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     "click .reset-button" : "resetHandler"
 
   toolbar: true
+  legend: ""
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @, arguments
@@ -34,8 +35,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
-
-    @legend ||= ""
 
     @configureToolbars()
     @applyStyles()

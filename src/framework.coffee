@@ -1,4 +1,7 @@
-window.Luca =
+window.Luca = (componentName)->
+  Luca.cache( componentName )
+
+_.extend window.Luca,
   VERSION: "0.8.8"
   core: {}
   containers: {}

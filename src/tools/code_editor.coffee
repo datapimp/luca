@@ -19,6 +19,11 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
     @bind "code:change", @onCodeChange
 
   beforeRender: ()->
+    @applyStyles
+      "min-height": @minHeight
+      background:'#272822'
+      color:'#f8f8f2'
+
     @$html "<textarea></textarea>"
 
   afterRender: ()->

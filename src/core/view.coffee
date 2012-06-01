@@ -61,7 +61,6 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @delegateEvents()
 
-
   #### JQuery / DOM Selector Helpers
   $bodyEl: ()->
     element = @bodyTagName || "div"
@@ -82,6 +81,12 @@ _.def("Luca.View").extends("Backbone.View").with
 
 
     $(@el)
+
+  $wrap: (wrapper)->
+    if !wrapper.match(/[<>]/)
+      wrapper = @make("div",class:wrapper)
+
+    @$el.wrap( wrapper )
 
   $template: (template, variables={})->
     @$html( Luca.template(template,variables) )

@@ -59,7 +59,6 @@ describe 'The Form View', ->
 
   it "should render the components within the body element", ->
     @form.render()
-    debugger
     expect( @form.$bodyEl().is('.form-view-body') ).toEqual true
 
   it "should assign the components to render inside of the body", ->

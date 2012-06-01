@@ -48,3 +48,7 @@ Thanks To
 @benchprep for giving me the freedom
 
 @luca. who i spent only two minutes making and am exponentially more proud to have created.
+
+
+https://raw.github.com/datapimp/luca/development-tools/assets/javascripts/dependencies/underscore-string.min.js
+https://raw.github.com/datapimp/luca/development-tools/assets/javascripts/dependencies/backbond-string.min.js
