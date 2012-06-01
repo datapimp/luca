@@ -93,9 +93,9 @@ _.def('Luca.core.Container').extends('Luca.View').with
     @applyStyles( @styles ) if @styles?
 
     if @hasBody or @topToolbar or @bottomToolbar
-      @bodyElement ||= "div"
+      @bodyTagName ||= "div"
       @bodyClassName ||= "view-body"
-      @$append( @make(@bodyElement,class:@bodyClassName) )
+      @$append( @make(@bodyTagName,class:@bodyClassName) )
 
       # will only be run if the toolbar module has been mixed in
       @renderToolbars?()
@@ -133,12 +133,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
 
   customizeContainerEl: (containerEl, panel, panelIndex)->
     containerEl
-  # prepare layout is where you would perform the DOM element
-  # creation / manipulation for how your container lays out
-  # its components.  Minimally you will want to set the
-  # container property on each component.
 
-  # NOTE:  prepareLayout is expected to return an array of containers
   prepareLayout: ()->
     container = @
     @componentContainers = _( @components ).map (component, index)->
@@ -154,16 +149,11 @@ _.def('Luca.core.Container').extends('Luca.View').with
 
       if @appendContainers
         panel = @make(@componentTag, container, '')
+        @$append( panel )
 
-        @$bodyEl().append( panel )
-
-        if index is @activeCard
-          $( panel ).show()
-        else
-          $( panel ).hide()
-
-
-      component.container = if @appendContainers then "##{ container.id }" else @$bodyEl()
+      unless component.container?
+        component.container = "##{ container.id }" if @appendContainers
+        component.container ||= @$bodyEl()
 
   createComponents: ()->
     return if @componentsCreated is true

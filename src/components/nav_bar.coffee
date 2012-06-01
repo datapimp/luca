@@ -10,10 +10,11 @@ _.def("Luca.components.NavBar").extends("Luca.View").with
 
   brand: "Luca.js"
 
+  bodyTemplate: 'nav_bar'
+  bodyClassName: 'luca-ui-navbar-body'
+
   beforeRender: ()->
     @$el.addClass "navbar-fixed-#{ @position }" if @fixed
-
-    @$el.append("<div class='navbar-inner'><div class='container'></div></div>")
 
     if @brand?
       @content().append("<a class='brand' href='#'>#{ @brand }</a>")

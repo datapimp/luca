@@ -1,2 +1,3 @@
 - Make development mode options easily disabled
 - Add StateMachine model to all instances of Luca.View
+- Luca.core.Container should relay all activation events to @components

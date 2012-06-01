@@ -31,4 +31,4 @@ _.def("Luca.Router").extends("Backbone.Router").with
       regex = @_routeToRegExp(route)
       if regex.test(matchedRoute)
         args = @_extractParameters(regex, matchedRoute)
-        @trigger.apply @, ["change:navigation", route_id].concat( args )
+        @trigger "change:navigation", [route_id].concat( args )

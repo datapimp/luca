@@ -8,8 +8,8 @@ _.def("Luca.tools.ClassBrowser").extends("Luca.core.Container").with
     Luca.core.Container::beforeRender?.apply(@, arguments)
 
   prepareLayout: ()->
-    @$append @make("div",class:"left-column span4")
-    @$append @make("div",class:"right-column span8")
+    @$append @make("div",class:"left-column span2")
+    @$append @make("div",class:"right-column span10")
 
   prepareComponents: ()->
     @components[0].container = @$ '.left-column'

@@ -1,8 +1,4 @@
 describe "Luca.View", ->
-  Custom = Luca.View.extend
-    clickHandler: sinon.spy()
-    autoBindEventHandlers: true
-
   it "should be defined", ->
     expect(Luca.View).toBeDefined()
 
@@ -16,16 +12,51 @@ describe "Luca.View", ->
 
   it "should register the view in the cache", ->
     view = new Luca.View(name:"cached")
-    expect( Luca.cache("cached") ).toBeDefined()
+    expect( Luca.cache("cached") ).toEqual(view)
 
   it "should trigger after initialize", ->
     view = new Luca.View()
     expect( view ).toHaveTriggered("after:initialize")
 
-  it "should auto-bind event handlers", ->
-    # pending
+  it "should be picked up by the isBackboneView helper", ->
+    view = new Luca.View()
+    expect( Luca.isBackboneView(view) ).toEqual true
+
+  it "should be picked up by the isBackboneComponent helper", ->
+    view = new Luca.View()
+    expect( Luca.isComponent(view) ).toEqual true
+
+  it "should be picked up by the supportsBackboneEvents helper", ->
+    view = new Luca.View()
+    expect( Luca.supportsBackboneEvents(view) ).toEqual true
+
+describe 'The Body Element', ->
+  it "should have a separate body element", ->
+    view = new Luca.View(bodyClassName:"panel")
+    expect( view.$el.is('.panel') ).toEqual false
 
 
+describe "DOM Helper Methods", ->
+  it "should use the $html method to inject into the $el", ->
+    view = new Luca.View()
+    view.$html('haha')
+    expect( view.$html() ).toEqual 'haha'
+
+  it "should use the $html method to inject into the $bodyEl", ->
+    view = new Luca.View(bodyClassName:"body")
+
+
+describe "Deferrable Rendering", ->
+  beforeEach ->
+    @spy = sinon.spy()
+    @collection = new Luca.Collection(url:"/test",fetch: @spy, cache_key:"haha")
+    @view = new Luca.View(deferrable:@collection)
+
+  it "should automatically call fetch on the collection once render is called", ->
+    @view.render()
+    expect( @spy ).toHaveBeenCalled()
+
+describe "The Render Wrapper", ->
 
 describe "Hooks", ->
   it "should have before and after render hooks", ->
@@ -85,3 +116,10 @@ describe "The Collection Events API", ->
     collection = @manager.get("sample")
     collection.reset([])
     expect( view.resetHandler ).toHaveBeenCalled()
+
+
+describe "Code Refresh", ->
+  beforeEach ->
+
+  it "should reference the event handler function property names", ->
+  it "should reference the event handler functions", ->

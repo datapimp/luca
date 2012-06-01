@@ -22,6 +22,9 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   beforeRender: ()->
     Luca.containers.CardView::beforeRender?.apply(@, arguments)
 
+    if Luca.enableBootstrap and @topNav and @fullscreen
+      $('body').css('padding','40px')
+
     @renderTopNavigation() if @topNav?
     @renderBottomNavigation() if @bottomNav?
 
@@ -32,6 +35,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
       @topNav = Luca.util.lazyComponent(@topNav)
 
     if _.isObject( @topNav )
+      @topNav.ctype ||= @topNav.type || "nav_bar"
       unless Luca.isBackboneView(@topNav)
         @topNav = Luca.util.lazyComponent( @topNav )
 

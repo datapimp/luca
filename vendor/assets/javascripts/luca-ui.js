@@ -41,6 +41,14 @@
     return memo;
   }, {});
 
+  Luca.supportsBackboneEvents = function(obj) {
+    return Luca.isComponent(obj) || (_.isFunction(obj != null ? obj.trigger : void 0) || _.isFunction(obj != null ? obj.bind : void 0));
+  };
+
+  Luca.isComponent = function(obj) {
+    return Luca.isBackboneModel(obj) || Luca.isBackboneView(obj) || Luca.isBackboneCollection(obj);
+  };
+
   Luca.isBackboneModel = function(obj) {
     return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
   };
@@ -427,6 +435,10 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
+  Luca.templates["components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'navbar-inner\'>\n  <div class=\'luca-ui-navbar-body container\'></div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
   Luca.templates["containers/basic"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', classes ,'\' id=\'', id ,'\' style=\'', style ,'\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
@@ -564,7 +576,6 @@
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
-    deferrable_event: "reset",
     initialize: function(options) {
       var unique;
       this.options = options != null ? options : {};
@@ -576,16 +587,28 @@
       if (this.autoBindEventHandlers === true) this.bindAllEventHandlers();
       this.trigger("after:initialize", this);
       this.registerCollectionEvents();
+      if (this.bodyTemplate) this.$html(Luca.template(this.bodyTemplate, this));
       return this.delegateEvents();
     },
     $bodyEl: function() {
-      var bodyEl;
-      this.bodyElement || (this.bodyElement = "div");
-      this.bodyClassName || (this.bodyClassName = "view-body");
-      this.bodyEl = "" + this.bodyElement + "." + this.bodyClassName;
+      var bodyEl, className, element;
+      element = this.bodyTagName || "div";
+      className = this.bodyClassName || "view-body";
+      this.bodyEl = "" + element + "." + className;
       bodyEl = this.$(this.bodyEl);
-      if (bodyEl.length > 0) return bodyEl;
-      return this.$el;
+      if (bodyEl.length === 0 && ((this.bodyClassName != null) || (this.bodyTagName != null))) {
+        bodyEl = this.make(element, {
+          "class": className
+        });
+        $(this.el).append(bodyEl);
+        return this.$(this.bodyEl);
+      }
+      if (this.$(this.bodyEl).length > 0) return this.$(this.bodyEl);
+      return $(this.el);
+    },
+    $template: function(template, variables) {
+      if (variables == null) variables = {};
+      return this.$html(Luca.template(template, variables));
     },
     $html: function(content) {
       return this.$bodyEl().html(content);
@@ -708,23 +731,25 @@
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
     definition.render = function() {
-      var _this = this;
-      if (this.bodyTemplate && _(Luca.available_templates()).include(this.bodyTemplate)) {
-        this.$el.html(Luca.template(this.bodyTemplate, this));
-      }
-      if (this.deferrable) {
-        this.trigger("before:render", this);
-        this.deferrable.bind(this.deferrable_event, _.once(function() {
+      var deferredRender, fn, _base2, _name,
+        _this = this;
+      if (this.deferrable && Luca.supportsBackboneEvents(this.deferrable)) {
+        deferredRender = _.once(function() {
           _base.apply(_this, arguments);
           return _this.trigger("after:render", _this);
-        }));
-        if (!this.deferrable_trigger) this.immediate_trigger = true;
-        if (this.immediate_trigger === true) {
-          this.deferrable.fetch();
+        });
+        (this.deferrable_target || this.deferrable).bind(this.deferrable_event || "reset", deferredRender);
+        this.trigger("before:render", this);
+        if (!this.deferrable_trigger) {
+          if (typeof (_base2 = this.deferrable)[_name = this.deferrable_method || "fetch"] === "function") {
+            _base2[_name]();
+          }
         } else {
-          this.bind(this.deferrable_trigger, _.once(function() {
-            return _this.deferrable.fetch();
-          }));
+          fn = _.once(function() {
+            var _base3, _name2;
+            return typeof (_base3 = _this.deferrable)[_name2 = _this.deferrable_method || "fetch"] === "function" ? _base3[_name2]() : void 0;
+          });
+          (this.deferrable_target || this).bind(this.deferrable_trigger, fn);
         }
         return this;
       } else {
@@ -835,7 +860,7 @@
         for (_i = 0, _len = membershipEvents.length; _i < _len; _i++) {
           membershipEvent = membershipEvents[_i];
           collection.bind(membershipEvent, function() {
-            return collection.clearMethodCache();
+            return collection.clearAllMethodsCache();
           });
         }
         dependencies = method.split(':')[1];
@@ -863,7 +888,7 @@
       this.setupMethodCaching();
       this._reset();
       if (this.cached) {
-        console.log('The @cache_keyproperty of Luca.Collection is being deprecated.  Please change to cache_key');
+        console.log('The @cached property of Luca.Collection is being deprecated.  Please change to cache_key');
       }
       if (this.cache_key || (this.cache_key = this.cached)) {
         this.bootstrap_cache_key = _.isFunction(this.cache_key) ? this.cache_key() : this.cache_key;
@@ -1165,9 +1190,9 @@
       this.doComponents();
       if (this.styles != null) this.applyStyles(this.styles);
       if (this.hasBody || this.topToolbar || this.bottomToolbar) {
-        this.bodyElement || (this.bodyElement = "div");
+        this.bodyTagName || (this.bodyTagName = "div");
         this.bodyClassName || (this.bodyClassName = "view-body");
-        this.$append(this.make(this.bodyElement, {
+        this.$append(this.make(this.bodyTagName, {
           "class": this.bodyClassName
         }));
         return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
@@ -1225,14 +1250,12 @@
         container["class"] = container["class"] || container.className || container.classes;
         if (_this.appendContainers) {
           panel = _this.make(_this.componentTag, container, '');
-          _this.$bodyEl().append(panel);
-          if (index === _this.activeCard) {
-            $(panel).show();
-          } else {
-            $(panel).hide();
-          }
+          _this.$append(panel);
         }
-        return component.container = _this.appendContainers ? "#" + container.id : _this.$bodyEl();
+        if (component.container == null) {
+          if (_this.appendContainers) component.container = "#" + container.id;
+          return component.container || (component.container = _this.$bodyEl());
+        }
       });
     },
     createComponents: function() {
@@ -1654,13 +1677,27 @@
     activeCard: 0,
     components: [],
     hooks: ['before:card:switch', 'after:card:switch'],
+    componentClass: 'luca-ui-card',
+    appendContainers: true,
     initialize: function(options) {
       this.options = options;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       return this.setupHooks(this.hooks);
     },
-    componentClass: 'luca-ui-card',
-    appendContainers: true,
+    prepareComponents: function() {
+      var _ref,
+        _this = this;
+      if ((_ref = Luca.core.Container.prototype.prepareComponents) != null) {
+        _ref.apply(this, arguments);
+      }
+      return _(this.components).each(function(component, index) {
+        if (index === _this.activeCard) {
+          return $(component.container).show();
+        } else {
+          return $(component.container).hide();
+        }
+      });
+    },
     activeComponentElement: function() {
       return this.componentElements().eq(this.activeCard);
     },
@@ -1715,8 +1752,8 @@
         current.trigger("first:activation");
         current.previously_activated = true;
       }
-      this.activeComponentElement().show();
       this.activeCard = index;
+      this.activeComponentElement().show();
       if (!silent) {
         this.trigger("after:card:switch", previous, current);
         if ((_ref3 = previous.trigger) != null) {
@@ -1923,7 +1960,7 @@
       this.setupHooks(this.hooks);
       return this.bind("after:card:switch", this.highlightSelectedTab);
     },
-    bodyElement: "div",
+    bodyTagName: "div",
     bodyClassName: 'tab-content',
     activeTabSelector: function() {
       return this.tabSelectors().eq(this.activeCard || this.activeTab || this.activeItem);
@@ -2004,15 +2041,20 @@
       if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
         _ref.apply(this, arguments);
       }
+      if (Luca.enableBootstrap && this.topNav && this.fullscreen) {
+        $('body').css('padding', '40px');
+      }
       if (this.topNav != null) this.renderTopNavigation();
       if (this.bottomNav != null) return this.renderBottomNavigation();
     },
     renderTopNavigation: function() {
+      var _base;
       if (this.topNav == null) return;
       if (_.isString(this.topNav)) {
         this.topNav = Luca.util.lazyComponent(this.topNav);
       }
       if (_.isObject(this.topNav)) {
+        (_base = this.topNav).ctype || (_base.ctype = this.topNav.type || "nav_bar");
         if (!Luca.isBackboneView(this.topNav)) {
           this.topNav = Luca.util.lazyComponent(this.topNav);
         }
@@ -2112,6 +2154,22 @@
     activeSection: function() {
       return this.get("active_section");
     },
+    beforeRender: function() {
+      var routerStartEvent, _ref;
+      if ((_ref = Luca.containers.Viewport.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      if ((this.router != null) && this.autoStartHistory === true) {
+        routerStartEvent = this.startRouterOn || "after:render";
+        if (routerStartEvent === "before:render") {
+          return Backbone.history.start();
+        } else {
+          return this.bind(routerStartEvent, function() {
+            return Backbone.history.start();
+          });
+        }
+      }
+    },
     afterComponents: function() {
       var _ref, _ref2, _ref3,
         _this = this;
@@ -2134,15 +2192,6 @@
           });
         }
       }) : void 0;
-    },
-    beforeRender: function() {
-      var _ref;
-      if ((_ref = Luca.containers.Viewport.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      if ((this.router != null) && this.autoStartHistory === true) {
-        return Backbone.history.start();
-      }
     },
     boot: function() {
       return this.trigger("ready");
@@ -2190,7 +2239,6 @@
       source = control ? this.keyEvents.control : source;
       source = meta && control ? this.keyEvents.meta_control : source;
       if (keyEvent = source != null ? source[keyname] : void 0) {
-        console.log("Picked up Key Event", keyEvent);
         if (this[keyEvent] != null) {
           return (_ref = this[keyEvent]) != null ? _ref.call(this) : void 0;
         } else {
@@ -2795,7 +2843,6 @@
     },
     bodyTemplate: ["components/form_view"],
     bodyClassName: "form-view-body",
-    hasBody: true,
     afterComponents: function() {
       var _ref,
         _this = this;
@@ -3208,9 +3255,10 @@
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
     brand: "Luca.js",
+    bodyTemplate: 'nav_bar',
+    bodyClassName: 'luca-ui-navbar-body',
     beforeRender: function() {
       if (this.fixed) this.$el.addClass("navbar-fixed-" + this.position);
-      this.$el.append("<div class='navbar-inner'><div class='container'></div></div>");
       if (this.brand != null) {
         return this.content().append("<a class='brand' href='#'>" + this.brand + "</a>");
       }

@@ -23,7 +23,7 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
 
     @bind "after:card:switch", @highlightSelectedTab
 
-  bodyElement: "div"
+  bodyTagName: "div"
 
   bodyClassName: 'tab-content'
 

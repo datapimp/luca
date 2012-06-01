@@ -45,6 +45,12 @@ Luca.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo
 , {}
 
+Luca.supportsBackboneEvents = (obj)->
+  Luca.isComponent(obj) or (_.isFunction( obj?.trigger ) or _.isFunction(obj?.bind))
+
+Luca.isComponent = (obj)->
+  Luca.isBackboneModel(obj) or Luca.isBackboneView(obj) or Luca.isBackboneCollection(obj)
+
 Luca.isBackboneModel = (obj)->
   _.isFunction(obj?.set) and _.isFunction(obj?.get) and _.isObject(obj?.attributes)
 

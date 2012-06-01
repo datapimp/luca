@@ -87,7 +87,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   bodyTemplate: ["components/form_view"]
   bodyClassName: "form-view-body"
-  hasBody: true
 
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)

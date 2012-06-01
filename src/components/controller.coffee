@@ -9,7 +9,6 @@ _.def('Luca.components.Controller').extends('Luca.containers.CardView').with
     @state = new Backbone.Model
       active_section: @defaultCard
 
-
   each: (fn)->
     _( @components ).each (component)=>
       fn.apply @, [component]

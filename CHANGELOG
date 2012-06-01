@@ -39,11 +39,11 @@
     events and delegating them properly
   - Luca.containers.CardView has been refactored to be more inline with base container
   - Luca.View gets $append, $html, $container jQuery helpers.  shortcut for @renderToEl().append, etc
-  - Luca.View gets @bodyElement, @bodyTemplate properties.
+  - Luca.View gets @bodyTagName, @bodyTemplate properties.
       - @bodyTemplate references a JST template which automatically gets added
       via $html if present, immediately when the view is rendered
-      - @bodyElement is where $append, $html will insert content, otherwise defaults to @$el
-  - Luca.View has $bodyEl() method which points to $(@bodyElement) or $(@el) ( default )
+      - @bodyTagName is where $append, $html will insert content, otherwise defaults to @$el
+  - Luca.View has $bodyEl() method which points to $(@bodyTagName) or $(@el) ( default )
 
 0.8.7
   - Luca.core.Container now uses bodyTemplate to render
@@ -58,5 +58,6 @@
     which allows you to edit the prototype definitions of all Luca components, and update
     any running instances with your new class definition.  This allows you to make changes
     to the app on the fly.
-
   - Added development mode helpers to Luca.View to aid in in browser editing workflow
+  - Added additional configuration for @deferrable rendering system for Luca.View
+  - Added isComponent and supportsBackboneEvents helpers

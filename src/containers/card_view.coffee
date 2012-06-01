@@ -12,13 +12,21 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
     'after:card:switch'
   ]
 
+  componentClass: 'luca-ui-card'
+  appendContainers: true
+
   initialize: (@options)->
     Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
 
-  componentClass: 'luca-ui-card'
+  prepareComponents: ()->
+    Luca.core.Container::prepareComponents?.apply(@, arguments)
 
-  appendContainers: true
+    _( @components ).each (component,index)=>
+      if index is @activeCard
+        $( component.container ).show()
+      else
+        $( component.container ).hide()
 
   activeComponentElement: ()->
     @componentElements().eq( @activeCard )
@@ -55,7 +63,8 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
       index = @indexOf(index)
       current = @getComponent( index )
 
-    return unless current
+    unless current
+      return
 
     unless silent
       @trigger "before:card:switch", previous, current
@@ -68,8 +77,8 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
       current.trigger "first:activation"
       current.previously_activated = true
 
-    @activeComponentElement().show()
     @activeCard = index
+    @activeComponentElement().show()
 
     unless silent
       @trigger "after:card:switch", previous, current

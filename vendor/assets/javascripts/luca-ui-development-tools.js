@@ -16773,10 +16773,10 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     },
     prepareLayout: function() {
       this.$append(this.make("div", {
-        "class": "left-column span4"
+        "class": "left-column span2"
       }));
       return this.$append(this.make("div", {
-        "class": "right-column span8"
+        "class": "right-column span10"
       }));
     },
     prepareComponents: function() {
@@ -16909,6 +16909,18 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 }).call(this);
 (function() {
 
+  _.def("Luca.tools.ComponentTester")["extends"]("Luca.core.Container")["with"]({
+    name: "component_tester",
+    components: [
+      {
+        ctype: "code_editor"
+      }
+    ]
+  });
+
+}).call(this);
+(function() {
+
   _.def("Luca.tools.ClassBrowserDetail")["extends"]('Luca.core.Container')["with"]({
     components: [
       {
@@ -16917,7 +16929,6 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     ],
     loadComponent: function(model) {
       this.components[0].compiled = void 0;
-      console.log(model.get('source'));
       return this.components[0].editor.setValue(model.get('source'));
     }
   });
@@ -17054,12 +17065,13 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
       }
       return this;
     },
+    bodyClassName: "console-wrapper",
     setup: function() {
       var console_name, devConsole;
       this.$append(this.make("div", {
         "class": "console-wrapper"
       }));
-      this.bodyElement = this.$('.console-wrapper');
+      this.bodyTagName = this.$('.console-wrapper');
       this.$bodyEl().css({
         height: "500px",
         width: "800px"

@@ -17,12 +17,12 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   # by default, the application will use a controller
   # component, which is a card view container which shows
   # one view at a time.  this is useful for having an application
-  # with several 'sections' so to speak
+  # with several 'pages' so to speak
   useController: true
 
   #### Nested Components
 
-  # applications have one component, the controller
+  # applications have one component, the controller.
   # any components defined on the application class directly
   # will get wrapped by the main controller unless you
   # set useController = false
@@ -51,8 +51,11 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     @state = new Backbone.Model( @defaultState )
 
-    @bind "ready", ()=> @render()
-
+    # we will render when all of the various components
+    # which handle our data dependencies determine that
+    # we are ready
+    @bind "ready", ()=>
+      @render()
     # the keyRouter allows us to specify
     # keyEvents on our application with an API very similar
     # to the DOM events API for Backbone.View
@@ -64,6 +67,9 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     #     forwardslash: "altSlashHandler"
     @setupKeyRouter() if @useKeyRouter is true and @keyEvents?
 
+    # if the application is a plugin designed to modify the behavior
+    # of another app, then don't claim ownership.  otherwise the most common
+    # use-case is that there will be one application instance
     unless @plugin is true
       Luca.getApplication = ()=> @
 
@@ -78,6 +84,17 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
   activeSection: ()->
     @get("active_section")
+
+  beforeRender: ()->
+    Luca.containers.Viewport::beforeRender?.apply(@, arguments)
+
+    if @router? and @autoStartHistory is true
+      routerStartEvent = @startRouterOn || "after:render"
+
+      if routerStartEvent is "before:render"
+        Backbone.history.start()
+      else
+        @bind routerStartEvent, ()-> Backbone.history.start()
 
   afterComponents: ()->
     Luca.containers.Viewport::afterComponents?.apply @, arguments
@@ -94,9 +111,6 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
         component.bind "after:card:switch", (previous,current)=>
           @state.set(active_sub_section:current.name)
 
-  beforeRender: ()->
-    Luca.containers.Viewport::beforeRender?.apply @, arguments
-    Backbone.history.start() if @router? and @autoStartHistory is true
 
   # boot should trigger the ready event, which will call the initial call
   # to render() your application, which will have a cascading effect on every
@@ -169,7 +183,6 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     source = if meta and control then @keyEvents.meta_control else source
 
     if keyEvent = source?[keyname]
-      console.log "Picked up Key Event", keyEvent
       if @[keyEvent]?
         @[keyEvent]?.call(@)
       else

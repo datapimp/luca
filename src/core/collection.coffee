@@ -68,10 +68,8 @@ _.def("Luca.Collection").extends( source ).with
 
     # DEPRECATION NOTICE
     if @cached
-      console.log 'The @cache_keyproperty of Luca.Collection is being deprecated.  Please change to cache_key'
+      console.log 'The @cached property of Luca.Collection is being deprecated.  Please change to cache_key'
 
-    # TODO
-    # Change this from cached to cache_key
     if @cache_key ||= @cached
       @bootstrap_cache_key = if _.isFunction( @cache_key ) then @cache_key() else @cache_key
 

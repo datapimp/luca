@@ -32,11 +32,6 @@ _.def("Luca.View").extends("Backbone.View").with
     "deactivation"
   ]
 
-  # which event should we listen to on
-  # our deferrable property, before we
-  # trigger the actual rendering
-  deferrable_event: "reset"
-
   initialize: (@options={})->
 
     _.extend @, @options
@@ -61,21 +56,35 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @registerCollectionEvents()
 
+    if @bodyTemplate
+      @$html( Luca.template(@bodyTemplate, @) )
+
     @delegateEvents()
 
 
   #### JQuery / DOM Selector Helpers
   $bodyEl: ()->
-    @bodyElement ||= "div"
-    @bodyClassName ||= "view-body"
+    element = @bodyTagName || "div"
+    className = @bodyClassName || "view-body"
 
-    @bodyEl = "#{ @bodyElement }.#{ @bodyClassName }"
+    @bodyEl = "#{ element }.#{ className }"
 
     bodyEl = @$(@bodyEl)
 
     return bodyEl if bodyEl.length > 0
 
-    @$el
+    # if we've been configured to have one, and it doesn't exist
+    # then we should append it to ourselves
+    if bodyEl.length is 0 and (@bodyClassName? || @bodyTagName?)
+      bodyEl = @make(element,class:className)
+      $(@el).append( bodyEl )
+      return @$(@bodyEl)
+
+
+    $(@el)
+
+  $template: (template, variables={})->
+    @$html( Luca.template(template,variables) )
 
   $html: (content)->
     @$bodyEl().html( content )
@@ -248,28 +257,23 @@ customizeRender = (definition)->
   _base ||= Luca.View::$attach
 
   definition.render = ()->
-    if @bodyTemplate and _( Luca.available_templates() ).include( @bodyTemplate )
-      @$el.html( Luca.template(@bodyTemplate, @) )
 
-    if @deferrable
-      @trigger "before:render", @
+    # if a view has a deferrable property set
 
-      @deferrable.bind @deferrable_event, _.once ()=>
+    if @deferrable and Luca.supportsBackboneEvents( @deferrable )
+      deferredRender = _.once ()=>
         _base.apply(@, arguments)
         @trigger "after:render", @
 
-      # we might not want to fetch immediately upon
-      # rendering, so we can pass a deferrable_trigger
-      # event and not fire the fetch until this event
-      # occurs
-      if !@deferrable_trigger
-        @immediate_trigger = true
+      (@deferrable_target || @deferrable).bind (@deferrable_event||"reset"), deferredRender
 
-      if @immediate_trigger is true
-        @deferrable.fetch()
+      @trigger "before:render", @
+
+      if !@deferrable_trigger
+        @deferrable[ (@deferrable_method||"fetch") ]?()
       else
-        @bind @deferrable_trigger, _.once ()=>
-          @deferrable.fetch()
+        fn = _.once ()=> @deferrable[ (@deferrable_method||"fetch") ]?()
+        (@deferrable_target || @ ).bind(@deferrable_trigger, fn)
 
       return @
 

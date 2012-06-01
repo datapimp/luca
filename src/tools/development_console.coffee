@@ -31,9 +31,11 @@ _.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
     Luca.ModalView::render?.apply(@, arguments)
     @
 
+  bodyClassName:"console-wrapper"
+
   setup: ()->
     @$append( @make("div",class:"console-wrapper") )
-    @bodyElement = @$('.console-wrapper')
+    @bodyTagName = @$('.console-wrapper')
     @$bodyEl().css(height:"500px",width:"800px")
 
     @$append( @make("div",class:"console-inner") )
