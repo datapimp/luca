@@ -720,10 +720,14 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
-      this.applyParams(filter);
-      return this.fetch(_.extend(options, {
-        refresh: true
-      }));
+      if ((options.remote != null) === true) {
+        this.applyParams(filter);
+        return this.fetch(_.extend(options, {
+          refresh: true
+        }));
+      } else {
+        return this.reset(this.query(filter));
+      }
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
