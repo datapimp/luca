@@ -720,10 +720,14 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
-      this.applyParams(filter);
-      return this.fetch(_.extend(options, {
-        refresh: true
-      }));
+      if ((options.remote != null) === true) {
+        this.applyParams(filter);
+        return this.fetch(_.extend(options, {
+          refresh: true
+        }));
+      } else {
+        return this.reset(this.query(filter));
+      }
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
@@ -3408,7 +3412,7 @@
       this.server.respond();
       return expect(collection.length).toEqual(2);
     });
-    return it("should attempt to register with a collection manager", function() {
+    it("should attempt to register with a collection manager", function() {
       var collection, registerSpy;
       registerSpy = sinon.spy();
       collection = new Luca.Collection([], {
@@ -3416,6 +3420,23 @@
         register: registerSpy
       });
       return expect(registerSpy).toHaveBeenCalled();
+    });
+    return it("should query collection with filter", function() {
+      var collection, i, models;
+      models = [];
+      for (i = 0; i <= 9; i++) {
+        models.push({
+          id: i,
+          key: 'value'
+        });
+      }
+      models[3].key = 'specialValue';
+      collection = new Luca.Collection(models);
+      collection.applyFilter({
+        key: 'specialValue'
+      });
+      expect(collection.length).toBe(1);
+      return expect(collection.first().get('key')).toBe('specialValue');
     });
   });
 
