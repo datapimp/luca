@@ -30,11 +30,38 @@ describe "Luca.View", ->
     view = new Luca.View()
     expect( Luca.supportsBackboneEvents(view) ).toEqual true
 
-describe 'The Body Element', ->
-  it "should have a separate body element", ->
-    view = new Luca.View(bodyClassName:"panel")
-    expect( view.$el.is('.panel') ).toEqual false
+describe "Introspection Helpers", ->
+  beforeEach ->
+    @view = new Luca.View
+      events:
+        "click .a" : "clickHandler"
+        "hover .a" : "hoverHandler"
 
+      clickHandler: ()-> "click"
+      hoverHandler: ()-> "hover"
+
+      collection_one: new Luca.Collection([],name:"collection_one")
+      collection_two: new Luca.Collection([],name:"collection_two")
+      view_one: new Luca.View(name:"view_one")
+      view_two: new Luca.View(name:"view_two")
+      model_one: new Luca.Model(name:"model_one")
+      model_two: new Luca.Model(name:"model_two")
+
+  it "should know the names of functions which are event handlers", ->
+    names = @view.eventHandlerProperties()
+    expect( names ).toEqual ["clickHandler","hoverHandler"]
+
+  it "should know which properties are other views", ->
+    viewNames = _( @view.views() ).pluck("name")
+    expect( viewNames ).toEqual ["view_one","view_two"]
+
+  it "should know which properties are other models", ->
+    modelNames = _( @view.models() ).map (m)-> m.get('name')
+    expect( modelNames ).toEqual ["model_one","model_two"]
+
+  it "should know which properties are other collections", ->
+    collectionNames = _( @view.collections() ).pluck("name")
+    expect( collectionNames ).toEqual ["collection_one","collection_two"]
 
 describe "DOM Helper Methods", ->
   it "should use the $html method to inject into the $el", ->
@@ -42,24 +69,31 @@ describe "DOM Helper Methods", ->
     view.$html('haha')
     expect( view.$html() ).toEqual 'haha'
 
-  it "should use the $html method to inject into the $bodyEl", ->
-    view = new Luca.View(bodyClassName:"body")
-
-
 describe "Deferrable Rendering", ->
-  DeferrableView = Luca.View.extend
-    name: "deferrable_view"
-
   beforeEach ->
     @spy = sinon.spy()
-    @collection = new Luca.Collection(url:"/t",fetch: @spy, cache_key:"haha")
-    @view = new DeferrableView(deferrable:@collection)
+
+    @collection = new Luca.Collection
+      url: "/t"
+      fetch: @spy
+      custom: @spy
+      name: "haha"
+
+    @DeferrableView = Luca.View.extend
+      name: "deferrable_view"
+      deferrable: @collection
+
+    @TriggeredView = Luca.View.extend
+      deferrable: @collection
+      deferrable_method: "custom"
 
   it "should automatically call fetch on the collection ", ->
-    @view.render()
-    expect( @collection ).toHaveTriggered("before:fetch")
+    ( new @DeferrableView ).render()
+    expect( @collection.fetch ).toHaveBeenCalled()
 
-describe "The Render Wrapper", ->
+  it "should call a custom method if configured", ->
+    ( new @TriggeredView ).render()
+    expect( @collection.fetch ).toHaveBeenCalled()
 
 describe "Hooks", ->
   it "should have before and after render hooks", ->

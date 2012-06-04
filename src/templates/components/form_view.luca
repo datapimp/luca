@@ -1,14 +1,17 @@
 .luca-ui-form-view-wrapper{:id=>"<%= cid %>-wrapper"}
   .form-view-header
     .toolbar-container.top{:id=>"<%= cid %>-top-toolbar-container"}
-  <% if(legend){ %>
+
+  %ul.form-view-flash-container
+
+  <% if(typeof(legend)!=="undefined"){ %>
   %fieldset
     %legend
       <%= legend %>
     .form-view-flash-container
     .form-view-body
   <% } else { %>
-  %ul.form-view-flash-container
+
   .form-view-body
   <% } %>
   .form-view-footer

@@ -3,7 +3,10 @@ _.def('Luca.components.Template').extends('Luca.View').with
   templateContainer: "Luca.templates"
 
   initialize: (@options={})->
+    console.log "The Use of Luca.components.Template directly is being DEPRECATED"
+
     Luca.View::initialize.apply @, arguments
+
     throw "Templates must specify which template / markup to use" unless @template or @markup
 
     if _.isString(@templateContainer)

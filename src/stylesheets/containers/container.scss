@@ -1,7 +1,19 @@
 .luca-ui-container {
+
 }
 
 .luca-ui-card {
-  padding: 5px;
-  width: 100%;
+}
+
+.toolbar-container {
+  overflow: hidden;
+  clear: both;
+}
+
+.toolbar-container.top {
+  height:54px;
+}
+
+.toolbar-container.bottom {
+  margin-top: 0px;
 }

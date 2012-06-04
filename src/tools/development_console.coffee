@@ -6,7 +6,8 @@ inspectArray = (array)->
   lastPrompt.before("<div class='array-inspector'>#{ items.join('') }</div>")
 
 _.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
-  hasBody: true
+
+  bodyClassName: "view-body"
 
   name: "development_console"
 

@@ -1,8 +1,3 @@
-parseRegistry = ()->
-  _( Luca.registry.classes ).map (className, ctype)->
-    className: className
-    ctype: ctype
-
 _.def("Luca.models.Component").extends("Luca.Model").with
   url: ()->
     "/components?component=#{ @get('className') }"
@@ -34,7 +29,8 @@ _.def('Luca.collections.Components').extends('Luca.Collection').with
     "/luca/components"
 
   initialize: (models, options)->
-    Luca.Collection.cache @cache_key, parseRegistry()
+    Luca.Collection.cache @cache_key, Luca.registry.classes()
+
     Luca.Collection::initialize.apply(@, arguments)
 
   classes: ()->

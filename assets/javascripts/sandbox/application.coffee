@@ -16,7 +16,7 @@ Sandbox.Application = Luca.Application.extend
     name: 'pages'
     components:[
       name: "main"
-      template: 'main'
+      bodyTemplate: 'main'
     ,
       name :"class_browser"
       ctype: "class_browser"

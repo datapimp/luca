@@ -18,7 +18,7 @@ describe "The Luca Framework", ->
 
   it "should allow me to add view namespaces to the registry", ->
     Luca.registry.addNamespace("Test.namespace")
-    expect( Luca.registry.namespaces ).toContain("Test.namespace")
+    expect( Luca.registry.namespaces(false) ).toContain("Test.namespace")
 
   it "should resolve a value.string to the object", ->
     window.nested =
@@ -31,22 +31,17 @@ describe "The Luca Framework", ->
 
   it "should create an instance of a class by ctype", ->
     object =
-      ctype: "template"
-      template: "components/form_view"
+      ctype: "view"
 
     component = Luca.util.lazyComponent(object)
-    expect( _.isFunction(component.render) ).toBeTruthy()
 
-  it "should create an instance of a class by passing a ctype string", ->
-    component = Luca.util.lazyComponent("panel_view")
-    expect( _.isFunction(component.render) ).toBeTruthy()
+    expect( Luca.isBackboneView(component) ).toEqual true
 
   it "should find a created view in the cache", ->
-    template = new Luca.components.Template
-      template: "components/form_view"
+    template = new Luca.View
       name: 'test_template'
 
-    expect(Luca.cache("test_template")).toBeDefined()
+    expect( Luca.isBackboneView( Luca.cache("test_template") ) ).toEqual true
 
   it "should detect if an object is probably a backbone view", ->
     obj =
@@ -83,7 +78,7 @@ describe "Luca Component Definition", ->
     expect( Luca.random ).toBeDefined()
 
   it "should automatically register the namespace in the registry", ->
-    expect( Luca.registry.namespaces ).toContain 'Luca.random'
+    expect( Luca.registry.namespaces() ).toContain Luca.random
 
   it "should automatically register the component in the registry", ->
     expect( Luca.registry.lookup("component_definition") ).toBeDefined()

@@ -5,9 +5,13 @@
 Luca.Events =
   once: (trigger, callback, context)->
     context ||= @
-    @bind trigger, ()->
-      callback.apply(context, arguments)
 
-_.extend Luca.View, Luca.Events
-_.extend Luca.Collection, Luca.Events
-_.extend Luca.Model, Luca.Events
+    onceFn = ()->
+      callback.apply(context, arguments)
+      @unbind(trigger, onceFn)
+
+    @bind trigger, onceFn
+
+_.extend Luca.View::, Luca.Events
+_.extend Luca.Collection::, Luca.Events
+_.extend Luca.Model::, Luca.Events

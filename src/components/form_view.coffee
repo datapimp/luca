@@ -25,7 +25,11 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     "click .reset-button" : "resetHandler"
 
   toolbar: true
+
   legend: ""
+
+  bodyTemplate: ["components/form_view"]
+  bodyClassName: "form-view-body"
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @, arguments
@@ -84,8 +88,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @trigger "before:submit", @
     @submit()
 
-  bodyTemplate: ["components/form_view"]
-  bodyClassName: "form-view-body"
 
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)

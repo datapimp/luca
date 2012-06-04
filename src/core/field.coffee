@@ -23,10 +23,10 @@ _.def('Luca.core.Field').extends('Luca.View').with
 
   initialize: (@options={})->
     _.extend @, @options
-    Luca.View::initialize.apply(@, arguments)
 
     @input_id ||= _.uniqueId('field')
     @input_name ||= @name
+    @input_class ||= ""
     @helperText ||= ""
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     @inputStyles ||= ""
@@ -35,6 +35,8 @@ _.def('Luca.core.Field').extends('Luca.View').with
 
     @updateState( @state )
     @placeHolder ||= ""
+
+    Luca.View::initialize.apply(@, arguments)
 
   beforeRender: ()->
     if Luca.enableBootstrap

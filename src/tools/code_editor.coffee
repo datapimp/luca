@@ -2,12 +2,17 @@ compilers =
   coffeescript: (code)->
     CoffeeScript.compile code, bare: true
 
-_.def("Luca.tools.CodeEditor").extends("Luca.View").with
+_.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
   name: "code_editor"
   id: "editor_container"
   autoBindEventHandlers: true
+
+  bodyClassName: "codemirror-wrapper"
+
+  defaultValue: ''
+
   initialize: (@options)->
-    Luca.View::initialize.apply(@, arguments)
+    Luca.components.Panel::initialize.apply(@, arguments)
 
     _.bindAll @, "onEditorChange", "onCodeChange"
 
@@ -18,11 +23,49 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
 
     @bind "code:change", @onCodeChange
 
+    @setupBuffers()
+
+  setupBuffers: ()->
+    @buffers = new Luca.Model
+      defaults:
+        _current: "default"
+
+      currentContent: ()->
+        current = @get("_current")
+        @get(current)
+
+    editor = @
+
+    @buffers.bind "change:_current", (model,value)->
+      editor.setValue( @buffers.currentContent() || "" )
+
+  currentBuffer: ()->
+    @buffers.get("_current")
+
+  loadBuffer: (bufferName)->
+    @buffers.set("_current", bufferName)
+
+  saveBuffer: ()->
+    @buffers.set( @currentBuffer(), @editor.getValue() )
+
+  editorOptions: ()->
+    mode: @mode
+    theme: @theme
+    keyMap: @keyMap
+    lineNumbers: true
+    gutter: true
+    autofocus: true
+    onChange: @onEditorChange
+
   beforeRender: ()->
-    @applyStyles
+    Luca.components.Panel::beforeRender?.apply(@, arguments)
+
+    styles =
       "min-height": @minHeight
       background:'#272822'
       color:'#f8f8f2'
+
+    @$bodyEl().css(styles)
 
     @$html "<textarea></textarea>"
 
@@ -36,41 +79,45 @@ _.def("Luca.tools.CodeEditor").extends("Luca.View").with
   compile: (code)-> code
 
   save: ()->
-    # implement
+    @saveBuffer()
 
   restore: ()->
-    @editor.setValue('')
+    @editor.setValue("")
     @editor.refresh()
 
   onEditorChange: ()->
     @trigger "editor:change"
-    @save()
 
     try
       compiled = @compiler.apply(@, [@getValue()])
 
       if @compiled and compiled != @compiled
         @trigger "code:change", compiled
+        @
 
-      @compiled = compiled
+
     catch error
       #console.log "Error Compiling Coffeescript"
       #console.log error.message
 
   onCodeChange: (compiled)->
-    evaluator = ()->
-      eval( compiled )
+    @save()
 
-    evaluator.call( window )
+  getContext: ()->
+    Luca.util.resolve(@context||="window")
+
+  evaluateCode: ()->
+    compiled = @compiled
+
+    evaluator = ()-> eval( compiled )
+
+    try
+      result = evaluator.call( @getContext() )
+      @trigger "eval:success", result
+    catch error
+      @trigger "eval:error", error
 
   getValue: ()->
     @editor.getValue()
 
-  editorOptions: ()->
-    mode: @mode
-    theme: @theme
-    keyMap: @keyMap
-    lineNumbers: true
-    gutter: true
-    autofocus: true
-    onChange: @onEditorChange
+

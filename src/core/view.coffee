@@ -5,12 +5,9 @@
 # such as auto event binding, the facilitation of deferred rendering
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
-_.def("Luca.View").extends("Backbone.View").with
-  applyStyles: (styles={})->
-    for setting, value  of styles
-      @$el.css(setting,value)
 
-    @
+_.def("Luca.View").extends("Backbone.View").with
+
 
   debug: ()->
     return unless @debugMode or window.LucaDebugMode?
@@ -56,32 +53,14 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @registerCollectionEvents()
 
-    if @bodyTemplate
-      @$html( Luca.template(@bodyTemplate, @) )
+    if template = @bodyTemplate
+      console.log "Applying body template", template, @name
+      @$el.empty()
+      @$html( Luca.template(template, @) )
 
     @delegateEvents()
 
   #### JQuery / DOM Selector Helpers
-  $bodyEl: ()->
-    element = @bodyTagName || "div"
-    className = @bodyClassName || "view-body"
-
-    @bodyEl = "#{ element }.#{ className }"
-
-    bodyEl = @$(@bodyEl)
-
-    return bodyEl if bodyEl.length > 0
-
-    # if we've been configured to have one, and it doesn't exist
-    # then we should append it to ourselves
-    if bodyEl.length is 0 and (@bodyClassName? || @bodyTagName?)
-      bodyEl = @make(element,class:className)
-      $(@el).append( bodyEl )
-      return @$(@bodyEl)
-
-
-    $(@el)
-
   $wrap: (wrapper)->
     if !wrapper.match(/[<>]/)
       wrapper = @make("div",class:wrapper)
@@ -89,13 +68,13 @@ _.def("Luca.View").extends("Backbone.View").with
     @$el.wrap( wrapper )
 
   $template: (template, variables={})->
-    @$html( Luca.template(template,variables) )
+    @$el.html( Luca.template(template,variables) )
 
   $html: (content)->
-    @$bodyEl().html( content )
+    @$el.html( content )
 
   $append: (content)->
-   @$bodyEl().append(content)
+    @$el.append( content )
 
   #### Containers
   #
@@ -195,25 +174,9 @@ _.def("Luca.View").extends("Backbone.View").with
       if _.isString(handler)
         _.bindAll @, handler
 
-  # which properties of this view instance are backbone views
-  viewProperties: ()->
-    propertyValues = _( @ ).values()
-
-    properties = _( propertyValues ).select (v)->
-      Luca.isBackboneView(v)
-
-    components = _( @components ).select (v)-> Luca.isBackboneView(v)
-
-    _([components,properties]).flatten()
-
-  # which properties of this view instance are backbone collections
-  collectionProperties: ()->
-    propertyValues = _( @ ).values()
-    _( propertyValues ).select (v)->
-      Luca.isBackboneCollection(v)
-
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
+
   # refreshCode happens whenever the Luca.Framework extension
   # system is run after there are running instances of a given component
 
@@ -245,6 +208,11 @@ _.def("Luca.View").extends("Backbone.View").with
     _( handlerIds ).map (handlerId)=>
       if _.isFunction(handlerId) then handlerId else @[handlerId]
 
+  collections: ()-> Luca.util.selectProperties( Luca.isBackboneCollection, @ )
+  models: ()-> Luca.util.selectProperties( Luca.isBackboneModel, @ )
+  views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
+
+
 Luca.View.originalExtend = Backbone.View.extend
 
 customizeRender = (definition)->
@@ -261,11 +229,17 @@ customizeRender = (definition)->
 
   _base ||= Luca.View::$attach
 
-  definition.render = ()->
 
+  definition.render = ()->
+    view = @
     # if a view has a deferrable property set
 
-    if @deferrable and Luca.supportsBackboneEvents( @deferrable )
+    if @deferrable
+      target = @deferrable_target
+
+      unless Luca.isBackboneCollection(@deferrable)
+        @deferrable = @collection
+
       deferredRender = _.once ()=>
         _base.apply(@, arguments)
         @trigger "after:render", @

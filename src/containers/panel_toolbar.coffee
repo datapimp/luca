@@ -15,17 +15,19 @@ buildButton = (button, wrap=true)->
 
   # if it is a normal button, and not a button group
   else
-    label = button.label
+    label = button.label ||= ""
 
     button.eventId ||= _.string.dasherize( button.label.toLowerCase() )
 
     if button.icon
+      label = " " if _.string.isBlank( label )
       white = "icon-white" if button.white
       label = "<i class='#{ white } icon-#{ button.icon }' /> #{ label }"
 
     buttonAttributes =
       class: "btn"
       "data-eventId" : button.eventId
+      title: button.title || button.description
 
     buttonAttributes["class"] += " btn-#{ button.color }" if button.color?
 
@@ -40,7 +42,6 @@ buildButton = (button, wrap=true)->
 
       dropdownEl = make "ul", {class:"dropdown-menu"}, dropdownItems
 
-    console.log "Making Button", @parent, buttonAttributes, button
     buttonEl = make "a", buttonAttributes, label
 
     # needs to be wrapped for proper rendering, but not
@@ -88,8 +89,10 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
 
   orientation: 'top'
 
+  autoBindEventHandlers: true
+
   events:
-    "click .btn, click .dropdown-menu li" : "clickHandler"
+    "click a.btn, click .dropdown-menu li" : "clickHandler"
 
   #autoBindEventHandlers: true
 
@@ -98,8 +101,21 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
   # to organize actions
   clickHandler: (e)->
     me = my = $( e.target )
+
+    if me.is('i')
+      me = my = $( e.target ).parent()
+
     eventId = my.data('eventid')
-    console.log "Triggering EventId: #{ eventId } on ", @parent
+
+    return unless eventId?
+
+    hook = Luca.util.hook( eventId )
+
+    source = @parent || @
+    if _.isFunction( source[hook] )
+      source[ hook ].call(@, me, e)
+    else
+      source.trigger(eventId, me, e)
 
   beforeRender:()->
     Luca.View::beforeRender?.apply(@, arguments)

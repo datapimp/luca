@@ -1,11 +1,57 @@
-#### The Component Container
+# The Component Container
 #
 # The Component Container is a nestable component
-# which is responsible for laying out the many components
-# it contains, assigning them to a DOM container, and
-# automatically instantiating and rendering the components
-# in their proper place.
-_.def('Luca.core.Container').extends('Luca.View').with
+# which are responsible for handling communication between multiple
+# nested views.
+#
+# One: Layout
+#
+# a container is responsible for laying out the nested views
+# and rendering them in a special DOM element
+doLayout = ()->
+  @trigger "before:layout", @
+  @prepareLayout()
+  @trigger "after:layout", @
+
+# and displaying those elements in a way that is
+# optimal for the desired user experience of that view
+# ( i.e seeing only one of them at a time, seeing them side by side )
+applyDOMConfig = (panel, panelIndex)->
+  style_declarations = []
+
+  style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
+  style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width?
+  style_declarations.push "float: #{ panel.float }" if panel.float
+
+  config =
+    class: panel?.classes || @componentClass
+    id: "#{ @cid }-#{ panelIndex }"
+    style: style_declarations.join(';')
+    "data-luca-owner" : @name || @cid
+
+  if @customizeContainerEl?
+   config = @customizeContainerEl( config, panel, panelIndex )
+
+  config
+
+# Two: Component Creation
+#
+# A container is responsible for creating and storing references to the nested
+# views that are required for its functioning.
+doComponents = ()->
+  @trigger "before:components", @, @components
+  @prepareComponents()
+  @createComponents()
+  @trigger "before:render:components", @, @components
+  @renderComponents()
+  @trigger "after:components", @, @components
+
+
+# Containers are central to Luca.  They are what make it easy to structure
+# your application in a logical way and to specify much of the behavior of
+# complex / composite views at define time using JSON syntax combined with
+# the meta data contained in the Luca component registry.
+_.def('Luca.core.Container').extends('Luca.components.Panel').with
 
   className: 'luca-ui-container'
 
@@ -41,7 +87,7 @@ _.def('Luca.core.Container').extends('Luca.View').with
 
     Luca.View::initialize.apply @, arguments
 
-  #### Rendering Pipeline
+  # Rendering Pipeline
   #
   # A container has nested components.  these components
   # are automatically rendered inside their own DOM element
@@ -88,58 +134,26 @@ _.def('Luca.core.Container').extends('Luca.View').with
   # firstActivation()
   #
   beforeRender: ()->
-    @doLayout()
-    @doComponents()
-    @applyStyles( @styles ) if @styles?
+    doLayout.call(@)
+    doComponents.call(@)
+    Luca.components.Panel::beforeRender?.apply(@, arguments)
 
-    if @hasBody or @topToolbar or @bottomToolbar
-      @bodyTagName ||= "div"
-      @bodyClassName ||= "view-body"
-      @$append( @make(@bodyTagName,class:@bodyClassName) )
-
-      # will only be run if the toolbar module has been mixed in
-      @renderToolbars?()
-
-  doLayout: ()->
-    @trigger "before:layout", @
-    @prepareLayout()
-    @trigger "after:layout", @
-
-  doComponents: ()->
-    @trigger "before:components", @, @components
-    @prepareComponents()
-    @createComponents()
-    @trigger "before:render:components", @, @components
-    @renderComponents()
-    @trigger "after:components", @, @components
-
-  applyPanelConfig: (panel, panelIndex)->
-    style_declarations = []
-
-    style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
-    style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width?
-    style_declarations.push "float: #{ panel.float }" if panel.float
-
-    config =
-      class: panel?.classes || @componentClass
-      id: "#{ @cid }-#{ panelIndex }"
-      style: style_declarations.join(';')
-      "data-luca-owner" : @name || @cid
-
-    if @customizeContainerEl?
-     config = @customizeContainerEl( config, panel, panelIndex )
-
-    config
-
+  # Components which inherit from Luca.core.Container can implement
+  # their own versions of this method, if they need to apply any sort
+  # of additional styling / configuration for the DOM elements that
+  # are created to wrap each container.
   customizeContainerEl: (containerEl, panel, panelIndex)->
     containerEl
 
   prepareLayout: ()->
     container = @
     @componentContainers = _( @components ).map (component, index)->
-      container.applyPanelConfig(component, index)
+      applyDOMConfig.call(container, component, index)
 
-  # prepare components is where each component gets assigned a container to be rendered into
+  # prepare components is where each component gets assigned
+  # a container to be rendered into.  if @appendContainers is
+  # set to true, then the view will automatically $append()
+  # elements created via Backbone.View::make() to the body element of the view
   prepareComponents: ()->
     _( @components ).each (component, index)=>
       container = @componentContainers?[index]
@@ -155,6 +169,12 @@ _.def('Luca.core.Container').extends('Luca.View').with
         component.container = "##{ container.id }" if @appendContainers
         component.container ||= @$bodyEl()
 
+  # create components is responsible for turning the JSON syntax of the
+  # container's definition into live objects against a given Luca Component
+  # type.
+  #
+  # In addition to this, a container builds an index of the components
+  # which belong to it, so that they can easily be looked up by name
   createComponents: ()->
     return if @componentsCreated is true
 
@@ -173,7 +193,8 @@ _.def('Luca.core.Container').extends('Luca.View').with
         Luca.util.lazyComponent( object )
 
       # if we're using base backbone views, then they don't extend themselves
-      # with their passed options, so this is a workaround
+      # with their passed options, so this is a workaround to get them to
+      # pick up the container config property
       if !component.container and component.options.container
         component.container = component.options.container
 
@@ -186,6 +207,9 @@ _.def('Luca.core.Container').extends('Luca.View').with
       component
 
     @componentsCreated = true
+
+    @registerComponentEvents() unless _.isEmpty(@componentEvents)
+
     map
 
   # Trigger the Rendering Pipeline process on all of the nested
@@ -206,30 +230,6 @@ _.def('Luca.core.Container').extends('Luca.View').with
           console.log e.stack
 
         throw e unless Luca.silenceRenderErrors? is true
-
-  topToolbar: undefined
-
-  bottomToolbar: undefined
-
-  # Luca containers can have toolbars, these will get injected before or after the bodyEl
-  renderToolbars: ()->
-    _( ["top","left","right","bottom"] ).each (orientation)=>
-      if @["#{ orientation }Toolbar"]?
-        @renderToolbar( orientation, @["#{ orientation }Toolbar"] )
-
-  renderToolbar: (orientation="top", config={})->
-    attach = if ( orientation is "top" or orientation is "left" ) then "before" else "after"
-
-    unless @$("#{ orientation }-toolbar-container").length > 0
-      @$bodyEl()[ attach ] @make("div",id:"#{ @cid }-toolbar-#{ orientation }",class:"#{ orientation }-toolbar-container")
-
-    config.ctype ||= "panel_toolbar"
-    config.parent = @
-    config.orientation = orientation
-
-    toolbar = @["#{ orientation }Toolbar"] = Luca.util.lazyComponent(config)
-
-    @$("##{ @cid }-toolbar-#{ orientation }").append( toolbar.render().el )
 
   #### Container Activation
   #
@@ -264,6 +264,22 @@ _.def('Luca.core.Container').extends('Luca.View').with
       _.compact matches
 
     _.flatten( components )
+
+  # event binding sugar for nested components
+  #
+  # you can define events like:
+
+  # _.def("MyContainer").extends("Luca.View").with
+  #   componentEvents:
+  #     "component_name before:load" : "mySpecialHandler"
+  #
+  componentEvents: {}
+
+  registerComponentEvents: ()->
+    for listener, handler of @componentEvents
+      [componentName,trigger] = listener.split(' ')
+      component = @findComponentByName(componentName)
+      component?.bind trigger, @[handler]
 
   findComponentByName: (name, deep=false)->
     @findComponent(name, "name_index", deep)
