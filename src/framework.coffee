@@ -1,8 +1,23 @@
-window.Luca = (needle)->
-  component = Luca.cache( needle )
-  return component if component?
+# the Luca() browser utility function is meant to be a smart wrapper around various
+# types of input which will return what the developer would expect given the
+# context it is used.
+window.Luca = (payload, args...)->
+  if _.isString(payload) and result = Luca.cache(payload)
+    return result
 
-  Luca.find(needle)
+  if _.isString(payload) and result = Luca.find(payload)
+    return result
+
+  if _.isObject(payload) and payload.ctype?
+    return Luca.util.lazyComponent( payload )
+
+  if _.isObject(payload) and payload.defines and payload.extends
+    definition = payload.defines
+    inheritsFrom = payload.extends
+
+
+  if _.isFunction( fallback = _(args).last() )
+    return fallback()
 
 _.extend window.Luca,
   VERSION: "0.8.8"
@@ -40,6 +55,10 @@ Luca.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo[value] = symbol.toLowerCase()
   memo
 , {}
+
+Luca.find = ()->
+  # TODO Implement
+  undefined
 
 Luca.supportsBackboneEvents = (obj)->
   Luca.isComponent(obj) or (_.isFunction( obj?.trigger ) or _.isFunction(obj?.bind))
@@ -94,3 +113,49 @@ Luca.available_templates = (filter="")->
     _( available ).select (tmpl)-> tmpl.match(filter)
   else
     available
+
+
+
+UnderscoreExtensions =
+  module: (base,module)->
+    _.extend base, module
+    if base.included and _(base.included).isFunction()
+      base.included.apply(base)
+
+  delete: (object, key)->
+    value = object[key]
+    delete object[key]
+    value
+
+  # this function will ensure a function gets called at least once
+  # afrer x delay.  by setting defaults, we can use this on backbone
+  # view definitions
+  idle: (code, delay=1000)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+  idleShort: (code, delay=100)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+  idleMedium: (code, delay=2000)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+  idleLong: (code, delay=5000)->
+    delay = 0 if window.DISABLE_IDLE
+    handle = undefined
+    ()->
+      window.clearTimeout(handle) if handle
+      handle = window.setTimeout(_.bind(code, @), delay)
+
+_.mixin(UnderscoreExtensions)

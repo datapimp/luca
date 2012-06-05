@@ -1,7 +1,0 @@
-%h1 Component Tester
-%p This is a tool that enables you to build and test Luca components in an isolated sandbox environment.  The editor is currently enabled with vim keybindings
-
-%p Setup
-%p Teardown
-%p Define
-%p Implementation

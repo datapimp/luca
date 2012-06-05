@@ -1,6 +1,16 @@
+BuffersModel = Luca.Model.extend
+  defaults:
+    _current: "default"
+
+  currentContent: ()->
+    current = @get("_current")
+    @get(current)
+
 compilers =
   coffeescript: (code)->
     CoffeeScript.compile code, bare: true
+  default: (code)->
+    code
 
 _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
   name: "code_editor"
@@ -11,42 +21,63 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
 
   defaultValue: ''
 
-  initialize: (@options)->
-    Luca.components.Panel::initialize.apply(@, arguments)
+  compilationEnabled: false
 
-    _.bindAll @, "onEditorChange", "onCodeChange"
+  initialize: (@options)->
+    @_super("initialize", @, arguments)
+
+    _.bindAll @, "onCompiledCodeChange", "onBufferChange", "onEditorChange"
+
+    console.log "Initializing Code Editor", @keyMap
 
     @mode ||= "coffeescript"
     @theme ||= "monokai"
     @keyMap ||= "vim"
-    @compiler = compilers[@mode] || @compile
-
-    @bind "code:change", @onCodeChange
+    @compiler = compilers[@mode] || compilers.default
 
     @setupBuffers()
 
   setupBuffers: ()->
-    @buffers = new Luca.Model
-      defaults:
-        _current: "default"
-
-      currentContent: ()->
-        current = @get("_current")
-        @get(current)
-
+    @buffers = new BuffersModel()
+    @buffers.set( @currentBuffers, silent: true ) if @currentBuffers?
     editor = @
 
-    @buffers.bind "change:_current", (model,value)->
-      editor.setValue( @buffers.currentContent() || "" )
+    for key of @buffers.attributes when key isnt "_current"
+      @buffers.bind "change:#{ key }", @onBufferChange
+      @buffers.bind "change:compiled_#{ key }", @onCompiledCodeChange
+
+    # handle switching of the buffers.  when the editor
+    # is told to switch buffers, we will get the current content
+    # in that buffer, and update the code mirror instance
+    @buffers.bind "change:_current", (model,value)=>
+      editor.trigger "buffer:change"
+      editor.editor.setValue( @buffers.currentContent() || "" )
+
+    @monitorChanges = true
 
   currentBuffer: ()->
     @buffers.get("_current")
 
-  loadBuffer: (bufferName)->
+  loadBuffer: (bufferName, autoSave=true)->
+    @saveBuffer() if autoSave
     @buffers.set("_current", bufferName)
 
   saveBuffer: ()->
+    localStorage.setItem("tester:buffers:default:#{ @currentBuffer() }", @editor.getValue())
     @buffers.set( @currentBuffer(), @editor.getValue() )
+
+  getBuffer: (buffer, compiled=false)->
+    buffer ||= @currentBuffer()
+    code = @buffers.get( buffer )
+
+    return code unless compiled is true
+
+    compiledCode = @buffers.get("compiled_#{ buffer }")
+
+    if _.string.isBlank(compiledCode)
+      compiledCode = @compileCode(code, buffer)
+
+    return compiledCode
 
   editorOptions: ()->
     mode: @mode
@@ -56,6 +87,10 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     gutter: true
     autofocus: true
     onChange: @onEditorChange
+    tabSize: @tabSize || 2
+    indentUnit: 2
+    smartIndent: false
+    indentWithTabs: false
 
   beforeRender: ()->
     Luca.components.Panel::beforeRender?.apply(@, arguments)
@@ -74,10 +109,6 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
       @editor = window.CodeMirror.fromTextArea( @$('textarea')[0], @editorOptions())
       @restore()
 
-  # if we don't have a special compiler for
-  # this mode, then we will just return the code
-  compile: (code)-> code
-
   save: ()->
     @saveBuffer()
 
@@ -86,38 +117,56 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     @editor.refresh()
 
   onEditorChange: ()->
-    @trigger "editor:change"
+    if @monitorChanges is true and @getBuffer() isnt @getValue()
+      @save()
+
+  # TODO
+  # changedAttributes isn't giving us the data we want
+  # and it could be our fault
+  onBufferChange: (model, newValue, changes)->
+    previous = model.previousAttributes()
+
+    for key of @buffers.attributes when key isnt "_current"
+      if previous[key] isnt @buffers.get(key)
+        result = @compileCode( @buffers.get(key), key )
+        if result.success is true
+          @buffers.set("compiled_#{ key }", result.compiled, silent: true)
+
+    @buffers.change()
+
+  onCompiledCodeChange: (model, newValue, changes)->
+    changedBuffers = _( model.changedAttributes() ).keys()
+    @trigger "code:change", changedBuffers
+    for changed in changedBuffers
+      @trigger "code:change:#{ changed }", changed
+
+  compileCode: (code, buffer)->
+    buffer ||= @currentBuffer()
+    code ||= @getBuffer(buffer, false)
+
+    compiled = ""
+
+    result =
+      success: true
+      compiled: ""
 
     try
-      compiled = @compiler.apply(@, [@getValue()])
-
-      if @compiled and compiled != @compiled
-        @trigger "code:change", compiled
-        @
-
-
+      compiled = @compiler.call(@, code)
+      @trigger "compile:success", code, compiled
+      result.compiled = compiled
     catch error
-      #console.log "Error Compiling Coffeescript"
-      #console.log error.message
+      @trigger "compile:error", error, code
+      result.success = false
+      result.compiled = @buffers.get("compiled_#{ buffer }")
 
-  onCodeChange: (compiled)->
-    @save()
+    result
 
-  getContext: ()->
-    Luca.util.resolve(@context||="window")
-
-  evaluateCode: ()->
-    compiled = @compiled
-
-    evaluator = ()-> eval( compiled )
-
-    try
-      result = evaluator.call( @getContext() )
-      @trigger "eval:success", result
-    catch error
-      @trigger "eval:error", error
+  getCompiledCode: (buffer)->
+    buffer = @getBuffer(buffer)
+    _.string.strip( @compileCode(buffer) )
 
   getValue: ()->
     @editor.getValue()
 
-
+  setValue: (value)->
+    @editor.setValue( value )

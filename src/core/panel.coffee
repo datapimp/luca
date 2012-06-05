@@ -49,6 +49,7 @@ _.def("Luca.components.Panel").extends("Luca.View").with
   beforeRender: ()->
     Luca.View::beforeRender?.apply(@, arguments)
     @applyStyles( @styles ) if @styles?
+    @applyStyles( @bodyStyles, true ) if @bodyStyles?
     @renderToolbars?()
 
   $bodyEl: ()->

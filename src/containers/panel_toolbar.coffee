@@ -1,42 +1,63 @@
+
+# button config accepts the following paramters:
+#
+# label       what should the button say
+# eventId     what event should the button trigger
+# dropdown    an array of arrays: [eventId, label]
+# group       an array of button configs
+# wrapper     a css class, in addition to btn-group
+# icon        which icon do you want to use on this button?
+# white       true or false: is it a white colored text?
+# color       options are primary, info, success, warning, danger, inverse
+
 make = Backbone.View::make
 
-buildButton = (button, wrap=true)->
+buildButton = (config, wrap=true)->
+  if config.ctype?
+    return Luca(config)?.render()?.el
+
+  if config.spacer
+    return make "div", class: "spacer #{ config.spacer }"
+
+  if config.text
+    return make "div", {class: "toolbar-text"}, config.text
+
   wrapper = 'btn-group'
-  wrapper += " #{ button.wrapper }" if button.wrapper?
-  wrapper += " align-#{ button.align }" if button.align?
+  wrapper += " #{ config.wrapper }" if config.wrapper?
+  wrapper += " align-#{ config.align }" if config.align?
 
   # if we're passed a group, then we need to just
   # wrap the contents of the buttons property in that group
   # skipping the btn-group wrapping that takes place for
   # individual buttons
-  if button.group? and button.buttons?
-    buttons = prepareButtons( button.buttons, false )
+  if config.group? and config.buttons?
+    buttons = prepareButtons( config.buttons, false )
     return make "div", class: wrapper, buttons
 
   # if it is a normal button, and not a button group
   else
-    label = button.label ||= ""
+    label = config.label ||= ""
 
-    button.eventId ||= _.string.dasherize( button.label.toLowerCase() )
+    config.eventId ||= _.string.dasherize( config.label.toLowerCase() )
 
-    if button.icon
+    if config.icon
       label = " " if _.string.isBlank( label )
-      white = "icon-white" if button.white
-      label = "<i class='#{ white } icon-#{ button.icon }' /> #{ label }"
+      white = "icon-white" if config.white
+      label = "<i class='#{ white || "" } icon-#{ config.icon }' /> #{ label }"
 
     buttonAttributes =
       class: "btn"
-      "data-eventId" : button.eventId
-      title: button.title || button.description
+      "data-eventId" : config.eventId
+      title: config.title || config.description
 
-    buttonAttributes["class"] += " btn-#{ button.color }" if button.color?
+    buttonAttributes["class"] += " btn-#{ config.color }" if config.color?
 
-    if button.dropdown
+    if config.dropdown
       label = "#{ label } <span class='caret'></span>"
       buttonAttributes["class"] += " dropdown-toggle"
       buttonAttributes["data-toggle"] = "dropdown"
 
-      dropdownItems = _(button.dropdown).map (dropdownItem)=>
+      dropdownItems = _(config.dropdown).map (dropdownItem)=>
         link = make "a", {}, dropdownItem[1]
         make "li", {"data-eventId": dropdownItem[0]}, link
 
@@ -47,7 +68,7 @@ buildButton = (button, wrap=true)->
     # needs to be wrapped for proper rendering, but not
     # if it already is part of a group
     autoWrapClass = "btn-group"
-    autoWrapClass += " align-#{ button.align }" if button.align?
+    autoWrapClass += " align-#{ config.align }" if config.align?
 
     if wrap is true
       return make "div", {class: autoWrapClass}, [buttonEl,dropdownEl]
@@ -70,17 +91,6 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
   className: "luca-ui-toolbar btn-toolbar"
 
   # @buttons is an array of button config objects
-
-  # button config accepts the following paramters:
-  #
-  # label       what should the button say
-  # eventId     what event should the button trigger
-  # dropdown    an array of arrays: [eventId, label]
-  # group       an array of button configs
-  # wrapper     a css class, in addition to btn-group
-  # icon        which icon do you want to use on this button?
-  # white       true or false: is it a white colored text?
-  # color       options are primary, info, success, warning, danger, inverse
 
 
   buttons:[]

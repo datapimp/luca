@@ -54,7 +54,6 @@ _.def("Luca.View").extends("Backbone.View").with
     @registerCollectionEvents()
 
     if template = @bodyTemplate
-      console.log "Applying body template", template, @name
       @$el.empty()
       @$html( Luca.template(template, @) )
 

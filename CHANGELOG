@@ -54,10 +54,15 @@
     value will be cleared, and then the next call will be cached, and so on
 
 0.8.8
-  - Luca.tools.ClassBrowser now incorporates an instance of the CodeMirror code editor,
-    which allows you to edit the prototype definitions of all Luca components, and update
-    any running instances with your new class definition.  This allows you to make changes
-    to the app on the fly.
-  - Added development mode helpers to Luca.View to aid in in browser editing workflow
-  - Added additional configuration for @deferrable rendering system for Luca.View
+  - Added development mode helpers to Luca.View to aid in browser editing
+  - Added configuration for @deferrable rendering system for Luca.View
   - Added isComponent and supportsBackboneEvents helpers
+  - Added componentEvents configuration sugar to Luca.core.Container classes
+    @componentEvents allows for a container to bind to events on its children
+
+0.8.81
+  - major work on component tester
+  - the development console component now extends from Luca.core.Panel instead of the ModalView
+  - Added _super() method which accepts a method name, context, and arguments array
+    and is the equivalent to applying the component you extend from prototype method
+    with @, arguments

@@ -82,6 +82,9 @@ Luca.extend = (superClassName, childName, properties={})->
     superClass.displayName ||= superClassName
     superClass
 
+  properties._super = (method, context, args)->
+    @_superClass().prototype[method]?.apply(context, args)
+
   superClass.extend(properties)
 
 _.mixin

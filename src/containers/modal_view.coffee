@@ -6,9 +6,6 @@ _.def("Luca.ModalView").extends("Luca.View").with
 
   backdrop: false
 
-  afterRender: ()->
-    Luca.View::afterRender?.apply(@, arguments)
-
   container: ()->
     $('body')
 

@@ -5,9 +5,10 @@ inspectArray = (array)->
 
   lastPrompt.before("<div class='array-inspector'>#{ items.join('') }</div>")
 
-_.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
+console_name = ""
 
-  bodyClassName: "view-body"
+_.def('Luca.tools.DevelopmentConsole').extends('Luca.components.Panel').with
+  bodyClassName:"console-wrapper"
 
   name: "development_console"
 
@@ -15,28 +16,16 @@ _.def('Luca.tools.DevelopmentConsole').extends('Luca.ModalView').with
 
   prompt:"Coffee> "
 
-  modal: true
-
   initialize: (@options={})->
-    Luca.View::initialize.apply @, arguments
-
-    console_name = @name
-
-    if @modal
-      @$el.addClass 'luca-ui-modal'
-      @$el.addClass 'modal'
+    @_super("initialize", @, arguments)
 
   render: ()->
     return @ if @rendered is true
     @setup()
-    Luca.ModalView::render?.apply(@, arguments)
+    @_super("render", @, arguments)
     @
 
-  bodyClassName:"console-wrapper"
-
   setup: ()->
-    @$append( @make("div",class:"console-wrapper") )
-    @bodyTagName = @$('.console-wrapper')
     @$bodyEl().css(height:"500px",width:"800px")
 
     @$append( @make("div",class:"console-inner") )
