@@ -34,6 +34,10 @@ Sandbox.Application = Luca.Application.extend
     @_developmentConsole ||= new Luca.tools.DevelopmentConsole()
     @_developmentConsole.render().toggle()
 
+  afterRender: ()->
+    @_super("afterRender", @, arguments)
+    $('body>.navbar').hide()
+
 $ do ->
   (window || global).SandboxApp = new Sandbox.Application()
   SandboxApp.boot()

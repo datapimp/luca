@@ -4,10 +4,10 @@ class Luca.Observer
     @type = @options.type
 
     if @options.debugAll
-      @bind "event", (t, args...)=>
-        console.log "Observed #{ @type } #{ (t.name || t.id || t.cid) }", t, _(args).flatten()
-
+      @bind "all", (trigger, one, two)=>
+        console.log "ALL", trigger, one, two
   relay: (triggerer, args...)->
+    console.log "Relaying", trigger, args
     @trigger "event", triggerer, args
     @trigger "event:#{ args[0] }", triggerer, args.slice(1)
 

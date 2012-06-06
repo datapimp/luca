@@ -16,6 +16,7 @@ Luca.defaultComponentType = 'view'
 
 # We register that component class for you:
 Luca.register = (component, prototypeName)->
+  Luca.trigger "component:registered", component, prototypeName
   registry.classes[ component ] = prototypeName
 
 Luca.development_mode_register = (component, prototypeName)->
@@ -72,10 +73,13 @@ Luca.registry.findInstancesByClassName = (className)->
   _( instances ).select (instance)->
     instance.displayName is className or instance._superClass?()?.displayName is className
 
-Luca.registry.classes = ()->
+Luca.registry.classes = (toString=false)->
   _( registry.classes ).map (className, ctype)->
-    className: className
-    ctype: ctype
+    if toString
+      className
+    else
+      className: className
+      ctype: ctype
 
 Luca.cache = (needle, component)->
   component_cache.cid_index[ needle ] = component if component?
@@ -84,8 +88,10 @@ Luca.cache = (needle, component)->
 
   # optionally, cache it by tying its name to its cid for easier lookups
   if component?.component_name?
+    Luca.trigger "component:created:#{ component.component_name }", component
     component_cache.name_index[ component.component_name ] = component.cid
   else if component?.name?
+    Luca.trigger "component:created:#{ component.component_name }", component
     component_cache.name_index[ component.name ] = component.cid
 
   return component if component?

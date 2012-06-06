@@ -14,7 +14,13 @@ make = Backbone.View::make
 
 buildButton = (config, wrap=true)->
   if config.ctype?
-    return Luca(config)?.render()?.el
+    config.className ||= ""
+    config.className += 'toolbar-component'
+
+    object = Luca(config).render()
+    if Luca.isBackboneView(object)
+      console.log "Adding toolbar component", object
+      return object.el
 
   if config.spacer
     return make "div", class: "spacer #{ config.spacer }"
@@ -128,7 +134,7 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
       source.trigger(eventId, me, e)
 
   beforeRender:()->
-    Luca.View::beforeRender?.apply(@, arguments)
+    @_super("beforeRender", @, arguments)
 
     if @well is true
       @$el.addClass 'well'
@@ -143,3 +149,8 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
     elements = prepareButtons(@buttons)
     _( elements ).each (element)=>
       @$el.append( element )
+
+  afterRender: ()->
+    @_super("afterRender", @, arguments)
+    #  @$('.toolbar-component label').remove()
+    #  @$('.toolbar-component').addClass('btn-group')

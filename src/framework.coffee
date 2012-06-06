@@ -1,7 +1,7 @@
 # the Luca() browser utility function is meant to be a smart wrapper around various
 # types of input which will return what the developer would expect given the
 # context it is used.
-window.Luca = (payload, args...)->
+(window || global).Luca = (payload, args...)->
   if _.isString(payload) and result = Luca.cache(payload)
     return result
 
@@ -19,7 +19,7 @@ window.Luca = (payload, args...)->
   if _.isFunction( fallback = _(args).last() )
     return fallback()
 
-_.extend window.Luca,
+_.extend Luca,
   VERSION: "0.8.8"
   core: {}
   containers: {}
@@ -28,6 +28,11 @@ _.extend window.Luca,
   util: {}
   fields: {}
   registry:{}
+
+_.extend Luca, Backbone.Events
+
+# if developmentMode is true, you have access to some neat development tools
+Luca.developmentMode = false
 
 # The Global Observer is very helpful in development
 # it observes every event triggered on every view, collection, model
@@ -60,7 +65,7 @@ Luca.find = ()->
   # TODO Implement
   undefined
 
-Luca.supportsBackboneEvents = (obj)->
+Luca.supportsEvents = Luca.supportsBackboneEvents = (obj)->
   Luca.isComponent(obj) or (_.isFunction( obj?.trigger ) or _.isFunction(obj?.bind))
 
 Luca.isComponent = (obj)->

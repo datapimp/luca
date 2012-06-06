@@ -1,6 +1,39 @@
 BuffersModel = Luca.Model.extend
   defaults:
     _current: "default"
+    _namespace: "default"
+
+  initialize: (@attributes={})->
+    Luca.Model::initialize.apply(@, arguments)
+    @fetch(silent:true)
+
+  bufferKeys: ()->
+    return @bufferNames if @bufferNames?
+
+    for key, value of @attributes when !key.match(/_/)
+      key
+
+  namespacedBuffer: (key)->
+    "#{ @get('_namespace') }:#{ key }"
+
+  bufferValues: ()->
+    _( @attributes ).pick( @bufferKeys() )
+
+  fetch: (options={})->
+    options.silent ||= true
+
+    _( @bufferKeys() ).each (key)=>
+      value = localStorage?.getItem( @namespacedBuffer(key) )
+      @set(key, value, silent: options.silent is true) if value?
+
+    @
+
+  persist: ()->
+    _( @bufferKeys() ).each (key)=>
+      value = @get(key)
+      localStorage?.setItem( @namespacedBuffer(key), value)
+
+    @
 
   currentContent: ()->
     current = @get("_current")
@@ -14,7 +47,9 @@ compilers =
 
 _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
   name: "code_editor"
+
   id: "editor_container"
+
   autoBindEventHandlers: true
 
   bodyClassName: "codemirror-wrapper"
@@ -23,12 +58,19 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
 
   compilationEnabled: false
 
+  bufferNamespace: "luca:code"
+
+  namespace: (set, options={})->
+    if set?
+      @bufferNamespace = set
+      @buffers?.set("_namespace", set, silent: (options.silent is true) )
+
+    @bufferNamespace
+
   initialize: (@options)->
     @_super("initialize", @, arguments)
 
     _.bindAll @, "onCompiledCodeChange", "onBufferChange", "onEditorChange"
-
-    console.log "Initializing Code Editor", @keyMap
 
     @mode ||= "coffeescript"
     @theme ||= "monokai"
@@ -37,13 +79,27 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
 
     @setupBuffers()
 
+  setMode: (@mode)->
+    @editor.setOption("mode", @mode)
+    @
+
+  setKeyMap: (@keyMap)->
+    @editor.setOption("keyMap", @keyMap)
+    @
+
+  setTheme: (@theme)->
+    @editor.setOption("theme",@theme)
+    @
+
   setupBuffers: ()->
-    @buffers = new BuffersModel()
-    @buffers.set( @currentBuffers, silent: true ) if @currentBuffers?
+    attributes = _.extend(@currentBuffers || {},_namespace:@namespace())
+    @buffers = new BuffersModel(attributes)
+
     editor = @
 
-    for key of @buffers.attributes when key isnt "_current"
-      @buffers.bind "change:#{ key }", @onBufferChange
+    _( @buffers.bufferKeys() ).each (key)=>
+      @buffers.bind "change:#{ key }", ()=>
+        @onBufferChange.apply(@, arguments)
       @buffers.bind "change:compiled_#{ key }", @onCompiledCodeChange
 
     # handle switching of the buffers.  when the editor
@@ -120,16 +176,14 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     if @monitorChanges is true and @getBuffer() isnt @getValue()
       @save()
 
-  # TODO
-  # changedAttributes isn't giving us the data we want
-  # and it could be our fault
   onBufferChange: (model, newValue, changes)->
     previous = model.previousAttributes()
 
-    for key of @buffers.attributes when key isnt "_current"
+    _( @buffers.bufferKeys() ).each (key)=>
       if previous[key] isnt @buffers.get(key)
         result = @compileCode( @buffers.get(key), key )
         if result.success is true
+          @buffers.persist(key)
           @buffers.set("compiled_#{ key }", result.compiled, silent: true)
 
     @buffers.change()

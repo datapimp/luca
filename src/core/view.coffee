@@ -14,9 +14,10 @@ _.def("Luca.View").extends("Backbone.View").with
     console.log [(@name || @cid),message] for message in arguments
 
   trigger: ()->
-    if Luca.enableGlobalObserver and @observeEvents is true
-      Luca.ViewObserver ||= new Luca.Observer(type:"view")
-      Luca.ViewObserver.relay @, arguments
+    if Luca.enableGlobalObserver
+      if Luca.developmentMode is true or @observeEvents is true
+        Luca.ViewObserver ||= new Luca.Observer(type:"view")
+        Luca.ViewObserver.relay @, arguments
 
     Backbone.View.prototype.trigger.apply @, arguments
 

@@ -59,10 +59,15 @@
   - Added isComponent and supportsBackboneEvents helpers
   - Added componentEvents configuration sugar to Luca.core.Container classes
     @componentEvents allows for a container to bind to events on its children
-
-0.8.81
   - major work on component tester
   - the development console component now extends from Luca.core.Panel instead of the ModalView
   - Added _super() method which accepts a method name, context, and arguments array
     and is the equivalent to applying the component you extend from prototype method
     with @, arguments
+  - Added component.once, as an alias for binding to an event and firing a callback one time
+  - Added component.defer(operation).until(object,trigger) as wrapper around .once binding.
+    operation can be a string, or a function, and the call to until accepts an object and
+    the name of a trigger to listen for on that object.  if you just pass a trigger, object is implicitly the component
+  - Luca() is now a global helper for finding views, querying the cache, lazily creating objects, etc.  smart enough
+    to know what you want from it based on the input
+  - window.Luca now mixes in Backbone.Events and Luca.Events.  triggers events whenever components are registered or created

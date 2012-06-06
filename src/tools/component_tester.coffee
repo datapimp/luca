@@ -30,16 +30,15 @@ defaults.teardown = """
 """
 
 defaults.implementation = """
-# the implementation tab is the code which will be run when you hit refresh.
-# it should return an instance of your component, so that its output can
-# be rendered in the output panel
+# the implementation tab is where you specify options for your component.
+#
+# NOTE: the component tester uses whatever is returned from evalulating
+# the code in this tab.  if it responds to render(), it will append
+# render().el to the output panel.  if it is an object, then we will attempt
+# to create an instance of the component you defined with the object as
 """
 
-defaultBuffers = ()->
-  setup: ( localStorage.getItem("tester:buffers:default:setup") || defaults.setup )
-  implementation: ( localStorage.getItem("tester:buffers:default:implementation") || defaults.implementation )
-  component: ( localStorage.getItem("tester:buffers:default:component") || defaults.component )
-  teardown: ( localStorage.getItem("tester:buffers:default:teardown") || defaults.teardown )
+bufferNames = ["setup","implementation","component","teardown"]
 
 _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   name: "component_tester"
@@ -68,9 +67,10 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
       "bottom" : "0px"
       "width" : "90%"
 
-    currentBuffers: defaultBuffers()
+    currentBuffers: defaults
 
     bufferNames: ["component","setup","implementation","teardown"]
+
     topToolbar:
       buttons:[
         icon: "refresh"
@@ -84,27 +84,35 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
         eventId: "click:autoeval"
       ,
         icon: "plus"
-        align: "left"
         description: "add a new component to test"
         eventId: "click:add"
       ,
         icon: "folder-open"
-        align: "left"
-        description: "open an existing component definition"
+        description: "open an existing component's definition"
         eventId: "click:open"
       ]
 
     bottomToolbar:
       buttons:[
         group: true
+        wrapper: "span4"
+        buttons:[
+          label: "Coffeescript"
+          description: "Switch between compiled JS and Coffeescript"
+          eventId: "toggle:mode"
+        ,
+          label: "VIM"
+          description: "Switch between VIM and normal keybindings"
+          eventId: "toggle:keymap"
+        ]
+      ,
+        group: true
+        wrapper: "span4 offset4"
         buttons:[
           label: "Component"
           eventId: "edit:component"
           description: "Edit the component itself"
-        ]
-      ,
-        group: true
-        buttons:[
+        ,
           label: "Setup"
           eventId: "edit:setup"
           description: "Edit the setup for your component test"
@@ -119,7 +127,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
         ]
       ,
         group: true
-        align: 'right'
+        align: "right"
         buttons:[
           icon:"question-sign"
           align: "right"
@@ -161,12 +169,18 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     "component_tester_editor edit:teardown" : "editTeardown"
     "component_tester_editor edit:component" : "editComponent"
     "component_tester_editor edit:implementation" : "editImplementation"
+    "component_tester_editor toggle:keymap" : "toggleKeymap"
+    "component_tester_editor toggle:mode" : "toggleMode"
 
   initialize: ()->
     Luca.core.Container::initialize.apply(@, arguments)
 
     for key, value of @componentEvents
       @[ value ] = _.bind(@[value], @)
+
+    @defer("editComponent").until("after:render")
+
+    @bind "change:editor:mode",
 
   afterRender: ()->
     @getOutput().applyStyles('min-height':'400px')
@@ -196,8 +210,19 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     console.log "Error in #{ bufferId }", error, error.message, error.stack
 
   onSuccess: (result, bufferId)->
-    if bufferId is "implementation" and Luca.isBackboneView(result)
-      @getOutput().$html( result.render().el )
+    if bufferId is "component"
+      @componentDefinition = result
+
+    if bufferId is "implementation"
+      if Luca.isBackboneView(result)
+        object = result
+      else if _.isObject(result) and result.ctype?
+        object = Luca(result)
+      else if _.isObject(result) and _.isFunction(@componentDefinition)
+        object = ( new @componentDefinition(result) )
+
+      if Luca.isBackboneView(object)
+        @getOutput().$html( object.render().el )
 
   refreshCode: ()->
     @getOutput().$html('')
@@ -228,28 +253,58 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     iconHolder.removeClass()
     iconHolder.addClass(buttonClass)
 
+    @
+
+  showEditor: (options)->
+    @getEditor().$('.toolbar-container.top').toggle(options)
+    @getEditor().$('.codemirror-wrapper').toggle(options)
+    @trigger "controls:toggled"
+
+  toggleKeymap: (button)->
+    newMode = if @getEditor().keyMap is "vim" then "basic" else "vim"
+    @getEditor().setKeyMap(newMode)
+    button.html( _.string.capitalize(newMode) )
+
+  toggleMode: (button)->
+    newMode = if @getEditor().mode is "coffeescript" then "javascript" else "coffeescript"
+    @getEditor().setMode(newMode)
+    button.html _.string.capitalize(newMode)
+    @editBuffer @currentBufferName, (newMode is "javascript")
+
   toggleControls: (button)->
-    @getEditor().$('.toolbar-container.top').toggle()
-    @getEditor().$('.codemirror-wrapper').toggle()
+    @bind "controls:toggled", ()=>
+      iconHolder = button.children('i').eq(0)
+      iconHolder.removeClass()
+
+      buttonClass = if @getEditor().$('.toolbar-container.top').is(":visible") then "icon-eye-close" else "icon-eye-open"
+      iconHolder.addClass(buttonClass)
+
+    @showEditor()
+
+    @
 
   toggleSettings: ()->
-    @debug "toggle settings"
+    @
+
+  editBuffer: (@currentBufferName, compiled=false, autoSave=true)->
+    @showEditor(true)
+    @highlight(@currentBufferName)
+
+    buffer = if compiled then "compiled_#{ @currentBufferName }" else @currentBufferName
+    @getEditor().loadBuffer(buffer,autoSave)
+    @
 
   editComponent: ()->
-    @highlight("component")
-    @getEditor().loadBuffer("component")
+    @editBuffer("component")
 
   editTeardown: ()->
-    @highlight("teardown")
-    @getEditor().loadBuffer("teardown")
+    @editBuffer("teardown")
 
   editSetup: ()->
-    @highlight("setup")
-    @getEditor().loadBuffer("setup")
+    @editBuffer("setup")
 
   editImplementation: ()->
-    @highlight("implementation")
-    @getEditor().loadBuffer("implementation")
+    @editBuffer("implementation")
 
   getTestRun: ()->
     editor = @getEditor()
@@ -284,6 +339,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
 
   openComponent: ()->
     @debug "open component"
+    @trigger "open:component"
 
   highlight: (section)->
     @$("a.btn[data-eventid='edit:#{ section }']").siblings().css('font-weight','normal')
