@@ -29,7 +29,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   legend: ""
 
   bodyTemplate: ["components/form_view"]
-  bodyClassName: "form-view-body"
 
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @, arguments
@@ -40,42 +39,35 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
     @setupHooks( @hooks )
 
-    @configureToolbars()
-    @applyStyles()
+    @applyStyleClasses()
 
-  addBootstrapFormControls: ()->
-    @bind "after:render", ()=>
-      el = @$('.toolbar-container.bottom')
+    if @toolbar is true and not (@bottomToolbar? or @topToolbar?)
+      @bottomToolbar =
+        buttons:[
+          icon:"ok-sign"
+          white: true
+          label: "Save Changes"
+          eventId: "click:submit"
+          color: "success"
+        ,
+          icon:"remove-sign"
+          label: "Reset"
+          eventId: "click:reset"
+        ]
 
-      el.addClass('form-controls')
-      el.html @formControlsTemplate || Luca.templates["components/bootstrap_form_controls"](@)
-
-  applyStyles: ()->
-    @applyBootstrapStyles() if Luca.enableBootstrap
+  applyStyleClasses: ()->
+    @applyBootstrapStyleClasses() if Luca.enableBootstrap
 
     @$el.addClass( "label-align-#{ @labelAlign }") if @labelAlign
     @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass
 
-  applyBootstrapStyles: ()->
+  applyBootstrapStyleClasses: ()->
     @inlineForm = true if @labelAlign is "left"
 
     @$el.addClass('well') if @well
     @$el.addClass('form-search') if @searchForm
     @$el.addClass('form-horizontal') if @horizontalForm
     @$el.addClass('form-inline') if @inlineForm
-
-  configureToolbars: ()->
-    return @addBootstrapFormControls() if Luca.enableBootstrap and @toolbar is true
-
-    if @toolbar is true
-      @toolbars = [
-        ctype: 'form_button_toolbar'
-        includeReset: true
-        position: 'bottom'
-      ]
-
-    if @toolbars and @toolbars.length
-      @bind "after:render", _.once @renderToolbars
 
   resetHandler: (e)->
     me = my = $( e.currentTarget )
@@ -88,29 +80,12 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @trigger "before:submit", @
     @submit()
 
-
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)
 
     @eachField (field)=>
       field.getForm = ()=> @
       field.getModel = ()=> @currentModel()
-
-  render: ()->
-    $( @container ).append( @$el )
-    @
-
-  wrapper: ()->
-    @$el.parents('.luca-ui-form-view-wrapper')
-
-  toolbarContainers: (position="bottom")->
-    $(".toolbar-container.#{ position }", @wrapper() ).first()
-
-  renderToolbars: ()->
-    _( @toolbars ).each (toolbar)=>
-      toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
-      toolbar = Luca.util.lazyComponent(toolbar)
-      toolbar.render()
 
   eachField: (iterator)->
     _( @getFields() ).map( iterator )

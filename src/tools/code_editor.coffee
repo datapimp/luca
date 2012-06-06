@@ -2,10 +2,14 @@ BuffersModel = Luca.Model.extend
   defaults:
     _current: "default"
     _namespace: "default"
+    _compiled: []
 
   initialize: (@attributes={})->
     Luca.Model::initialize.apply(@, arguments)
     @fetch(silent:true)
+
+  requireCompilation: ()->
+    @get("_compiled")
 
   bufferKeys: ()->
     return @bufferNames if @bufferNames?
@@ -75,9 +79,14 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     @mode ||= "coffeescript"
     @theme ||= "monokai"
     @keyMap ||= "vim"
+    @lineWrapping ||= true
+
     @compiler = compilers[@mode] || compilers.default
 
     @setupBuffers()
+
+  setWrap: (@lineWrapping)->
+    @editor.setOption("lineWrapping", @lineWrapping)
 
   setMode: (@mode)->
     @editor.setOption("mode", @mode)
@@ -92,7 +101,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     @
 
   setupBuffers: ()->
-    attributes = _.extend(@currentBuffers || {},_namespace:@namespace())
+    attributes = _.extend(@currentBuffers || {},_compiled:@compiledBuffers,_namespace:@namespace())
     @buffers = new BuffersModel(attributes)
 
     editor = @
@@ -100,6 +109,8 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     _( @buffers.bufferKeys() ).each (key)=>
       @buffers.bind "change:#{ key }", ()=>
         @onBufferChange.apply(@, arguments)
+
+    _( @buffers.requireCompilation() ).each (key)=>
       @buffers.bind "change:compiled_#{ key }", @onCompiledCodeChange
 
     # handle switching of the buffers.  when the editor
@@ -119,7 +130,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     @buffers.set("_current", bufferName)
 
   saveBuffer: ()->
-    localStorage.setItem("tester:buffers:default:#{ @currentBuffer() }", @editor.getValue())
+    localStorage.setItem( @buffers.namespacedBuffer( @currentBuffer() ), @editor.getValue())
     @buffers.set( @currentBuffer(), @editor.getValue() )
 
   getBuffer: (buffer, compiled=false)->
@@ -143,10 +154,12 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     gutter: true
     autofocus: true
     onChange: @onEditorChange
-    tabSize: @tabSize || 2
-    indentUnit: 2
+    passDelay: 50
+    autoClearEmptyLines: true
     smartIndent: false
-    indentWithTabs: false
+    tabSize: 2
+    electricChars: false
+
 
   beforeRender: ()->
     Luca.components.Panel::beforeRender?.apply(@, arguments)
@@ -173,7 +186,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     @editor.refresh()
 
   onEditorChange: ()->
-    if @monitorChanges is true and @getBuffer() isnt @getValue()
+    if @monitorChanges
       @save()
 
   onBufferChange: (model, newValue, changes)->
@@ -181,10 +194,14 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
 
     _( @buffers.bufferKeys() ).each (key)=>
       if previous[key] isnt @buffers.get(key)
-        result = @compileCode( @buffers.get(key), key )
-        if result.success is true
+        if _( @buffers.requireCompilation() ).include(key)
+          result = @compileCode( @buffers.get(key), key )
+          if result.success is true
+            @buffers.persist(key)
+            @buffers.set("compiled_#{ key }", result.compiled, silent: true)
+        else
+          @trigger "code:change:#{ key }", @buffers.get("key")
           @buffers.persist(key)
-          @buffers.set("compiled_#{ key }", result.compiled, silent: true)
 
     @buffers.change()
 

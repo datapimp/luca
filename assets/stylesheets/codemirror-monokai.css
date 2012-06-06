@@ -1,22 +1,8 @@
 /* Based on Sublime Text's Monokai theme */
 
-.CodeMirror {
-  font-size: 1.3em;
-  line-height: 1.5em;
-}
-
-.font-small .CodeMirror {
-  font-size: 1.0em;
-  line-height: 1.2em;
-}
 
 .CodeMirror {
   font-family: "Monaco";
-}
-
-.CodeMirror-scroll {
-  height: auto;
-  overflow: visible;
 }
 
 .cm-s-monokai {background: #272822; color: #f8f8f2;}

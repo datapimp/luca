@@ -56,7 +56,7 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     element = @bodyTagName || "div"
     className = @bodyClassName || "view-body"
 
-    @bodyEl = "#{ element }.#{ className }"
+    @bodyEl ||= "#{ element }.#{ className }"
 
     bodyEl = @$(@bodyEl)
 
@@ -65,8 +65,9 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     # if we've been configured to have one, and it doesn't exist
     # then we should append it to ourselves
     if bodyEl.length is 0 and (@bodyClassName? || @bodyTagName?)
-      bodyEl = @make(element,class:className)
-      $(@el).append( bodyEl )
+      newElement = @make(element,class:className,"data-auto-appended":true)
+      $(@el).append( newElement )
+      console.log "Appended", @$(@bodyEl)
       return @$(@bodyEl)
 
 

@@ -69,7 +69,7 @@ Luca.registry.lookup = (ctype)->
     parent[className]).compact().value()?[0]
 
 Luca.registry.findInstancesByClassName = (className)->
-  instances = _( Luca.component_cache.cid_index ).values()
+  instances = _( component_cache.cid_index ).values()
   _( instances ).select (instance)->
     instance.displayName is className or instance._superClass?()?.displayName is className
 

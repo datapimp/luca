@@ -38,7 +38,61 @@ defaults.implementation = """
 # to create an instance of the component you defined with the object as
 """
 
-bufferNames = ["setup","implementation","component","teardown"]
+defaults.style = """
+/*
+ * customize the styles that effect this component
+ * note, all styles here will be scoped to only effect
+ * the output panel :)
+*/
+"""
+
+defaults.html = ""
+
+bufferNames = ["setup","implementation","component","style","html"]
+compiledBuffers = ["setup","implementation","component"]
+
+ComponentPicker = Luca.fields.TypeAheadField.extend
+  name: "component_picker"
+
+  label: "Choose a component to edit"
+
+  initialize: ()->
+    @collection = new Luca.collections.Components()
+    @collection.fetch()
+
+    @_super("initialize", @, arguments)
+
+  getSource: ()->
+    @collection.classes()
+
+  change_handler: ()->
+    componentDefinition = @getValue()
+
+    component = @collection.find (model)->
+      model.get("className") is componentDefinition
+
+    component.fetch success: (model, response)=>
+      if response?.source.length > 0
+        @trigger "component:fetched", response.source, response.className
+
+    @hide()
+
+  createWrapper: ()->
+    @make "div",
+      class: "component-picker span4 well"
+      style:
+        "position: absolute; z-index:12000"
+
+  show: ()->
+    @$el.parent().show()
+
+  hide: ()->
+    @$el.parent().hide()
+
+  toggle: ()->
+    @$el.parent().toggle()
+
+
 
 _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   name: "component_tester"
@@ -58,18 +112,18 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     ]
   ,
     ctype: "code_editor"
-    name: "component_tester_editor"
-    className: 'font-small'
+    name: "ctester_edit"
+    className: 'font-small fixed-height'
     minHeight:'350px'
 
     styles:
       "position" : "absolute"
       "bottom" : "0px"
-      "width" : "90%"
+      "width" : "96%"
 
     currentBuffers: defaults
 
-    bufferNames: ["component","setup","implementation","teardown"]
+    compiledBuffers:["component","setup","implementation"]
 
     topToolbar:
       buttons:[
@@ -97,13 +151,9 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
         group: true
         wrapper: "span4"
         buttons:[
-          label: "Coffeescript"
+          label: "Raw"
           description: "Switch between compiled JS and Coffeescript"
           eventId: "toggle:mode"
-        ,
-          label: "VIM"
-          description: "Switch between VIM and normal keybindings"
-          eventId: "toggle:keymap"
         ]
       ,
         group: true
@@ -120,10 +170,17 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
           label: "Implementation"
           eventId: "edit:implementation"
           description: "Implement your component"
+        ]
+      ,
+        group: true
+        buttons:[
+          label: "HTML"
+          eventId: "edit:html"
+          description: "Edit HTML"
         ,
-          label: "Teardown"
-          eventId: "edit:teardown"
-          description: "Edit the teardown for your component test"
+          label: "CSS"
+          eventId: "edit:style"
+          description: "Edit CSS"
         ]
       ,
         group: true
@@ -155,22 +212,26 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   debugMode: true
 
   componentEvents:
-    "component_tester_editor click:autoeval" : "toggleAutoeval"
-    "component_tester_editor click:refresh" : "refreshCode"
-    "component_tester_editor click:hide" : "toggleControls"
-    "component_tester_editor click:settings" : "toggleSettings"
-    "component_tester_editor click:add" : "addComponent"
-    "component_tester_editor click:open" : "openComponent"
-    "component_tester_editor click:help" : "showHelp"
-    "component_tester_editor click:console" : "toggleConsole"
-    "component_tester_editor eval:error" : "onError"
-    "component_tester_editor eval:success" : "onSuccess"
-    "component_tester_editor edit:setup" : "editSetup"
-    "component_tester_editor edit:teardown" : "editTeardown"
-    "component_tester_editor edit:component" : "editComponent"
-    "component_tester_editor edit:implementation" : "editImplementation"
-    "component_tester_editor toggle:keymap" : "toggleKeymap"
-    "component_tester_editor toggle:mode" : "toggleMode"
+    "ctester_edit click:autoeval" : "toggleAutoeval"
+    "ctester_edit click:refresh" : "refreshCode"
+    "ctester_edit click:hide" : "toggleControls"
+    "ctester_edit click:settings" : "toggleSettings"
+    "ctester_edit click:add" : "addComponent"
+    "ctester_edit click:open" : "openComponent"
+    "ctester_edit click:help" : "showHelp"
+    "ctester_edit click:console" : "toggleConsole"
+    "ctester_edit eval:error" : "onError"
+    "ctester_edit eval:success" : "onSuccess"
+    "ctester_edit edit:setup" : "editSetup"
+    "ctester_edit edit:teardown" : "editTeardown"
+    "ctester_edit edit:component" : "editComponent"
+    "ctester_edit edit:style" : "editStyle"
+    "ctester_edit edit:html" : "editHTML"
+    "ctester_edit edit:implementation" : "editImplementation"
+    "ctester_edit toggle:keymap" : "toggleKeymap"
+    "ctester_edit toggle:mode" : "toggleMode"
+    "ctester_edit code:change:html" : "onMarkupChange"
+    "ctester_edit code:change:style" : "onStyleChange"
 
   initialize: ()->
     Luca.core.Container::initialize.apply(@, arguments)
@@ -179,8 +240,6 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
       @[ value ] = _.bind(@[value], @)
 
     @defer("editComponent").until("after:render")
-
-    @bind "change:editor:mode",
 
   afterRender: ()->
     @getOutput().applyStyles('min-height':'400px')
@@ -192,13 +251,13 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
 
     changeHandler = _.idleMedium ()=>
       if @autoEvaluateCode is true
-        @refreshCode()
+        @applyTestRun()
     , 1500
 
     @getEditor().bind "code:change", changeHandler
 
   getEditor: ()->
-    Luca("component_tester_editor")
+    Luca("ctester_edit")
 
   getDetail: ()->
     Luca("component_detail")
@@ -224,7 +283,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
       if Luca.isBackboneView(object)
         @getOutput().$html( object.render().el )
 
-  refreshCode: ()->
+  applyTestRun: ()->
     @getOutput().$html('')
 
     for bufferId, code of @getTestRun()
@@ -239,14 +298,14 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
       @consoleContainerAppended = true
       @developmentConsole.render()
 
-    $('#devtools-console-wrapper').modal('show')
+    $('#devtools-console-wrapper').modal(backdrop:false,show:true)
 
   toggleAutoeval: (button)->
     @autoEvaluateCode = !(@autoEvaluateCode is true)
 
     if not @started and @autoEvaluateCode is true
       @started = true
-      @refreshCode()
+      @applyTestRun()
 
     iconHolder = button.children('i').eq(0)
     buttonClass = if @autoEvaluateCode then "icon-pause" else "icon-play"
@@ -268,7 +327,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   toggleMode: (button)->
     newMode = if @getEditor().mode is "coffeescript" then "javascript" else "coffeescript"
     @getEditor().setMode(newMode)
-    button.html _.string.capitalize(newMode)
+    button.html _.string.capitalize((if newMode is "coffeescript" then "Raw" else "Compiled"))
     @editBuffer @currentBufferName, (newMode is "javascript")
 
   toggleControls: (button)->
@@ -286,6 +345,10 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   toggleSettings: ()->
     @
 
+  setValue: (value, buffer="component")->
+    compiled = @getEditor().editor.getOption('mode') is "javascript"
+    @editBuffer(buffer, compiled, false).getEditor().setValue( value )
+
   editBuffer: (@currentBufferName, compiled=false, autoSave=true)->
     @showEditor(true)
     @highlight(@currentBufferName)
@@ -294,16 +357,29 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @getEditor().loadBuffer(buffer,autoSave)
     @
 
+  editHTML: ()->
+    @getEditor().setMode('htmlmixed')
+    @getEditor().setWrap(true)
+    @editBuffer("html").setValue(@getOutput().$html(), 'html')
+
+  editStyle: ()->
+    @getEditor().setMode('css')
+    @editBuffer("style")
+
   editComponent: ()->
+    @getEditor().setMode('coffeescript')
     @editBuffer("component")
 
   editTeardown: ()->
+    @getEditor().setMode('coffeescript')
     @editBuffer("teardown")
 
   editSetup: ()->
+    @getEditor().setMode('coffeescript')
     @editBuffer("setup")
 
   editImplementation: ()->
+    @getEditor().setMode('coffeescript')
     @editBuffer("implementation")
 
   getTestRun: ()->
@@ -311,7 +387,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
 
     testRun = {}
 
-    for buffer in ["component","setup","implementation","teardown"]
+    for buffer in ["component","setup","implementation"]
       testRun[buffer] = editor.getBuffer(buffer, true)
 
     testRun
@@ -331,16 +407,38 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     catch error
       @onError( error, bufferId, code)
 
+  onMarkupChange: ()->
+    if @autoEvaluateCode is true
+      @getOutput().$html @getEditor().getValue()
+
+  onStyleChange: ()->
+    if @autoEvaluateCode is true
+      console.log "on style change", arguments
+
   showHelp: ()->
     @getOutput().$html( Luca.template("component_tester/help",@) )
 
-  addComponent: ()->
-    @debug "add components"
+  addComponent: (button)->
 
-  openComponent: ()->
-    @debug "open component"
-    @trigger "open:component"
+  openComponent: (button)->
+    @componentPicker ||= new ComponentPicker()
+
+    @componentPicker.bind "component:fetched", (source, component)=>
+      @setEditorNamespace(component).setValue( source, "component")
+
+    if !@$('.component-picker').length > 0
+      @$('.codemirror-wrapper').before(@componentPicker.createWrapper())
+      @$('.component-picker').html( @componentPicker.render().el )
+      @componentPicker.show()
+      return
+
+    @componentPicker.toggle()
 
   highlight: (section)->
     @$("a.btn[data-eventid='edit:#{ section }']").siblings().css('font-weight','normal')
     @$("a.btn[data-eventid='edit:#{ section }']").css('font-weight','bold')
+
+  setEditorNamespace: (namespace)->
+    @getEditor().namespace( namespace )
+    @getEditor().buffers.fetch()
+    @
