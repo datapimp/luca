@@ -231,6 +231,26 @@
     return _(values).select(iterator);
   };
 
+  Luca.util.loadScript = function(url, callback) {
+    var script;
+    script = document.createElement("script");
+    script.type = "text/javascript";
+    if (script.readyState) {
+      script.onreadystatechange = function() {
+        if (script.readyState === "loaded" || script.readyState === "complete") {
+          script.onreadystatechange = null;
+          return callback();
+        } else {
+          return script.onload = function() {
+            return callback();
+          };
+        }
+      };
+    }
+    script.src = url;
+    return document.body.appendChild(script);
+  };
+
 }).call(this);
 (function() {
   var component_cache, registry;
@@ -1085,7 +1105,8 @@
       }
       if (this.styles != null) this.applyStyles(this.styles);
       if (this.bodyStyles != null) this.applyStyles(this.bodyStyles, true);
-      return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
+      if (typeof this.renderToolbars === "function") this.renderToolbars();
+      return this.$el.data('luca.panel', this.name || this.cid);
     },
     $bodyEl: function() {
       var bodyEl, className, element, newElement;
