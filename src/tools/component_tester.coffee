@@ -357,7 +357,8 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   editMarkup: ()->
     @getEditor().setMode('htmlmixed')
     @getEditor().setWrap(true)
-    @editBuffer("html").setValue(@getOutput().$html(), 'html')
+    value = Luca.util.style_html( @getOutput().$html() )
+    @editBuffer("html").setValue(value, 'html')
 
   editStyle: ()->
     @getEditor().setMode('css')

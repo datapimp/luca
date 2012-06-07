@@ -52,7 +52,7 @@ class App < Sinatra::Base
     if params[:component]
       component = params[:component]
       source = Luca::CodeBrowser.get_source_for( component )
-      {className:component, source:source}.to_json
+      {}.merge(:className => component, :source => source).to_json
     else
       Luca::CodeBrowser.map_source
     end

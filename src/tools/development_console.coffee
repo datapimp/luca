@@ -84,6 +84,7 @@ _.def('Luca.tools.DevelopmentConsole').extends('Luca.components.Panel').with
         functions = _.functions
         inspect = JSON.stringify
         inspectArray = _.bind(inspectArray, devConsole)
+        load = Luca.util.load
 
         try
           ret = eval(compiled)

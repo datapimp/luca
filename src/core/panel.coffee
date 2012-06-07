@@ -51,6 +51,7 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     @applyStyles( @styles ) if @styles?
     @applyStyles( @bodyStyles, true ) if @bodyStyles?
     @renderToolbars?()
+    @$el.data('luca.panel', @name || @cid)
 
   $bodyEl: ()->
     element = @bodyTagName || "div"
