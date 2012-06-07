@@ -67,7 +67,6 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     if bodyEl.length is 0 and (@bodyClassName? || @bodyTagName?)
       newElement = @make(element,class:className,"data-auto-appended":true)
       $(@el).append( newElement )
-      console.log "Appended", @$(@bodyEl)
       return @$(@bodyEl)
 
 

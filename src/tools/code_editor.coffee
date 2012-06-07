@@ -194,13 +194,14 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
 
     _( @buffers.bufferKeys() ).each (key)=>
       if previous[key] isnt @buffers.get(key)
+
         if _( @buffers.requireCompilation() ).include(key)
           result = @compileCode( @buffers.get(key), key )
           if result.success is true
             @buffers.persist(key)
             @buffers.set("compiled_#{ key }", result.compiled, silent: true)
         else
-          @trigger "code:change:#{ key }", @buffers.get("key")
+          @trigger "code:change:#{ key }", @buffers.get(key)
           @buffers.persist(key)
 
     @buffers.change()

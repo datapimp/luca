@@ -127,6 +127,11 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 /* Based on Sublime Text's Monokai theme */
 
 
+
+.CodeMirror {
+  font-family: "Monaco";
+}
+
 .cm-s-monokai {background: #272822; color: #f8f8f2;}
 .cm-s-monokai div.CodeMirror-selected {background: #49483E !important;}
 .cm-s-monokai .CodeMirror-gutter {background: #272822; border-right: 0px;}
@@ -170,8 +175,23 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
     list-style-type: none;
     margin: 0px;
     padding: 0px; }
-.CodeMirror-scroll {
-  height: 100%; }
+.font-large .CodeMirror {
+  font-size: 1.3em;
+  line-height: 1.5em; }
+
+.font-small .CodeMirror {
+  font-size: 1.0em;
+  line-height: 1.2em; }
+
+.fixed-height .CodeMirror-scroll {
+  overflow: auto;
+  height: 350px; }
+
+.auto-height .CodeMirror-scroll {
+  height: auto;
+  overflow: visible; }
+ul.typeahead.dropdown-menu {
+  z-index: 13000; }
 /*
 
 

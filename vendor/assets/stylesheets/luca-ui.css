@@ -149,9 +149,15 @@
     clear: right; }
     .luca-ui-g-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
       float: left; }
-.luca-ui-card {
-  padding: 5px;
-  width: 100%; }
+.toolbar-container {
+  overflow: hidden;
+  clear: both; }
+
+.toolbar-container.top {
+  height: 54px; }
+
+.toolbar-container.bottom {
+  margin-top: 0px; }
 .luca-ui-toolbar {
   float: left;
   clear: both;
@@ -561,8 +567,23 @@ table {
     list-style-type: none;
     margin: 0px;
     padding: 0px; }
-.CodeMirror-scroll {
-  height: 100%; }
+.font-large .CodeMirror {
+  font-size: 1.3em;
+  line-height: 1.5em; }
+
+.font-small .CodeMirror {
+  font-size: 1.0em;
+  line-height: 1.2em; }
+
+.fixed-height .CodeMirror-scroll {
+  overflow: auto;
+  height: 350px; }
+
+.auto-height .CodeMirror-scroll {
+  height: auto;
+  overflow: visible; }
+ul.typeahead.dropdown-menu {
+  z-index: 13000; }
 /*
 
  */

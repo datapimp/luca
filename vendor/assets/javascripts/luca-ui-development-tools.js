@@ -16262,6 +16262,1134 @@ CodeMirror.defineMode('coffeescript', function(conf) {
 });
 
 CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
+CodeMirror.defineMode("javascript", function(config, parserConfig) {
+  var indentUnit = config.indentUnit;
+  var jsonMode = parserConfig.json;
+
+  // Tokenizer
+
+  var keywords = function(){
+    function kw(type) {return {type: type, style: "keyword"};}
+    var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c");
+    var operator = kw("operator"), atom = {type: "atom", style: "atom"};
+    return {
+      "if": A, "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
+      "return": C, "break": C, "continue": C, "new": C, "delete": C, "throw": C,
+      "var": kw("var"), "const": kw("var"), "let": kw("var"),
+      "function": kw("function"), "catch": kw("catch"),
+      "for": kw("for"), "switch": kw("switch"), "case": kw("case"), "default": kw("default"),
+      "in": operator, "typeof": operator, "instanceof": operator,
+      "true": atom, "false": atom, "null": atom, "undefined": atom, "NaN": atom, "Infinity": atom
+    };
+  }();
+
+  var isOperatorChar = /[+\-*&%=<>!?|]/;
+
+  function chain(stream, state, f) {
+    state.tokenize = f;
+    return f(stream, state);
+  }
+
+  function nextUntilUnescaped(stream, end) {
+    var escaped = false, next;
+    while ((next = stream.next()) != null) {
+      if (next == end && !escaped)
+        return false;
+      escaped = !escaped && next == "\\";
+    }
+    return escaped;
+  }
+
+  // Used as scratch variables to communicate multiple values without
+  // consing up tons of objects.
+  var type, content;
+  function ret(tp, style, cont) {
+    type = tp; content = cont;
+    return style;
+  }
+
+  function jsTokenBase(stream, state) {
+    var ch = stream.next();
+    if (ch == '"' || ch == "'")
+      return chain(stream, state, jsTokenString(ch));
+    else if (/[\[\]{}\(\),;\:\.]/.test(ch))
+      return ret(ch);
+    else if (ch == "0" && stream.eat(/x/i)) {
+      stream.eatWhile(/[\da-f]/i);
+      return ret("number", "number");
+    }
+    else if (/\d/.test(ch)) {
+      stream.match(/^\d*(?:\.\d*)?(?:[eE][+\-]?\d+)?/);
+      return ret("number", "number");
+    }
+    else if (ch == "/") {
+      if (stream.eat("*")) {
+        return chain(stream, state, jsTokenComment);
+      }
+      else if (stream.eat("/")) {
+        stream.skipToEnd();
+        return ret("comment", "comment");
+      }
+      else if (state.reAllowed) {
+        nextUntilUnescaped(stream, "/");
+        stream.eatWhile(/[gimy]/); // 'y' is "sticky" option in Mozilla
+        return ret("regexp", "string-2");
+      }
+      else {
+        stream.eatWhile(isOperatorChar);
+        return ret("operator", null, stream.current());
+      }
+    }
+    else if (ch == "#") {
+        stream.skipToEnd();
+        return ret("error", "error");
+    }
+    else if (isOperatorChar.test(ch)) {
+      stream.eatWhile(isOperatorChar);
+      return ret("operator", null, stream.current());
+    }
+    else {
+      stream.eatWhile(/[\w\$_]/);
+      var word = stream.current(), known = keywords.propertyIsEnumerable(word) && keywords[word];
+      return (known && state.kwAllowed) ? ret(known.type, known.style, word) :
+                     ret("variable", "variable", word);
+    }
+  }
+
+  function jsTokenString(quote) {
+    return function(stream, state) {
+      if (!nextUntilUnescaped(stream, quote))
+        state.tokenize = jsTokenBase;
+      return ret("string", "string");
+    };
+  }
+
+  function jsTokenComment(stream, state) {
+    var maybeEnd = false, ch;
+    while (ch = stream.next()) {
+      if (ch == "/" && maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == "*");
+    }
+    return ret("comment", "comment");
+  }
+
+  // Parser
+
+  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, "regexp": true};
+
+  function JSLexical(indented, column, type, align, prev, info) {
+    this.indented = indented;
+    this.column = column;
+    this.type = type;
+    this.prev = prev;
+    this.info = info;
+    if (align != null) this.align = align;
+  }
+
+  function inScope(state, varname) {
+    for (var v = state.localVars; v; v = v.next)
+      if (v.name == varname) return true;
+  }
+
+  function parseJS(state, style, type, content, stream) {
+    var cc = state.cc;
+    // Communicate our context to the combinators.
+    // (Less wasteful than consing up a hundred closures on every call.)
+    cx.state = state; cx.stream = stream; cx.marked = null, cx.cc = cc;
+
+    if (!state.lexical.hasOwnProperty("align"))
+      state.lexical.align = true;
+
+    while(true) {
+      var combinator = cc.length ? cc.pop() : jsonMode ? expression : statement;
+      if (combinator(type, content)) {
+        while(cc.length && cc[cc.length - 1].lex)
+          cc.pop()();
+        if (cx.marked) return cx.marked;
+        if (type == "variable" && inScope(state, content)) return "variable-2";
+        return style;
+      }
+    }
+  }
+
+  // Combinator utils
+
+  var cx = {state: null, column: null, marked: null, cc: null};
+  function pass() {
+    for (var i = arguments.length - 1; i >= 0; i--) cx.cc.push(arguments[i]);
+  }
+  function cont() {
+    pass.apply(null, arguments);
+    return true;
+  }
+  function register(varname) {
+    var state = cx.state;
+    if (state.context) {
+      cx.marked = "def";
+      for (var v = state.localVars; v; v = v.next)
+        if (v.name == varname) return;
+      state.localVars = {name: varname, next: state.localVars};
+    }
+  }
+
+  // Combinators
+
+  var defaultVars = {name: "this", next: {name: "arguments"}};
+  function pushcontext() {
+    if (!cx.state.context) cx.state.localVars = defaultVars;
+    cx.state.context = {prev: cx.state.context, vars: cx.state.localVars};
+  }
+  function popcontext() {
+    cx.state.localVars = cx.state.context.vars;
+    cx.state.context = cx.state.context.prev;
+  }
+  function pushlex(type, info) {
+    var result = function() {
+      var state = cx.state;
+      state.lexical = new JSLexical(state.indented, cx.stream.column(), type, null, state.lexical, info)
+    };
+    result.lex = true;
+    return result;
+  }
+  function poplex() {
+    var state = cx.state;
+    if (state.lexical.prev) {
+      if (state.lexical.type == ")")
+        state.indented = state.lexical.indented;
+      state.lexical = state.lexical.prev;
+    }
+  }
+  poplex.lex = true;
+
+  function expect(wanted) {
+    return function expecting(type) {
+      if (type == wanted) return cont();
+      else if (wanted == ";") return pass();
+      else return cont(arguments.callee);
+    };
+  }
+
+  function statement(type) {
+    if (type == "var") return cont(pushlex("vardef"), vardef1, expect(";"), poplex);
+    if (type == "keyword a") return cont(pushlex("form"), expression, statement, poplex);
+    if (type == "keyword b") return cont(pushlex("form"), statement, poplex);
+    if (type == "{") return cont(pushlex("}"), block, poplex);
+    if (type == ";") return cont();
+    if (type == "function") return cont(functiondef);
+    if (type == "for") return cont(pushlex("form"), expect("("), pushlex(")"), forspec1, expect(")"),
+                                      poplex, statement, poplex);
+    if (type == "variable") return cont(pushlex("stat"), maybelabel);
+    if (type == "switch") return cont(pushlex("form"), expression, pushlex("}", "switch"), expect("{"),
+                                         block, poplex, poplex);
+    if (type == "case") return cont(expression, expect(":"));
+    if (type == "default") return cont(expect(":"));
+    if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
+                                        statement, poplex, popcontext);
+    return pass(pushlex("stat"), expression, expect(";"), poplex);
+  }
+  function expression(type) {
+    if (atomicTypes.hasOwnProperty(type)) return cont(maybeoperator);
+    if (type == "function") return cont(functiondef);
+    if (type == "keyword c") return cont(maybeexpression);
+    if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeoperator);
+    if (type == "operator") return cont(expression);
+    if (type == "[") return cont(pushlex("]"), commasep(expression, "]"), poplex, maybeoperator);
+    if (type == "{") return cont(pushlex("}"), commasep(objprop, "}"), poplex, maybeoperator);
+    return cont();
+  }
+  function maybeexpression(type) {
+    if (type.match(/[;\}\)\],]/)) return pass();
+    return pass(expression);
+  }
+
+  function maybeoperator(type, value) {
+    if (type == "operator" && /\+\+|--/.test(value)) return cont(maybeoperator);
+    if (type == "operator" || type == ":") return cont(expression);
+    if (type == ";") return;
+    if (type == "(") return cont(pushlex(")"), commasep(expression, ")"), poplex, maybeoperator);
+    if (type == ".") return cont(property, maybeoperator);
+    if (type == "[") return cont(pushlex("]"), expression, expect("]"), poplex, maybeoperator);
+  }
+  function maybelabel(type) {
+    if (type == ":") return cont(poplex, statement);
+    return pass(maybeoperator, expect(";"), poplex);
+  }
+  function property(type) {
+    if (type == "variable") {cx.marked = "property"; return cont();}
+  }
+  function objprop(type) {
+    if (type == "variable") cx.marked = "property";
+    if (atomicTypes.hasOwnProperty(type)) return cont(expect(":"), expression);
+  }
+  function commasep(what, end) {
+    function proceed(type) {
+      if (type == ",") return cont(what, proceed);
+      if (type == end) return cont();
+      return cont(expect(end));
+    }
+    return function commaSeparated(type) {
+      if (type == end) return cont();
+      else return pass(what, proceed);
+    };
+  }
+  function block(type) {
+    if (type == "}") return cont();
+    return pass(statement, block);
+  }
+  function vardef1(type, value) {
+    if (type == "variable"){register(value); return cont(vardef2);}
+    return cont();
+  }
+  function vardef2(type, value) {
+    if (value == "=") return cont(expression, vardef2);
+    if (type == ",") return cont(vardef1);
+  }
+  function forspec1(type) {
+    if (type == "var") return cont(vardef1, forspec2);
+    if (type == ";") return pass(forspec2);
+    if (type == "variable") return cont(formaybein);
+    return pass(forspec2);
+  }
+  function formaybein(type, value) {
+    if (value == "in") return cont(expression);
+    return cont(maybeoperator, forspec2);
+  }
+  function forspec2(type, value) {
+    if (type == ";") return cont(forspec3);
+    if (value == "in") return cont(expression);
+    return cont(expression, expect(";"), forspec3);
+  }
+  function forspec3(type) {
+    if (type != ")") cont(expression);
+  }
+  function functiondef(type, value) {
+    if (type == "variable") {register(value); return cont(functiondef);}
+    if (type == "(") return cont(pushlex(")"), pushcontext, commasep(funarg, ")"), poplex, statement, popcontext);
+  }
+  function funarg(type, value) {
+    if (type == "variable") {register(value); return cont();}
+  }
+
+  // Interface
+
+  return {
+    startState: function(basecolumn) {
+      return {
+        tokenize: jsTokenBase,
+        reAllowed: true,
+        kwAllowed: true,
+        cc: [],
+        lexical: new JSLexical((basecolumn || 0) - indentUnit, 0, "block", false),
+        localVars: parserConfig.localVars,
+        context: parserConfig.localVars && {vars: parserConfig.localVars},
+        indented: 0
+      };
+    },
+
+    token: function(stream, state) {
+      if (stream.sol()) {
+        if (!state.lexical.hasOwnProperty("align"))
+          state.lexical.align = false;
+        state.indented = stream.indentation();
+      }
+      if (stream.eatSpace()) return null;
+      var style = state.tokenize(stream, state);
+      if (type == "comment") return style;
+      state.reAllowed = !!(type == "operator" || type == "keyword c" || type.match(/^[\[{}\(,;:]$/));
+      state.kwAllowed = type != '.';
+      return parseJS(state, style, type, content, stream);
+    },
+
+    indent: function(state, textAfter) {
+      if (state.tokenize != jsTokenBase) return 0;
+      var firstChar = textAfter && textAfter.charAt(0), lexical = state.lexical;
+      if (lexical.type == "stat" && firstChar == "}") lexical = lexical.prev;
+      var type = lexical.type, closing = firstChar == type;
+      if (type == "vardef") return lexical.indented + 4;
+      else if (type == "form" && firstChar == "{") return lexical.indented;
+      else if (type == "stat" || type == "form") return lexical.indented + indentUnit;
+      else if (lexical.info == "switch" && !closing)
+        return lexical.indented + (/^(?:case|default)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
+      else if (lexical.align) return lexical.column + (closing ? 0 : 1);
+      else return lexical.indented + (closing ? 0 : indentUnit);
+    },
+
+    electricChars: ":{}"
+  };
+});
+
+CodeMirror.defineMIME("text/javascript", "javascript");
+CodeMirror.defineMIME("application/json", {name: "javascript", json: true});
+CodeMirror.defineMode("xml", function(config, parserConfig) {
+  var indentUnit = config.indentUnit;
+  var Kludges = parserConfig.htmlMode ? {
+    autoSelfClosers: {'area': true, 'base': true, 'br': true, 'col': true, 'command': true,
+                      'embed': true, 'frame': true, 'hr': true, 'img': true, 'input': true,
+                      'keygen': true, 'link': true, 'meta': true, 'param': true, 'source': true,
+                      'track': true, 'wbr': true},
+    implicitlyClosed: {'dd': true, 'li': true, 'optgroup': true, 'option': true, 'p': true,
+                       'rp': true, 'rt': true, 'tbody': true, 'td': true, 'tfoot': true,
+                       'th': true, 'tr': true},
+    contextGrabbers: {
+      'dd': {'dd': true, 'dt': true},
+      'dt': {'dd': true, 'dt': true},
+      'li': {'li': true},
+      'option': {'option': true, 'optgroup': true},
+      'optgroup': {'optgroup': true},
+      'p': {'address': true, 'article': true, 'aside': true, 'blockquote': true, 'dir': true,
+            'div': true, 'dl': true, 'fieldset': true, 'footer': true, 'form': true,
+            'h1': true, 'h2': true, 'h3': true, 'h4': true, 'h5': true, 'h6': true,
+            'header': true, 'hgroup': true, 'hr': true, 'menu': true, 'nav': true, 'ol': true,
+            'p': true, 'pre': true, 'section': true, 'table': true, 'ul': true},
+      'rp': {'rp': true, 'rt': true},
+      'rt': {'rp': true, 'rt': true},
+      'tbody': {'tbody': true, 'tfoot': true},
+      'td': {'td': true, 'th': true},
+      'tfoot': {'tbody': true},
+      'th': {'td': true, 'th': true},
+      'thead': {'tbody': true, 'tfoot': true},
+      'tr': {'tr': true}
+    },
+    doNotIndent: {"pre": true},
+    allowUnquoted: true,
+    allowMissing: false
+  } : {
+    autoSelfClosers: {},
+    implicitlyClosed: {},
+    contextGrabbers: {},
+    doNotIndent: {},
+    allowUnquoted: false,
+    allowMissing: false
+  };
+  var alignCDATA = parserConfig.alignCDATA;
+
+  // Return variables for tokenizers
+  var tagName, type;
+
+  function inText(stream, state) {
+    function chain(parser) {
+      state.tokenize = parser;
+      return parser(stream, state);
+    }
+
+    var ch = stream.next();
+    if (ch == "<") {
+      if (stream.eat("!")) {
+        if (stream.eat("[")) {
+          if (stream.match("CDATA[")) return chain(inBlock("atom", "]]>"));
+          else return null;
+        }
+        else if (stream.match("--")) return chain(inBlock("comment", "-->"));
+        else if (stream.match("DOCTYPE", true, true)) {
+          stream.eatWhile(/[\w\._\-]/);
+          return chain(doctype(1));
+        }
+        else return null;
+      }
+      else if (stream.eat("?")) {
+        stream.eatWhile(/[\w\._\-]/);
+        state.tokenize = inBlock("meta", "?>");
+        return "meta";
+      }
+      else {
+        type = stream.eat("/") ? "closeTag" : "openTag";
+        stream.eatSpace();
+        tagName = "";
+        var c;
+        while ((c = stream.eat(/[^\s\u00a0=<>\"\'\/?]/))) tagName += c;
+        state.tokenize = inTag;
+        return "tag";
+      }
+    }
+    else if (ch == "&") {
+      var ok;
+      if (stream.eat("#")) {
+        if (stream.eat("x")) {
+          ok = stream.eatWhile(/[a-fA-F\d]/) && stream.eat(";");
+        } else {
+          ok = stream.eatWhile(/[\d]/) && stream.eat(";");
+        }
+      } else {
+        ok = stream.eatWhile(/[\w\.\-:]/) && stream.eat(";");
+      }
+      return ok ? "atom" : "error";
+    }
+    else {
+      stream.eatWhile(/[^&<]/);
+      return null;
+    }
+  }
+
+  function inTag(stream, state) {
+    var ch = stream.next();
+    if (ch == ">" || (ch == "/" && stream.eat(">"))) {
+      state.tokenize = inText;
+      type = ch == ">" ? "endTag" : "selfcloseTag";
+      return "tag";
+    }
+    else if (ch == "=") {
+      type = "equals";
+      return null;
+    }
+    else if (/[\'\"]/.test(ch)) {
+      state.tokenize = inAttribute(ch);
+      return state.tokenize(stream, state);
+    }
+    else {
+      stream.eatWhile(/[^\s\u00a0=<>\"\'\/?]/);
+      return "word";
+    }
+  }
+
+  function inAttribute(quote) {
+    return function(stream, state) {
+      while (!stream.eol()) {
+        if (stream.next() == quote) {
+          state.tokenize = inTag;
+          break;
+        }
+      }
+      return "string";
+    };
+  }
+
+  function inBlock(style, terminator) {
+    return function(stream, state) {
+      while (!stream.eol()) {
+        if (stream.match(terminator)) {
+          state.tokenize = inText;
+          break;
+        }
+        stream.next();
+      }
+      return style;
+    };
+  }
+  function doctype(depth) {
+    return function(stream, state) {
+      var ch;
+      while ((ch = stream.next()) != null) {
+        if (ch == "<") {
+          state.tokenize = doctype(depth + 1);
+          return state.tokenize(stream, state);
+        } else if (ch == ">") {
+          if (depth == 1) {
+            state.tokenize = inText;
+            break;
+          } else {
+            state.tokenize = doctype(depth - 1);
+            return state.tokenize(stream, state);
+          }
+        }
+      }
+      return "meta";
+    };
+  }
+
+  var curState, setStyle;
+  function pass() {
+    for (var i = arguments.length - 1; i >= 0; i--) curState.cc.push(arguments[i]);
+  }
+  function cont() {
+    pass.apply(null, arguments);
+    return true;
+  }
+
+  function pushContext(tagName, startOfLine) {
+    var noIndent = Kludges.doNotIndent.hasOwnProperty(tagName) || (curState.context && curState.context.noIndent);
+    curState.context = {
+      prev: curState.context,
+      tagName: tagName,
+      indent: curState.indented,
+      startOfLine: startOfLine,
+      noIndent: noIndent
+    };
+  }
+  function popContext() {
+    if (curState.context) curState.context = curState.context.prev;
+  }
+
+  function element(type) {
+    if (type == "openTag") {
+      curState.tagName = tagName;
+      return cont(attributes, endtag(curState.startOfLine));
+    } else if (type == "closeTag") {
+      var err = false;
+      if (curState.context) {
+        if (curState.context.tagName != tagName) {
+          if (Kludges.implicitlyClosed.hasOwnProperty(curState.context.tagName.toLowerCase())) {
+            popContext();
+          }
+          err = !curState.context || curState.context.tagName != tagName;
+        }
+      } else {
+        err = true;
+      }
+      if (err) setStyle = "error";
+      return cont(endclosetag(err));
+    }
+    return cont();
+  }
+  function endtag(startOfLine) {
+    return function(type) {
+      if (type == "selfcloseTag" ||
+          (type == "endTag" && Kludges.autoSelfClosers.hasOwnProperty(curState.tagName.toLowerCase()))) {
+        maybePopContext(curState.tagName.toLowerCase());
+        return cont();
+      }
+      if (type == "endTag") {
+        maybePopContext(curState.tagName.toLowerCase());
+        pushContext(curState.tagName, startOfLine);
+        return cont();
+      }
+      return cont();
+    };
+  }
+  function endclosetag(err) {
+    return function(type) {
+      if (err) setStyle = "error";
+      if (type == "endTag") { popContext(); return cont(); }
+      setStyle = "error";
+      return cont(arguments.callee);
+    }
+  }
+  function maybePopContext(nextTagName) {
+    var parentTagName;
+    while (true) {
+      if (!curState.context) {
+        return;
+      }
+      parentTagName = curState.context.tagName.toLowerCase();
+      if (!Kludges.contextGrabbers.hasOwnProperty(parentTagName) ||
+          !Kludges.contextGrabbers[parentTagName].hasOwnProperty(nextTagName)) {
+        return;
+      }
+      popContext();
+    }
+  }
+
+  function attributes(type) {
+    if (type == "word") {setStyle = "attribute"; return cont(attribute, attributes);}
+    if (type == "endTag" || type == "selfcloseTag") return pass();
+    setStyle = "error";
+    return cont(attributes);
+  }
+  function attribute(type) {
+    if (type == "equals") return cont(attvalue, attributes);
+    if (!Kludges.allowMissing) setStyle = "error";
+    return (type == "endTag" || type == "selfcloseTag") ? pass() : cont();
+  }
+  function attvalue(type) {
+    if (type == "string") return cont(attvaluemaybe);
+    if (type == "word" && Kludges.allowUnquoted) {setStyle = "string"; return cont();}
+    setStyle = "error";
+    return (type == "endTag" || type == "selfCloseTag") ? pass() : cont();
+  }
+  function attvaluemaybe(type) {
+    if (type == "string") return cont(attvaluemaybe);
+    else return pass();
+  }
+
+  return {
+    startState: function() {
+      return {tokenize: inText, cc: [], indented: 0, startOfLine: true, tagName: null, context: null};
+    },
+
+    token: function(stream, state) {
+      if (stream.sol()) {
+        state.startOfLine = true;
+        state.indented = stream.indentation();
+      }
+      if (stream.eatSpace()) return null;
+
+      setStyle = type = tagName = null;
+      var style = state.tokenize(stream, state);
+      state.type = type;
+      if ((style || type) && style != "comment") {
+        curState = state;
+        while (true) {
+          var comb = state.cc.pop() || element;
+          if (comb(type || style)) break;
+        }
+      }
+      state.startOfLine = false;
+      return setStyle || style;
+    },
+
+    indent: function(state, textAfter, fullLine) {
+      var context = state.context;
+      if ((state.tokenize != inTag && state.tokenize != inText) ||
+          context && context.noIndent)
+        return fullLine ? fullLine.match(/^(\s*)/)[0].length : 0;
+      if (alignCDATA && /<!\[CDATA\[/.test(textAfter)) return 0;
+      if (context && /^<\//.test(textAfter))
+        context = context.prev;
+      while (context && !context.startOfLine)
+        context = context.prev;
+      if (context) return context.indent + indentUnit;
+      else return 0;
+    },
+
+    compareStates: function(a, b) {
+      if (a.indented != b.indented || a.tokenize != b.tokenize) return false;
+      for (var ca = a.context, cb = b.context; ; ca = ca.prev, cb = cb.prev) {
+        if (!ca || !cb) return ca == cb;
+        if (ca.tagName != cb.tagName) return false;
+      }
+    },
+
+    electricChars: "/"
+  };
+});
+
+CodeMirror.defineMIME("application/xml", "xml");
+if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
+  CodeMirror.defineMIME("text/html", {name: "xml", htmlMode: true});
+CodeMirror.defineMode("htmlmixed", function(config, parserConfig) {
+  var htmlMode = CodeMirror.getMode(config, {name: "xml", htmlMode: true});
+  var jsMode = CodeMirror.getMode(config, "javascript");
+  var cssMode = CodeMirror.getMode(config, "css");
+
+  function html(stream, state) {
+    var style = htmlMode.token(stream, state.htmlState);
+    if (style == "tag" && stream.current() == ">" && state.htmlState.context) {
+      if (/^script$/i.test(state.htmlState.context.tagName)) {
+        state.token = javascript;
+        state.localState = jsMode.startState(htmlMode.indent(state.htmlState, ""));
+        state.mode = "javascript";
+      }
+      else if (/^style$/i.test(state.htmlState.context.tagName)) {
+        state.token = css;
+        state.localState = cssMode.startState(htmlMode.indent(state.htmlState, ""));
+        state.mode = "css";
+      }
+    }
+    return style;
+  }
+  function maybeBackup(stream, pat, style) {
+    var cur = stream.current();
+    var close = cur.search(pat);
+    if (close > -1) stream.backUp(cur.length - close);
+    return style;
+  }
+  function javascript(stream, state) {
+    if (stream.match(/^<\/\s*script\s*>/i, false)) {
+      state.token = html;
+      state.localState = null;
+      state.mode = "html";
+      return html(stream, state);
+    }
+    return maybeBackup(stream, /<\/\s*script\s*>/,
+                       jsMode.token(stream, state.localState));
+  }
+  function css(stream, state) {
+    if (stream.match(/^<\/\s*style\s*>/i, false)) {
+      state.token = html;
+      state.localState = null;
+      state.mode = "html";
+      return html(stream, state);
+    }
+    return maybeBackup(stream, /<\/\s*style\s*>/,
+                       cssMode.token(stream, state.localState));
+  }
+
+  return {
+    startState: function() {
+      var state = htmlMode.startState();
+      return {token: html, localState: null, mode: "html", htmlState: state};
+    },
+
+    copyState: function(state) {
+      if (state.localState)
+        var local = CodeMirror.copyState(state.token == css ? cssMode : jsMode, state.localState);
+      return {token: state.token, localState: local, mode: state.mode,
+              htmlState: CodeMirror.copyState(htmlMode, state.htmlState)};
+    },
+
+    token: function(stream, state) {
+      return state.token(stream, state);
+    },
+
+    indent: function(state, textAfter) {
+      if (state.token == html || /^\s*<\//.test(textAfter))
+        return htmlMode.indent(state.htmlState, textAfter);
+      else if (state.token == javascript)
+        return jsMode.indent(state.localState, textAfter);
+      else
+        return cssMode.indent(state.localState, textAfter);
+    },
+
+    compareStates: function(a, b) {
+      if (a.mode != b.mode) return false;
+      if (a.localState) return CodeMirror.Pass;
+      return htmlMode.compareStates(a.htmlState, b.htmlState);
+    },
+
+    electricChars: "/{}:"
+  }
+}, "xml", "javascript", "css");
+
+CodeMirror.defineMIME("text/html", "htmlmixed");
+CodeMirror.defineMode("css", function(config) {
+  var indentUnit = config.indentUnit, type;
+  function ret(style, tp) {type = tp; return style;}
+
+  function tokenBase(stream, state) {
+    var ch = stream.next();
+    if (ch == "@") {stream.eatWhile(/[\w\\\-]/); return ret("meta", stream.current());}
+    else if (ch == "/" && stream.eat("*")) {
+      state.tokenize = tokenCComment;
+      return tokenCComment(stream, state);
+    }
+    else if (ch == "<" && stream.eat("!")) {
+      state.tokenize = tokenSGMLComment;
+      return tokenSGMLComment(stream, state);
+    }
+    else if (ch == "=") ret(null, "compare");
+    else if ((ch == "~" || ch == "|") && stream.eat("=")) return ret(null, "compare");
+    else if (ch == "\"" || ch == "'") {
+      state.tokenize = tokenString(ch);
+      return state.tokenize(stream, state);
+    }
+    else if (ch == "#") {
+      stream.eatWhile(/[\w\\\-]/);
+      return ret("atom", "hash");
+    }
+    else if (ch == "!") {
+      stream.match(/^\s*\w*/);
+      return ret("keyword", "important");
+    }
+    else if (/\d/.test(ch)) {
+      stream.eatWhile(/[\w.%]/);
+      return ret("number", "unit");
+    }
+    else if (/[,.+>*\/]/.test(ch)) {
+      return ret(null, "select-op");
+    }
+    else if (/[;{}:\[\]]/.test(ch)) {
+      return ret(null, ch);
+    }
+    else {
+      stream.eatWhile(/[\w\\\-]/);
+      return ret("variable", "variable");
+    }
+  }
+
+  function tokenCComment(stream, state) {
+    var maybeEnd = false, ch;
+    while ((ch = stream.next()) != null) {
+      if (maybeEnd && ch == "/") {
+        state.tokenize = tokenBase;
+        break;
+      }
+      maybeEnd = (ch == "*");
+    }
+    return ret("comment", "comment");
+  }
+
+  function tokenSGMLComment(stream, state) {
+    var dashes = 0, ch;
+    while ((ch = stream.next()) != null) {
+      if (dashes >= 2 && ch == ">") {
+        state.tokenize = tokenBase;
+        break;
+      }
+      dashes = (ch == "-") ? dashes + 1 : 0;
+    }
+    return ret("comment", "comment");
+  }
+
+  function tokenString(quote) {
+    return function(stream, state) {
+      var escaped = false, ch;
+      while ((ch = stream.next()) != null) {
+        if (ch == quote && !escaped)
+          break;
+        escaped = !escaped && ch == "\\";
+      }
+      if (!escaped) state.tokenize = tokenBase;
+      return ret("string", "string");
+    };
+  }
+
+  return {
+    startState: function(base) {
+      return {tokenize: tokenBase,
+              baseIndent: base || 0,
+              stack: []};
+    },
+
+    token: function(stream, state) {
+      if (stream.eatSpace()) return null;
+      var style = state.tokenize(stream, state);
+
+      var context = state.stack[state.stack.length-1];
+      if (type == "hash" && context != "rule") style = "string-2";
+      else if (style == "variable") {
+        if (context == "rule") style = "number";
+        else if (!context || context == "@media{") style = "tag";
+      }
+
+      if (context == "rule" && /^[\{\};]$/.test(type))
+        state.stack.pop();
+      if (type == "{") {
+        if (context == "@media") state.stack[state.stack.length-1] = "@media{";
+        else state.stack.push("{");
+      }
+      else if (type == "}") state.stack.pop();
+      else if (type == "@media") state.stack.push("@media");
+      else if (context == "{" && type != "comment") state.stack.push("rule");
+      return style;
+    },
+
+    indent: function(state, textAfter) {
+      var n = state.stack.length;
+      if (/^\}/.test(textAfter))
+        n -= state.stack[state.stack.length-1] == "rule" ? 2 : 1;
+      return state.baseIndent + n * indentUnit;
+    },
+
+    electricChars: "}"
+  };
+});
+
+CodeMirror.defineMIME("text/css", "css");
+/*
+LESS mode - http://www.lesscss.org/
+Ported to CodeMirror by Peter Kroon
+*/
+
+
+CodeMirror.defineMode("css", function(config) {
+  var indentUnit = config.indentUnit, type;
+  function ret(style, tp) {type = tp; return style;}
+  //html5 tags
+  var tags = ["a","abbr","acronym","address","applet","area","article","aside","audio","b","base","basefont","bdi","bdo","big","blockquote","body","br","button","canvas","caption","cite","code","col","colgroup","command","datalist","dd","del","details","dfn","dir","div","dl","dt","em","embed","fieldset","figcaption","figure","font","footer","form","frame","frameset","h1","h2","h3","h4","h5","h6","head","header","hgroup","hr","html","i","iframe","img","input","ins","keygen","kbd","label","legend","li","link","map","mark","menu","meta","meter","nav","noframes","noscript","object","ol","optgroup","option","output","p","param","pre","progress","q","rp","rt","ruby","s","samp","script","section","select","small","source","span","strike","strong","style","sub","summary","sup","table","tbody","td","textarea","tfoot","th","thead","time","title","tr","track","tt","u","ul","var","video","wbr"];
+
+  function inTagsArray(val){
+    for(var i=0; i<tags.length; i++){
+      if(val === tags[i]){
+        return true;
+      }
+    }
+  }
+
+  function tokenBase(stream, state) {
+    var ch = stream.next();
+
+  if (ch == "@") {stream.eatWhile(/[\w\-]/); return ret("meta", stream.current());}
+    else if (ch == "/" && stream.eat("*")) {
+      state.tokenize = tokenCComment;
+      return tokenCComment(stream, state);
+    }
+    else if (ch == "<" && stream.eat("!")) {
+      state.tokenize = tokenSGMLComment;
+      return tokenSGMLComment(stream, state);
+    }
+    else if (ch == "=") ret(null, "compare");
+    else if ((ch == "~" || ch == "|") && stream.eat("=")) return ret(null, "compare");
+    else if (ch == "\"" || ch == "'") {
+      state.tokenize = tokenString(ch);
+      return state.tokenize(stream, state);
+    }
+  else if (ch == "/") { // lesscss e.g.: .png will not be parsed as a class
+    if(stream.eat("/")){
+    state.tokenize = tokenSComment
+        return tokenSComment(stream, state);
+    }else{
+      stream.eatWhile(/[\a-zA-Z0-9\-_.\s]/);
+    if(/\/|\)|#/.test(stream.peek() || stream.eol() || (stream.eatSpace() && stream.peek() == ")")))return ret("string", "string");//let url(/images/logo.png) without quotes return as string
+        return ret("number", "unit");
+    }
+    }
+    else if (ch == "!") {
+      stream.match(/^\s*\w*/);
+      return ret("keyword", "important");
+    }
+    else if (/\d/.test(ch)) {
+      stream.eatWhile(/[\w.%]/);
+      return ret("number", "unit");
+    }
+    else if (/[,+<>*\/]/.test(ch)) {//removed . dot character original was [,.+>*\/]
+      return ret(null, "select-op");
+    }
+    else if (/[;{}:\[\]()]/.test(ch)) { //added () char for lesscss original was [;{}:\[\]]
+      if(ch == ":"){
+    stream.eatWhile(/[active|hover|link|visited]/);
+    if( stream.current().match(/active|hover|link|visited/)){
+      return ret("tag", "tag");
+    }else{
+      return ret(null, ch);
+    }
+    }else{
+        return ret(null, ch);
+    }
+    }
+  else if (ch == ".") { // lesscss
+    stream.eatWhile(/[\a-zA-Z0-9\-_]/);
+      return ret("tag", "tag");
+    }
+  else if (ch == "#") { // lesscss
+    //we don't eat white-space, we want the hex color and or id only
+    stream.eatWhile(/[A-Za-z0-9]/);
+    //check if there is a proper hex color length e.g. #eee || #eeeEEE
+    if(stream.current().length ===4 || stream.current().length ===7){
+      if(stream.current().match(/[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}/,false) != null){//is there a valid hex color value present in the current stream
+        //when not a valid hex value, parse as id
+      if(stream.current().substring(1) != stream.current().match(/[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}/,false))return ret("atom", "tag");
+      //eat white-space
+      stream.eatSpace();
+      //when hex value declaration doesn't end with [;,] but is does with a slash/cc comment treat it as an id, just like the other hex values that don't end with[;,]
+      if( /[\/<>.(){!$%^&*_\-\\?=+\|#'~`]/.test(stream.peek()) )return ret("atom", "tag");
+      //#time { color: #aaa }
+      else if(stream.peek() == "}" )return ret("number", "unit");
+      //we have a valid hex color value, parse as id whenever an element/class is defined after the hex(id) value e.g. #eee aaa || #eee .aaa
+      else if( /[a-zA-Z\\]/.test(stream.peek()) )return ret("atom", "tag");
+      //when a hex value is on the end of a line, parse as id
+      else if(stream.eol())return ret("atom", "tag");
+      //default
+      else return ret("number", "unit");
+      }else{//when not a valid hexvalue in the current stream e.g. #footer
+      stream.eatWhile(/[\w\\\-]/);
+      return ret("atom", "tag");
+      }
+    }else{
+    stream.eatWhile(/[\w\\\-]/);
+    return ret("atom", "tag");
+    }
+    }
+  else if (ch == "&") {
+    stream.eatWhile(/[\w\-]/);
+    return ret(null, ch);
+  }
+    else {
+      stream.eatWhile(/[\w\\\-_%.{]/);
+    if(stream.current().match(/http|https/) != null){
+    stream.eatWhile(/[\w\\\-_%.{:\/]/);
+    return ret("string", "string");
+    }else if(stream.peek() == "<" || stream.peek() == ">"){
+    return ret("tag", "tag");
+    }else if( stream.peek().match(/\(/) != null ){// lessc
+    return ret(null, ch);
+    }else if (stream.peek() == "/" && state.stack[state.stack.length-1] != undefined){ // url(dir/center/image.png)
+      return ret("string", "string");
+    }else if( stream.current().match(/\-\d|\-.\d/) ){ // lesscss match e.g.: -5px -0.4 etc... only colorize the minus sign
+    //stream.backUp(stream.current().length-1); //commment out these 2 comment if you want the minus sign to be parsed as null -500px
+      //return ret(null, ch);
+    return ret("number", "unit");
+    }else if( inTagsArray(stream.current()) ){ // lesscss match html tags
+      return ret("tag", "tag");
+    }else if( /\/|[\s\)]/.test(stream.peek() || stream.eol() || (stream.eatSpace() && stream.peek() == "/")) && stream.current().indexOf(".") !== -1){
+    if(stream.current().substring(stream.current().length-1,stream.current().length) == "{"){
+      stream.backUp(1);
+      return ret("tag", "tag");
+    }//end if
+    if( (stream.eatSpace() && stream.peek().match(/[{<>.a-zA-Z]/) != null)  || stream.eol() )return ret("tag", "tag");//e.g. button.icon-plus
+    return ret("string", "string");//let url(/images/logo.png) without quotes return as string
+    }else if( stream.eol() ){
+      if(stream.current().substring(stream.current().length-1,stream.current().length) == "{")stream.backUp(1);
+      return ret("tag", "tag");
+    }else{
+        return ret("variable", "variable");
+    }
+    }
+
+  }
+
+  function tokenSComment(stream, state) {// SComment = Slash comment
+    stream.skipToEnd();
+  state.tokenize = tokenBase;
+    return ret("comment", "comment");
+  }
+
+  function tokenCComment(stream, state) {
+    var maybeEnd = false, ch;
+    while ((ch = stream.next()) != null) {
+      if (maybeEnd && ch == "/") {
+        state.tokenize = tokenBase;
+        break;
+      }
+      maybeEnd = (ch == "*");
+    }
+    return ret("comment", "comment");
+  }
+
+  function tokenSGMLComment(stream, state) {
+    var dashes = 0, ch;
+    while ((ch = stream.next()) != null) {
+      if (dashes >= 2 && ch == ">") {
+        state.tokenize = tokenBase;
+        break;
+      }
+      dashes = (ch == "-") ? dashes + 1 : 0;
+    }
+    return ret("comment", "comment");
+  }
+
+  function tokenString(quote) {
+    return function(stream, state) {
+      var escaped = false, ch;
+      while ((ch = stream.next()) != null) {
+        if (ch == quote && !escaped)
+          break;
+        escaped = !escaped && ch == "\\";
+      }
+      if (!escaped) state.tokenize = tokenBase;
+      return ret("string", "string");
+    };
+  }
+
+  return {
+    startState: function(base) {
+      return {tokenize: tokenBase,
+              baseIndent: base || 0,
+              stack: []};
+    },
+
+    token: function(stream, state) {
+      if (stream.eatSpace()) return null;
+      var style = state.tokenize(stream, state);
+
+      var context = state.stack[state.stack.length-1];
+      if (type == "hash" && context == "rule") style = "atom";
+      else if (style == "variable") {
+        if (context == "rule") style = null; //"tag"
+        else if (!context || context == "@media{"){
+      style = stream.current()  == "when"   ? "variable"  :
+      stream.string.match(/#/g)   != undefined  ? null    :
+      /[\s,|\s\)]/.test(stream.peek())    ? "tag"   : null;
+    }
+      }
+
+      if (context == "rule" && /^[\{\};]$/.test(type))
+        state.stack.pop();
+      if (type == "{") {
+        if (context == "@media") state.stack[state.stack.length-1] = "@media{";
+        else state.stack.push("{");
+      }
+      else if (type == "}") state.stack.pop();
+      else if (type == "@media") state.stack.push("@media");
+      else if (context == "{" && type != "comment") state.stack.push("rule");
+      return style;
+    },
+
+    indent: function(state, textAfter) {
+      var n = state.stack.length;
+      if (/^\}/.test(textAfter))
+        n -= state.stack[state.stack.length-1] == "rule" ? 2 : 1;
+      return state.baseIndent + n * indentUnit;
+    },
+
+    electricChars: "}"
+  };
+});
+
+CodeMirror.defineMIME("text/x-less", "less");
+if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
+  CodeMirror.defineMIME("text/css", "less");
 // Supported keybindings:
 //
 // Cursor movement:
@@ -16819,71 +17947,180 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 
 }).call(this);
 (function() {
-  var compilers;
+  var BuffersModel, compilers;
+
+  BuffersModel = Luca.Model.extend({
+    defaults: {
+      _current: "default",
+      _namespace: "default",
+      _compiled: []
+    },
+    initialize: function(attributes) {
+      this.attributes = attributes != null ? attributes : {};
+      Luca.Model.prototype.initialize.apply(this, arguments);
+      return this.fetch({
+        silent: true
+      });
+    },
+    requireCompilation: function() {
+      return this.get("_compiled");
+    },
+    bufferKeys: function() {
+      var key, value, _ref, _results;
+      if (this.bufferNames != null) return this.bufferNames;
+      _ref = this.attributes;
+      _results = [];
+      for (key in _ref) {
+        value = _ref[key];
+        if (!key.match(/_/)) _results.push(key);
+      }
+      return _results;
+    },
+    namespacedBuffer: function(key) {
+      return "" + (this.get('_namespace')) + ":" + key;
+    },
+    bufferValues: function() {
+      return _(this.attributes).pick(this.bufferKeys());
+    },
+    fetch: function(options) {
+      var _this = this;
+      if (options == null) options = {};
+      options.silent || (options.silent = true);
+      _(this.bufferKeys()).each(function(key) {
+        var value;
+        value = typeof localStorage !== "undefined" && localStorage !== null ? localStorage.getItem(_this.namespacedBuffer(key)) : void 0;
+        if (value != null) {
+          return _this.set(key, value, {
+            silent: options.silent === true
+          });
+        }
+      });
+      return this;
+    },
+    persist: function() {
+      var _this = this;
+      _(this.bufferKeys()).each(function(key) {
+        var value;
+        value = _this.get(key);
+        return typeof localStorage !== "undefined" && localStorage !== null ? localStorage.setItem(_this.namespacedBuffer(key), value) : void 0;
+      });
+      return this;
+    },
+    currentContent: function() {
+      var current;
+      current = this.get("_current");
+      return this.get(current);
+    }
+  });
 
   compilers = {
     coffeescript: function(code) {
       return CoffeeScript.compile(code, {
         bare: true
       });
+    },
+    "default": function(code) {
+      return code;
     }
   };
 
-  _.def("Luca.tools.CodeEditor")["extends"]("Luca.View")["with"]({
+  _.def("Luca.tools.CodeEditor")["extends"]("Luca.components.Panel")["with"]({
     name: "code_editor",
     id: "editor_container",
     autoBindEventHandlers: true,
+    bodyClassName: "codemirror-wrapper",
+    defaultValue: '',
+    compilationEnabled: false,
+    bufferNamespace: "luca:code",
+    namespace: function(set, options) {
+      var _ref;
+      if (options == null) options = {};
+      if (set != null) {
+        this.bufferNamespace = set;
+        if ((_ref = this.buffers) != null) {
+          _ref.set("_namespace", set, {
+            silent: options.silent === true
+          });
+        }
+      }
+      return this.bufferNamespace;
+    },
     initialize: function(options) {
       this.options = options;
-      Luca.View.prototype.initialize.apply(this, arguments);
-      _.bindAll(this, "onEditorChange", "onCodeChange");
+      this._super("initialize", this, arguments);
+      _.bindAll(this, "onCompiledCodeChange", "onBufferChange", "onEditorChange");
       this.mode || (this.mode = "coffeescript");
       this.theme || (this.theme = "monokai");
       this.keyMap || (this.keyMap = "vim");
-      this.compiler = compilers[this.mode] || this.compile;
-      return this.bind("code:change", this.onCodeChange);
+      this.lineWrapping || (this.lineWrapping = true);
+      this.compiler = compilers[this.mode] || compilers["default"];
+      return this.setupBuffers();
     },
-    beforeRender: function() {
-      return this.$html("<textarea></textarea>");
+    setWrap: function(lineWrapping) {
+      this.lineWrapping = lineWrapping;
+      return this.editor.setOption("lineWrapping", this.lineWrapping);
     },
-    afterRender: function() {
-      var _this = this;
-      return _.defer(function() {
-        _this.editor = window.CodeMirror.fromTextArea(_this.$('textarea')[0], _this.editorOptions());
-        return _this.restore();
+    setMode: function(mode) {
+      this.mode = mode;
+      this.editor.setOption("mode", this.mode);
+      return this;
+    },
+    setKeyMap: function(keyMap) {
+      this.keyMap = keyMap;
+      this.editor.setOption("keyMap", this.keyMap);
+      return this;
+    },
+    setTheme: function(theme) {
+      this.theme = theme;
+      this.editor.setOption("theme", this.theme);
+      return this;
+    },
+    setupBuffers: function() {
+      var attributes, editor,
+        _this = this;
+      attributes = _.extend(this.currentBuffers || {}, {
+        _compiled: this.compiledBuffers,
+        _namespace: this.namespace()
       });
+      this.buffers = new BuffersModel(attributes);
+      editor = this;
+      _(this.buffers.bufferKeys()).each(function(key) {
+        return _this.buffers.bind("change:" + key, function() {
+          return _this.onBufferChange.apply(_this, arguments);
+        });
+      });
+      _(this.buffers.requireCompilation()).each(function(key) {
+        return _this.buffers.bind("change:compiled_" + key, _this.onCompiledCodeChange);
+      });
+      this.buffers.bind("change:_current", function(model, value) {
+        editor.trigger("buffer:change");
+        return editor.editor.setValue(_this.buffers.currentContent() || "");
+      });
+      return this.monitorChanges = true;
     },
-    compile: function(code) {
-      return code;
+    currentBuffer: function() {
+      return this.buffers.get("_current");
     },
-    save: function() {},
-    restore: function() {
-      this.editor.setValue('');
-      return this.editor.refresh();
+    loadBuffer: function(bufferName, autoSave) {
+      if (autoSave == null) autoSave = true;
+      if (autoSave) this.saveBuffer();
+      return this.buffers.set("_current", bufferName);
     },
-    onEditorChange: function() {
-      var compiled;
-      this.trigger("editor:change");
-      this.save();
-      try {
-        compiled = this.compiler.apply(this, [this.getValue()]);
-        if (this.compiled && compiled !== this.compiled) {
-          this.trigger("code:change", compiled);
-        }
-        return this.compiled = compiled;
-      } catch (error) {
-
+    saveBuffer: function() {
+      localStorage.setItem(this.buffers.namespacedBuffer(this.currentBuffer()), this.editor.getValue());
+      return this.buffers.set(this.currentBuffer(), this.editor.getValue());
+    },
+    getBuffer: function(buffer, compiled) {
+      var code, compiledCode;
+      if (compiled == null) compiled = false;
+      buffer || (buffer = this.currentBuffer());
+      code = this.buffers.get(buffer);
+      if (compiled !== true) return code;
+      compiledCode = this.buffers.get("compiled_" + buffer);
+      if (_.string.isBlank(compiledCode)) {
+        compiledCode = this.compileCode(code, buffer);
       }
-    },
-    onCodeChange: function(compiled) {
-      var evaluator;
-      evaluator = function() {
-        return eval(compiled);
-      };
-      return evaluator.call(window);
-    },
-    getValue: function() {
-      return this.editor.getValue();
+      return compiledCode;
     },
     editorOptions: function() {
       return {
@@ -16893,8 +18130,107 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
         lineNumbers: true,
         gutter: true,
         autofocus: true,
-        onChange: this.onEditorChange
+        onChange: this.onEditorChange,
+        passDelay: 50,
+        autoClearEmptyLines: true,
+        smartIndent: false,
+        tabSize: 2,
+        electricChars: false
       };
+    },
+    beforeRender: function() {
+      var styles, _ref;
+      if ((_ref = Luca.components.Panel.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      styles = {
+        "min-height": this.minHeight,
+        background: '#272822',
+        color: '#f8f8f2'
+      };
+      this.$bodyEl().css(styles);
+      return this.$html("<textarea></textarea>");
+    },
+    afterRender: function() {
+      var _this = this;
+      return _.defer(function() {
+        _this.editor = window.CodeMirror.fromTextArea(_this.$('textarea')[0], _this.editorOptions());
+        return _this.restore();
+      });
+    },
+    save: function() {
+      return this.saveBuffer();
+    },
+    restore: function() {
+      this.editor.setValue("");
+      return this.editor.refresh();
+    },
+    onEditorChange: function() {
+      if (this.monitorChanges) return this.save();
+    },
+    onBufferChange: function(model, newValue, changes) {
+      var previous,
+        _this = this;
+      previous = model.previousAttributes();
+      _(this.buffers.bufferKeys()).each(function(key) {
+        var result;
+        if (previous[key] !== _this.buffers.get(key)) {
+          if (_(_this.buffers.requireCompilation()).include(key)) {
+            result = _this.compileCode(_this.buffers.get(key), key);
+            if (result.success === true) {
+              _this.buffers.persist(key);
+              return _this.buffers.set("compiled_" + key, result.compiled, {
+                silent: true
+              });
+            }
+          } else {
+            _this.trigger("code:change:" + key, _this.buffers.get(key));
+            return _this.buffers.persist(key);
+          }
+        }
+      });
+      return this.buffers.change();
+    },
+    onCompiledCodeChange: function(model, newValue, changes) {
+      var changed, changedBuffers, _i, _len, _results;
+      changedBuffers = _(model.changedAttributes()).keys();
+      this.trigger("code:change", changedBuffers);
+      _results = [];
+      for (_i = 0, _len = changedBuffers.length; _i < _len; _i++) {
+        changed = changedBuffers[_i];
+        _results.push(this.trigger("code:change:" + changed, changed));
+      }
+      return _results;
+    },
+    compileCode: function(code, buffer) {
+      var compiled, result;
+      buffer || (buffer = this.currentBuffer());
+      code || (code = this.getBuffer(buffer, false));
+      compiled = "";
+      result = {
+        success: true,
+        compiled: ""
+      };
+      try {
+        compiled = this.compiler.call(this, code);
+        this.trigger("compile:success", code, compiled);
+        result.compiled = compiled;
+      } catch (error) {
+        this.trigger("compile:error", error, code);
+        result.success = false;
+        result.compiled = this.buffers.get("compiled_" + buffer);
+      }
+      return result;
+    },
+    getCompiledCode: function(buffer) {
+      buffer = this.getBuffer(buffer);
+      return _.string.strip(this.compileCode(buffer));
+    },
+    getValue: function() {
+      return this.editor.getValue();
+    },
+    setValue: function(value) {
+      return this.editor.setValue(value);
     }
   });
 
@@ -16908,14 +18244,461 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 
 }).call(this);
 (function() {
+  var ComponentPicker, bufferNames, compiledBuffers, defaults;
+
+  defaults = {};
+
+  defaults.setup = "# the setup tab contains code which is run every time\n# prior to the 'implementation' run";
+
+  defaults.component = "# the component tab is where you handle the definition of the component\n# that you are trying to test.  it will render its output into the\n# output panel of the code tester\n#\n# example definition:\n#\n# _.def('MyComponent').extends('Luca.View').with\n#   bodyTemplate: 'sample/welcome'";
+
+  defaults.teardown = "# the teardown tab is where you undo / cleanup any of the operations\n# from setup / implementation";
+
+  defaults.implementation = "# the implementation tab is where you specify options for your component.\n#\n# NOTE: the component tester uses whatever is returned from evalulating\n# the code in this tab.  if it responds to render(), it will append\n# render().el to the output panel.  if it is an object, then we will attempt\n# to create an instance of the component you defined with the object as";
+
+  defaults.style = "/*\n * customize the styles that effect this component\n * note, all styles here will be scoped to only effect\n * the output panel :)\n*/";
+
+  defaults.html = "";
+
+  bufferNames = ["setup", "implementation", "component", "style", "html"];
+
+  compiledBuffers = ["setup", "implementation", "component"];
+
+  ComponentPicker = Luca.fields.TypeAheadField.extend({
+    name: "component_picker",
+    label: "Choose a component to edit",
+    initialize: function() {
+      this.collection = new Luca.collections.Components();
+      this.collection.fetch();
+      return this._super("initialize", this, arguments);
+    },
+    getSource: function() {
+      return this.collection.classes();
+    },
+    change_handler: function() {
+      var component, componentDefinition,
+        _this = this;
+      componentDefinition = this.getValue();
+      component = this.collection.find(function(model) {
+        return model.get("className") === componentDefinition;
+      });
+      component.fetch({
+        success: function(model, response) {
+          if ((response != null ? response.source.length : void 0) > 0) {
+            return _this.trigger("component:fetched", response.source, response.className);
+          }
+        }
+      });
+      return this.hide();
+    },
+    createWrapper: function() {
+      return this.make("div", {
+        "class": "component-picker span4 well",
+        style: "position: absolute; z-index:12000"
+      });
+    },
+    show: function() {
+      return this.$el.parent().show();
+    },
+    hide: function() {
+      return this.$el.parent().hide();
+    },
+    toggle: function() {
+      return this.$el.parent().toggle();
+    }
+  });
 
   _.def("Luca.tools.ComponentTester")["extends"]("Luca.core.Container")["with"]({
     name: "component_tester",
+    className: "span11",
+    autoEvaluateCode: false,
     components: [
       {
-        ctype: "code_editor"
+        ctype: 'card_view',
+        name: "component_detail",
+        activeCard: 0,
+        components: [
+          {
+            ctype: 'panel',
+            name: "component_tester_output",
+            bodyTemplate: "component_tester/help"
+          }
+        ]
+      }, {
+        ctype: "code_editor",
+        name: "ctester_edit",
+        className: 'font-small fixed-height',
+        minHeight: '350px',
+        styles: {
+          "position": "absolute",
+          "bottom": "0px",
+          "width": "96%"
+        },
+        currentBuffers: defaults,
+        compiledBuffers: ["component", "setup", "implementation"],
+        topToolbar: {
+          buttons: [
+            {
+              icon: "refresh",
+              align: "right",
+              description: "refresh the output of your component setup",
+              eventId: "click:refresh"
+            }, {
+              icon: "play",
+              align: "right",
+              description: "Enable auto-evaluation of test script on code change",
+              eventId: "click:autoeval"
+            }, {
+              icon: "plus",
+              description: "add a new component to test",
+              eventId: "click:add"
+            }, {
+              icon: "folder-open",
+              description: "open an existing component's definition",
+              eventId: "click:open"
+            }
+          ]
+        },
+        bottomToolbar: {
+          buttons: [
+            {
+              group: true,
+              wrapper: "span4",
+              buttons: [
+                {
+                  label: "View Javascript",
+                  description: "Switch between compiled JS and Coffeescript",
+                  eventId: "toggle:mode"
+                }
+              ]
+            }, {
+              group: true,
+              wrapper: "span6 offset4",
+              buttons: [
+                {
+                  label: "Component",
+                  eventId: "edit:component",
+                  description: "Edit the component itself"
+                }, {
+                  label: "Setup",
+                  eventId: "edit:setup",
+                  description: "Edit the setup for your component test"
+                }, {
+                  label: "Implementation",
+                  eventId: "edit:implementation",
+                  description: "Implement your component"
+                }, {
+                  label: "Markup",
+                  eventId: "edit:markup",
+                  description: "Edit the HTML produced by the component"
+                }, {
+                  label: "CSS",
+                  eventId: "edit:style",
+                  description: "Edit CSS"
+                }
+              ]
+            }, {
+              group: true,
+              align: "right",
+              buttons: [
+                {
+                  icon: "question-sign",
+                  align: "right",
+                  eventId: "click:help",
+                  description: "Help"
+                }, {
+                  icon: "cog",
+                  align: 'right',
+                  eventId: "click:settings",
+                  description: "component tester settings"
+                }, {
+                  icon: "eye-close",
+                  align: "right",
+                  eventId: "click:hide",
+                  description: "hide the tester controls"
+                }, {
+                  icon: "heart",
+                  eventId: "click:console",
+                  description: "Coffeescript Console",
+                  align: "right"
+                }
+              ]
+            }
+          ]
+        }
       }
-    ]
+    ],
+    debugMode: true,
+    componentEvents: {
+      "ctester_edit click:autoeval": "toggleAutoeval",
+      "ctester_edit click:refresh": "refreshCode",
+      "ctester_edit click:hide": "toggleControls",
+      "ctester_edit click:settings": "toggleSettings",
+      "ctester_edit click:add": "addComponent",
+      "ctester_edit click:open": "openComponent",
+      "ctester_edit click:help": "showHelp",
+      "ctester_edit click:console": "toggleConsole",
+      "ctester_edit eval:error": "onError",
+      "ctester_edit eval:success": "onSuccess",
+      "ctester_edit edit:setup": "editSetup",
+      "ctester_edit edit:teardown": "editTeardown",
+      "ctester_edit edit:component": "editComponent",
+      "ctester_edit edit:style": "editStyle",
+      "ctester_edit edit:markup": "editMarkup",
+      "ctester_edit edit:implementation": "editImplementation",
+      "ctester_edit toggle:keymap": "toggleKeymap",
+      "ctester_edit toggle:mode": "toggleMode",
+      "ctester_edit code:change:html": "onMarkupChange",
+      "ctester_edit code:change:style": "onStyleChange"
+    },
+    initialize: function() {
+      var key, value, _ref;
+      Luca.core.Container.prototype.initialize.apply(this, arguments);
+      _ref = this.componentEvents;
+      for (key in _ref) {
+        value = _ref[key];
+        this[value] = _.bind(this[value], this);
+      }
+      return this.defer("editComponent").until("after:render");
+    },
+    afterRender: function() {
+      var changeHandler,
+        _this = this;
+      this.getOutput().applyStyles({
+        'min-height': '400px'
+      });
+      this.$('.toolbar-container').css('padding-right', '12px');
+      this.$('.luca-ui-toolbar.toolbar-bottom').css('margin', '0px');
+      changeHandler = _.idleMedium(function() {
+        if (_this.autoEvaluateCode === true) return _this.applyTestRun();
+      }, 1500);
+      return this.getEditor().bind("code:change", changeHandler);
+    },
+    getEditor: function() {
+      return Luca("ctester_edit");
+    },
+    getDetail: function() {
+      return Luca("component_detail");
+    },
+    getOutput: function() {
+      return this.getDetail().findComponentByName("component_tester_output");
+    },
+    onError: function(error, bufferId) {
+      return console.log("Error in " + bufferId, error, error.message, error.stack);
+    },
+    onSuccess: function(result, bufferId) {
+      var object;
+      if (bufferId === "component") this.componentDefinition = result;
+      if (bufferId === "implementation") {
+        if (Luca.isBackboneView(result)) {
+          object = result;
+        } else if (_.isObject(result) && (result.ctype != null)) {
+          object = Luca(result);
+        } else if (_.isObject(result) && _.isFunction(this.componentDefinition)) {
+          object = new this.componentDefinition(result);
+        }
+        if (Luca.isBackboneView(object)) {
+          return this.getOutput().$html(object.render().el);
+        }
+      }
+    },
+    applyTestRun: function() {
+      var bufferId, code, _ref, _results;
+      this.getOutput().$html('');
+      _ref = this.getTestRun();
+      _results = [];
+      for (bufferId in _ref) {
+        code = _ref[bufferId];
+        _results.push(this.evaluateCode(code, bufferId));
+      }
+      return _results;
+    },
+    toggleConsole: function(button) {
+      var container;
+      this.developmentConsole = Luca("coffeescript-console", function() {
+        return new Luca.tools.DevelopmentConsole({
+          name: "coffeescript-console"
+        });
+      });
+      if (!this.consoleContainerAppended) {
+        container = this.make("div", {
+          id: "devtools-console-wrapper",
+          "class": "devtools-console-container modal",
+          style: "width:850px"
+        }, this.developmentConsole.el);
+        $('body').append(container);
+        this.consoleContainerAppended = true;
+        this.developmentConsole.render();
+      }
+      return $('#devtools-console-wrapper').modal({
+        backdrop: false,
+        show: true
+      });
+    },
+    toggleAutoeval: function(button) {
+      var buttonClass, iconHolder;
+      this.autoEvaluateCode = !(this.autoEvaluateCode === true);
+      if (!this.started && this.autoEvaluateCode === true) {
+        this.started = true;
+        this.applyTestRun();
+      }
+      iconHolder = button.children('i').eq(0);
+      buttonClass = this.autoEvaluateCode ? "icon-pause" : "icon-play";
+      iconHolder.removeClass();
+      iconHolder.addClass(buttonClass);
+      return this;
+    },
+    showEditor: function(options) {
+      this.getEditor().$('.toolbar-container.top').toggle(options);
+      this.getEditor().$('.codemirror-wrapper').toggle(options);
+      return this.trigger("controls:toggled");
+    },
+    toggleKeymap: function(button) {
+      var newMode;
+      newMode = this.getEditor().keyMap === "vim" ? "basic" : "vim";
+      this.getEditor().setKeyMap(newMode);
+      return button.html(_.string.capitalize(newMode));
+    },
+    toggleMode: function(button) {
+      var newMode;
+      newMode = this.getEditor().mode === "coffeescript" ? "javascript" : "coffeescript";
+      this.getEditor().setMode(newMode);
+      button.html(_.string.capitalize((newMode === "coffeescript" ? "View Javascript" : "View Coffeescript")));
+      return this.editBuffer(this.currentBufferName, newMode === "javascript");
+    },
+    toggleControls: function(button) {
+      var _this = this;
+      this.bind("controls:toggled", function() {
+        var buttonClass, iconHolder;
+        iconHolder = button.children('i').eq(0);
+        iconHolder.removeClass();
+        buttonClass = _this.getEditor().$('.toolbar-container.top').is(":visible") ? "icon-eye-close" : "icon-eye-open";
+        return iconHolder.addClass(buttonClass);
+      });
+      this.showEditor();
+      return this;
+    },
+    toggleSettings: function() {
+      return this;
+    },
+    setValue: function(value, buffer) {
+      var compiled;
+      if (buffer == null) buffer = "component";
+      compiled = this.getEditor().editor.getOption('mode') === "javascript";
+      return this.editBuffer(buffer, compiled, false).getEditor().setValue(value);
+    },
+    editBuffer: function(currentBufferName, compiled, autoSave) {
+      var buffer;
+      this.currentBufferName = currentBufferName;
+      if (compiled == null) compiled = false;
+      if (autoSave == null) autoSave = true;
+      this.showEditor(true);
+      this.highlight(this.currentBufferName);
+      buffer = compiled ? "compiled_" + this.currentBufferName : this.currentBufferName;
+      this.getEditor().loadBuffer(buffer, autoSave);
+      return this;
+    },
+    editMarkup: function() {
+      this.getEditor().setMode('htmlmixed');
+      this.getEditor().setWrap(true);
+      return this.editBuffer("html").setValue(this.getOutput().$html(), 'html');
+    },
+    editStyle: function() {
+      this.getEditor().setMode('css');
+      return this.editBuffer("style");
+    },
+    editComponent: function() {
+      this.getEditor().setMode('coffeescript');
+      return this.editBuffer("component");
+    },
+    editTeardown: function() {
+      this.getEditor().setMode('coffeescript');
+      return this.editBuffer("teardown");
+    },
+    editSetup: function() {
+      this.getEditor().setMode('coffeescript');
+      return this.editBuffer("setup");
+    },
+    editImplementation: function() {
+      this.getEditor().setMode('coffeescript');
+      return this.editBuffer("implementation");
+    },
+    getTestRun: function() {
+      var buffer, editor, testRun, _i, _len, _ref;
+      editor = this.getEditor();
+      testRun = {};
+      _ref = ["component", "setup", "implementation"];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        buffer = _ref[_i];
+        testRun[buffer] = editor.getBuffer(buffer, true);
+      }
+      return testRun;
+    },
+    getContext: function() {
+      return Luca.util.resolve(this.context || (this.context = "window"));
+    },
+    evaluateCode: function(code, bufferId, compile) {
+      var compiled, evaluator, result;
+      if (compile == null) compile = false;
+      code || (code = this.getEditor().getValue());
+      compiled = compile === true ? this.getEditor().compileCode(code) : code;
+      evaluator = function() {
+        return eval(compiled);
+      };
+      try {
+        result = evaluator.call(this.getContext());
+        return this.onSuccess(result, bufferId, code);
+      } catch (error) {
+        return this.onError(error, bufferId, code);
+      }
+    },
+    onMarkupChange: function() {
+      if (this.autoEvaluateCode === true) {
+        return this.getOutput().$html(this.getEditor().getValue());
+      }
+    },
+    onStyleChange: function() {
+      var style, styleTag, _ref;
+      if (this.autoEvaluateCode === true) {
+        $('#component-tester-stylesheet').remove();
+        style = (_ref = this.getEditor()) != null ? _ref.getValue() : void 0;
+        if (style) {
+          styleTag = this.make("style", {
+            type: "text/css",
+            id: "component-tester-stylesheet"
+          });
+          $('head').append(styleTag);
+          return $(styleTag).append(style);
+        }
+      }
+    },
+    showHelp: function() {
+      return this.getOutput().$html(Luca.template("component_tester/help", this));
+    },
+    addComponent: function(button) {},
+    openComponent: function(button) {
+      var _this = this;
+      this.componentPicker || (this.componentPicker = new ComponentPicker());
+      this.componentPicker.bind("component:fetched", function(source, component) {
+        return _this.setEditorNamespace(component).setValue(source, "component");
+      });
+      if (!this.$('.component-picker').length > 0) {
+        this.$('.codemirror-wrapper').before(this.componentPicker.createWrapper());
+        this.$('.component-picker').html(this.componentPicker.render().el);
+        this.componentPicker.show();
+        return;
+      }
+      return this.componentPicker.toggle();
+    },
+    highlight: function(section) {
+      this.$("a.btn[data-eventid='edit:" + section + "']").siblings().css('font-weight', 'normal');
+      return this.$("a.btn[data-eventid='edit:" + section + "']").css('font-weight', 'bold');
+    },
+    setEditorNamespace: function(namespace) {
+      this.getEditor().namespace(namespace);
+      this.getEditor().buffers.fetch();
+      return this;
+    }
   });
 
 }).call(this);
@@ -17029,7 +18812,7 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 
 }).call(this);
 (function() {
-  var inspectArray;
+  var console_name, inspectArray;
 
   inspectArray = function(array) {
     var items, lastPrompt;
@@ -17040,38 +18823,25 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     return lastPrompt.before("<div class='array-inspector'>" + (items.join('')) + "</div>");
   };
 
-  _.def('Luca.tools.DevelopmentConsole')["extends"]('Luca.ModalView')["with"]({
-    hasBody: true,
+  console_name = "";
+
+  _.def('Luca.tools.DevelopmentConsole')["extends"]('Luca.components.Panel')["with"]({
+    bodyClassName: "console-wrapper",
     name: "development_console",
     className: 'luca-ui-development-console',
     prompt: "Coffee> ",
-    modal: true,
     initialize: function(options) {
-      var console_name;
       this.options = options != null ? options : {};
-      Luca.View.prototype.initialize.apply(this, arguments);
-      console_name = this.name;
-      if (this.modal) {
-        this.$el.addClass('luca-ui-modal');
-        return this.$el.addClass('modal');
-      }
+      return this._super("initialize", this, arguments);
     },
     render: function() {
-      var _ref;
       if (this.rendered === true) return this;
       this.setup();
-      if ((_ref = Luca.ModalView.prototype.render) != null) {
-        _ref.apply(this, arguments);
-      }
+      this._super("render", this, arguments);
       return this;
     },
-    bodyClassName: "console-wrapper",
     setup: function() {
-      var console_name, devConsole;
-      this.$append(this.make("div", {
-        "class": "console-wrapper"
-      }));
-      this.bodyTagName = this.$('.console-wrapper');
+      var devConsole;
       this.$bodyEl().css({
         height: "500px",
         width: "800px"
@@ -17145,16 +18915,6 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 
 }).call(this);
 (function() {
-  var parseRegistry;
-
-  parseRegistry = function() {
-    return _(Luca.registry.classes).map(function(className, ctype) {
-      return {
-        className: className,
-        ctype: ctype
-      };
-    });
-  };
 
   _.def("Luca.models.Component")["extends"]("Luca.Model")["with"]({
     url: function() {
@@ -17181,7 +18941,7 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
       return "/luca/components";
     },
     initialize: function(models, options) {
-      Luca.Collection.cache(this.cache_key, parseRegistry());
+      Luca.Collection.cache(this.cache_key, Luca.registry.classes());
       return Luca.Collection.prototype.initialize.apply(this, arguments);
     },
     classes: function() {
@@ -17217,6 +18977,10 @@ CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
     }
   });
 
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
+  Luca.templates["component_tester/help"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<h1>Component Tester</h1>\n<p>This is a tool that enables you to build and test Luca components in an isolated sandbox environment.  The editor is currently enabled with vim keybindings</p>\n<h3>Setup</h3>\n<p>This is where you setup any data requirements needed for the test to work.  This is run every time before the implementation code is ran.</p>\n<h3>Teardown</h3>\n<p>This is where you clean up after the tests.  This will be run every time after the implementation code is ran.</p>\n<h3>Definitions</h3>\n<p>This is where you define the component you will be testing.  This is usually the code you will be shipping once you have completed testing.</p>\n<h3>Implementation</h3>\n<p>This is where you create an instance of the component and specify any of the necessary configuration settings. The component will be rendered into the output panel of the component tester.</p>\n');}return __p.join('');};
 }).call(this);
 (function() {
 

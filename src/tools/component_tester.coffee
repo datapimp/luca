@@ -151,13 +151,13 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
         group: true
         wrapper: "span4"
         buttons:[
-          label: "Raw"
+          label: "View Javascript"
           description: "Switch between compiled JS and Coffeescript"
           eventId: "toggle:mode"
         ]
       ,
         group: true
-        wrapper: "span4 offset4"
+        wrapper: "span6 offset4"
         buttons:[
           label: "Component"
           eventId: "edit:component"
@@ -170,13 +170,10 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
           label: "Implementation"
           eventId: "edit:implementation"
           description: "Implement your component"
-        ]
-      ,
-        group: true
-        buttons:[
-          label: "HTML"
-          eventId: "edit:html"
-          description: "Edit HTML"
+        ,
+          label: "Markup",
+          eventId: "edit:markup"
+          description: "Edit the HTML produced by the component"
         ,
           label: "CSS"
           eventId: "edit:style"
@@ -226,7 +223,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     "ctester_edit edit:teardown" : "editTeardown"
     "ctester_edit edit:component" : "editComponent"
     "ctester_edit edit:style" : "editStyle"
-    "ctester_edit edit:html" : "editHTML"
+    "ctester_edit edit:markup" : "editMarkup"
     "ctester_edit edit:implementation" : "editImplementation"
     "ctester_edit toggle:keymap" : "toggleKeymap"
     "ctester_edit toggle:mode" : "toggleMode"
@@ -327,7 +324,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   toggleMode: (button)->
     newMode = if @getEditor().mode is "coffeescript" then "javascript" else "coffeescript"
     @getEditor().setMode(newMode)
-    button.html _.string.capitalize((if newMode is "coffeescript" then "Raw" else "Compiled"))
+    button.html _.string.capitalize((if newMode is "coffeescript" then "View Javascript" else "View Coffeescript"))
     @editBuffer @currentBufferName, (newMode is "javascript")
 
   toggleControls: (button)->
@@ -357,7 +354,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @getEditor().loadBuffer(buffer,autoSave)
     @
 
-  editHTML: ()->
+  editMarkup: ()->
     @getEditor().setMode('htmlmixed')
     @getEditor().setWrap(true)
     @editBuffer("html").setValue(@getOutput().$html(), 'html')
@@ -413,7 +410,14 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
 
   onStyleChange: ()->
     if @autoEvaluateCode is true
-      console.log "on style change", arguments
+      $('#component-tester-stylesheet').remove()
+
+      style = @getEditor()?.getValue()
+
+      if style
+        styleTag = @make "style", type:"text/css", id: "component-tester-stylesheet"
+        $('head').append( styleTag )
+        $(styleTag).append(style)
 
   showHelp: ()->
     @getOutput().$html( Luca.template("component_tester/help",@) )
