@@ -99,7 +99,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
 
   className:"span11"
 
-  autoEvaluateCode: false
+  autoEvaluateCode: true
 
   components:[
     ctype: 'card_view'
@@ -129,10 +129,10 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
       buttons:[
         icon: "resize-full"
         align: "right"
-        description: "refresh the output of your component setup"
+        description: "change the size of the component tester editor"
         eventId: "toggle:size"
       ,
-        icon: "play"
+        icon: "pause"
         align: "right"
         description: "Toggle auto-evaluation of test script on code change"
         eventId: "click:autoeval"

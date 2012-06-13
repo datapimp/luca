@@ -24,6 +24,7 @@ Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
       lineNumbers: if @lineNumbers? then @lineNumbers else defaultOptions.lineNumbers
       readOnly: if @readOnly? then @readOnly else defaultOptions.readOnly
       gutter: if @gutter? then @gutter else defaultOptions.gutter
+      lineWrapping: @lineWrapping is true
       onChange: ()=>
         @trigger "editor:change", @
         @onEditorChange?.call(@)
