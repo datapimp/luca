@@ -189,7 +189,14 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       component = if Luca.isBackboneView( object )
         object
       else
-        object.type ||= object.ctype ||= ( Luca.defaultComponentType )
+        object.type ||= object.ctype
+
+        if !object.type?
+          if object.components?
+            object.type = object.ctype = 'container'
+          else
+            object.type = object.ctype = Luca.defaultComponentType
+
         Luca.util.lazyComponent( object )
 
       # if we're using base backbone views, then they don't extend themselves
@@ -241,13 +248,12 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   # will trigger first:activation on the components as they become
   # displayed.
   firstActivation: ()->
-    _( @components ).each (component)=>
-      activator = @
-
+    activator = @
+    @each (component, index)->
       # apply the first:activation trigger on the component, in the context of the component
       # passing as arguments the component itself, and the component doing the activation
       unless component?.previously_activated is true
-        component?.trigger?.apply component, ["first:activation", [component, activator] ]
+        component?.trigger?.call component, "first:activation", component, activator
         component.previously_activated = true
 
   #### Component Finder Methods
@@ -300,12 +306,15 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
       sub_container?.findComponent?(needle, haystack, true)
 
+  each: (fn)->
+    @eachComponent(fn, false)
+
   # run a function for each component in this container
   # and any nested containers in those components, recursively
   # pass false as the second argument to skip the deep recursion
   eachComponent: (fn, deep=true)->
-    _( @components ).each (component)=>
-      fn.apply component, [component]
+    _( @components ).each (component, index)=>
+      fn.call component, component, index
       component?.eachComponent?.apply component, [fn,deep] if deep
 
   indexOf: (name)->

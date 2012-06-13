@@ -231,26 +231,6 @@
     return _(values).select(iterator);
   };
 
-  Luca.util.loadScript = function(url, callback) {
-    var script;
-    script = document.createElement("script");
-    script.type = "text/javascript";
-    if (script.readyState) {
-      script.onreadystatechange = function() {
-        if (script.readyState === "loaded" || script.readyState === "complete") {
-          script.onreadystatechange = null;
-          return callback();
-        } else {
-          return script.onload = function() {
-            return callback();
-          };
-        }
-      };
-    }
-    script.src = url;
-    return document.body.appendChild(script);
-  };
-
 }).call(this);
 (function() {
   var component_cache, registry;
@@ -1105,8 +1085,7 @@
       }
       if (this.styles != null) this.applyStyles(this.styles);
       if (this.bodyStyles != null) this.applyStyles(this.bodyStyles, true);
-      if (typeof this.renderToolbars === "function") this.renderToolbars();
-      return this.$el.data('luca.panel', this.name || this.cid);
+      return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
     },
     $bodyEl: function() {
       var bodyEl, className, element, newElement;
@@ -1298,7 +1277,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
+  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1585,14 +1564,14 @@
       });
     },
     firstActivation: function() {
-      var _this = this;
-      return _(this.components).each(function(component) {
-        var activator, _ref;
-        activator = _this;
+      var activator;
+      activator = this;
+      return this.each(function(component, index) {
+        var _ref;
         if ((component != null ? component.previously_activated : void 0) !== true) {
           if (component != null) {
             if ((_ref = component.trigger) != null) {
-              _ref.apply(component, ["first:activation", [component, activator]]);
+              _ref.call(component, "first:activation", component, activator);
             }
           }
           return component.previously_activated = true;
@@ -1650,12 +1629,15 @@
         return sub_container != null ? typeof sub_container.findComponent === "function" ? sub_container.findComponent(needle, haystack, true) : void 0 : void 0;
       }
     },
+    each: function(fn) {
+      return this.eachComponent(fn, false);
+    },
     eachComponent: function(fn, deep) {
       var _this = this;
       if (deep == null) deep = true;
-      return _(this.components).each(function(component) {
+      return _(this.components).each(function(component, index) {
         var _ref;
-        fn.apply(component, [component]);
+        fn.call(component, component, index);
         if (deep) {
           return component != null ? (_ref = component.eachComponent) != null ? _ref.apply(component, [fn, deep]) : void 0 : void 0;
         }
@@ -2018,7 +2000,7 @@
           }
         }
       }
-      this.$(">." + this.componentClass).hide();
+      this.componentElements().hide();
       if (!current.previously_activated) {
         current.trigger("first:activation");
         current.previously_activated = true;
@@ -2241,14 +2223,13 @@
 (function() {
 
   _.def('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
-    events: {
-      "click ul.nav-tabs li": "select"
-    },
     hooks: ["before:select", "after:select"],
     componentType: 'tab_view',
     className: 'luca-ui-tab-view tabbable',
     tab_position: 'top',
     tabVerticalOffset: '50px',
+    bodyTemplate: "containers/tab_view",
+    bodyEl: "div.tab-content",
     initialize: function(options) {
       this.options = options != null ? options : {};
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
@@ -2256,38 +2237,34 @@
       this.setupHooks(this.hooks);
       return this.bind("after:card:switch", this.highlightSelectedTab);
     },
-    bodyTagName: "div",
-    bodyClassName: 'tab-content',
     activeTabSelector: function() {
       return this.tabSelectors().eq(this.activeCard || this.activeTab || this.activeItem);
     },
     beforeLayout: function() {
       var _ref;
       this.$el.addClass("tabs-" + this.tab_position);
-      if (this.tab_position === "below") {
-        this.$el.append(Luca.templates["containers/tab_view"](this));
-        this.$el.append(Luca.templates["containers/tab_selector_container"](this));
-      } else {
-        this.$el.append(Luca.templates["containers/tab_selector_container"](this));
-        this.$el.append(Luca.templates["containers/tab_view"](this));
-      }
+      this.activeTabSelector().addClass('active');
+      this.createTabSelectors();
       return (_ref = Luca.containers.CardView.prototype.beforeLayout) != null ? _ref.apply(this, arguments) : void 0;
     },
-    beforeRender: function() {
+    afterRender: function() {
       var _ref;
-      if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
+      if ((_ref = Luca.containers.CardView.prototype.afterRender) != null) {
         _ref.apply(this, arguments);
       }
-      this.activeTabSelector().addClass('active');
-      if (Luca.enableBootstrap && this.tab_position === "left" || this.tab_position === "right") {
-        this.$el.wrap("<div class='row' />");
-        this.$el.addClass('span12');
-        this.tabContainerWrapper().addClass('span3');
-        this.tabContentWrapper().addClass('span9');
-        if (this.tabVerticalOffset) {
-          return this.tabContainerWrapper().css('padding-top', this.tabVerticalOffset);
-        }
-      }
+      return this.registerEvent("click #" + this.cid + "-tabs-selector li a", "select");
+    },
+    createTabSelectors: function() {
+      var tabView;
+      tabView = this;
+      return this.each(function(component, index) {
+        var selector;
+        selector = tabView.make("li", {
+          "class": "tab-selector",
+          "data-target": index
+        }, "<a>" + component.title + "</a>");
+        return tabView.tabContainer().append(selector);
+      });
     },
     highlightSelectedTab: function() {
       this.tabSelectors().removeClass('active');
@@ -2295,10 +2272,13 @@
     },
     select: function(e) {
       var me, my;
-      me = my = $(e.currentTarget);
+      me = my = $(e.target);
       this.trigger("before:select", this);
-      this.activate(my.data('target'));
+      this.activate(my.parent().data('target'));
       return this.trigger("after:select", this);
+    },
+    componentElements: function() {
+      return this.$(">.tab-content >." + this.componentClass);
     },
     tabContentWrapper: function() {
       return $("#" + this.cid + "-tab-view-content");
@@ -2307,10 +2287,10 @@
       return $("#" + this.cid + "-tabs-selector");
     },
     tabContainer: function() {
-      return $("ul#" + this.cid + "-tabs-nav");
+      return this.$('ul.nav-tabs', this.tabContainerWrapper());
     },
     tabSelectors: function() {
-      return $('li.tab-selector', this.tabContainer());
+      return this.$('li.tab-selector', this.tabContainer());
     }
   });
 

@@ -71,7 +71,7 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
       previous?.trigger?.apply(previous,["before:deactivation", @, previous, current])
       current?.trigger?.apply(previous,["before:activation", @, previous, current])
 
-    @$(">.#{ @componentClass }").hide()
+    @componentElements().hide()
 
     unless current.previously_activated
       current.trigger "first:activation"
