@@ -1,12 +1,19 @@
 .luca-ui-console {
-  border-top: 1px solid #ccc;
+  .CodeMirror {
+    font-family: "Monaco";
+    font-size: 14px;
+    line-height: 1.75;
+  }
   .luca-ui-text-field {
     width: 100%;
     background-color: #272822;
+    border-top: 1px solid #ccc;
+    padding-left:1px;
     input {
+      font-family: "Monaco";
       color: #fff;
       border: 0px;
-      width: 99%;
+      width: 90%;
       background-color: #272822;
     }
   }

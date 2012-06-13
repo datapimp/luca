@@ -1,7 +1,7 @@
 #= require ./luca-ui/framework
 #= require ./luca-ui/core/util
-#= require ./luca-ui/core/registry
 #= require ./luca-ui/core/core
+#= require ./luca-ui/core/registry
 #= require ./luca-ui/core/view
 #= require ./luca-ui/core/model
 #= require ./luca-ui/core/collection

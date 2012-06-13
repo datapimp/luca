@@ -454,9 +454,9 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @componentPicker.bind "component:fetched", (source, component)=>
       @setEditorNamespace(component).setValue( source, "component")
 
-    if !@$('.component-picker').length > 0
-      @$('.codemirror-wrapper').before(@componentPicker.createWrapper())
-      @$('.component-picker').html( @componentPicker.render().el )
+    if !@getEditor().$('.component-picker').length > 0
+      @getEditor().$('.codemirror-wrapper').before(@componentPicker.createWrapper())
+      @getEditor().$('.component-picker').html( @componentPicker.render().el )
       @componentPicker.show()
       return
 
