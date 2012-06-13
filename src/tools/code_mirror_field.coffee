@@ -11,6 +11,8 @@ defaultOptions =
 
 Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
   bodyClassName: "codemirror-wrapper"
+  preProcessors: []
+  postProcessors: []
 
   codemirrorOptions: ()->
     options = _.clone( defaultOptions )
@@ -19,16 +21,28 @@ Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
       mode: @mode || "coffeescript"
       theme: @theme || "monokai"
       keyMap: @keyMap || "basic"
-      onChange: @onEditorChange || ()-> true
       lineNumbers: if @lineNumbers? then @lineNumbers else defaultOptions.lineNumbers
       readOnly: if @readOnly? then @readOnly else defaultOptions.readOnly
       gutter: if @gutter? then @gutter else defaultOptions.gutter
+      onChange: ()=>
+        @trigger "editor:change", @
+        @onEditorChange?.call(@)
+
+    customOptions.onKeyEvent = _.bind(@onKeyEvent,@) if @onKeyEvent?
 
     _.extend(options, customOptions)
 
+  getCodeMirror: ()->
+    @instance
+
+  getValue: (processed=true)->
+    value = @getCodeMirror().getValue()
+
+  setValue: (value="", processed=true)->
+    @getCodeMirror().setValue( value )
+
   afterRender: ()->
-    @_super("afterRender", @, arguments)
-    CodeMirror( @$bodyEl()[0], @codemirrorOptions() )
+    @instance = CodeMirror( @$bodyEl()[0], @codemirrorOptions() )
     @setMaxHeight()
     @setHeight()
 

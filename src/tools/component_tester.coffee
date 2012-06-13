@@ -127,14 +127,14 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
 
     topToolbar:
       buttons:[
-        icon: "refresh"
+        icon: "resize-full"
         align: "right"
         description: "refresh the output of your component setup"
-        eventId: "click:refresh"
+        eventId: "toggle:size"
       ,
         icon: "play"
         align: "right"
-        description: "Enable auto-evaluation of test script on code change"
+        description: "Toggle auto-evaluation of test script on code change"
         eventId: "click:autoeval"
       ,
         icon: "plus"
@@ -229,6 +229,8 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     "ctester_edit toggle:mode" : "toggleMode"
     "ctester_edit code:change:html" : "onMarkupChange"
     "ctester_edit code:change:style" : "onStyleChange"
+    "ctester_edit toggle:size" : "toggleSize"
+
 
   initialize: ()->
     Luca.core.Container::initialize.apply(@, arguments)
@@ -326,6 +328,28 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @getEditor().setMode(newMode)
     button.html _.string.capitalize((if newMode is "coffeescript" then "View Javascript" else "View Coffeescript"))
     @editBuffer @currentBufferName, (newMode is "javascript")
+
+
+  currentSize: 1
+  sizes:[
+    icon: "resize-full"
+    value: ()-> $(window).height() * 0.3
+  ,
+    icon: "resize-small"
+    value: ()-> $(window).height() * 0.6
+  ]
+
+  toggleSize: (button)->
+    index = @currentSize++ % @sizes.length
+    newSize = @sizes[ index ].value()
+    newIcon = @sizes[ index ].icon
+
+    if button?
+      iconHolder = button.children('i').eq(0)
+      iconHolder.removeClass().addClass("icon-#{ newIcon }")
+
+    @$('.codemirror-wrapper').css('height', "#{ parseInt(newSize) }px")
+    @getEditor().refresh()
 
   toggleControls: (button)->
     @bind "controls:toggled", ()=>
