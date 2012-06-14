@@ -9,7 +9,13 @@
     background-color: #272822;
     border-top: 1px solid #ccc;
     padding-left:1px;
+    input:focus {
+      outline: none !important;
+      box-shadow: 0 0 0 0 transparent;
+    }
     input {
+      outline: none !important;
+      box-shadow: 0 0 0 0 transparent;
       font-family: "Monaco";
       color: #fff;
       border: 0px;

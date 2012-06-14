@@ -82,29 +82,60 @@ Luca.define("Luca.tools.Console").extends("Luca.core.Container").with
 
     Luca("code_input").setValue( @history[ @historyIndex ] || currentValue)
 
-  onSuccess: (result, js, coffee)->
-    @saveHistory(coffee)
-    input = Luca("code_input")
+  append: (code, result, skipFormatting=false)->
     output = Luca("code_output")
-    inspected = JSON.stringify(result, null, "\t")  || "undefined"
-    display = _.compact([output.getValue(),"// #{ _.string.strip(js) }", inspected]).join("\n")
-    output.setValue( display )
+    current = output.getValue()
+
+    source = "// #{ code }" if code?
+
+    payload = if skipFormatting or code.match(/^console\.log/)
+      [current,result]
+    else
+      [current,source, result]
+
+    output.setValue( _.compact(payload).join("\n") )
     output.getCodeMirror().scrollTo(0,90000)
 
-  onError: (error)->
-    output = Luca("code_output")
-    display = _.compact([output.getValue(),"// #{ _.string.strip(js) }", "// ERROR: #{ error.message }"]).join("\n")
-    output.setValue( display )
+  onSuccess: (result, js, coffee)->
+    @saveHistory(coffee)
+    dump = JSON.stringify(result, null, "\t")
+    dump ||= result.toString?()
 
-  evaluateCode: (code, raw )->
-    console.log "evaluating", code, raw
+    @append(js, dump || "undefined")
+
+  onError: (error, js, coffee)->
+    @append(js, "// ERROR: #{ error.message }")
+
+  evaluateCode: (code, raw)->
     return unless code?.length > 0
 
-    evaluator = ()-> eval( code )
+    raw = _.string.strip(raw)
+    output = Luca("code_output")
+    dev = @
+
+    evaluator = ()->
+      old_console = window.console
+
+      console =
+        log: ()->
+          for arg in arguments
+            dev.append(undefined, arg, true)
+
+      log = console.log
+
+      try
+        result = eval( code )
+      catch error
+        window.console = old_console
+        throw(error)
+
+      window.console = old_console
+
+      result
 
     try
       result = evaluator.call( @getContext() )
-      @onSuccess(result, code, raw)
+      @onSuccess(result, code, raw) unless raw.match(/^console\.log/)
     catch error
       @onError(error, code, raw)
 
@@ -113,5 +144,4 @@ Luca.define("Luca.tools.Console").extends("Luca.core.Container").with
     compile = _.bind(Luca.tools.CoffeeEditor::compile, @)
     raw = Luca("code_input").getValue()
     compiled = compile raw, (compiled)->
-      console.log dev.evaluateCode
       dev.evaluateCode(compiled, raw)
