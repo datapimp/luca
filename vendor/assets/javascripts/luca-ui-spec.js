@@ -2073,8 +2073,8 @@
       return this.collection.bind("reset", this.populateCheckboxes);
     },
     afterRender: function() {
-      var _ref, _ref2;
-      if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
+      var _ref;
+      if (((_ref = this.collection) != null ? _ref.length : void 0) > 0) {
         return this.populateCheckboxes();
       } else {
         return this.collection.trigger("reset");
@@ -3173,6 +3173,64 @@
 (function() {
 
 
+
+}).call(this);
+(function() {
+
+  describe('The Checkbox Array Field', function() {
+    beforeEach(function() {
+      var collection;
+      this.model = new Backbone.Model({
+        item_ids: ["1"]
+      });
+      collection = new Luca.Collection;
+      this.formView = new Luca.components.FormView({
+        components: [
+          {
+            ctype: "checkbox_array",
+            name: 'item_ids',
+            collection: collection
+          }
+        ]
+      });
+      this.formView.render();
+      this.formView.loadModel(this.model);
+      collection.reset([
+        {
+          id: "1",
+          name: "Item1"
+        }, {
+          id: "2",
+          name: "Item2"
+        }, {
+          id: "3",
+          name: "Item3"
+        }
+      ]);
+      return this.field = this.formView.getFields()[0];
+    });
+    it("should create a checkbox array field", function() {
+      expect(this.formView.currentModel()).toEqual(this.model);
+      return expect(this.field.selectedItems).toEqual(["1"]);
+    });
+    it("should render the list of checkboxes", function() {
+      expect(this.field.$el.html()).toContain("Item1");
+      expect(this.field.$el.html()).toContain("Item2");
+      return expect(this.field.$el.html()).toContain("Item3");
+    });
+    it("should check off each checkbox in the collection that is selected", function() {
+      expect(this.field.$el.find("input[value='1']")[0].checked).toBeTruthy();
+      expect(this.field.$el.find("input[value='2']")[0].checked).toBeFalsy();
+      return expect(this.field.$el.find("input[value='3']")[0].checked).toBeFalsy();
+    });
+    return it("should update the form model's attribute to be an array of selected items on click", function() {
+      var checkbox;
+      checkbox = $(this.field.$el.find("input[value='2']")[0]);
+      checkbox.prop("checked", true);
+      checkbox.click();
+      return expect(this.field.getModel().get('item_ids')).toEqual(["1", "2"]);
+    });
+  });
 
 }).call(this);
 (function() {

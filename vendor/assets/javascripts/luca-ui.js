@@ -2073,8 +2073,8 @@
       return this.collection.bind("reset", this.populateCheckboxes);
     },
     afterRender: function() {
-      var _ref, _ref2;
-      if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
+      var _ref;
+      if (((_ref = this.collection) != null ? _ref.length : void 0) > 0) {
         return this.populateCheckboxes();
       } else {
         return this.collection.trigger("reset");
