@@ -74,7 +74,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
   initialize: (@options)->
     @_super("initialize", @, arguments)
 
-    _.bindAll @, "onCompiledCodeChange", "onBufferChange", "onEditorChange"
+    _.bindAll @, "onCompiledCodeChange", "onBufferChange", "onEditorChange", "stripTabs"
 
     @mode ||= "coffeescript"
     @theme ||= "monokai"
@@ -154,6 +154,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     gutter: true
     autofocus: true
     onChange: @onEditorChange
+    onKeyEvent: @stripTabs
     passDelay: 50
     autoClearEmptyLines: true
     smartIndent: false
@@ -177,6 +178,7 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     _.defer ()=>
       @editor = window.CodeMirror.fromTextArea( @$('textarea')[0], @editorOptions())
       @restore()
+      @enableTabStripping = true
 
   save: ()->
     @saveBuffer()
@@ -184,6 +186,17 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
   restore: ()->
     @editor.setValue("")
     @editor.refresh()
+
+  replaceTabWithSpace: ()->
+
+  stripTabs: (editor, keyEvent)->
+    if keyEvent?.keyCode is 9
+      coords = @editor.cursorCoords()
+      cleansed = @getValue().replace(/\t/g,'  ')
+      @setValue(cleansed)
+      @editor.setCursor( coords )
+
+    false
 
   onEditorChange: ()->
     if @monitorChanges
@@ -241,4 +254,5 @@ _.def("Luca.tools.CodeEditor").extends("Luca.components.Panel").with
     @editor.getValue()
 
   setValue: (value)->
+    value = value.replace(/\t/g, '  ')
     @editor.setValue( value )

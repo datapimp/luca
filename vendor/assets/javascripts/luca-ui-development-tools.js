@@ -1,652 +1,3 @@
-// JQuery Console 1.0
-// Sun Feb 21 20:28:47 GMT 2010
-//
-// Copyright 2010 Chris Done, Simon David Pratt. All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//
-//    1. Redistributions of source code must retain the above
-//       copyright notice, this list of conditions and the following
-//       disclaimer.
-//
-//    2. Redistributions in binary form must reproduce the above
-//       copyright notice, this list of conditions and the following
-//       disclaimer in the documentation and/or other materials
-//       provided with the distribution.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-// FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-// COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-// BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
-
-// TESTED ON
-//   Internet Explorer 6
-//   Opera 10.01
-//   Chromium 4.0.237.0 (Ubuntu build 31094)
-//   Firefox 3.5.8, 3.6.2 (Mac)
-//   Safari 4.0.5 (6531.22.7) (Mac)
-//   Google Chrome 5.0.375.55 (Mac)
-
-(function($){
-    $.fn.console = function(config){
-        ////////////////////////////////////////////////////////////////////////
-        // Constants
-        // Some are enums, data types, others just for optimisation
-        var keyCodes = {
-      // left
-      37: moveBackward,
-      // right
-      39: moveForward,
-      // up
-      38: previousHistory,
-      // down
-      40: nextHistory,
-      // backspace
-      8:  backDelete,
-      // delete
-      46: forwardDelete,
-            // end
-      35: moveToEnd,
-      // start
-      36: moveToStart,
-      // return
-      13: commandTrigger,
-      // tab
-      18: doNothing
-  };
-  var ctrlCodes = {
-      // C-a
-      65: moveToStart,
-      // C-e
-      69: moveToEnd,
-      // C-d
-      68: forwardDelete,
-      // C-n
-      78: nextHistory,
-      // C-p
-      80: previousHistory,
-      // C-b
-      66: moveBackward,
-      // C-f
-      70: moveForward,
-      // C-k
-      75: deleteUntilEnd
-  };
-  var altCodes = {
-      // M-f
-      70: moveToNextWord,
-      // M-b
-      66: moveToPreviousWord,
-      // M-d
-      68: deleteNextWord
-  };
-        var cursor = '<span class="jquery-console-cursor">&nbsp;</span>';
-
-        ////////////////////////////////////////////////////////////////////////
-        // Globals
-        var container = $(this);
-        var inner = $('<div class="jquery-console-inner"></div>');
-        // erjiang: changed this from a text input to a textarea so we
-        // can get pasted newlines
-        var typer = $('<textarea class="jquery-console-typer"></textarea>');
-        // Prompt
-        var promptBox;
-        var prompt;
-        var promptLabel = config && config.promptLabel? config.promptLabel : "> ";
-        var continuedPromptLabel = config && config.continuedPromptLabel?
-        config.continuedPromptLabel : "> ";
-        var column = 0;
-        var promptText = '';
-        var restoreText = '';
-        var continuedText = '';
-        // Prompt history stack
-        var history = [];
-        var ringn = 0;
-        // For reasons unknown to The Sword of Michael himself, Opera
-        // triggers and sends a key character when you hit various
-        // keys like PgUp, End, etc. So there is no way of knowing
-        // when a user has typed '#' or End. My solution is in the
-        // typer.keydown and typer.keypress functions; I use the
-        // variable below to ignore the keypress event if the keydown
-        // event succeeds.
-        var cancelKeyPress = 0;
-  // When this value is false, the prompt will not respond to input
-  var acceptInput = true;
-  // When this value is true, the command has been canceled
-  var cancelCommand = false;
-
-        // External exports object
-        var extern = {};
-
-        ////////////////////////////////////////////////////////////////////////
-        // Main entry point
-        (function(){
-            container.append(inner);
-            inner.append(typer);
-            typer.css({position:'absolute',top:0,left:'-9999px'});
-            if (config.welcomeMessage)
-                message(config.welcomeMessage,'jquery-console-welcome');
-            newPromptBox();
-            if (config.autofocus) {
-                inner.addClass('jquery-console-focus');
-                typer.focus();
-                setTimeout(function(){
-                    inner.addClass('jquery-console-focus');
-                    typer.focus();
-                },100);
-            }
-            extern.inner = inner;
-            extern.typer = typer;
-            extern.scrollToBottom = scrollToBottom;
-        })();
-
-        ////////////////////////////////////////////////////////////////////////
-        // Reset terminal
-        extern.reset = function(){
-            var welcome = (typeof config.welcomeMessage != 'undefined');
-            inner.parent().fadeOut(function(){
-                inner.find('div').each(function(){
-                    if (!welcome) {
-                        $(this).remove();
-        } else {
-      welcome = false;
-        }
-                });
-                newPromptBox();
-                inner.parent().fadeIn(function(){
-                    inner.addClass('jquery-console-focus');
-                    typer.focus();
-                });
-            });
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Reset terminal
-        extern.notice = function(msg,style){
-            var n = $('<div class="notice"></div>').append($('<div></div>').text(msg))
-                .css({visibility:'hidden'});
-            container.append(n);
-            var focused = true;
-            if (style=='fadeout')
-                setTimeout(function(){
-                    n.fadeOut(function(){
-                        n.remove();
-                    });
-                },4000);
-            else if (style=='prompt') {
-                var a = $('<br/><div class="action"><a href="javascript:">OK</a><div class="clear"></div></div>');
-                n.append(a);
-                focused = false;
-                a.click(function(){ n.fadeOut(function(){ n.remove();inner.css({opacity:1}) }); });
-            }
-            var h = n.height();
-            n.css({height:'0px',visibility:'visible'})
-                .animate({height:h+'px'},function(){
-                    if (!focused) inner.css({opacity:0.5});
-                });
-            n.css('cursor','default');
-            return n;
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Make a new prompt box
-        function newPromptBox() {
-            column = 0;
-            promptText = '';
-      ringn = 0; // Reset the position of the history ring
-      enableInput();
-            promptBox = $('<div class="jquery-console-prompt-box"></div>');
-            var label = $('<span class="jquery-console-prompt-label"></span>');
-            var labelText = extern.continuedPrompt? continuedPromptLabel : promptLabel;
-            promptBox.append(label.text(labelText).show());
-            label.html(label.html().replace(' ','&nbsp;'));
-            prompt = $('<span class="jquery-console-prompt"></span>');
-            promptBox.append(prompt);
-            inner.append(promptBox);
-            updatePromptDisplay();
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Handle setting focus
-        container.click(function(){
-            inner.addClass('jquery-console-focus');
-            inner.removeClass('jquery-console-nofocus');
-            typer.focus();
-            scrollToBottom();
-            return false;
-        });
-
-        ////////////////////////////////////////////////////////////////////////
-        // Handle losing focus
-        typer.blur(function(){
-            inner.removeClass('jquery-console-focus');
-            inner.addClass('jquery-console-nofocus');
-        });
-
-        ////////////////////////////////////////////////////////////////////////
-        // Bind to the paste event of the input box so we know when we
-        // get pasted data
-        typer.bind('paste', function(e) {
-            // wipe typer input clean just in case
-            typer.val("");
-            // this timeout is required because the onpaste event is
-            // fired *before* the text is actually pasted
-            setTimeout(function() {
-                typer.consoleInsert(typer.val());
-                typer.val("");
-            }, 0);
-        });
-
-        ////////////////////////////////////////////////////////////////////////
-        // Handle key hit before translation
-        // For picking up control characters like up/left/down/right
-
-        typer.keydown(function(e){
-            cancelKeyPress = 0;
-            var keyCode = e.keyCode;
-      // C-c: cancel the execution
-      if(e.ctrlKey && keyCode == 67) {
-    cancelKeyPress = keyCode;
-    cancelExecution();
-    return false;
-      }
-      if (acceptInput) {
-    if (keyCode in keyCodes) {
-                    cancelKeyPress = keyCode;
-        (keyCodes[keyCode])();
-        return false;
-    } else if (e.ctrlKey && keyCode in ctrlCodes) {
-                    cancelKeyPress = keyCode;
-        (ctrlCodes[keyCode])();
-        return false;
-    } else if (e.altKey  && keyCode in altCodes) {
-                    cancelKeyPress = keyCode;
-        (altCodes[keyCode])();
-        return false;
-    }
-      }
-        });
-
-        ////////////////////////////////////////////////////////////////////////
-        // Handle key press
-        typer.keypress(function(e){
-            var keyCode = e.keyCode || e.which;
-            if (isIgnorableKey(e)) {
-                return false;
-            }
-          // // C-v: don't insert on paste event
-            if ((e.ctrlKey || e.metaKey) && String.fromCharCode(keyCode).toLowerCase() == 'v') {
-              return true;
-            }
-            if (acceptInput && cancelKeyPress != keyCode && keyCode >= 32){
-                if (cancelKeyPress) return false;
-                if (typeof config.charInsertTrigger == 'undefined' ||
-                    (typeof config.charInsertTrigger == 'function' &&
-                     config.charInsertTrigger(keyCode,promptText)))
-                    typer.consoleInsert(keyCode);
-            }
-            if ($.browser.webkit) return false;
-        });
-
-        function isIgnorableKey(e) {
-            // for now just filter alt+tab that we receive on some platforms when
-            // user switches windows (goes away from the browser)
-            return ((e.keyCode == keyCodes.tab || e.keyCode == 192) && e.altKey);
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Rotate through the command history
-        function rotateHistory(n){
-            if (history.length == 0) return;
-            ringn += n;
-            if (ringn < 0) ringn = history.length;
-            else if (ringn > history.length) ringn = 0;
-            var prevText = promptText;
-            if (ringn == 0) {
-                promptText = restoreText;
-            } else {
-                promptText = history[ringn - 1];
-            }
-            if (config.historyPreserveColumn) {
-                if (promptText.length < column + 1) {
-                    column = promptText.length;
-                } else if (column == 0) {
-                    column = promptText.length;
-                }
-            } else {
-                column = promptText.length;
-            }
-            updatePromptDisplay();
-        };
-
-  function previousHistory() {
-      rotateHistory(-1);
-  };
-
-  function nextHistory() {
-      rotateHistory(1);
-  };
-
-        // Add something to the history ring
-        function addToHistory(line){
-            history.push(line);
-            restoreText = '';
-        };
-
-        // Delete the character at the current position
-        function deleteCharAtPos(){
-            if (column < promptText.length){
-                promptText =
-                    promptText.substring(0,column) +
-                    promptText.substring(column+1);
-                restoreText = promptText;
-                return true;
-            } else return false;
-        };
-
-  function backDelete() {
-            if (moveColumn(-1)){
-                deleteCharAtPos();
-                updatePromptDisplay();
-            }
-  };
-
-  function forwardDelete() {
-            if (deleteCharAtPos())
-                updatePromptDisplay();
-  };
-
-  function deleteUntilEnd() {
-      while(deleteCharAtPos()) {
-    updatePromptDisplay();
-      }
-  };
-
-  function deleteNextWord() {
-      // A word is defined within this context as a series of alphanumeric
-      // characters.
-      // Delete up to the next alphanumeric character
-      while(column < promptText.length &&
-      !isCharAlphanumeric(promptText[column])) {
-    deleteCharAtPos();
-    updatePromptDisplay();
-      }
-      // Then, delete until the next non-alphanumeric character
-      while(column < promptText.length &&
-      isCharAlphanumeric(promptText[column])) {
-    deleteCharAtPos();
-    updatePromptDisplay();
-      }
-  };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Validate command and trigger it if valid, or show a validation error
-        function commandTrigger() {
-            var line = promptText;
-            if (typeof config.commandValidate == 'function') {
-                var ret = config.commandValidate(line);
-                if (ret == true || ret == false) {
-                    if (ret) {
-                        handleCommand();
-                    }
-                } else {
-                    commandResult(ret,"jquery-console-message-error");
-                }
-            } else {
-                handleCommand();
-            }
-        };
-
-        // Scroll to the bottom of the view
-        function scrollToBottom() {
-            if (jQuery.fn.jquery > "1.6") {
-                inner.prop({ scrollTop: inner.prop("scrollHeight") });
-            }
-            else {
-                inner.attr({ scrollTop: inner.attr("scrollHeight") });
-            }
-        };
-
-  function cancelExecution() {
-      if(typeof config.cancelHandle == 'function') {
-    config.cancelHandle();
-      }
-  }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Handle a command
-        function handleCommand() {
-            if (typeof config.commandHandle == 'function') {
-    disableInput();
-                addToHistory(promptText);
-                var text = promptText;
-                if (extern.continuedPrompt) {
-                  if (continuedText)
-                    continuedText += '\n' + promptText;
-                  else continuedText = promptText;
-                } else continuedText = undefined;
-                if (continuedText) text = continuedText;
-                var ret = config.commandHandle(text,function(msgs){
-                    commandResult(msgs);
-                });
-                if (extern.continuedPrompt && !continuedText)
-                  continuedText = promptText;
-                if (typeof ret == 'boolean') {
-                    if (ret) {
-                        // Command succeeded without a result.
-                        commandResult();
-                    } else {
-                        commandResult('Command failed.',
-                                      "jquery-console-message-error");
-                    }
-                } else if (typeof ret == "string") {
-                    commandResult(ret,"jquery-console-message-success");
-                } else if (typeof ret == 'object' && ret.length) {
-                    commandResult(ret);
-                } else if (extern.continuedPrompt) {
-                    commandResult();
-                }
-            }
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Disable input
-  function disableInput() {
-      acceptInput = false;
-  };
-
-        // Enable input
-  function enableInput() {
-      acceptInput = true;
-  }
-
-        ////////////////////////////////////////////////////////////////////////
-        // Reset the prompt in invalid command
-        function commandResult(msg,className) {
-            column = -1;
-            updatePromptDisplay();
-            if (typeof msg == 'string') {
-                message(msg,className);
-            } else if ($.isArray(msg)) {
-                for (var x in msg) {
-                    var ret = msg[x];
-                    message(ret.msg,ret.className);
-                }
-            } else { // Assume it's a DOM node or jQuery object.
-              inner.append(msg);
-            }
-            newPromptBox();
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Display a message
-        function message(msg,className) {
-            var mesg = $('<div class="jquery-console-message"></div>');
-            if (className) mesg.addClass(className);
-            mesg.filledText(msg).hide();
-            inner.append(mesg);
-            mesg.show();
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Handle normal character insertion
-        // data can either be a number, which will be interpreted as the
-        // numeric value of a single character, or a string
-        typer.consoleInsert = function(data){
-            // TODO: remove redundant indirection
-            var text = isNaN(data) ? data : String.fromCharCode(data);
-            var before = promptText.substring(0,column);
-            var after = promptText.substring(column);
-            promptText = before + text + after;
-            moveColumn(text.length);
-            restoreText = promptText;
-            updatePromptDisplay();
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Move to another column relative to this one
-        // Negative means go back, positive means go forward.
-        function moveColumn(n){
-            if (column + n >= 0 && column + n <= promptText.length){
-                column += n;
-                return true;
-            } else return false;
-        };
-
-  function moveForward() {
-            if(moveColumn(1)) {
-    updatePromptDisplay();
-    return true;
-      }
-      return false;
-  };
-
-  function moveBackward() {
-            if(moveColumn(-1)) {
-    updatePromptDisplay();
-    return true;
-      }
-      return false;
-  };
-
-  function moveToStart() {
-            if (moveColumn(-column))
-                updatePromptDisplay();
-  };
-
-  function moveToEnd() {
-            if (moveColumn(promptText.length-column))
-                updatePromptDisplay();
-  };
-
-  function moveToNextWord() {
-      while(column < promptText.length &&
-      !isCharAlphanumeric(promptText[column]) &&
-      moveForward()) {
-      }
-      while(column < promptText.length &&
-      isCharAlphanumeric(promptText[column]) &&
-      moveForward()) {
-      }
-  };
-
-  function moveToPreviousWord() {
-      // Move backward until we find the first alphanumeric
-      while(column -1 >= 0 &&
-      !isCharAlphanumeric(promptText[column-1]) &&
-      moveBackward()) {
-      }
-      // Move until we find the first non-alphanumeric
-      while(column -1 >= 0 &&
-      isCharAlphanumeric(promptText[column-1]) &&
-      moveBackward()) {
-      }
-  };
-
-  function isCharAlphanumeric(charToTest) {
-      if(typeof charToTest == 'string') {
-    var code = charToTest.charCodeAt();
-    return (code >= 'A'.charCodeAt() && code <= 'Z'.charCodeAt()) ||
-        (code >= 'a'.charCodeAt() && code <= 'z'.charCodeAt()) ||
-        (code >= '0'.charCodeAt() && code <= '9'.charCodeAt());
-      }
-      return false;
-  };
-
-  function doNothing() {};
-
-        extern.promptText = function(text){
-            if (text) {
-                promptText = text;
-                column = promptText.length;
-                updatePromptDisplay();
-            }
-            return promptText;
-        };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Update the prompt display
-        function updatePromptDisplay(){
-            var line = promptText;
-            var html = '';
-            if (column > 0 && line == ''){
-                // When we have an empty line just display a cursor.
-                html = cursor;
-            } else if (column == promptText.length){
-                // We're at the end of the line, so we need to display
-                // the text *and* cursor.
-                html = htmlEncode(line) + cursor;
-            } else {
-                // Grab the current character, if there is one, and
-                // make it the current cursor.
-                var before = line.substring(0, column);
-                var current = line.substring(column,column+1);
-                if (current){
-                    current =
-                        '<span class="jquery-console-cursor">' +
-                        htmlEncode(current) +
-                        '</span>';
-                }
-                var after = line.substring(column+1);
-                html = htmlEncode(before) + current + htmlEncode(after);
-            }
-            prompt.html(html);
-            scrollToBottom();
-        };
-
-        // Simple HTML encoding
-        // Simply replace '<', '>' and '&'
-        // TODO: Use jQuery's .html() trick, or grab a proper, fast
-        // HTML encoder.
-        function htmlEncode(text){
-            return (
-                text.replace(/&/g,'&amp;')
-                    .replace(/</g,'&lt;')
-                    .replace(/</g,'&lt;')
-                    .replace(/ /g,'&nbsp;')
-                    .replace(/\n/g,'<br />')
-            );
-        };
-
-        return extern;
-    };
-    // Simple utility for printing messages
-    $.fn.filledText = function(txt){
-        $(this).text(txt);
-        $(this).html($(this).html().replace(/\n/g,'<br/>'));
-        return this;
-    };
-})(jQuery);
 /**
  * CoffeeScript Compiler v1.2.1-pre
  * http://coffeescript.org
@@ -17892,42 +17243,13 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 })();
 (function() {
 
-  _.def("Luca.tools.ClassBrowser")["extends"]("Luca.core.Container")["with"]({
+  _.def("Luca.tools.ClassBrowser")["extends"]("Luca.containers.SplitView")["with"]({
     name: "class_browser",
     className: "luca-class-browser row",
-    beforeRender: function() {
-      var _ref;
-      return (_ref = Luca.core.Container.prototype.beforeRender) != null ? _ref.apply(this, arguments) : void 0;
+    components: ["class_browser_list", "class_browser_detail"],
+    componentEvents: {
+      "class_browser_list component:loaded": "loadSourceCode"
     },
-    prepareLayout: function() {
-      this.$append(this.make("div", {
-        "class": "left-column span2"
-      }));
-      return this.$append(this.make("div", {
-        "class": "right-column span10"
-      }));
-    },
-    prepareComponents: function() {
-      this.components[0].container = this.$('.left-column');
-      return this.components[1].container = this.$('.right-column');
-    },
-    afterComponents: function() {
-      var detail, list;
-      list = this.components[0];
-      detail = this.components[1];
-      return list.bind("component:loaded", function(model, response) {
-        return detail.loadComponent(model);
-      });
-    },
-    components: [
-      {
-        name: "class_browser_list",
-        ctype: "class_browser_list"
-      }, {
-        name: "class_browser_detail",
-        ctype: "class_browser_detail"
-      }
-    ],
     bottomToolbar: {
       buttons: [
         {
@@ -17939,9 +17261,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         }
       ]
     },
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.core.Container.prototype.initialize.apply(this, arguments);
+    loadSourceCode: function(model, response) {
+      return Luca("class_browser_detail").loadComponent(model);
     }
   });
 
@@ -18048,7 +17369,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     initialize: function(options) {
       this.options = options;
       this._super("initialize", this, arguments);
-      _.bindAll(this, "onCompiledCodeChange", "onBufferChange", "onEditorChange");
+      _.bindAll(this, "onCompiledCodeChange", "onBufferChange", "onEditorChange", "stripTabs");
       this.mode || (this.mode = "coffeescript");
       this.theme || (this.theme = "monokai");
       this.keyMap || (this.keyMap = "vim");
@@ -18131,6 +17452,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         gutter: true,
         autofocus: true,
         onChange: this.onEditorChange,
+        onKeyEvent: this.stripTabs,
         passDelay: 50,
         autoClearEmptyLines: true,
         smartIndent: false,
@@ -18155,7 +17477,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       var _this = this;
       return _.defer(function() {
         _this.editor = window.CodeMirror.fromTextArea(_this.$('textarea')[0], _this.editorOptions());
-        return _this.restore();
+        _this.restore();
+        return _this.enableTabStripping = true;
       });
     },
     save: function() {
@@ -18164,6 +17487,17 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     restore: function() {
       this.editor.setValue("");
       return this.editor.refresh();
+    },
+    replaceTabWithSpace: function() {},
+    stripTabs: function(editor, keyEvent) {
+      var cleansed, coords;
+      if ((keyEvent != null ? keyEvent.keyCode : void 0) === 9) {
+        coords = this.editor.cursorCoords();
+        cleansed = this.getValue().replace(/\t/g, '  ');
+        this.setValue(cleansed);
+        this.editor.setCursor(coords);
+      }
+      return false;
     },
     onEditorChange: function() {
       if (this.monitorChanges) return this.save();
@@ -18230,7 +17564,154 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       return this.editor.getValue();
     },
     setValue: function(value) {
+      value = value.replace(/\t/g, '  ');
       return this.editor.setValue(value);
+    }
+  });
+
+}).call(this);
+(function() {
+  var defaultOptions;
+
+  defaultOptions = {
+    readOnly: false,
+    lineNumbers: true,
+    gutter: true,
+    autofocus: false,
+    passDelay: 50,
+    autoClearEmptyLines: true,
+    smartIndent: false,
+    tabSize: 2,
+    electricChars: false
+  };
+
+  Luca.define("Luca.tools.CodeMirrorField")["extends"]("Luca.components.Panel")["with"]({
+    bodyClassName: "codemirror-wrapper",
+    preProcessors: [],
+    postProcessors: [],
+    codemirrorOptions: function() {
+      var customOptions, options,
+        _this = this;
+      options = _.clone(defaultOptions);
+      customOptions = {
+        mode: this.mode || "coffeescript",
+        theme: this.theme || "monokai",
+        keyMap: this.keyMap || "basic",
+        lineNumbers: this.lineNumbers != null ? this.lineNumbers : defaultOptions.lineNumbers,
+        readOnly: this.readOnly != null ? this.readOnly : defaultOptions.readOnly,
+        gutter: this.gutter != null ? this.gutter : defaultOptions.gutter,
+        lineWrapping: this.lineWrapping === true,
+        onChange: function() {
+          var _ref;
+          _this.trigger("editor:change", _this);
+          return (_ref = _this.onEditorChange) != null ? _ref.call(_this) : void 0;
+        }
+      };
+      if (this.onKeyEvent != null) {
+        customOptions.onKeyEvent = _.bind(this.onKeyEvent, this);
+      }
+      return _.extend(options, customOptions);
+    },
+    getCodeMirror: function() {
+      return this.instance;
+    },
+    getValue: function(processed) {
+      var value;
+      if (processed == null) processed = true;
+      return value = this.getCodeMirror().getValue();
+    },
+    setValue: function(value, processed) {
+      if (value == null) value = "";
+      if (processed == null) processed = true;
+      return this.getCodeMirror().setValue(value);
+    },
+    afterRender: function() {
+      this.instance = CodeMirror(this.$bodyEl()[0], this.codemirrorOptions());
+      this.setMaxHeight();
+      return this.setHeight();
+    },
+    setMaxHeight: function(maxHeight, grow) {
+      if (maxHeight == null) maxHeight = void 0;
+      if (grow == null) grow = true;
+      maxHeight || (maxHeight = this.maxHeight);
+      if (maxHeight == null) return;
+      this.$('.CodeMirror-scroll').css('max-height', maxHeight);
+      if (grow === true) {
+        return this.$('.CodeMirror-scroll').css('height', maxHeight);
+      }
+    },
+    setHeight: function(height) {
+      if (height == null) height = void 0;
+      if (height != null) {
+        return this.$('.CodeMirror-scroll').css('height', height);
+      }
+    }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.tools.CoffeeEditor")["extends"]("Luca.tools.CodeMirrorField")["with"]({
+    name: "coffeescript_editor",
+    compileOptions: {
+      bare: true
+    },
+    hooks: ["editor:change"],
+    initialize: function(options) {
+      var editor;
+      this.options = options;
+      Luca.tools.CodeMirrorField.prototype.initialize.apply(this, arguments);
+      _.bindAll(this, "editorChange");
+      editor = this;
+      this.state = new Luca.Model({
+        currentMode: "coffeescript",
+        coffeescript: "",
+        javascript: ""
+      });
+      this.state.bind("change:coffeescript", function(model) {
+        var code;
+        editor.trigger("change:coffeescript");
+        code = model.get("coffeescript");
+        return editor.compile(code, function(compiled) {
+          return model.set('javascript', compiled);
+        });
+      });
+      return this.state.bind("change:javascript", function(model) {
+        var _ref;
+        return (_ref = editor.onJavascriptChange) != null ? _ref.call(editor, model.get('javascript')) : void 0;
+      });
+    },
+    compile: function(code, callback) {
+      var compiled, response;
+      response = {};
+      code || (code = this.getValue());
+      try {
+        compiled = CoffeeScript.compile(code, this.compileOptions);
+        if (callback != null) callback.call(this, compiled);
+        return response = {
+          success: true,
+          compiled: compiled
+        };
+      } catch (error) {
+        this.trigger("compile:error", error, code);
+        return response = {
+          success: false,
+          compiled: '',
+          message: error.message
+        };
+      }
+    },
+    currentMode: function() {
+      return this.state.get("currentMode");
+    },
+    fixTabs: function() {
+      var value;
+      value = this.getValue(false);
+      debugger;
+    },
+    editorChange: function() {
+      this.fixTabs();
+      return this.state.set(this.currentMode(), this.getValue());
     }
   });
 
@@ -18311,7 +17792,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   _.def("Luca.tools.ComponentTester")["extends"]("Luca.core.Container")["with"]({
     name: "component_tester",
     className: "span11",
-    autoEvaluateCode: false,
+    autoEvaluateCode: true,
     components: [
       {
         ctype: 'card_view',
@@ -18339,14 +17820,14 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         topToolbar: {
           buttons: [
             {
-              icon: "refresh",
+              icon: "resize-full",
               align: "right",
-              description: "refresh the output of your component setup",
-              eventId: "click:refresh"
+              description: "change the size of the component tester editor",
+              eventId: "toggle:size"
             }, {
-              icon: "play",
+              icon: "pause",
               align: "right",
-              description: "Enable auto-evaluation of test script on code change",
+              description: "Toggle auto-evaluation of test script on code change",
               eventId: "click:autoeval"
             }, {
               icon: "plus",
@@ -18449,7 +17930,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       "ctester_edit toggle:keymap": "toggleKeymap",
       "ctester_edit toggle:mode": "toggleMode",
       "ctester_edit code:change:html": "onMarkupChange",
-      "ctester_edit code:change:style": "onStyleChange"
+      "ctester_edit code:change:style": "onStyleChange",
+      "ctester_edit toggle:size": "toggleSize"
     },
     initialize: function() {
       var key, value, _ref;
@@ -18565,6 +18047,32 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       this.getEditor().setMode(newMode);
       button.html(_.string.capitalize((newMode === "coffeescript" ? "View Javascript" : "View Coffeescript")));
       return this.editBuffer(this.currentBufferName, newMode === "javascript");
+    },
+    currentSize: 1,
+    sizes: [
+      {
+        icon: "resize-full",
+        value: function() {
+          return $(window).height() * 0.3;
+        }
+      }, {
+        icon: "resize-small",
+        value: function() {
+          return $(window).height() * 0.6;
+        }
+      }
+    ],
+    toggleSize: function(button) {
+      var iconHolder, index, newIcon, newSize;
+      index = this.currentSize++ % this.sizes.length;
+      newSize = this.sizes[index].value();
+      newIcon = this.sizes[index].icon;
+      if (button != null) {
+        iconHolder = button.children('i').eq(0);
+        iconHolder.removeClass().addClass("icon-" + newIcon);
+      }
+      this.$('.codemirror-wrapper').css('height', "" + (parseInt(newSize)) + "px");
+      return this.getEditor().refresh();
     },
     toggleControls: function(button) {
       var _this = this;
@@ -18682,9 +18190,9 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       this.componentPicker.bind("component:fetched", function(source, component) {
         return _this.setEditorNamespace(component).setValue(source, "component");
       });
-      if (!this.$('.component-picker').length > 0) {
-        this.$('.codemirror-wrapper').before(this.componentPicker.createWrapper());
-        this.$('.component-picker').html(this.componentPicker.render().el);
+      if (!this.getEditor().$('.component-picker').length > 0) {
+        this.getEditor().$('.codemirror-wrapper').before(this.componentPicker.createWrapper());
+        this.getEditor().$('.component-picker').html(this.componentPicker.render().el);
         this.componentPicker.show();
         return;
       }
@@ -18812,104 +18320,325 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
 }).call(this);
 (function() {
-  var console_name, inspectArray;
+  var codeMirrorOptions;
 
-  inspectArray = function(array) {
-    var items, lastPrompt;
-    lastPrompt = this.$('.console-inner .jquery-console-prompt-label').last();
-    items = _(array).map(function(item) {
-      return "<span>" + ((item != null ? item.toString() : void 0) || "undefined") + "</span>";
-    });
-    return lastPrompt.before("<div class='array-inspector'>" + (items.join('')) + "</div>");
+  codeMirrorOptions = {
+    readOnly: true,
+    autoFocus: false,
+    theme: "monokai",
+    mode: "javascript"
   };
 
-  console_name = "";
-
-  _.def('Luca.tools.DevelopmentConsole')["extends"]('Luca.components.Panel')["with"]({
-    bodyClassName: "console-wrapper",
-    name: "development_console",
-    className: 'luca-ui-development-console',
-    prompt: "Coffee> ",
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return this._super("initialize", this, arguments);
+  Luca.define("Luca.tools.DevelopmentConsole")["extends"]("Luca.core.Container")["with"]({
+    className: "luca-ui-console",
+    name: "console",
+    history: [],
+    historyIndex: 0,
+    componentEvents: {
+      "code_input key:keyup": "historyUp",
+      "code_input key:keydown": "historyDown",
+      "code_input key:enter": "runCommand"
     },
-    render: function() {
-      if (this.rendered === true) return this;
-      this.setup();
-      this._super("render", this, arguments);
-      return this;
+    compileOptions: {
+      bare: true
     },
-    setup: function() {
-      var devConsole;
-      this.$bodyEl().css({
-        height: "500px",
-        width: "800px"
-      });
-      this.$append(this.make("div", {
-        "class": "console-inner"
-      }));
-      console_name = this.name;
-      devConsole = this;
-      this.rendered = true;
-      this.console || (this.console = this.$('.console-inner').console({
-        promptLabel: this.prompt,
-        animateScroll: true,
-        promptHistory: true,
-        autoFocus: true,
-        commandValidate: function(line) {
-          var valid;
-          valid = true;
-          if (line === "") valid = false;
-          try {
-            if (CoffeeScript.compile(line)) {
-              valid = true;
-            } else {
-              valid = false;
-            }
-          } catch (error) {
-            valid = false;
-          }
-          return valid;
+    components: [
+      {
+        ctype: "code_mirror_field",
+        name: "code_output",
+        readOnly: true,
+        lineNumbers: false,
+        mode: "javascript",
+        maxHeight: '250px',
+        height: '250px',
+        lineWrapping: true,
+        gutter: false
+      }, {
+        ctype: "text_field",
+        name: "code_input",
+        lineNumbers: false,
+        height: '30px',
+        maxHeight: '30px',
+        gutter: false,
+        autoBindEventHandlers: true,
+        hideLabel: true,
+        prepend: "Coffee>",
+        events: {
+          "keypress input": "onKeyEvent",
+          "keydown input": "onKeyEvent"
         },
-        returnValue: function(val) {
-          if (val == null) return "undefined";
-          if (_.isArray(val)) {
-            inspectArray(val);
-            return "";
+        onKeyEvent: function(keyEvent) {
+          if (keyEvent.type === "keypress" && keyEvent.keyCode === Luca.keys.ENTER) {
+            this.trigger("key:enter", this.getValue());
           }
-          return (val != null ? val.toString() : void 0) || "";
+          if (keyEvent.type === "keydown" && keyEvent.keyCode === Luca.keys.KEYUP) {
+            this.trigger("key:keyup");
+          }
+          if (keyEvent.type === "keydown" && keyEvent.keyCode === Luca.keys.KEYDOWN) {
+            return this.trigger("key:keydown");
+          }
         },
-        parseLine: function(line) {
-          line = _.string.strip(line);
-          line = line.replace(/^return/, ' ');
-          if (line === "clear") {
-            Luca.cache(console_name).console.reset();
-            return "return ''";
-          }
-          return "return " + line;
-        },
-        commandHandle: function(line) {
-          var compiled, functions, inspect, keys, ret, values, _ref;
-          if (line === "") return;
-          compiled = CoffeeScript.compile(this.parseLine(line));
-          keys = _.keys;
-          values = _.values;
-          functions = _.functions;
-          inspect = JSON.stringify;
-          inspectArray = _.bind(inspectArray, devConsole);
-          try {
-            ret = eval(compiled);
-            return this.returnValue(ret);
-          } catch (error) {
-            if (error != null ? (_ref = error.message) != null ? _ref.match(/circular structure to JSON/) : void 0 : void 0) {
-              return ret.toString();
-            }
-            return error.toString();
-          }
+        afterRender: function() {
+          return this.$('input').focus();
         }
-      }));
-      return this;
+      }
+    ],
+    getContext: function() {
+      return window;
+    },
+    initialize: function() {
+      this._super("initialize", this, arguments);
+      return _.bindAll(this, "historyUp", "historyDown", "onSuccess", "onError", "runCommand");
+    },
+    saveHistory: function(command) {
+      if ((command != null ? command.length : void 0) > 0) {
+        this.history.push(command);
+      }
+      return this.historyIndex = 0;
+    },
+    historyUp: function() {
+      var currentValue;
+      this.historyIndex -= 1;
+      if (this.historyIndex < 0) this.historyIndex = 0;
+      currentValue = Luca("code_input").getValue();
+      return Luca("code_input").setValue(this.history[this.historyIndex] || currentValue);
+    },
+    historyDown: function() {
+      var currentValue;
+      this.historyIndex += 1;
+      if (this.historyIndex > this.history.length - 1) {
+        this.historyIndex = this.history.length - 1;
+      }
+      currentValue = Luca("code_input").getValue();
+      return Luca("code_input").setValue(this.history[this.historyIndex] || currentValue);
+    },
+    append: function(code, result, skipFormatting) {
+      var current, output, payload, source;
+      if (skipFormatting == null) skipFormatting = false;
+      output = Luca("code_output");
+      current = output.getValue();
+      if (code != null) source = "// " + code;
+      payload = skipFormatting || code.match(/^console\.log/) ? [current, result] : [current, source, result];
+      output.setValue(_.compact(payload).join("\n"));
+      return output.getCodeMirror().scrollTo(0, 90000);
+    },
+    onSuccess: function(result, js, coffee) {
+      var dump;
+      this.saveHistory(coffee);
+      dump = JSON.stringify(result, null, "\t");
+      dump || (dump = typeof result.toString === "function" ? result.toString() : void 0);
+      return this.append(js, dump || "undefined");
+    },
+    onError: function(error, js, coffee) {
+      return this.append(js, "// ERROR: " + error.message);
+    },
+    evaluateCode: function(code, raw) {
+      var dev, evaluator, output, result;
+      if (!((code != null ? code.length : void 0) > 0)) return;
+      raw = _.string.strip(raw);
+      output = Luca("code_output");
+      dev = this;
+      evaluator = function() {
+        var console, log, old_console, result;
+        old_console = window.console;
+        console = {
+          log: function() {
+            var arg, _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+              arg = arguments[_i];
+              _results.push(dev.append(void 0, arg, true));
+            }
+            return _results;
+          }
+        };
+        log = console.log;
+        try {
+          result = eval(code);
+        } catch (error) {
+          window.console = old_console;
+          throw error;
+        }
+        window.console = old_console;
+        return result;
+      };
+      try {
+        result = evaluator.call(this.getContext());
+        if (!raw.match(/^console\.log/)) return this.onSuccess(result, code, raw);
+      } catch (error) {
+        return this.onError(error, code, raw);
+      }
+    },
+    runCommand: function() {
+      var compile, compiled, dev, raw;
+      dev = this;
+      compile = _.bind(Luca.tools.CoffeeEditor.prototype.compile, this);
+      raw = Luca("code_input").getValue();
+      return compiled = compile(raw, function(compiled) {
+        return dev.evaluateCode(compiled, raw);
+      });
+    }
+  });
+
+}).call(this);
+(function() {
+  var codeMirrorOptions;
+
+  codeMirrorOptions = {
+    readOnly: true,
+    autoFocus: false,
+    theme: "monokai",
+    mode: "javascript"
+  };
+
+  Luca.define("Luca.tools.Console")["extends"]("Luca.core.Container")["with"]({
+    className: "luca-ui-console",
+    name: "console",
+    history: [],
+    historyIndex: 0,
+    componentEvents: {
+      "code_input key:keyup": "historyUp",
+      "code_input key:keydown": "historyDown",
+      "code_input key:enter": "runCommand"
+    },
+    compileOptions: {
+      bare: true
+    },
+    components: [
+      {
+        ctype: "code_mirror_field",
+        name: "code_output",
+        readOnly: true,
+        lineNumbers: false,
+        mode: "javascript",
+        maxHeight: '250px',
+        height: '250px',
+        lineWrapping: true,
+        gutter: false
+      }, {
+        ctype: "text_field",
+        name: "code_input",
+        lineNumbers: false,
+        height: '30px',
+        maxHeight: '30px',
+        gutter: false,
+        autoBindEventHandlers: true,
+        hideLabel: true,
+        prepend: "Coffee>",
+        events: {
+          "keypress input": "onKeyEvent",
+          "keydown input": "onKeyEvent"
+        },
+        onKeyEvent: function(keyEvent) {
+          if (keyEvent.type === "keypress" && keyEvent.keyCode === Luca.keys.ENTER) {
+            this.trigger("key:enter", this.getValue());
+          }
+          if (keyEvent.type === "keydown" && keyEvent.keyCode === Luca.keys.KEYUP) {
+            this.trigger("key:keyup");
+          }
+          if (keyEvent.type === "keydown" && keyEvent.keyCode === Luca.keys.KEYDOWN) {
+            return this.trigger("key:keydown");
+          }
+        },
+        afterRender: function() {
+          return this.$('input').focus();
+        }
+      }
+    ],
+    getContext: function() {
+      return window;
+    },
+    initialize: function() {
+      this._super("initialize", this, arguments);
+      return _.bindAll(this, "historyUp", "historyDown", "onSuccess", "onError", "runCommand");
+    },
+    saveHistory: function(command) {
+      if ((command != null ? command.length : void 0) > 0) {
+        this.history.push(command);
+      }
+      return this.historyIndex = 0;
+    },
+    historyUp: function() {
+      var currentValue;
+      this.historyIndex -= 1;
+      if (this.historyIndex < 0) this.historyIndex = 0;
+      currentValue = Luca("code_input").getValue();
+      return Luca("code_input").setValue(this.history[this.historyIndex] || currentValue);
+    },
+    historyDown: function() {
+      var currentValue;
+      this.historyIndex += 1;
+      if (this.historyIndex > this.history.length - 1) {
+        this.historyIndex = this.history.length - 1;
+      }
+      currentValue = Luca("code_input").getValue();
+      return Luca("code_input").setValue(this.history[this.historyIndex] || currentValue);
+    },
+    append: function(code, result, skipFormatting) {
+      var current, output, payload, source;
+      if (skipFormatting == null) skipFormatting = false;
+      output = Luca("code_output");
+      current = output.getValue();
+      if (code != null) source = "// " + code;
+      payload = skipFormatting || code.match(/^console\.log/) ? [current, result] : [current, source, result];
+      output.setValue(_.compact(payload).join("\n"));
+      return output.getCodeMirror().scrollTo(0, 90000);
+    },
+    onSuccess: function(result, js, coffee) {
+      var dump;
+      this.saveHistory(coffee);
+      dump = JSON.stringify(result, null, "\t");
+      dump || (dump = typeof result.toString === "function" ? result.toString() : void 0);
+      return this.append(js, dump || "undefined");
+    },
+    onError: function(error, js, coffee) {
+      return this.append(js, "// ERROR: " + error.message);
+    },
+    evaluateCode: function(code, raw) {
+      var dev, evaluator, output, result;
+      if (!((code != null ? code.length : void 0) > 0)) return;
+      raw = _.string.strip(raw);
+      output = Luca("code_output");
+      dev = this;
+      evaluator = function() {
+        var console, log, old_console, result;
+        old_console = window.console;
+        console = {
+          log: function() {
+            var arg, _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+              arg = arguments[_i];
+              _results.push(dev.append(void 0, arg, true));
+            }
+            return _results;
+          }
+        };
+        log = console.log;
+        try {
+          result = eval(code);
+        } catch (error) {
+          window.console = old_console;
+          throw error;
+        }
+        window.console = old_console;
+        return result;
+      };
+      try {
+        result = evaluator.call(this.getContext());
+        if (!raw.match(/^console\.log/)) return this.onSuccess(result, code, raw);
+      } catch (error) {
+        return this.onError(error, code, raw);
+      }
+    },
+    runCommand: function() {
+      var compile, compiled, dev, raw;
+      dev = this;
+      compile = _.bind(Luca.tools.CoffeeEditor.prototype.compile, this);
+      raw = Luca("code_input").getValue();
+      return compiled = compile(raw, function(compiled) {
+        return dev.evaluateCode(compiled, raw);
+      });
     }
   });
 

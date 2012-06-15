@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.8.9",
+    VERSION: "0.8.91",
     core: {},
     containers: {},
     components: {},
@@ -231,105 +231,24 @@
     return _(values).select(iterator);
   };
 
-}).call(this);
-(function() {
-  var component_cache, registry;
-
-  registry = {
-    classes: {},
-    namespaces: ['Luca.containers', 'Luca.components']
-  };
-
-  component_cache = {
-    cid_index: {},
-    name_index: {}
-  };
-
-  Luca.defaultComponentType = 'view';
-
-  Luca.register = function(component, prototypeName) {
-    Luca.trigger("component:registered", component, prototypeName);
-    return registry.classes[component] = prototypeName;
-  };
-
-  Luca.development_mode_register = function(component, prototypeName) {
-    var existing, liveInstances, prototypeDefinition;
-    existing = registry.classes[component];
-    if (Luca.enableDevelopmentTools === true && (existing != null)) {
-      prototypeDefinition = Luca.util.resolve(existing, window);
-      liveInstances = Luca.registry.findInstancesByClassName(prototypeName);
-      _(liveInstances).each(function(instance) {
-        var _ref;
-        return instance != null ? (_ref = instance.refreshCode) != null ? _ref.call(instance, prototypeDefinition) : void 0 : void 0;
-      });
+  Luca.util.loadScript = function(url, callback) {
+    var script;
+    script = document.createElement("script");
+    script.type = "text/javascript";
+    if (script.readyState) {
+      script.onreadystatechange = function() {
+        if (script.readyState === "loaded" || script.readyState === "complete") {
+          script.onreadystatechange = null;
+          return callback();
+        } else {
+          return script.onload = function() {
+            return callback();
+          };
+        }
+      };
     }
-    return Luca.register(component, prototypeName);
-  };
-
-  Luca.registry.addNamespace = function(identifier) {
-    registry.namespaces.push(identifier);
-    return registry.namespaces = _(registry.namespaces).uniq();
-  };
-
-  Luca.registry.namespaces = function(resolve) {
-    if (resolve == null) resolve = true;
-    return _(registry.namespaces).map(function(namespace) {
-      if (resolve) {
-        return Luca.util.resolve(namespace);
-      } else {
-        return namespace;
-      }
-    });
-  };
-
-  Luca.registry.lookup = function(ctype) {
-    var c, className, fullPath, parents, _ref;
-    c = registry.classes[ctype];
-    if (c != null) return c;
-    className = Luca.util.classify(ctype);
-    parents = Luca.registry.namespaces();
-    return fullPath = (_ref = _(parents).chain().map(function(parent) {
-      return parent[className];
-    }).compact().value()) != null ? _ref[0] : void 0;
-  };
-
-  Luca.registry.findInstancesByClassName = function(className) {
-    var instances;
-    instances = _(component_cache.cid_index).values();
-    return _(instances).select(function(instance) {
-      var _ref;
-      return instance.displayName === className || (typeof instance._superClass === "function" ? (_ref = instance._superClass()) != null ? _ref.displayName : void 0 : void 0) === className;
-    });
-  };
-
-  Luca.registry.classes = function(toString) {
-    if (toString == null) toString = false;
-    return _(registry.classes).map(function(className, ctype) {
-      if (toString) {
-        return className;
-      } else {
-        return {
-          className: className,
-          ctype: ctype
-        };
-      }
-    });
-  };
-
-  Luca.cache = function(needle, component) {
-    var lookup_id;
-    if (component != null) component_cache.cid_index[needle] = component;
-    component = component_cache.cid_index[needle];
-    if ((component != null ? component.component_name : void 0) != null) {
-      Luca.trigger("component:created:" + component.component_name, component);
-      component_cache.name_index[component.component_name] = component.cid;
-    } else if ((component != null ? component.name : void 0) != null) {
-      Luca.trigger("component:created:" + component.component_name, component);
-      component_cache.name_index[component.name] = component.cid;
-    }
-    if (component != null) return component;
-    lookup_id = component_cache.name_index[needle];
-    return component_cache.cid_index[lookup_id];
+    script.src = url;
+    return document.body.appendChild(script);
   };
 
 }).call(this);
@@ -475,9 +394,157 @@
     }
   };
 
+  Luca.ScriptLoader = (function() {
+
+    ScriptLoader.loaded = {};
+
+    function ScriptLoader(options) {
+      var ready;
+      if (options == null) options = {};
+      _.extend(this, Backbone.Events, Luca.Events);
+      this.autoStart = options.autoStart === true;
+      this.scripts = options.scripts;
+      ready = function() {
+        return this.trigger("ready");
+      };
+      this.ready = _.after(this.scripts.length, ready);
+      _.bindAll(this, "load", "ready");
+      this.defer("load").until(this, "start");
+      if (this.autoStart === true) this.trigger("start");
+      this.bind("ready", this.onReady);
+    }
+
+    ScriptLoader.prototype.applyPrefix = function(script) {
+      return script;
+    };
+
+    ScriptLoader.prototype.onReady = function() {
+      return console.log("All dependencies loaded");
+    };
+
+    ScriptLoader.prototype.start = function() {
+      return this.trigger("start");
+    };
+
+    ScriptLoader.prototype.load = function() {
+      var script, _i, _len, _ref, _results;
+      _ref = this.scripts;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        script = _ref[_i];
+        _results.push(Luca.util.loadScript(this.applyPrefix(script), this.ready));
+      }
+      return _results;
+    };
+
+    return ScriptLoader;
+
+  })();
+
 }).call(this);
 (function() {
-  var customizeRender;
+  var component_cache, registry;
+
+  registry = {
+    classes: {},
+    namespaces: ['Luca.containers', 'Luca.components']
+  };
+
+  component_cache = {
+    cid_index: {},
+    name_index: {}
+  };
+
+  Luca.defaultComponentType = 'view';
+
+  Luca.register = function(component, prototypeName) {
+    Luca.trigger("component:registered", component, prototypeName);
+    return registry.classes[component] = prototypeName;
+  };
+
+  Luca.development_mode_register = function(component, prototypeName) {
+    var existing, liveInstances, prototypeDefinition;
+    existing = registry.classes[component];
+    if (Luca.enableDevelopmentTools === true && (existing != null)) {
+      prototypeDefinition = Luca.util.resolve(existing, window);
+      liveInstances = Luca.registry.findInstancesByClassName(prototypeName);
+      _(liveInstances).each(function(instance) {
+        var _ref;
+        return instance != null ? (_ref = instance.refreshCode) != null ? _ref.call(instance, prototypeDefinition) : void 0 : void 0;
+      });
+    }
+    return Luca.register(component, prototypeName);
+  };
+
+  Luca.registry.addNamespace = function(identifier) {
+    registry.namespaces.push(identifier);
+    return registry.namespaces = _(registry.namespaces).uniq();
+  };
+
+  Luca.registry.namespaces = function(resolve) {
+    if (resolve == null) resolve = true;
+    return _(registry.namespaces).map(function(namespace) {
+      if (resolve) {
+        return Luca.util.resolve(namespace);
+      } else {
+        return namespace;
+      }
+    });
+  };
+
+  Luca.registry.lookup = function(ctype) {
+    var c, className, fullPath, parents, _ref;
+    c = registry.classes[ctype];
+    if (c != null) return c;
+    className = Luca.util.classify(ctype);
+    parents = Luca.registry.namespaces();
+    return fullPath = (_ref = _(parents).chain().map(function(parent) {
+      return parent[className];
+    }).compact().value()) != null ? _ref[0] : void 0;
+  };
+
+  Luca.registry.findInstancesByClassName = function(className) {
+    var instances;
+    instances = _(component_cache.cid_index).values();
+    return _(instances).select(function(instance) {
+      var _ref;
+      return instance.displayName === className || (typeof instance._superClass === "function" ? (_ref = instance._superClass()) != null ? _ref.displayName : void 0 : void 0) === className;
+    });
+  };
+
+  Luca.registry.classes = function(toString) {
+    if (toString == null) toString = false;
+    return _(registry.classes).map(function(className, ctype) {
+      if (toString) {
+        return className;
+      } else {
+        return {
+          className: className,
+          ctype: ctype
+        };
+      }
+    });
+  };
+
+  Luca.cache = function(needle, component) {
+    var lookup_id;
+    if (component != null) component_cache.cid_index[needle] = component;
+    component = component_cache.cid_index[needle];
+    if ((component != null ? component.component_name : void 0) != null) {
+      Luca.trigger("component:created:" + component.component_name, component);
+      component_cache.name_index[component.component_name] = component.cid;
+    } else if ((component != null ? component.name : void 0) != null) {
+      Luca.trigger("component:created:" + component.component_name, component);
+      component_cache.name_index[component.name] = component.cid;
+    }
+    if (component != null) return component;
+    lookup_id = component_cache.name_index[needle];
+    return component_cache.cid_index[lookup_id];
+  };
+
+}).call(this);
+(function() {
+  var customizeRender, originalExtend;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
     debug: function() {
@@ -636,7 +703,7 @@
     }
   });
 
-  Luca.View.originalExtend = Backbone.View.extend;
+  originalExtend = Backbone.View.extend;
 
   customizeRender = function(definition) {
     var _base;
@@ -681,7 +748,7 @@
 
   Luca.View.extend = function(definition) {
     definition = customizeRender(definition);
-    return Luca.View.originalExtend.call(this, definition);
+    return originalExtend.call(this, definition);
   };
 
 }).call(this);
@@ -1265,6 +1332,10 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
+  Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'progress progress-striped active\'>\n  <div class=\'bar\' style=\'width:1%\'></div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  Luca.templates || (Luca.templates = {});
   Luca.templates["components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'navbar-inner\'>\n  <div class=\'luca-ui-navbar-body container\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
@@ -1321,7 +1392,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n<span class=\'add-on\'>\n  ', addOn ,'\n</span>\n'); } __p.push('\n<input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
+  Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); } __p.push('\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n<span class=\'add-on\'>\n  ', addOn ,'\n</span>\n'); } __p.push('\n<input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1503,10 +1574,20 @@
       });
     },
     prepareComponents: function() {
-      var _this = this;
+      var component, _i, _len, _ref,
+        _this = this;
+      _ref = this.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        if (_.isString(component)) {
+          component = {
+            type: component
+          };
+        }
+      }
       return _(this.components).each(function(component, index) {
-        var container, panel, _ref;
-        container = (_ref = _this.componentContainers) != null ? _ref[index] : void 0;
+        var container, panel, _ref2;
+        container = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
         container["class"] = container["class"] || container.className || container.classes;
         if (_this.appendContainers) {
           panel = _this.make(_this.componentTag, container, '');
@@ -1528,7 +1609,7 @@
       };
       this.components = _(this.components).map(function(object, index) {
         var component;
-        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype || (object.ctype = Luca.defaultComponentType)), Luca.util.lazyComponent(object));
+        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, Luca.util.lazyComponent(object));
         if (!component.container && component.options.container) {
           component.container = component.options.container;
         }
@@ -2101,7 +2182,7 @@
         label = "<i class='" + (white || "") + " icon-" + config.icon + "' /> " + label;
       }
       buttonAttributes = {
-        "class": "btn",
+        "class": _.compact(["btn", config.classes, config.className]).join(" "),
         "data-eventId": config.eventId,
         title: config.title || config.description
       };
@@ -2960,9 +3041,9 @@
       "change input": "change_handler"
     },
     template: 'fields/text_field',
+    autoBindEventHandlers: true,
     initialize: function(options) {
       this.options = options != null ? options : {};
-      _.bindAll(this, "keydown_handler", "blur_handler", "focus_handler");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
@@ -2977,13 +3058,9 @@
         this.addOn = this.append;
       }
       if (this.enableKeyEvents) {
-        this.events["keydown input"] = "keydown_handler";
-        return this.delegateEvents();
+        return this.registerEvent("keydown input", "keydown_handler");
       }
     },
-    keydown_handler: _.throttle((function(e) {
-      return change_handler.apply(this, arguments);
-    }), 300),
     blur_handler: function(e) {
       var me, my;
       return me = my = $(e.currentTarget);
@@ -2992,7 +3069,10 @@
       var me, my;
       return me = my = $(e.currentTarget);
     },
-    change_handler: change_handler
+    change_handler: change_handler,
+    keydown_handler: _.throttle((function(e) {
+      return change_handler.apply(this, arguments);
+    }), 300)
   });
 
 }).call(this);
@@ -3074,15 +3154,19 @@
         return this.bottomToolbar = {
           buttons: [
             {
+              icon: "remove-sign",
+              label: "Reset",
+              eventId: "click:reset",
+              className: "reset-button",
+              align: 'right'
+            }, {
               icon: "ok-sign",
               white: true,
               label: "Save Changes",
               eventId: "click:submit",
-              color: "success"
-            }, {
-              icon: "remove-sign",
-              label: "Reset",
-              eventId: "click:reset"
+              color: "success",
+              className: 'submit-button',
+              align: 'right'
             }
           ]
         };
@@ -3489,6 +3573,14 @@
       $("." + this.rowClass, this.body).removeClass('selected-row');
       return me.addClass('selected-row');
     }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.components.LoadMask")["extends"]("Luca.View")["with"]({
+    className: "luca-ui-load-mask",
+    bodyTemplate: "components/load_mask"
   });
 
 }).call(this);

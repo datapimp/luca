@@ -1,4 +1,4 @@
-<% if(typeof(label)!=="undefined" && typeof(hideLabel) !== "undefined" && !hideLabel) {%>
+<% if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {%>
 %label.control-label{:for=>"<%= input_id %>"}
   <%= label %>
 <% } %>

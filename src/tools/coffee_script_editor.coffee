@@ -51,5 +51,10 @@ _.def("Luca.tools.CoffeeEditor").extends("Luca.tools.CodeMirrorField").with
   currentMode: ()->
     @state.get("currentMode")
 
+  fixTabs: ()->
+    value = @getValue(false)
+    debugger
+
   editorChange: ()->
+    @fixTabs()
     @state.set( @currentMode(), @getValue() )

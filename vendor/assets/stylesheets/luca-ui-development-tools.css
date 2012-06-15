@@ -192,6 +192,26 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   overflow: visible; }
 ul.typeahead.dropdown-menu {
   z-index: 13000; }
+.luca-ui-console .CodeMirror {
+  font-family: "Monaco";
+  font-size: 14px;
+  line-height: 1.75; }
+.luca-ui-console .luca-ui-text-field {
+  width: 100%;
+  background-color: #272822;
+  border-top: 1px solid #ccc;
+  padding-left: 1px; }
+  .luca-ui-console .luca-ui-text-field input:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 0 transparent; }
+  .luca-ui-console .luca-ui-text-field input {
+    outline: none !important;
+    box-shadow: 0 0 0 0 transparent;
+    font-family: "Monaco";
+    color: #fff;
+    border: 0px;
+    width: 90%;
+    background-color: #272822; }
 /*
 
 

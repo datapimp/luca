@@ -36,7 +36,6 @@ Sandbox.Application = Luca.Application.extend
 
   afterRender: ()->
     @_super("afterRender", @, arguments)
-    $('body>.navbar').hide()
 
 $ do ->
   (window || global).SandboxApp = new Sandbox.Application()

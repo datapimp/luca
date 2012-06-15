@@ -1,46 +1,3 @@
-.luca-ui-development-console.luca-ui-modal {
-  position: absolute;
-  top: 50px;
-  left: 410px;
-  width: 820px; }
-
-.luca-ui-development-console {
-  background: rgba(0, 0, 0, 0.9);
-  font-size: 16px;
-  margin-top: 1em;
-  font-family: "Monaco"; }
-  .luca-ui-development-console .console-inner {
-    color: #fff;
-    width: 100%; }
-    .luca-ui-development-console .console-inner .jquery-console-inner {
-      height: 100%;
-      width: 100%;
-      overflow: auto;
-      padding: 0.5em; }
-    .luca-ui-development-console .console-inner .jquery-console-focus .jquery-console-cursor {
-      font-weight: bold;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.2); }
-    .luca-ui-development-console .console-inner .jquery-console-message {
-      margin: 10px 0px; }
-    .luca-ui-development-console .console-inner .jquery-console-message-error {
-      font-weight: bold;
-      color: #ef0505;
-      padding: 0.1em; }
-    .luca-ui-development-console .console-inner .jquery-console-prompt-label {
-      font-weight: bold;
-      color: yellow; }
-
-.console-inner .array-inspector {
-  display: block;
-  width: 100%;
-  float: left;
-  clear: both;
-  margin: 10px 0px; }
-  .console-inner .array-inspector span {
-    float: left;
-    display: block;
-    padding: 5px; }
 .luca-ui-form-view-wrapper {
   width: 100%;
   float: left;
@@ -62,6 +19,10 @@
 .luca-ui-form-view.column-layout .luca-ui-field {
   float: left; }
 
+.luca-ui-form-view .toolbar-container {
+  padding-right: 12px; }
+
+/* support for older form view config */
 .form-view-footer .toolbar-container {
   float: left;
   width: 100%;
@@ -584,6 +545,26 @@ table {
   overflow: visible; }
 ul.typeahead.dropdown-menu {
   z-index: 13000; }
+.luca-ui-console .CodeMirror {
+  font-family: "Monaco";
+  font-size: 14px;
+  line-height: 1.75; }
+.luca-ui-console .luca-ui-text-field {
+  width: 100%;
+  background-color: #272822;
+  border-top: 1px solid #ccc;
+  padding-left: 1px; }
+  .luca-ui-console .luca-ui-text-field input:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 0 transparent; }
+  .luca-ui-console .luca-ui-text-field input {
+    outline: none !important;
+    box-shadow: 0 0 0 0 transparent;
+    font-family: "Monaco";
+    color: #fff;
+    border: 0px;
+    width: 90%;
+    background-color: #272822; }
 /*
 
  */

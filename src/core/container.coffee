@@ -39,6 +39,7 @@ applyDOMConfig = (panel, panelIndex)->
 # A container is responsible for creating and storing references to the nested
 # views that are required for its functioning.
 doComponents = ()->
+
   @trigger "before:components", @, @components
   @prepareComponents()
   @createComponents()
@@ -155,6 +156,11 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   # set to true, then the view will automatically $append()
   # elements created via Backbone.View::make() to the body element of the view
   prepareComponents: ()->
+    # accept components as an array of strings representing
+    # the luca component type
+    for component in @components when _.isString(component)
+      component = (type: component)
+
     _( @components ).each (component, index)=>
       container = @componentContainers?[index]
 
@@ -183,9 +189,12 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       cid_index: {}
 
     @components = _( @components ).map (object, index)=>
+
       # you can include normal backbone views as components
       # you will want to make sure your render method handles
-      # adding the views @$el to the appropriate @container
+      # adding the views @$el to the appropriate @container.
+
+      # you can also just pass a string representing the component_type
       component = if Luca.isBackboneView( object )
         object
       else

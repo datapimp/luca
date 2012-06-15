@@ -1,97 +1,147 @@
-inspectArray = (array)->
-  lastPrompt = @$('.console-inner .jquery-console-prompt-label').last()
+codeMirrorOptions =
+  readOnly: true
+  autoFocus: false
+  theme: "monokai"
+  mode: "javascript"
 
-  items = _( array ).map (item)-> "<span>#{ item?.toString() || "undefined" }</span>"
+Luca.define("Luca.tools.Console").extends("Luca.core.Container").with
+  className: "luca-ui-console"
+  name: "console"
+  history: []
+  historyIndex: 0
 
-  lastPrompt.before("<div class='array-inspector'>#{ items.join('') }</div>")
+  componentEvents:
+    "code_input key:keyup" : "historyUp"
+    "code_input key:keydown" : "historyDown"
+    "code_input key:enter" : "runCommand"
 
-console_name = ""
+  compileOptions:
+    bare: true
 
-_.def('Luca.tools.DevelopmentConsole').extends('Luca.components.Panel').with
-  bodyClassName:"console-wrapper"
+  components:[
+    ctype: "code_mirror_field"
+    name: "code_output"
+    readOnly: true
+    lineNumbers: false
+    mode: "javascript"
+    maxHeight: '250px'
+    height: '250px'
+    lineWrapping: true
+    gutter: false
+  ,
+    ctype: "text_field"
+    name: "code_input"
+    lineNumbers: false
+    height: '30px'
+    maxHeight: '30px'
+    gutter: false
+    autoBindEventHandlers: true
+    hideLabel: true
+    prepend: "Coffee>"
+    events:
+      "keypress input" : "onKeyEvent"
+      "keydown input" : "onKeyEvent"
 
-  name: "development_console"
+    onKeyEvent: (keyEvent)->
+      if keyEvent.type is "keypress" and keyEvent.keyCode is Luca.keys.ENTER
+        @trigger("key:enter", @getValue())
 
-  className: 'luca-ui-development-console'
+      if keyEvent.type is "keydown" and keyEvent.keyCode is Luca.keys.KEYUP
+        @trigger("key:keyup")
 
-  prompt:"Coffee> "
+      if keyEvent.type is "keydown" and keyEvent.keyCode is Luca.keys.KEYDOWN
+        @trigger("key:keydown")
 
-  initialize: (@options={})->
+    afterRender: ()->
+      @$('input').focus()
+  ]
+
+  getContext: ()->
+    window
+
+  initialize: ()->
     @_super("initialize", @, arguments)
+    _.bindAll @, "historyUp", "historyDown", "onSuccess", "onError", "runCommand"
 
-  render: ()->
-    return @ if @rendered is true
-    @setup()
-    @_super("render", @, arguments)
-    @
+  saveHistory: (command)->
+    @history.push( command ) if command?.length > 0
+    @historyIndex = 0
 
-  setup: ()->
-    @$bodyEl().css(height:"500px",width:"800px")
+  historyUp: ()->
+    @historyIndex -= 1
+    @historyIndex = 0 if @historyIndex < 0
 
-    @$append( @make("div",class:"console-inner") )
+    currentValue = Luca("code_input").getValue()
+    Luca("code_input").setValue( @history[ @historyIndex ] || currentValue )
 
-    console_name = @name
-    devConsole = @
+  historyDown: ()->
+    @historyIndex += 1
+    @historyIndex = @history.length - 1 if @historyIndex > @history.length - 1
 
-    @rendered = true
+    currentValue = Luca("code_input").getValue()
 
-    @console ||= @$('.console-inner').console
-      promptLabel: @prompt
-      animateScroll: true
-      promptHistory: true
-      autoFocus: true
-      commandValidate: (line)->
-        valid = true
+    Luca("code_input").setValue( @history[ @historyIndex ] || currentValue)
 
-        valid = false if line is ""
+  append: (code, result, skipFormatting=false)->
+    output = Luca("code_output")
+    current = output.getValue()
 
-        try
-          if CoffeeScript.compile(line)
-            valid = true
-          else
-            valid = false
-        catch error
-          valid =  false
+    source = "// #{ code }" if code?
 
-        valid
+    payload = if skipFormatting or code.match(/^console\.log/)
+      [current,result]
+    else
+      [current,source, result]
 
-      returnValue: (val)->
-        return "undefined" unless val?
+    output.setValue( _.compact(payload).join("\n") )
+    output.getCodeMirror().scrollTo(0,90000)
 
-        if _.isArray(val)
-          inspectArray(val)
-          return ""
+  onSuccess: (result, js, coffee)->
+    @saveHistory(coffee)
+    dump = JSON.stringify(result, null, "\t")
+    dump ||= result.toString?()
 
-        val?.toString() || ""
+    @append(js, dump || "undefined")
 
-      parseLine: (line)->
-        line = _.string.strip(line)
-        line = line.replace(/^return/,' ')
+  onError: (error, js, coffee)->
+    @append(js, "// ERROR: #{ error.message }")
 
-        if line is "clear"
-          Luca.cache( console_name ).console.reset()
-          return "return ''"
+  evaluateCode: (code, raw)->
+    return unless code?.length > 0
 
-        "return #{ line }"
+    raw = _.string.strip(raw)
+    output = Luca("code_output")
+    dev = @
 
-      commandHandle: (line)->
-        return if line is ""
+    evaluator = ()->
+      old_console = window.console
 
-        compiled = CoffeeScript.compile( @parseLine(line) )
+      console =
+        log: ()->
+          for arg in arguments
+            dev.append(undefined, arg, true)
 
-        keys = _.keys
-        values = _.values
-        functions = _.functions
-        inspect = JSON.stringify
-        inspectArray = _.bind(inspectArray, devConsole)
+      log = console.log
 
-        try
-          ret = eval(compiled)
-          return @returnValue(ret)
-        catch error
-          if error?.message?.match /circular structure to JSON/
-            return ret.toString()
+      try
+        result = eval( code )
+      catch error
+        window.console = old_console
+        throw(error)
 
-          error.toString()
+      window.console = old_console
 
-    @
+      result
+
+    try
+      result = evaluator.call( @getContext() )
+      @onSuccess(result, code, raw) unless raw.match(/^console\.log/)
+    catch error
+      @onError(error, code, raw)
+
+  runCommand: ()->
+    dev     = @
+    compile = _.bind(Luca.tools.CoffeeEditor::compile, @)
+    raw = Luca("code_input").getValue()
+    compiled = compile raw, (compiled)->
+      dev.evaluateCode(compiled, raw)

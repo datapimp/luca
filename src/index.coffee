@@ -3,22 +3,7 @@ _.def("Luca.tools.ComponentBuilder").extends("Luca.components.FormView").with
   components:[
     ctype: "split_view"
     components:[
-      className: "span6"
-      components:[
-        ctype: "text_field"
-        label: "Component Class Name"
-      ,
-        ctype: "text_area_field"
-        label: "Which class are you inheriting from?"
-        source: Luca.registry.classes(true)
-      ,
-        label: "What is the default name of this component?"
-        ctype: "text_field"
-      ]
-    ,
-      className: "span6"
-      components:[
-        ctype: "text_area_field"
+      className: "span6"x.e: "text_area_field"
         label: "Here is your code"
         name : "codemirror_output"
         afterRender: ()-> @enableEditor()

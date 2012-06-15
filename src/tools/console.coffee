@@ -4,7 +4,7 @@ codeMirrorOptions =
   theme: "monokai"
   mode: "javascript"
 
-Luca.define("Luca.tools.Console").extends("Luca.core.Container").with
+Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
   className: "luca-ui-console"
   name: "console"
   history: []

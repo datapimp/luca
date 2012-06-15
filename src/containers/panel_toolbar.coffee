@@ -52,7 +52,7 @@ buildButton = (config, wrap=true)->
       label = "<i class='#{ white || "" } icon-#{ config.icon }' /> #{ label }"
 
     buttonAttributes =
-      class: "btn"
+      class: _.compact(["btn",config.classes,config.className]).join(" ")
       "data-eventId" : config.eventId
       title: config.title || config.description
 

@@ -44,19 +44,24 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     if @toolbar is true and not (@bottomToolbar? or @topToolbar?)
       @bottomToolbar =
         buttons:[
+          icon:"remove-sign"
+          label: "Reset"
+          eventId: "click:reset"
+          className:"reset-button"
+          align: 'right'
+        ,
           icon:"ok-sign"
           white: true
           label: "Save Changes"
           eventId: "click:submit"
           color: "success"
-        ,
-          icon:"remove-sign"
-          label: "Reset"
-          eventId: "click:reset"
+          className: 'submit-button'
+          align: 'right'
         ]
 
   applyStyleClasses: ()->
-    @applyBootstrapStyleClasses() if Luca.enableBootstrap
+    if Luca.enableBootstrap
+      @applyBootstrapStyleClasses()
 
     @$el.addClass( "label-align-#{ @labelAlign }") if @labelAlign
     @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass

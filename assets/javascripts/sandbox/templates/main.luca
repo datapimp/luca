@@ -1,44 +1,33 @@
 
 .hero-unit
-  %h1 Luca.js. Smart Architecture.
-  %p Luca is a curated set of technology choices which support an opinionated approach to the design and architecture of large single web page applications.
-  %p We combine Backbone.js and Twitter Bootstrap with our own code to provide your development team with interface and information components which can be very easily arranged to work in any configuration you can design.
-  %p We aim to make building complex applications simple by trying to encourage the use of good design patterns.
+  %h1 Build apps with Backbone.js?
+  %h2 Smart move, player.
+  %p This is a collection of application design components that you should use to build your next large backbone.js application.
+  %p It combines the elegance and simplicity of backbone.js and bootstrap.css
 
   %a.btn.btn-large.btn-primary{:href=>"#class_browser"}
-    View The Code
+    Play with the code
 
-  %a.btn.btn-large{:href=>"#component_tester"}
-    Play With It
-
+  %a.btn.btn-success.btn-large{:href=>"#component_tester"}
+    Build a component
 
 %hr
 
 .row
   .span8.offset2
-    %h2 Smart Architecture based on Backbone.js
+    %h2 Composite Application Architecture
 .row
   .span4
     %h3 Component Driven Design
-    %p Luca is a collection of common components needed to build large single page applications. We provide lower level components as forms, fields, grids, list views, toolbars, and buttons. We provide containers to join these smaller UI components together to build higher level components, and a configuration style that enforces good structure and design habits, so that your development team and application can scale nicely.
+    %p Luca is a collection of common components needed to build large single page applications.  Twitter's Bootstrap is responsible for all of the styling, and Backbone.js is responsible for everything else.
 
-  .span4
-    %h3 Based On Bootstrap
-    %p Luca is based on the idea that a lot of common user interface problems are solved, and we aim to provide a suite of standard components that play very well together, look great, and require little markup or styling.  Twitter Bootstrap and Backbone.js lend themselves very well to this goal, with their minimalistic, use only what you need philosophies.
-
-  .span4
-    %h3 Development Tools
-    %p The primary advantage of the Luca framework and the style of application design and configuration that it enforces, is that your application's architecture is very predictable, and this allows us to build tools to run inside the browser in development mode that allow you to make changes to the application live, as it runs, in coffeescript
-
-.row
   .span4
     %h3 Interchangeable
     %p Luca is not a replacement for Backbone, it is a very smart use of Backbone's core classes.  Large apps require layers of abstraction and patterns for communication between various components, Luca provides these for you.  Everything in the framework extends Backbone core classes, and stays true to the Backbone philosophy.
 
   .span4
-    %h3 Responsive Applications
-    %p The habits and practices Luca encourages guarantee you the snappiest user experience possible.  We have optimized the core Backbone Model, Collection, and View classes, and added several additional components and helpers with the aim of allowing you to build large applications without having to worry about them getting slower as they get larger.
-
-  .span4
     %h3 Build Apps Quicker
     %p We have extracted all of the common patterns and optimizations we have learned over the course of a year developing several large applications. Using Luca allows you to leverage the power of Backbone.js but only focus on what makes your app unique.
+
+  %a{href:"https://github.com/datapimp/luca"}
+    %img{style:"position: absolute; top: 0; right: 0; border: 0; z-index:9000;",src:"https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png",alt:"Fork me on GitHub"}

@@ -213,7 +213,7 @@ _.def("Luca.View").extends("Backbone.View").with
   views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
 
 
-Luca.View.originalExtend = Backbone.View.extend
+originalExtend = Backbone.View.extend
 
 customizeRender = (definition)->
   #### Rendering
@@ -270,5 +270,5 @@ customizeRender = (definition)->
 # mostly related to render()
 Luca.View.extend = (definition)->
   definition = customizeRender( definition )
-  Luca.View.originalExtend.call(@, definition)
+  originalExtend.call(@, definition)
 

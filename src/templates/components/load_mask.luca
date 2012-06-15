@@ -1,0 +1,3 @@
+.load-mask
+.progress.progress-striped.active
+  .bar{:style=>"width:1%"}
