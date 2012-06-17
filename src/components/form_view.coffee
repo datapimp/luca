@@ -30,16 +30,35 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   bodyTemplate: ["components/form_view"]
 
+
+  # Load Mask will apply a transparent overlay over the form
+  # upon submission, with a moving progress bar which will be
+  # hidden upon successful response
+  loadMask: true
+  loadMaskTemplate: ["components/load_mask"]
+
   initialize: (@options={})->
     Luca.core.Container::initialize.apply @, arguments
 
-    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
+    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars", "applyLoadMask"
 
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
 
     @applyStyleClasses()
+
+    if @loadMask is true
+      @defer ()=>
+        @$el.addClass('with-mask')
+
+        if @$('.load-mask').length is 0
+          @$bodyEl().prepend Luca.template(@loadMaskTemplate, @)
+          @$('.load-mask').hide()
+      .until("after:render")
+
+      @on "before:submit", @applyLoadMask
+      @on "after:submit", @applyLoadMask
 
     if @toolbar is true and not (@bottomToolbar? or @topToolbar?)
       @bottomToolbar =
@@ -58,6 +77,17 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
           className: 'submit-button'
           align: 'right'
         ]
+
+  applyLoadMask: ()->
+    if @$('.load-mask').is(":visible")
+      @$('.load-mask').hide()
+      clearInterval(@loadMaskInterval)
+    else
+      @$('.load-mask').show().find('.bar').css("width","0%")
+      @loadMaskInterval = setInterval ()=>
+        currentWidth = @$('.load-mask .bar').width()
+        @$('.load-mask .bar').css('width', currentWidth + 50 )
+      , 25
 
   applyStyleClasses: ()->
     if Luca.enableBootstrap
@@ -83,7 +113,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   submitHandler: (e)->
     me = my = $( e.currentTarget )
     @trigger "before:submit", @
-    @submit()
+    @submit() if @hasModel()
 
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)
@@ -103,14 +133,12 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     # to find the fields
     fields = @select("isField", true, true)
 
+    return fields unless attr and value
     # if an optional attribute and value pair is passed
     # then you can limit the array of fields even further
-    if fields.length > 0 and attr and value
-      fields = _(fields).select (field)->
-        property = field[ attr ]
-        return false unless property?
-        propvalue = if _.isFunction(property) then property() else property
-        value is propvalue
+    _(fields).select (field)->
+      property = field[ attr ]
+      property? and value is (if _.isFunction(property) then property() else property)
 
     fields
 
@@ -211,6 +239,9 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @syncFormWithModel()
     return unless save
     @current_model.save( @current_model.toJSON(), saveOptions )
+
+  hasModel: ()->
+    @current_model?
 
   currentModel: (options={})->
     if options is true or options?.refresh is true

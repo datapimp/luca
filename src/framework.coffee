@@ -91,6 +91,9 @@ Luca.isBackboneCollection = (obj)->
 Luca.template = (template_name, variables)->
   window.JST ||= {}
 
+  if _.isFunction(template_name)
+    return template_name(variables)
+
   luca = Luca.templates?[ template_name ]
   jst = JST?[ template_name ]
 

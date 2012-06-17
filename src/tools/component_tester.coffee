@@ -113,7 +113,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
   ,
     ctype: "code_editor"
     name: "ctester_edit"
-    className: 'font-small fixed-height'
+    className: 'font-large fixed-height'
     minHeight:'350px'
 
     styles:
@@ -251,7 +251,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     changeHandler = _.idleMedium ()=>
       if @autoEvaluateCode is true
         @applyTestRun()
-    , 1500
+    , 500
 
     @getEditor().bind "code:change", changeHandler
 
@@ -292,7 +292,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @developmentConsole = Luca "coffeescript-console", ()-> new Luca.tools.DevelopmentConsole(name:"coffeescript-console")
 
     unless @consoleContainerAppended
-      container = @make("div",{id:"devtools-console-wrapper",class:"devtools-console-container modal",style:"width:850px"}, @developmentConsole.el)
+      container = @make("div",{id:"devtools-console-wrapper",class:"devtools-console-container modal",style:"width:900px;height:650px;"}, @developmentConsole.el)
       $('body').append( container )
       @consoleContainerAppended = true
       @developmentConsole.render()

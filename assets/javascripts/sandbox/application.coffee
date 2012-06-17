@@ -31,8 +31,16 @@ Sandbox.Application = Luca.Application.extend
     @router = new Sandbox.Router(app: @)
 
   developmentConsole: ()->
-    @_developmentConsole ||= new Luca.tools.DevelopmentConsole()
-    @_developmentConsole.render().toggle()
+    @developmentConsole = Luca "coffeescript-console", ()->
+      new Luca.tools.DevelopmentConsole(name:"coffeescript-console")
+
+    unless @consoleContainerAppended
+      container = @make("div",{id:"devtools-console-wrapper",class:"devtools-console-container modal",style:"width:1000px"}, @developmentConsole.el)
+      $('body').append( container )
+      @consoleContainerAppended = true
+      @developmentConsole.render()
+
+    $('#devtools-console-wrapper').modal(backdrop:false,show:true)
 
   afterRender: ()->
     @_super("afterRender", @, arguments)

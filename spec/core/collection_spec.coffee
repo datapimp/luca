@@ -213,7 +213,7 @@ describe "The Model Bootstrap", ->
 
   it "should fetch the cached models from the bootstrap", ->
     collection = new Luca.Collection [],
-      cached: ()-> "sample"
+      cache_key: ()-> "sample"
 
     collection.fetch()
 
@@ -222,14 +222,14 @@ describe "The Model Bootstrap", ->
 
   it "should reference the cached models", ->
     collection = new Luca.Collection [],
-      cached: ()-> "sample"
+      cache_key: ()-> "sample"
 
     expect( collection.cached_models().length ).toEqual(5)
 
   it "should avoid making an API call", ->
     spy = sinon.spy( Backbone.Collection.prototype.fetch )
     collection = new Luca.Collection [],
-        cached: ()-> "sample"
+        cache_key: ()-> "sample"
 
     collection.fetch()
     expect( spy.called ).toBeFalsy()
@@ -238,7 +238,7 @@ describe "The Model Bootstrap", ->
     spy = sinon.spy()
 
     collection = new Luca.Collection [],
-      cached: ()-> "sample"
+      cache_key: ()-> "sample"
       url: ()-> "/models"
 
     collection.bind "after:response", spy

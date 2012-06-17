@@ -3,15 +3,15 @@ describe 'The Luca Container', ->
     @container = new Luca.core.Container
       components:[
         name: "component_one"
-        ctype: "template"
-        markup: "markup for component one"
+        ctype: "view"
+        bodyTemplate: ()-> "markup for component one"
         id: "c1"
         value: 1
         spy: sinon.spy()
       ,
         name: "component_two"
-        ctype: "template"
-        markup: "markup for component two"
+        ctype: "view"
+        bodyTemplate: ()-> "markup for component two"
         id: "c2"
         value: 0
         spy: sinon.spy()
@@ -22,9 +22,9 @@ describe 'The Luca Container', ->
         value: 1
         spy: sinon.spy()
         components:[
-          ctype: "template"
+          ctype: "view"
           name: "component_four"
-          markup: "markup for component four"
+          bodyTemplate: ()-> "markup for component four"
           spy: sinon.spy()
         ]
       ]

@@ -71,12 +71,13 @@ describe "DOM Helper Methods", ->
 
 describe "Deferrable Rendering", ->
   beforeEach ->
-    @spy = sinon.spy()
+    @fetchSpy   = sinon.spy()
+    @customSpy  = sinon.spy()
 
     @collection = new Luca.Collection
-      url: "/t"
-      fetch: @spy
-      custom: @spy
+      url: "/models"
+      fetch: @fetchSpy
+      custom: @customSpy
       name: "haha"
 
     @DeferrableView = Luca.View.extend
@@ -89,11 +90,12 @@ describe "Deferrable Rendering", ->
 
   it "should automatically call fetch on the collection ", ->
     ( new @DeferrableView ).render()
-    expect( @collection.fetch ).toHaveBeenCalled()
+    @server.respond()
+    expect( @fetchSpy ).toHaveBeenCalled()
 
   it "should call a custom method if configured", ->
     ( new @TriggeredView ).render()
-    expect( @collection.fetch ).toHaveBeenCalled()
+    expect( @customSpy ).toHaveBeenCalled()
 
 describe "Hooks", ->
   it "should have before and after render hooks", ->

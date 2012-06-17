@@ -24,8 +24,8 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
     readOnly: true
     lineNumbers: false
     mode: "javascript"
-    maxHeight: '250px'
-    height: '250px'
+    height:"621px"
+    maxHeight:"621px"
     lineWrapping: true
     gutter: false
   ,

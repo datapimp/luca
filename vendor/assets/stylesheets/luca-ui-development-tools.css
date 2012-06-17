@@ -192,6 +192,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   overflow: visible; }
 ul.typeahead.dropdown-menu {
   z-index: 13000; }
+
+.font-large .CodeMirror {
+  font-size: 18px;
+  line-height: 1.7; }
 .luca-ui-console .CodeMirror {
   font-family: "Monaco";
   font-size: 14px;

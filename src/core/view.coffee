@@ -240,16 +240,24 @@ customizeRender = (definition)->
       unless Luca.isBackboneCollection(@deferrable)
         @deferrable = @collection
 
-      deferredRender = _.once ()=>
-        _base.apply(@, arguments)
-        @trigger "after:render", @
+      target ||= @deferrable
+      trigger = if @deferrable_event then @deferrable_event else "reset"
 
-      (@deferrable_target || @deferrable).bind (@deferrable_event||"reset"), deferredRender
+      console.log "deferrable set", target, trigger
 
-      @trigger "before:render", @
+      view.defer ()->
+        console.log "deferred render function being called", view.name
+        _base.call(view)
+        view.trigger "after:render", view
+      .until(target,trigger)
 
-      if !@deferrable_trigger
-        @deferrable[ (@deferrable_method||"fetch") ]?()
+      view.trigger "before:render", @
+
+      autoTrigger = @deferrable_trigger || @deferUntil
+
+      if !autoTrigger?
+        console.log("no deferrable trigger, doing it live")
+        target[ (@deferrable_method||"fetch") ].call(target)
       else
         fn = _.once ()=> @deferrable[ (@deferrable_method||"fetch") ]?()
         (@deferrable_target || @ ).bind(@deferrable_trigger, fn)
