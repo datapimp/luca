@@ -548,6 +548,7 @@
   var customizeRender, originalExtend;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
+    additionalClassNames: [],
     debug: function() {
       var message, _i, _len, _results;
       if (!(this.debugMode || (window.LucaDebugMode != null))) return;
@@ -571,7 +572,7 @@
     },
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var template, unique;
+      var additional, template, unique, _i, _len, _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (this.name != null) this.cid = _.uniqueId(this.name);
@@ -583,6 +584,16 @@
       unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
       this.setupHooks(unique);
       if (this.autoBindEventHandlers === true) this.bindAllEventHandlers();
+      if (this.additionalClassNames) {
+        if (_.isString(this.additionalClassNames)) {
+          this.additionalClassNames = this.additionalClassNames.split(" ");
+        }
+        _ref = this.additionalClassNames;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          additional = _ref[_i];
+          this.$el.addClass(additional);
+        }
+      }
       this.trigger("after:initialize", this);
       this.registerCollectionEvents();
       return this.delegateEvents();
@@ -2701,6 +2712,90 @@
           return _this.modalContainer().modal('hide');
         }, 400);
       });
+    }
+  });
+
+}).call(this);
+(function() {
+  var make;
+
+  make = Luca.View.prototype.make;
+
+  _.def("Luca.components.CollectionView")["extends"]("Luca.components.Panel")["with"]({
+    tagName: "div",
+    className: "luca-ui-collection-view",
+    bodyClassName: "collection-ui-panel",
+    itemTemplate: void 0,
+    itemRenderer: void 0,
+    itemTagName: 'li',
+    itemClassName: 'collection-item',
+    initialize: function(options) {
+      this.options = options != null ? options : {};
+      _.extend(this, this.options);
+      _.bindAll(this, "refresh");
+      if (this.collection == null) {
+        throw "Collection Views must specify a collection";
+      }
+      if (!((this.itemTemplate != null) || (this.itemRenderer != null))) {
+        throw "Collection Views must specify an item template or item renderer function";
+      }
+      Luca.components.Panel.prototype.initialize.apply(this, arguments);
+      if (Luca.isBackboneCollection(this.collection)) {
+        this.collection.bind("reset", this.refresh);
+        this.collection.bind("add", this.refresh);
+        return this.collection.bind("remove", this.refresh);
+      }
+    },
+    attributesForItem: function(item) {
+      return _.extend({}, {
+        "class": this.itemClassName,
+        "data-index": item.index
+      });
+    },
+    contentForItem: function(item) {
+      var content, templateFn;
+      if (item == null) item = {};
+      if ((this.itemTemplate != null) && (templateFn = Luca.template(this.itemTemplate))) {
+        content = templateFn.call(this, item);
+      }
+      if ((this.itemRenderer != null) && _.isFunction(this.itemRenderer)) {
+        content = this.itemRenderer.call(this, item);
+      }
+      return content || "";
+    },
+    makeItem: function(model, index) {
+      var item;
+      item = this.prepareItem != null ? this.prepareItem.call(this, model, index) : {
+        model: model,
+        index: index
+      };
+      return make(this.itemTagName, this.attributesForItem(item), this.contentForItem(item));
+    },
+    getModels: function() {
+      return this.collection.models;
+    },
+    refresh: function() {
+      var panel;
+      panel = this;
+      this.$bodyEl().empty();
+      return _(this.getModels()).each(function(model, index) {
+        return panel.$append(panel.makeItem(model, index));
+      });
+    },
+    registerEvent: function(domEvent, selector, handler) {
+      var eventTrigger;
+      if (!(handler != null) && _.isFunction(selector)) {
+        handler = selector;
+        selector = void 0;
+      }
+      eventTrigger = _([domEvent, "" + this.itemTagName + "." + this.itemClassName, selector]).compact().join(" ");
+      return Luca.View.prototype.registerEvent(eventTrigger, handler);
+    },
+    render: function() {
+      this.refresh();
+      if (this.$el.parent().length > 0 && (this.container != null)) {
+        return this.$attach();
+      }
     }
   });
 
@@ -4836,10 +4931,24 @@
       view = new Luca.View();
       return expect(Luca.isComponent(view)).toEqual(true);
     });
-    return it("should be picked up by the supportsBackboneEvents helper", function() {
+    it("should be picked up by the supportsBackboneEvents helper", function() {
       var view;
       view = new Luca.View();
       return expect(Luca.supportsBackboneEvents(view)).toEqual(true);
+    });
+    it("should append additional class names to the view's $el", function() {
+      var view;
+      view = new Luca.View({
+        additionalClassNames: ["yes-yes", "yall"]
+      });
+      return expect(view.$el.is(".yes-yes.yall")).toEqual(true);
+    });
+    return it("should accept a string for additional class names", function() {
+      var view;
+      view = new Luca.View({
+        additionalClassNames: "yes-yes yall"
+      });
+      return expect(view.$el.is(".yes-yes.yall")).toEqual(true);
     });
   });
 

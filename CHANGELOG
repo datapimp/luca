@@ -71,3 +71,13 @@
   - Luca() is now a global helper for finding views, querying the cache, lazily creating objects, etc.  smart enough
     to know what you want from it based on the input
   - window.Luca now mixes in Backbone.Events and Luca.Events.  triggers events whenever components are registered or created
+
+0.8.9
+  - Refactored Panel View to incorporate Load Mask and Top and Bottom Toolbar
+  - Refactored GridView and FormView to inherit from Luca.components.Panel
+  - Added @additionalClassNames property to Luca.View.
+  - GridView and FormView can not have an automatic load mask effect based on Twitter's progress bar.
+    Simply trigger enable:loadmask and disable:loadmask on any view where loadMask is set to true
+
+0.9.0
+  - Introducing Luca.components.CollectionView

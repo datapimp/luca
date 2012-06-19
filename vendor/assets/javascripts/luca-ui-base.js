@@ -548,6 +548,7 @@
   var customizeRender, originalExtend;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
+    additionalClassNames: [],
     debug: function() {
       var message, _i, _len, _results;
       if (!(this.debugMode || (window.LucaDebugMode != null))) return;
@@ -571,7 +572,7 @@
     },
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var template, unique;
+      var additional, template, unique, _i, _len, _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (this.name != null) this.cid = _.uniqueId(this.name);
@@ -583,6 +584,16 @@
       unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
       this.setupHooks(unique);
       if (this.autoBindEventHandlers === true) this.bindAllEventHandlers();
+      if (this.additionalClassNames) {
+        if (_.isString(this.additionalClassNames)) {
+          this.additionalClassNames = this.additionalClassNames.split(" ");
+        }
+        _ref = this.additionalClassNames;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          additional = _ref[_i];
+          this.$el.addClass(additional);
+        }
+      }
       this.trigger("after:initialize", this);
       this.registerCollectionEvents();
       return this.delegateEvents();

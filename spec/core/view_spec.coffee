@@ -30,6 +30,15 @@ describe "Luca.View", ->
     view = new Luca.View()
     expect( Luca.supportsBackboneEvents(view) ).toEqual true
 
+  it "should append additional class names to the view's $el", ->
+    view = new Luca.View(additionalClassNames:["yes-yes","yall"])
+    expect( view.$el.is(".yes-yes.yall") ).toEqual true
+
+  it "should accept a string for additional class names", ->
+    view = new Luca.View(additionalClassNames:"yes-yes yall")
+    expect( view.$el.is(".yes-yes.yall") ).toEqual true
+
+
 describe "Introspection Helpers", ->
   beforeEach ->
     @view = new Luca.View

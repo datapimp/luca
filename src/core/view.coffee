@@ -8,6 +8,7 @@
 
 _.def("Luca.View").extends("Backbone.View").with
 
+  additionalClassNames:[]
 
   debug: ()->
     return unless @debugMode or window.LucaDebugMode?
@@ -53,12 +54,13 @@ _.def("Luca.View").extends("Backbone.View").with
     if @autoBindEventHandlers is true
       @bindAllEventHandlers()
 
+    if @additionalClassNames
+      @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
+      @$el.addClass( additional ) for additional in @additionalClassNames
 
     @trigger "after:initialize", @
 
     @registerCollectionEvents()
-
-
 
     @delegateEvents()
 
