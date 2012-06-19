@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.8.91",
+    VERSION: "0.9.0",
     core: {},
     containers: {},
     components: {},
