@@ -25,7 +25,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     unless @collection?
       throw "Collection Views must specify a collection"
 
-    unless @itemTemplate? || @itemRenderer?
+    unless @itemTemplate? || @itemRenderer? || @itemProperty?
       throw "Collection Views must specify an item template or item renderer function"
 
     Luca.components.Panel::initialize.apply(@, arguments)
@@ -38,7 +38,6 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   attributesForItem: (item)->
     _.extend {}, class: @itemClassName, "data-index": item.index
 
-  # expects an item object, which contains the
   contentForItem: (item={})->
     if @itemTemplate? and templateFn = Luca.template(@itemTemplate)
       content = templateFn.call(@, item)
@@ -46,7 +45,8 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     if @itemRenderer? and _.isFunction( @itemRenderer )
       content = @itemRenderer.call(@, item)
 
-    content || ""
+    if @itemProperty
+      content = if _.isFunction(@itemProperty) then @itemProperty() else (item.model.get(@itemProperty) || item.model[ @itemProperty ])
 
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
@@ -54,7 +54,10 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     make(@itemTagName, @attributesForItem(item), @contentForItem(item))
 
   getModels: ()->
-    @collection.models
+    if @collection?.query and (@filter || @filterOptions)
+      @collection.query(@filter, @filterOptions)
+    else
+      @collection.models
 
   refresh: ()->
     panel = @
