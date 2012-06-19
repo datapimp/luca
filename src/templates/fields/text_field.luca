@@ -1,10 +1,13 @@
+<% if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {%>
 %label.control-label{:for=>"<%= input_id %>"}
   <%= label %>
+<% } %>
 
 <% if( typeof(addOn) !== "undefined" ) { %>
 %span.add-on
   <%= addOn %>
-<% } %> 
+<% } %>
+
 %input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>",:placeholder=>"<%= placeHolder %>", :class=>"<%= input_class %>"}
 
 <% if(helperText) { %>

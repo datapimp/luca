@@ -34,6 +34,13 @@
   }
 }
 
+.luca-ui-form-view {
+  .toolbar-container {
+    padding-right: 12px;
+  }
+}
+
+/* support for older form view config */
 .form-view-footer {
   .toolbar-container {
     float: left;
@@ -50,5 +57,3 @@
     }
   }
 }
-
-

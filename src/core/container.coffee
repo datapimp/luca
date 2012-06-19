@@ -1,14 +1,62 @@
-#### The Component Container
+# The Component Container
 #
 # The Component Container is a nestable component
-# which is responsible for laying out the many components
-# it contains, assigning them to a DOM container, and
-# automatically instantiating and rendering the components
-# in their proper place.
-_.component('Luca.core.Container').extends('Luca.View').with
+# which are responsible for handling communication between multiple
+# nested views.
+#
+# One: Layout
+#
+# a container is responsible for laying out the nested views
+# and rendering them in a special DOM element
+doLayout = ()->
+  @trigger "before:layout", @
+  @prepareLayout()
+  @trigger "after:layout", @
+
+# and displaying those elements in a way that is
+# optimal for the desired user experience of that view
+# ( i.e seeing only one of them at a time, seeing them side by side )
+applyDOMConfig = (panel, panelIndex)->
+  style_declarations = []
+
+  style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
+  style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width?
+  style_declarations.push "float: #{ panel.float }" if panel.float
+
+  config =
+    class: panel?.classes || @componentClass
+    id: "#{ @cid }-#{ panelIndex }"
+    style: style_declarations.join(';')
+    "data-luca-owner" : @name || @cid
+
+  if @customizeContainerEl?
+   config = @customizeContainerEl( config, panel, panelIndex )
+
+  config
+
+# Two: Component Creation
+#
+# A container is responsible for creating and storing references to the nested
+# views that are required for its functioning.
+doComponents = ()->
+
+  @trigger "before:components", @, @components
+  @prepareComponents()
+  @createComponents()
+  @trigger "before:render:components", @, @components
+  @renderComponents()
+  @trigger "after:components", @, @components
+
+
+# Containers are central to Luca.  They are what make it easy to structure
+# your application in a logical way and to specify much of the behavior of
+# complex / composite views at define time using JSON syntax combined with
+# the meta data contained in the Luca component registry.
+_.def('Luca.core.Container').extends('Luca.components.Panel').with
 
   className: 'luca-ui-container'
 
+  componentTag: 'div'
   componentClass: 'luca-ui-panel'
 
   isContainer: true
@@ -29,11 +77,18 @@ _.component('Luca.core.Container').extends('Luca.View').with
   initialize: (@options={})->
     _.extend @, @options
 
-    @setupHooks( Luca.core.Container::hooks )
+    @setupHooks [
+      "before:components"
+      "before:render:components"
+      "before:layout"
+      "after:components"
+      "after:layout"
+      "first:activation"
+    ]
 
     Luca.View::initialize.apply @, arguments
 
-  #### Rendering Pipeline
+  # Rendering Pipeline
   #
   # A container has nested components.  these components
   # are automatically rendered inside their own DOM element
@@ -80,62 +135,52 @@ _.component('Luca.core.Container').extends('Luca.View').with
   # firstActivation()
   #
   beforeRender: ()->
-    @debug "container before render"
-    @doLayout()
-    @doComponents()
+    doLayout.call(@)
+    doComponents.call(@)
+    Luca.components.Panel::beforeRender?.apply(@, arguments)
 
-  doLayout: ()->
-    @debug "container do layout"
-    @trigger "before:layout", @
-    @prepareLayout()
-    @trigger "after:layout", @
+  # Components which inherit from Luca.core.Container can implement
+  # their own versions of this method, if they need to apply any sort
+  # of additional styling / configuration for the DOM elements that
+  # are created to wrap each container.
+  customizeContainerEl: (containerEl, panel, panelIndex)->
+    containerEl
 
-  doComponents: ()->
-    @debug "container do components"
-
-    @trigger "before:components", @, @components
-    @prepareComponents()
-    @createComponents()
-    @trigger "before:render:components", @, @components
-    @renderComponents()
-    @trigger "after:components", @, @components
-
-  applyPanelConfig: (panel, panelIndex)->
-    style_declarations = []
-
-    style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height
-    style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width
-    style_declarations.push "float: #{ panel.float }" if panel.float
-
-    config =
-      classes: panel?.classes || @componentClass
-      id: "#{ @cid }-#{ panelIndex }"
-      style: style_declarations.join(';')
-
-  # prepare layout is where you would perform the DOM element
-  # creation / manipulation for how your container lays out
-  # its components.  Minimally you will want to set the
-  # container property on each component.
   prepareLayout: ()->
-    @debug "container prepare layout"
-    @componentContainers = _( @components ).map (component, index) =>
-      @applyPanelConfig.apply @, [ component, index ]
+    container = @
+    @componentContainers = _( @components ).map (component, index)->
+      applyDOMConfig.call(container, component, index)
 
-    if @appendContainers
-      _( @componentContainers ).each (container)=>
-        @$el.append Luca.templates["containers/basic"](container) unless container.appended?
-        container.appended = true
-
-  # prepare components is where you would set necessary object
-  # attributes on the components themselves.
+  # prepare components is where each component gets assigned
+  # a container to be rendered into.  if @appendContainers is
+  # set to true, then the view will automatically $append()
+  # elements created via Backbone.View::make() to the body element of the view
   prepareComponents: ()->
-    @debug "container prepare components"
-    @components = _( @components ).map (object, index) =>
-      panel = @componentContainers[ index ]
-      object.container = if @appendContainers then "##{ panel.id }" else @el
+    # accept components as an array of strings representing
+    # the luca component type
+    for component in @components when _.isString(component)
+      component = (type: component)
 
-      object
+    _( @components ).each (component, index)=>
+      container = @componentContainers?[index]
 
+      # support a variety of the bad naming conventions
+      container.class = container.class || container.className || container.classes
+
+      if @appendContainers
+        panel = @make(@componentTag, container, '')
+        @$append( panel )
+
+      unless component.container?
+        component.container = "##{ container.id }" if @appendContainers
+        component.container ||= @$bodyEl()
+
+  # create components is responsible for turning the JSON syntax of the
+  # container's definition into live objects against a given Luca Component
+  # type.
+  #
+  # In addition to this, a container builds an index of the components
+  # which belong to it, so that they can easily be looked up by name
   createComponents: ()->
     return if @componentsCreated is true
 
@@ -144,17 +189,28 @@ _.component('Luca.core.Container').extends('Luca.View').with
       cid_index: {}
 
     @components = _( @components ).map (object, index)=>
+
       # you can include normal backbone views as components
       # you will want to make sure your render method handles
-      # adding the views @$el to the appropriate @container
-      component = if _.isObject( object ) and object.render and object.trigger
+      # adding the views @$el to the appropriate @container.
+
+      # you can also just pass a string representing the component_type
+      component = if Luca.isBackboneView( object )
         object
       else
-        object.ctype ||= Luca.defaultComponentType || "template"
+        object.type ||= object.ctype
+
+        if !object.type?
+          if object.components?
+            object.type = object.ctype = 'container'
+          else
+            object.type = object.ctype = Luca.defaultComponentType
+
         Luca.util.lazyComponent( object )
 
       # if we're using base backbone views, then they don't extend themselves
-      # with their passed options, so this is a workaround
+      # with their passed options, so this is a workaround to get them to
+      # pick up the container config property
       if !component.container and component.options.container
         component.container = component.options.container
 
@@ -167,6 +223,9 @@ _.component('Luca.core.Container').extends('Luca.View').with
       component
 
     @componentsCreated = true
+
+    @registerComponentEvents() unless _.isEmpty(@componentEvents)
+
     map
 
   # Trigger the Rendering Pipeline process on all of the nested
@@ -181,8 +240,11 @@ _.component('Luca.core.Container').extends('Luca.View').with
         component.render()
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
-        console.log e.message
-        console.log e.stack
+
+        if _.isObject(e)
+          console.log e.message
+          console.log e.stack
+
         throw e unless Luca.silenceRenderErrors? is true
 
   #### Container Activation
@@ -195,13 +257,12 @@ _.component('Luca.core.Container').extends('Luca.View').with
   # will trigger first:activation on the components as they become
   # displayed.
   firstActivation: ()->
-    _( @components ).each (component)=>
-      activator = @
-
+    activator = @
+    @each (component, index)->
       # apply the first:activation trigger on the component, in the context of the component
       # passing as arguments the component itself, and the component doing the activation
       unless component?.previously_activated is true
-        component?.trigger?.apply component, ["first:activation", [component, activator] ]
+        component?.trigger?.call component, "first:activation", component, activator
         component.previously_activated = true
 
   #### Component Finder Methods
@@ -218,6 +279,22 @@ _.component('Luca.core.Container').extends('Luca.View').with
       _.compact matches
 
     _.flatten( components )
+
+  # event binding sugar for nested components
+  #
+  # you can define events like:
+
+  # _.def("MyContainer").extends("Luca.View").with
+  #   componentEvents:
+  #     "component_name before:load" : "mySpecialHandler"
+  #
+  componentEvents: {}
+
+  registerComponentEvents: ()->
+    for listener, handler of @componentEvents
+      [componentName,trigger] = listener.split(' ')
+      component = @findComponentByName(componentName)
+      component?.bind trigger, @[handler]
 
   findComponentByName: (name, deep=false)->
     @findComponent(name, "name_index", deep)
@@ -238,12 +315,15 @@ _.component('Luca.core.Container').extends('Luca.View').with
       sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
       sub_container?.findComponent?(needle, haystack, true)
 
+  each: (fn)->
+    @eachComponent(fn, false)
+
   # run a function for each component in this container
   # and any nested containers in those components, recursively
   # pass false as the second argument to skip the deep recursion
   eachComponent: (fn, deep=true)->
-    _( @components ).each (component)=>
-      fn.apply component, [component]
+    _( @components ).each (component, index)=>
+      fn.call component, component, index
       component?.eachComponent?.apply component, [fn,deep] if deep
 
   indexOf: (name)->
@@ -254,7 +334,8 @@ _.component('Luca.core.Container').extends('Luca.View').with
     return @ unless @activeItem
     return @components[ @activeItem ]
 
-  componentElements: ()-> $(".#{ @componentClass }", @el)
+  componentElements: ()->
+    $(">.#{ @componentClass }", @el)
 
   getComponent: (needle)->
     @components[ needle ]

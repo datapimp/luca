@@ -1,8 +1,21 @@
-_.component('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
+_.def('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
   className: 'luca-ui-field'
 
-  afterInitialize: ()->
-    @input_id ||= _.uniqueId('field')
-    @input_name ||= @name
-    @label ||= @name
+  getSource: ()->
+    @source || []
 
+  matcher: (item)->
+    # IMPLEMENT
+    # return true where item matches @query
+    true
+
+  beforeRender: ()->
+    @_super("beforeRender", @, arguments)
+    @$('input').attr('data-provide','typeahead')
+
+  afterRender: ()->
+    @_super("afterRender", @, arguments)
+
+    @$('input').typeahead
+      matcher: @matcher
+      source: @getSource()

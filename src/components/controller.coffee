@@ -1,6 +1,4 @@
-_.component('Luca.components.Controller')
-.extends('Luca.containers.CardView').with
-
+_.def('Luca.components.Controller').extends('Luca.containers.CardView').with
   initialize: (@options)->
     Luca.containers.CardView::initialize.apply @, arguments
 
@@ -10,7 +8,6 @@ _.component('Luca.components.Controller')
 
     @state = new Backbone.Model
       active_section: @defaultCard
-
 
   each: (fn)->
     _( @components ).each (component)=>

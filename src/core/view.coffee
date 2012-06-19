@@ -1,6 +1,4 @@
 #### Luca Base View
-Luca.View = Backbone.View.extend
-  base: 'Luca.View'
 
 # The Luca.View class adds some very commonly used patterns
 # and functionality to the stock Backbone.View class. Features
@@ -8,82 +6,18 @@ Luca.View = Backbone.View.extend
 # against a Backbone.Model or Backbone.Collection reset event, Caching
 # views into a global Component Registry, and more.
 
-Luca.View.originalExtend = Backbone.View.extend
+_.def("Luca.View").extends("Backbone.View").with
 
-# By overriding Backbone.View.extend we are able to intercept
-# some method definitions and add special behavior around them
-# mostly related to render()
-Luca.View.extend = (definition)->
-  #### Rendering
-  #
-  # Our base view class wraps the defined render() method
-  # of the views which inherit from it, and does things like
-  # trigger the before and after render events automatically.
-  # In addition, if the view has a deferrable property on it
-  # then it will make sure that the render method doesn't get called
-  # until.
-
-  _base = definition.render
-
-  _base ||= ()->
-    container = if _.isFunction(@container) then @container() else @container
-
-    return @ unless $(container) and @$el
-
-    $(container).append( @$el )
-
-    return @
-
-  definition.render = ()->
-    if @layoutTemplate?
-      @$el.html()
-
-    if @deferrable
-      @trigger "before:render", @
-
-      @deferrable.bind @deferrable_event, _.once ()=>
-        _base.apply(@, arguments)
-        @trigger "after:render", @
-
-      # we might not want to fetch immediately upon
-      # rendering, so we can pass a deferrable_trigger
-      # event and not fire the fetch until this event
-      # occurs
-      if !@deferrable_trigger
-        @immediate_trigger = true
-
-      if @immediate_trigger is true
-        @deferrable.fetch()
-      else
-        @bind @deferrable_trigger, _.once ()=>
-          @deferrable.fetch()
-
-      return @
-
-    else
-      @trigger "before:render", @
-      _base.apply(@, arguments)
-      @trigger "after:render", @
-
-      return @
-
-  Luca.View.originalExtend.call(@, definition)
-
-_.extend Luca.View.prototype,
-  applyStyles: (styles={})->
-    for setting, value  of styles
-      @$el.css(setting,value)
-
-    @
 
   debug: ()->
     return unless @debugMode or window.LucaDebugMode?
     console.log [(@name || @cid),message] for message in arguments
 
   trigger: ()->
-    if Luca.enableGlobalObserver and @observeEvents is true
-      Luca.ViewObserver ||= new Luca.Observer(type:"view")
-      Luca.ViewObserver.relay @, arguments
+    if Luca.enableGlobalObserver
+      if Luca.developmentMode is true or @observeEvents is true
+        Luca.ViewObserver ||= new Luca.Observer(type:"view")
+        Luca.ViewObserver.relay @, arguments
 
     Backbone.View.prototype.trigger.apply @, arguments
 
@@ -96,16 +30,15 @@ _.extend Luca.View.prototype,
     "deactivation"
   ]
 
-  # which event should we listen to on
-  # our deferrable property, before we
-  # trigger the actual rendering
-  deferrable_event: "reset"
-
   initialize: (@options={})->
 
     _.extend @, @options
 
     @cid = _.uniqueId(@name) if @name?
+
+    if template = @bodyTemplate
+      @$el.empty()
+      Luca.View::$html.call(@, Luca.template(template, @) )
 
     #### View Caching
     #
@@ -118,18 +51,47 @@ _.extend Luca.View.prototype,
     @setupHooks( unique )
 
     if @autoBindEventHandlers is true
-      _( @events ).each (handler,event)=>
-        if _.isString(handler)
-          _.bindAll @, handler
+      @bindAllEventHandlers()
 
 
     @trigger "after:initialize", @
 
     @registerCollectionEvents()
 
+
+
     @delegateEvents()
 
-  $container: ()-> $(@container)
+  #### JQuery / DOM Selector Helpers
+  $wrap: (wrapper)->
+    if !wrapper.match(/[<>]/)
+      wrapper = @make("div",class:wrapper)
+
+    @$el.wrap( wrapper )
+
+  $template: (template, variables={})->
+    @$el.html( Luca.template(template,variables) )
+
+  $html: (content)->
+    @$el.html( content )
+
+  $append: (content)->
+    @$el.append( content )
+
+  #### Containers
+  #
+  # Luca is heavily reliant on the concept of Container views.  Views which
+  # contain other views and handle inter-component communication between the
+  # component views.  The default render() operation consists of building the
+  # view's content, and then attaching that view to its container.
+  #
+  # 99% of the time this would happen automatically
+  $attach: ()->
+    @$container().append( @el )
+
+  $container: ()->
+    $(@container)
+
   #### Hooks or Auto Event Binding
   #
   # views which inherit from Luca.View can define hooks
@@ -147,13 +109,14 @@ _.extend Luca.View.prototype,
     set ||= @hooks
 
     _(set).each (eventId)=>
-      parts = eventId.split(':')
-      prefix = parts.shift()
+      fn = Luca.util.hook( eventId )
 
-      parts = _( parts ).map (p)-> _.string.capitalize(p)
-      fn = prefix + parts.join('')
+      callback = ()=>
+        @[fn]?.apply @, arguments
 
-      @bind eventId, ()=> @[fn].apply @, arguments if @[fn]
+      callback = _.once(callback) if eventId?.match(/once:/)
+
+      @bind eventId, callback
 
 
   #### Luca.Collection and Luca.CollectionManager integration
@@ -207,3 +170,111 @@ _.extend Luca.View.prototype,
     @events ||= {}
     @events[ selector ] = handler
     @delegateEvents()
+
+  bindAllEventHandlers: ()->
+    _( @events ).each (handler,event)=>
+      if _.isString(handler)
+        _.bindAll @, handler
+
+  definitionClass: ()->
+    Luca.util.resolve(@displayName, window)?.prototype
+
+  # refreshCode happens whenever the Luca.Framework extension
+  # system is run after there are running instances of a given component
+
+  # in the context of views, what this means is that each eventHandler which
+  # is bound to a specific object via _.bind or _.bindAll, or autoBindEventHandlers
+  # is refreshed with the prototype method of the component that it inherits from,
+  # and then delegateEvents is called to refresh any of the updated event handlers
+
+  # in addition to this, all properties of the instance of a given view which are
+  # also backbone views will have the same process run against them
+  refreshCode: ()->
+    view = @
+
+    _( @eventHandlerProperties() ).each (prop)->
+      view[ prop ] = view.definitionClass()[prop]
+
+    if @autoBindEventHandlers is true
+      @bindAllEventHandlers()
+
+    @delegateEvents()
+
+  eventHandlerProperties: ()->
+    handlerIds = _( @events ).values()
+    _( handlerIds ).select (v)->
+      _.isString(v)
+
+  eventHandlerFunctions: ()->
+    handlerIds = _( @events ).values()
+    _( handlerIds ).map (handlerId)=>
+      if _.isFunction(handlerId) then handlerId else @[handlerId]
+
+  collections: ()-> Luca.util.selectProperties( Luca.isBackboneCollection, @ )
+  models: ()-> Luca.util.selectProperties( Luca.isBackboneModel, @ )
+  views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
+
+
+originalExtend = Backbone.View.extend
+
+customizeRender = (definition)->
+  #### Rendering
+  #
+  # Our base view class wraps the defined render() method
+  # of the views which inherit from it, and does things like
+  # trigger the before and after render events automatically.
+  # In addition, if the view has a deferrable property on it
+  # then it will make sure that the render method doesn't get called
+  # until.
+
+  _base = definition.render
+
+  _base ||= Luca.View::$attach
+
+
+  definition.render = ()->
+    view = @
+    # if a view has a deferrable property set
+
+    if @deferrable
+      target = @deferrable_target
+
+      unless Luca.isBackboneCollection(@deferrable)
+        @deferrable = @collection
+
+      target ||= @deferrable
+      trigger = if @deferrable_event then @deferrable_event else "reset"
+
+      view.defer ()->
+        _base.call(view)
+        view.trigger "after:render", view
+      .until(target,trigger)
+
+      view.trigger "before:render", @
+
+      autoTrigger = @deferrable_trigger || @deferUntil
+
+      if !autoTrigger?
+        target[ (@deferrable_method||"fetch") ].call(target)
+      else
+        fn = _.once ()=> @deferrable[ (@deferrable_method||"fetch") ]?()
+        (@deferrable_target || @ ).bind(@deferrable_trigger, fn)
+
+      return @
+
+    else
+      @trigger "before:render", @
+      _base.apply(@, arguments)
+      @trigger "after:render", @
+
+      return @
+
+  definition
+
+# By overriding Backbone.View.extend we are able to intercept
+# some method definitions and add special behavior around them
+# mostly related to render()
+Luca.View.extend = (definition)->
+  definition = customizeRender( definition )
+  originalExtend.call(@, definition)
+

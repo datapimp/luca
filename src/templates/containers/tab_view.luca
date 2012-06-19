@@ -1,1 +1,2 @@
+%ul.nav.nav-tabs{:id=>"<%= cid %>-tabs-selector"}
 %div{:id=>"<%= cid %>-tab-view-content",:class=>"tab-content"}

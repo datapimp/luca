@@ -18,7 +18,7 @@ describe "The Luca Framework", ->
 
   it "should allow me to add view namespaces to the registry", ->
     Luca.registry.addNamespace("Test.namespace")
-    expect( Luca.registry.namespaces ).toContain("Test.namespace")
+    expect( Luca.registry.namespaces(false) ).toContain("Test.namespace")
 
   it "should resolve a value.string to the object", ->
     window.nested =
@@ -31,18 +31,17 @@ describe "The Luca Framework", ->
 
   it "should create an instance of a class by ctype", ->
     object =
-      ctype: "template"
-      template: "components/form_view"
+      ctype: "view"
 
     component = Luca.util.lazyComponent(object)
-    expect( _.isFunction(component.render) ).toBeTruthy()
+
+    expect( Luca.isBackboneView(component) ).toEqual true
 
   it "should find a created view in the cache", ->
-    template = new Luca.components.Template
-      template: "components/form_view"
+    template = new Luca.View
       name: 'test_template'
 
-    expect(Luca.cache("test_template")).toBeDefined()
+    expect( Luca.isBackboneView( Luca.cache("test_template") ) ).toEqual true
 
   it "should detect if an object is probably a backbone view", ->
     obj =
@@ -79,14 +78,14 @@ describe "Luca Component Definition", ->
     expect( Luca.random ).toBeDefined()
 
   it "should automatically register the namespace in the registry", ->
-    expect( Luca.registry.namespaces ).toContain 'Luca.random'
+    expect( Luca.registry.namespaces() ).toContain Luca.random
 
   it "should automatically register the component in the registry", ->
     expect( Luca.registry.lookup("component_definition") ).toBeDefined()
 
   it "should reference the name of the extending class", ->
     instance = new Luca.random.ComponentDefinition
-    expect( instance._className ).toEqual "Luca.random.ComponentDefinition"
+    expect( instance.displayName ).toEqual "Luca.random.ComponentDefinition"
 
   it "should reference the extended class", ->
     instance = new Luca.random.ComponentDefinition
@@ -94,12 +93,16 @@ describe "Luca Component Definition", ->
 
   it "should reference the name of the extended class", ->
     instance = new Luca.random.ComponentDefinition
-    expect( instance._superClass()._className ).toEqual 'Luca.View'
+    expect( instance._superClass().displayName ).toEqual 'Luca.View'
 
   it "should use the backbone.extend functionality properly", ->
     instance = new Luca.random.ComponentDefinition
     expect( instance.property ).toEqual "value"
 
-  it "should alias to _.component", ->
-    proxy = _.component('Luca.random.ComponentDefition')
+  it "should alias to _.def", ->
+    proxy = _.def('Luca.random.ComponentDefition')
     expect( proxy.with ).toBeDefined()
+
+  it "should allow me to set the namespace before the definition", ->
+    Luca.util.namespace("Luca.View")
+    expect( Luca.util.namespace() ).toEqual Luca.View

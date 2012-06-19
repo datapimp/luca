@@ -1,14 +1,18 @@
-_.component('Luca.fields.TextField').extends('Luca.core.Field').with
+change_handler = (e)-> @trigger "on:change", @, e
+
+_.def('Luca.fields.TextField').extends('Luca.core.Field').with
   events:
-    "keydown input" : "keydown_handler"
     "blur input" : "blur_handler"
     "focus input" : "focus_handler"
     "change input" : "change_handler"
 
   template: 'fields/text_field'
 
+  autoBindEventHandlers: true
+
+  send_blanks: true
+
   initialize: (@options={})->
-    _.bindAll @, "keydown_handler", "blur_handler", "focus_handler"
     Luca.core.Field::initialize.apply @, arguments
 
     @input_id ||= _.uniqueId('field')
@@ -24,7 +28,7 @@ _.component('Luca.fields.TextField').extends('Luca.core.Field').with
       @$el.addClass('input-append')
       @addOn = @append
 
-  keydown_handler: _.throttle ((e)-> @change_handler.apply @, arguments), 300
+    @registerEvent("keydown input","keydown_handler") if @enableKeyEvents
 
   blur_handler: (e)->
     me = my = $( e.currentTarget )
@@ -32,5 +36,5 @@ _.component('Luca.fields.TextField').extends('Luca.core.Field').with
   focus_handler: (e)->
     me = my = $( e.currentTarget )
 
-  change_handler: (e)->
-    @trigger "on:change", @, e
+  change_handler: change_handler
+  keydown_handler: _.throttle ((e)-> change_handler.apply @, arguments), 300

@@ -8,9 +8,7 @@
 # which work together.  inter-component communication should be handled
 # by parent containers, and not individual components, which should
 # usually not be aware of other components.
-_.component('Luca.components.RecordManager')
-.extend('Luca.containers.CardView').with
-
+_.def('Luca.components.RecordManager').extends('Luca.containers.CardView').with
   events:
     "click .record-manager-grid .edit-link" : "edit_handler"
     "click .record-manager-filter .filter-button" : "filter_handler"

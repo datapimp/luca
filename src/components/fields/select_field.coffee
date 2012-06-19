@@ -1,4 +1,4 @@
-_.component('Luca.fields.SelectField').extends('Luca.core.Field').with
+_.def('Luca.fields.SelectField').extends('Luca.core.Field').with
 
   events:
     "change select" : "change_handler"

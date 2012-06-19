@@ -1,4 +1,6 @@
-_.component('Luca.components.GridView').extend('Luca.View').with
+_.def('Luca.components.GridView').extend('Luca.components.Panel').with
+
+  bodyTemplate: "components/grid_view"
 
   autoBindEventHandlers: true
 
@@ -57,28 +59,39 @@ _.component('Luca.components.GridView').extend('Luca.View').with
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
 
-    Luca.View::initialize.apply( @, arguments )
+    @loadMask = Luca.enableBootstrap unless @loadMask?
+    @loadMaskEl ||= ".luca-ui-g-view-body" if @loadMask is true
 
-    @configure_collection()
+    Luca.components.Panel::initialize.apply(@, arguments)
+
+    @configure_collection(true)
+
+    @collection.bind "before:fetch", ()=>
+      console.log "Triggering Enable Load Mask"
+      @trigger "enable:loadmask" if @loadMask is true
 
     @collection.bind "reset", (collection) =>
       @refresh()
+      console.log "Triggering Disable LoadMask"
+      @trigger "disable:loadmask" if @loadMask is true
       @trigger "after:collection:load", collection
 
     # if a model changes, then we will update the row's contents
     # by rerendering that row's cells
     @collection.bind "change", (model)=>
+      return unless @rendered is true
+
       try
         rowEl = @getRowEl( model.id || model.get('id') || model.cid )
         cells = @render_row(model, @collection.indexOf(model), cellsOnly: true )
         $( rowEl ).html( cells )
       catch error
-        console.log "Error in change handler for GridView.collection", error, @
+        console.log "Error in change handler for GridView.collection", error, @, model, rowEl, cells
 
   beforeRender: ()->
-    @trigger "before:grid:render", @
+    Luca.components.Panel::beforeRender?.apply(@, arguments)
 
-    @$el.html Luca.templates["components/grid_view"]()
+    @trigger "before:grid:render", @
 
     @table      = @$ 'table.luca-ui-g-view'
     @header     = @$ "thead"
@@ -94,9 +107,14 @@ _.component('Luca.components.GridView').extend('Luca.View').with
 
     @emptyMessage()
 
-    @renderToolbars()
-
     $(@container).append @$el
+
+  afterRender: ()->
+    Luca.components.Panel::afterRender?.apply(@, arguments)
+
+    @rendered = true
+    @refresh()
+    @trigger "after:grid:render", @
 
   applyCssClasses: ()->
     @$el.addClass 'scrollable-g-view' if @scrollable
@@ -109,15 +127,6 @@ _.component('Luca.components.GridView').extend('Luca.View').with
 
     _( @tableStyle?.split(" ") ).each (style)=>
       @table.addClass("table-#{ style }")
-
-  toolbarContainers:(position="bottom")->
-    $(".toolbar-container.#{ position }", @el)
-
-  renderToolbars: ()->
-    _( @toolbars ).each (toolbar)=>
-      toolbar = Luca.util.lazyComponent(toolbar)
-      toolbar.container = @toolbarContainers( toolbar.position )
-      toolbar.render()
 
   setDimensions: (offset)->
     @height ||= @defaultHeight
@@ -172,9 +181,7 @@ _.component('Luca.components.GridView').extend('Luca.View').with
   lastColumn: ()->
     @columns[ @columns.length - 1 ]
 
-  afterRender: ()->
-    @refresh()
-    @trigger "after:grid:render", @
+
 
   emptyMessage: (text="")->
     text ||= @emptyText

@@ -1,4 +1,4 @@
-_.component('Luca.fields.CheckboxField').extends('Luca.core.Field').with
+_.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
 
   events:
     "change input" : "change_handler"
@@ -18,6 +18,8 @@ _.component('Luca.fields.CheckboxField').extends('Luca.core.Field').with
   template: 'fields/checkbox_field'
 
   hooks: ["checked","unchecked"]
+
+  send_blanks: true
 
   initialize: (@options={})->
     _.extend @, @options

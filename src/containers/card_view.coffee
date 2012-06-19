@@ -1,4 +1,4 @@
-_.component("Luca.containers.CardView").extends("Luca.core.Container").with
+_.def("Luca.containers.CardView").extends("Luca.core.Container").with
   componentType: 'card_view'
 
   className: 'luca-ui-card-view-wrapper'
@@ -12,31 +12,32 @@ _.component("Luca.containers.CardView").extends("Luca.core.Container").with
     'after:card:switch'
   ]
 
+  componentClass: 'luca-ui-card'
+  appendContainers: true
+
   initialize: (@options)->
     Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
 
-  componentClass: 'luca-ui-card'
-
-  beforeLayout: ()->
-    @cards = _(@components).map (card,cardIndex) =>
-      classes: @componentClass
-      style: "display:#{ (if cardIndex is @activeCard then 'block' else 'none' )}"
-      id: "#{ @cid }-#{ cardIndex }"
-
-  prepareLayout: ()->
-    @card_containers = _( @cards ).map (card, index)=>
-      @$el.append Luca.templates["containers/basic"](card)
-      $("##{ card.id }")
-
   prepareComponents: ()->
-    @components = _( @components ).map (object,index)=>
-      card = @cards[index]
-      object.container = "##{ card.id }"
-      object
+    Luca.core.Container::prepareComponents?.apply(@, arguments)
+
+    _( @components ).each (component,index)=>
+      if index is @activeCard
+        $( component.container ).show()
+      else
+        $( component.container ).hide()
+
+  activeComponentElement: ()->
+    @componentElements().eq( @activeCard )
 
   activeComponent: ()->
     @getComponent( @activeCard )
+
+  customizeContainerEl: (containerEl, panel, panelIndex)->
+    containerEl.style += if panelIndex is @activeCard then "display:block;" else "display:none;"
+
+    containerEl
 
   cycle: ()->
     nextIndex = if @activeCard < @components.length - 1 then @activeCard + 1 else 0
@@ -62,24 +63,22 @@ _.component("Luca.containers.CardView").extends("Luca.core.Container").with
       index = @indexOf(index)
       current = @getComponent( index )
 
-    return unless current
-
+    unless current
+      return
 
     unless silent
       @trigger "before:card:switch", previous, current
       previous?.trigger?.apply(previous,["before:deactivation", @, previous, current])
       current?.trigger?.apply(previous,["before:activation", @, previous, current])
 
-    _( @card_containers ).each (container)->
-      container.hide()
+    @componentElements().hide()
 
     unless current.previously_activated
       current.trigger "first:activation"
       current.previously_activated = true
 
-    $( current.container ).show()
-
     @activeCard = index
+    @activeComponentElement().show()
 
     unless silent
       @trigger "after:card:switch", previous, current

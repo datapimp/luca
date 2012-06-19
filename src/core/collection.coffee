@@ -1,39 +1,77 @@
-# Luca.Collection
-#
-# Luca.Collection is an extenstion of Backbone.Collection which provides
-# a bunch of commonly used patterns for doing things like:
-#
-#   - setting base parameters used on every request to your REST API
-#
-#   - bootstrapping a collection of objects which are
-#     rendered in your markup on page load
-#
-#   - filtering with query string parameters against your API
-#
-#   - automatic interaction with your Luca.CollectionManager class
-#
-#   - make it easier to parse Rails style responses which include the root
-#     by specifying a @root parameter
-#
-#   - use backbone-query if available
-#
-#   - onceLoaded: run a callback once if there are models present, otherwise wait until
-#     the collection fetches
-#
-#   - ifLoaded: run a callback any time the model gets reset, or if there are already models
-#
-Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
+source = 'Backbone.Collection'
+source = 'Backbone.QueryCollection' if Backbone.QueryCollection?
+
+_.def("Luca.Collection").extends( source ).with
+  # cachedMethods refers to a list of methods on the collection
+  # whose value gets cached once it is ran.  the collection then
+  # binds to change, add, remove, and reset events and then expires
+  # the cached value once these events are fired.
+
+  # cachedMethods expects an array of strings representing the method name
+  # or objects containing @method and @resetEvents properties.  by default
+  # @resetEvents are 'add','remove',reset' and 'change'.
+  cachedMethods: []
+
+  restoreMethodCache: ()->
+    for name, config of @_methodCache
+      if config.original?
+        config.args = undefined
+        @[ name ] = config.original
+
+  clearMethodCache: (method)->
+    @_methodCache[method].value = undefined
+
+  clearAllMethodsCache: ()->
+    for name, config of @_methodCache
+      @clearMethodCache(name)
+
+  setupMethodCaching: ()->
+    collection = @
+    membershipEvents = ["reset","add","remove"]
+    cache = @_methodCache = {}
+
+    _( @cachedMethods ).each (method)->
+      # store a reference to the unwrapped version of the method
+      # and a placeholder for the cached value
+      cache[ method ] =
+        name: method
+        original: collection[method]
+        value: undefined
+
+      # wrap the collection method with a basic memoize operation
+      collection[ method ] = ()->
+        cache[method].value ||= cache[method].original.apply collection, arguments
+
+      # bind to events on the collection, which once triggered, will
+      # invalidate the cached value.  causing us to have to restore it
+      for membershipEvent in membershipEvents
+        collection.bind membershipEvent, ()->
+          collection.clearAllMethodsCache()
+
+      dependencies = method.split(':')[1]
+
+      if dependencies
+        for dependency in dependencies.split(",")
+          collection.bind "change:#{dependency}", ()->
+            collection.clearMethodCache(method: method)
 
   initialize: (models=[], @options)->
     _.extend @, @options
 
+    @setupMethodCaching()
+
     @_reset()
 
-    # By specifying a @cached property or method, you can instruct
+    # By specifying a @cache_key property or method, you can instruct
     # Luca.Collection instances where to pull an array of model attributes
     # usually done with the bootstrap functionality provided.
+
+    # DEPRECATION NOTICE
     if @cached
-      @bootstrap_cache_key = if _.isFunction( @cached ) then @cached() else @cached
+      console.log 'The @cached property of Luca.Collection is being deprecated.  Please change to cache_key'
+
+    if @cache_key ||= @cached
+      @bootstrap_cache_key = if _.isFunction( @cache_key ) then @cache_key() else @cache_key
 
     if @registerAs or @registerWith
       console.log "This configuration API is deprecated.  use @name and @manager properties instead"
@@ -41,7 +79,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     # support the older configuration API
     @name ||= @registerAs
     @manager ||= @registerWith
-
 
     # if they specify a
     if @name and not @manager
@@ -53,7 +90,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     # to be scoped with some sort of unique id, as say some sort of belongsTo relationship
     # then you can specify @registerAs as a method()
     if @manager
-      @name ||= @cached()
+      @name ||= @cache_key()
       @name = if _.isFunction( @name ) then @name() else @name
 
       unless @private or @anonymous
@@ -81,15 +118,13 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
     @__wrapUrl() unless @useNormalUrl is true
 
-    Backbone.Collection.prototype.initialize.apply @, [models, @options]
+    Backbone.Collection::initialize.apply @, [models, @options]
 
     if models
       @reset models, silent: true, parse: options?.parse
 
     @trigger "after:initialize"
 
-  #### Automatic Query String Generation
-  #
   # Luca.Collections will append a query string to the URL
   # and will automatically do this for you without you having
   # to write a special url handler.  If you want to use a normal
@@ -147,8 +182,6 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
     @base_params ||= _( Luca.Collection.baseParams() ).clone()
     _.extend @base_params, params
 
-  # Collection Manager Registry
-  #
   # If this collection is to be registered with some global collection
   # tracker such as new Luca.CollectionManager() then we will register
   # ourselves automatically
@@ -177,7 +210,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
   # A Luca.Collection will load models from the in memory model store
   # returned from Luca.Collection.cache, where the key returned from
-  # the @cached attribute or method matches the key of the model cache
+  # the @cache_keyattribute or method matches the key of the model cache
   loadFromBootstrap: ()->
     return unless @bootstrap_cache_key
     @reset @cached_models()
@@ -189,7 +222,7 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
 
   # cached_models is a reference to the Luca.Collection.cache object
   # key'd on whatever this collection's bootstrap_cache_key is set to be
-  # via the @cached() interface
+  # via the @cache_key() interface
   cached_models: ()->
     Luca.Collection.cache( @bootstrap_cache_key )
 
@@ -289,8 +322,6 @@ _.extend Luca.Collection.prototype,
 
     Backbone.View.prototype.trigger.apply @, arguments
 
-#### Base Parameters
-#
 # Always include these parameters in every request to your REST API.
 #
 # either specify a function which returns a hash, or just a normal hash
@@ -303,14 +334,12 @@ Luca.Collection.baseParams = (obj)->
   if _.isObject( Luca.Collection._baseParams )
     Luca.Collection._baseParams
 
-#### Bootstrapped Models ( stuff loaded on page load )
-#
 # In order to make our Backbone Apps super fast it is a good practice
 # to pre-populate your collections by what is referred to as bootstrapping
 #
 # Luca.Collections make it easier for you to do this cleanly and automatically
 #
-# by specifying a @cached property or method in your collection definition
+# by specifying a @cache_keyproperty or method in your collection definition
 # Luca.Collections will automatically look in this space to find models
 # and avoid a roundtrip to your API unless explicitly told to.
 Luca.Collection._bootstrapped_models = {}

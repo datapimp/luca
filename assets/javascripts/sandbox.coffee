@@ -1,5 +1,5 @@
-#= require ./development-console
 #= require ./sandbox/config
 #= require_tree ./sandbox/templates
 #= require_tree ./sandbox/views
-#= require ./sandbox/sandbox
+#= require ./sandbox/router
+#= require ./sandbox/application

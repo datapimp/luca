@@ -1,4 +1,4 @@
-_.component('Luca.fields.HiddenField').extends('Luca.core.Field').with
+_.def('Luca.fields.HiddenField').extends('Luca.core.Field').with
 
   template: 'fields/hidden_field'
 

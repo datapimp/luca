@@ -1,4 +1,4 @@
-_.component('Luca.containers.ColumnView').extends('Luca.core.Container').with
+_.def('Luca.containers.ColumnView').extends('Luca.core.Container').with
   componentType: 'column_view'
 
   className: 'luca-ui-column-view'
@@ -30,11 +30,6 @@ _.component('Luca.containers.ColumnView').extends('Luca.core.Container').with
       @autoColumnWidths()
 
     @columnWidths = _( @columnWidths ).map (val)-> "#{ val }%"
-
-  beforeComponents: ()->
-    @debug "column_view before components"
-    _( @components ).each (component)->
-      component.ctype ||= "panel_view"
 
   beforeLayout: ()->
     @debug "column_view before layout"

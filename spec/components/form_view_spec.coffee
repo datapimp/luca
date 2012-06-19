@@ -40,6 +40,10 @@ describe 'The Form View', ->
     @form = new FormView()
     @model = new Model(field0:1,field1:"jonathan",field3:true,field4:"what up player?")
 
+  afterEach ->
+    @form = undefined
+    @model = undefined
+
   it "should create a form", ->
     expect( @form ).toBeDefined()
 
@@ -53,11 +57,13 @@ describe 'The Form View', ->
     values = @form.getValues()
     expect( values.field1 ).toEqual "jonathan"
 
-  it "should render the components", ->
+  it "should render the components within the body element", ->
     @form.render()
-    expect( @form.$el.html() ).toContain "Field Four"
-    expect( @form.$el.html() ).toContain "Field One"
-    expect( @form.$el.html() ).toContain "Click Me"
+    expect( @form.$bodyEl().is('.form-view-body') ).toEqual true
+
+  it "should assign the components to render inside of the body", ->
+    @form.render()
+    expect( @form.$bodyEl().html() ).toContain "Field Four"
 
   it "should allow me to set the values of the form fields with a hash", ->
     @form.render()

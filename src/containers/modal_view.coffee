@@ -1,83 +1,32 @@
-_.component('Luca.containers.ModalView').extends('Luca.core.Container').with
-  componentType: 'modal_view'
+_.def("Luca.ModalView").extends("Luca.View").with
 
-  className: 'luca-ui-modal-view'
+  closeOnEscape: true
 
-  components:[]
+  showOnInitialize: false
 
-  renderOnInitialize: true
+  backdrop: false
 
-  showOnRender: false
+  container: ()->
+    $('body')
 
-  hooks:[
-    'before:show',
-    'before:hide'
-  ]
-
-  defaultModalOptions:
-    minWidth: 375
-    maxWidth: 375
-    minHeight: 550
-    maxHeight: 550
-    opacity: 80
-    onOpen: (modal)->
-      @onOpen.apply @
-      @onModalOpen.apply modal, [modal, @]
-    onClose: (modal)->
-      @onClose.apply @
-      @onModalClose.apply modal, [modal, @]
-
-  modalOptions: {}
-
-  initialize: (@options={})->
-    Luca.core.Container::initialize.apply @,arguments
-    @setupHooks(@hooks)
-
-    _( @defaultModalOptions ).each (value,setting) => @modalOptions[ setting ] ||= value
-
-    @modalOptions.onOpen = _.bind( @modalOptions.onOpen, @)
-    @modalOptions.onClose = _.bind( @modalOptions.onClose, @)
-
-  # this will get called within the context of the modal view
-  onOpen: ()-> true
-
-  # this will get called within the context of the modal view
-  onClose: ()-> true
-
-  getModal: ()-> @modal
-
-  # this will be called within the context of the simple modal object
-  onModalOpen: (modal, view)->
-    view.modal = modal
-
-    modal.overlay.show()
-    modal.container.show()
-    modal.data.show()
-
-  # this will be called within the context of the simple modal object
-  onModalClose: (modal, view)->
-    $.modal.close()
-
-  prepareLayout: ()->
-    $('body').append( @$el )
-
-  prepareComponents: ()->
-    @components = _(@components).map (object,index) =>
-      object.container =  @el
-      object
-
-  afterInitialize: ()->
-    @$el.hide()
-    @render() if @renderOnInitialize
-
-  afterRender: ()->
-    @show() if @showOnRender
-
-  wrapper: ()-> $( @$el.parent() )
+  toggle: ()->
+    @$el.modal('toggle')
 
   show: ()->
-    @trigger "before:show", @
-    @$el.modal( @modalOptions )
+    @$el.modal('show')
 
   hide: ()->
-    @trigger "before:hide", @
+    @$el.modal('hide')
+
+  render: ()->
+    @$el.addClass 'modal'
+    @$el.addClass 'fade' if @fade is true
+
+    $('body').append( @$el )
+
+    @$el.modal
+      backdrop: @backdrop is true
+      keyboard: @closeOnEscape is true
+      show: @showOnInitialize is true
+
+_.def("Luca.containers.ModalView").extends("Luca.ModalView").with()

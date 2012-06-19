@@ -93,19 +93,15 @@
 
 }
 
-.luca-ui-g-view-footer {
+.luca-ui-g-view {
   .toolbar-container {
     float: left;
     width: 100%;
     clear: both;
     display: block;
+    padding-right:12px;
     .luca-ui-toolbar {
-      display: block;
-      float: right;
-      clear: right;
-      .luca-ui-field {
-        float: left;
-      }
+      padding: 2px 0px;
     }
   }
 }

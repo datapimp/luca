@@ -1,4 +1,4 @@
-%div#progress-model.modal{:stype =>"display: none;"}
+%div#progress-model.modal{:style =>"display: none;"}
   .progress.progress-info.progress-striped.active
     .bar{:style => "width: 0%;" }
   .message

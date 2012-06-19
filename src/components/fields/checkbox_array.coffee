@@ -1,4 +1,4 @@
-_.component('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
+_.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
 
   template: "fields/checkbox_array"
 

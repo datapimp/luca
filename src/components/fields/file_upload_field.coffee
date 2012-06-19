@@ -1,4 +1,4 @@
-_.component('Luca.fields.FileUploadField').extends('Luca.core.Field').with
+_.def('Luca.fields.FileUploadField').extends('Luca.core.Field').with
 
   template: 'fields/file_upload_field'
 

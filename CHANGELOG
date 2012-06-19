@@ -29,6 +29,45 @@
     allows for introspection of components as well as advanced
     querying of the Luca Component Cache
 
-  _ Added _.component as an alias to Luca.define
+  _ Added _.def as an alias to Luca.define
 
   - All Luca components have been migrated over to the new Luca.define() API
+
+0.8.6
+  - Luca.ModalView has been refactored to use Twitter Bootstrap Modal
+  - Luca.Application now has keyEvents API for handling keypress
+    events and delegating them properly
+  - Luca.containers.CardView has been refactored to be more inline with base container
+  - Luca.View gets $append, $html, $container jQuery helpers.  shortcut for @renderToEl().append, etc
+  - Luca.View gets @bodyTagName, @bodyTemplate properties.
+      - @bodyTemplate references a JST template which automatically gets added
+      via $html if present, immediately when the view is rendered
+      - @bodyTagName is where $append, $html will insert content, otherwise defaults to @$el
+  - Luca.View has $bodyEl() method which points to $(@bodyTagName) or $(@el) ( default )
+
+0.8.7
+  - Luca.core.Container now uses bodyTemplate to render
+  - Luca.Collection.cached property is now deprecated.  use @cache_key instead
+  - introducing Luca.Collection.cachedMethods property.  any method on the
+    collection which is listed here, will have its return value memoized upon
+    first being called.  Whenever the collection is reset or changed, this
+    value will be cleared, and then the next call will be cached, and so on
+
+0.8.8
+  - Added development mode helpers to Luca.View to aid in browser editing
+  - Added configuration for @deferrable rendering system for Luca.View
+  - Added isComponent and supportsBackboneEvents helpers
+  - Added componentEvents configuration sugar to Luca.core.Container classes
+    @componentEvents allows for a container to bind to events on its children
+  - major work on component tester
+  - the development console component now extends from Luca.core.Panel instead of the ModalView
+  - Added _super() method which accepts a method name, context, and arguments array
+    and is the equivalent to applying the component you extend from prototype method
+    with @, arguments
+  - Added component.once, as an alias for binding to an event and firing a callback one time
+  - Added component.defer(operation).until(object,trigger) as wrapper around .once binding.
+    operation can be a string, or a function, and the call to until accepts an object and
+    the name of a trigger to listen for on that object.  if you just pass a trigger, object is implicitly the component
+  - Luca() is now a global helper for finding views, querying the cache, lazily creating objects, etc.  smart enough
+    to know what you want from it based on the input
+  - window.Luca now mixes in Backbone.Events and Luca.Events.  triggers events whenever components are registered or created

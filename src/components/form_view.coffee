@@ -1,4 +1,4 @@
-_.component("Luca.components.FormView").extends('Luca.core.Container').with
+_.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   tagName: 'form'
 
@@ -26,53 +26,56 @@ _.component("Luca.components.FormView").extends('Luca.core.Container').with
 
   toolbar: true
 
+  legend: ""
+
+  bodyClassName: "form-view-body"
+  bodyTemplate: ["components/form_view"]
+
   initialize: (@options={})->
+    @loadMask = Luca.enableBootstrap unless @loadMask?
+
     Luca.core.Container::initialize.apply @, arguments
 
-    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
+    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars", "applyLoadMask"
 
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
 
-    @legend ||= ""
+    @applyStyleClasses()
 
-    @configureToolbars()
-    @applyStyles()
+    if @toolbar is true and not (@bottomToolbar? or @topToolbar?)
+      @bottomToolbar =
+        buttons:[
+          icon:"remove-sign"
+          label: "Reset"
+          eventId: "click:reset"
+          className:"reset-button"
+          align: 'right'
+        ,
+          icon:"ok-sign"
+          white: true
+          label: "Save Changes"
+          eventId: "click:submit"
+          color: "success"
+          className: 'submit-button'
+          align: 'right'
+        ]
 
-  addBootstrapFormControls: ()->
-    @bind "after:render", ()=>
-      el = @$('.toolbar-container.bottom')
-
-      el.addClass('form-controls')
-      el.html @formControlsTemplate || Luca.templates["components/bootstrap_form_controls"](@)
-
-  applyStyles: ()->
-    @applyBootstrapStyles() if Luca.enableBootstrap
+  applyStyleClasses: ()->
+    if Luca.enableBootstrap
+      @applyBootstrapStyleClasses()
 
     @$el.addClass( "label-align-#{ @labelAlign }") if @labelAlign
     @$el.addClass( @fieldLayoutClass ) if @fieldLayoutClass
 
-  applyBootstrapStyles: ()->
+  applyBootstrapStyleClasses: ()->
     @inlineForm = true if @labelAlign is "left"
 
     @$el.addClass('well') if @well
     @$el.addClass('form-search') if @searchForm
     @$el.addClass('form-horizontal') if @horizontalForm
     @$el.addClass('form-inline') if @inlineForm
-
-  configureToolbars: ()->
-    return @addBootstrapFormControls() if Luca.enableBootstrap and @toolbar is true
-
-    if @toolbar is true
-      @toolbars = [
-        ctype: 'form_button_toolbar'
-        includeReset: true
-        position: 'bottom'
-      ]
-
-    if @toolbars and @toolbars.length
-      @bind "after:render", _.once @renderToolbars
 
   resetHandler: (e)->
     me = my = $( e.currentTarget )
@@ -83,38 +86,15 @@ _.component("Luca.components.FormView").extends('Luca.core.Container').with
   submitHandler: (e)->
     me = my = $( e.currentTarget )
     @trigger "before:submit", @
-    @submit()
-
-  beforeLayout: ()->
-    Luca.core.Container::beforeLayout?.apply @, arguments
-    @$el.html Luca.templates["components/form_view"]( @ )
-
-  prepareComponents: ()->
-    container = $('.form-view-body', @el)
-    _( @components ).each (component)->
-      component.container = container
+    @trigger "enable:loadmask", @ if @loadMask is true
+    @submit() if @hasModel()
 
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)
+
     @eachField (field)=>
       field.getForm = ()=> @
       field.getModel = ()=> @currentModel()
-
-  render: ()->
-    $( @container ).append( @$el )
-    @
-
-  wrapper: ()->
-    @$el.parents('.luca-ui-form-view-wrapper')
-
-  toolbarContainers: (position="bottom")->
-    $(".toolbar-container.#{ position }", @wrapper() ).first()
-
-  renderToolbars: ()->
-      _( @toolbars ).each (toolbar)=>
-        toolbar.container = $("##{ @cid }-#{ toolbar.position }-toolbar-container")
-        toolbar = Luca.util.lazyComponent(toolbar)
-        toolbar.render()
 
   eachField: (iterator)->
     _( @getFields() ).map( iterator )
@@ -127,14 +107,12 @@ _.component("Luca.components.FormView").extends('Luca.core.Container').with
     # to find the fields
     fields = @select("isField", true, true)
 
+    return fields unless attr and value
     # if an optional attribute and value pair is passed
     # then you can limit the array of fields even further
-    if fields.length > 0 and attr and value
-      fields = _(fields).select (field)->
-        property = field[ attr ]
-        return false unless property?
-        propvalue = if _.isFunction(property) then property() else property
-        value is propvalue
+    _(fields).select (field)->
+      property = field[ attr ]
+      property? and value is (if _.isFunction(property) then property() else property)
 
     fields
 
@@ -216,6 +194,7 @@ _.component("Luca.components.FormView").extends('Luca.core.Container').with
 
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
+    @trigger "disable:loadmask", @ if @loadMask is true
 
     if response and response?.success is true
       @trigger "after:submit:success", @, model, response
@@ -235,6 +214,9 @@ _.component("Luca.components.FormView").extends('Luca.core.Container').with
     @syncFormWithModel()
     return unless save
     @current_model.save( @current_model.toJSON(), saveOptions )
+
+  hasModel: ()->
+    @current_model?
 
   currentModel: (options={})->
     if options is true or options?.refresh is true
