@@ -1,9 +1,9 @@
 describe 'The Checkbox Array Field', ->
-  
+
   beforeEach ->
     @model = new Backbone.Model(item_ids: ["1"])
     collection = new Luca.Collection
-    
+
     @formView = new Luca.components.FormView
       components:[
         ctype: "checkbox_array"
@@ -13,7 +13,7 @@ describe 'The Checkbox Array Field', ->
 
     @formView.render()
     @formView.loadModel(@model)
-    
+
     collection.reset([
       id: "1", name: "Item1"
     ,
@@ -21,9 +21,10 @@ describe 'The Checkbox Array Field', ->
     ,
       id: "3", name: "Item3"
     ])
-    
+
+    @formView.loadModel(@model)
     @field = @formView.getFields()[0]
-    
+
   it "should create a checkbox array field", ->
     expect(@formView.currentModel()).toEqual(@model)
     expect(@field.selectedItems).toEqual(["1"])
@@ -37,10 +38,3 @@ describe 'The Checkbox Array Field', ->
     expect(@field.$el.find("input[value='1']")[0].checked).toBeTruthy()
     expect(@field.$el.find("input[value='2']")[0].checked).toBeFalsy()
     expect(@field.$el.find("input[value='3']")[0].checked).toBeFalsy()
-  
-  it "should update the form model's attribute to be an array of selected items on click", ->
-    checkbox = $(@field.$el.find("input[value='2']")[0])
-    checkbox.prop("checked", true)
-    checkbox.click()
-
-    expect(@field.getModel().get('item_ids')).toEqual(["1", "2"])
