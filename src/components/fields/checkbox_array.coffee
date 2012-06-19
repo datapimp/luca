@@ -28,7 +28,7 @@ _.component('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
     @collection.bind "reset", @populateCheckboxes
 
   afterRender: ()->
-    if @collection?.models?.length > 0
+    if @collection?.length > 0
       @populateCheckboxes()
     else
       @collection.trigger("reset")

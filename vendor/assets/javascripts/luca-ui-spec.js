@@ -721,9 +721,20 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
+<<<<<<< HEAD
       options.refresh = this.remoteFilter === true;
       this.applyParams(filter);
       return this.fetch(options);
+=======
+      if ((options.remote != null) === true) {
+        this.applyParams(filter);
+        return this.fetch(_.extend(options, {
+          refresh: true
+        }));
+      } else {
+        return this.reset(this.query(filter));
+      }
+>>>>>>> e1c230f566f4ee2a633f9454a81a3370ef1a7bac
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
@@ -2069,8 +2080,8 @@
       return this.collection.bind("reset", this.populateCheckboxes);
     },
     afterRender: function() {
-      var _ref, _ref2;
-      if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
+      var _ref;
+      if (((_ref = this.collection) != null ? _ref.length : void 0) > 0) {
         return this.populateCheckboxes();
       } else {
         return this.collection.trigger("reset");
@@ -3173,6 +3184,64 @@
 }).call(this);
 (function() {
 
+  describe('The Checkbox Array Field', function() {
+    beforeEach(function() {
+      var collection;
+      this.model = new Backbone.Model({
+        item_ids: ["1"]
+      });
+      collection = new Luca.Collection;
+      this.formView = new Luca.components.FormView({
+        components: [
+          {
+            ctype: "checkbox_array",
+            name: 'item_ids',
+            collection: collection
+          }
+        ]
+      });
+      this.formView.render();
+      this.formView.loadModel(this.model);
+      collection.reset([
+        {
+          id: "1",
+          name: "Item1"
+        }, {
+          id: "2",
+          name: "Item2"
+        }, {
+          id: "3",
+          name: "Item3"
+        }
+      ]);
+      return this.field = this.formView.getFields()[0];
+    });
+    it("should create a checkbox array field", function() {
+      expect(this.formView.currentModel()).toEqual(this.model);
+      return expect(this.field.selectedItems).toEqual(["1"]);
+    });
+    it("should render the list of checkboxes", function() {
+      expect(this.field.$el.html()).toContain("Item1");
+      expect(this.field.$el.html()).toContain("Item2");
+      return expect(this.field.$el.html()).toContain("Item3");
+    });
+    it("should check off each checkbox in the collection that is selected", function() {
+      expect(this.field.$el.find("input[value='1']")[0].checked).toBeTruthy();
+      expect(this.field.$el.find("input[value='2']")[0].checked).toBeFalsy();
+      return expect(this.field.$el.find("input[value='3']")[0].checked).toBeFalsy();
+    });
+    return it("should update the form model's attribute to be an array of selected items on click", function() {
+      var checkbox;
+      checkbox = $(this.field.$el.find("input[value='2']")[0]);
+      checkbox.prop("checked", true);
+      checkbox.click();
+      return expect(this.field.getModel().get('item_ids')).toEqual(["1", "2"]);
+    });
+  });
+
+}).call(this);
+(function() {
+
   describe('The Form View', function() {
     beforeEach(function() {
       var FormView, Model;
@@ -3408,7 +3477,7 @@
       this.server.respond();
       return expect(collection.length).toEqual(2);
     });
-    return it("should attempt to register with a collection manager", function() {
+    it("should attempt to register with a collection manager", function() {
       var collection, registerSpy;
       registerSpy = sinon.spy();
       collection = new Luca.Collection([], {
@@ -3416,6 +3485,23 @@
         register: registerSpy
       });
       return expect(registerSpy).toHaveBeenCalled();
+    });
+    return it("should query collection with filter", function() {
+      var collection, i, models;
+      models = [];
+      for (i = 0; i <= 9; i++) {
+        models.push({
+          id: i,
+          key: 'value'
+        });
+      }
+      models[3].key = 'specialValue';
+      collection = new Luca.Collection(models);
+      collection.applyFilter({
+        key: 'specialValue'
+      });
+      expect(collection.length).toBe(1);
+      return expect(collection.first().get('key')).toBe('specialValue');
     });
   });
 

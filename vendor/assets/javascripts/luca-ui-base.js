@@ -721,9 +721,20 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
+<<<<<<< HEAD
       options.refresh = this.remoteFilter === true;
       this.applyParams(filter);
       return this.fetch(options);
+=======
+      if ((options.remote != null) === true) {
+        this.applyParams(filter);
+        return this.fetch(_.extend(options, {
+          refresh: true
+        }));
+      } else {
+        return this.reset(this.query(filter));
+      }
+>>>>>>> e1c230f566f4ee2a633f9454a81a3370ef1a7bac
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());

@@ -721,9 +721,20 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
+<<<<<<< HEAD
       options.refresh = this.remoteFilter === true;
       this.applyParams(filter);
       return this.fetch(options);
+=======
+      if ((options.remote != null) === true) {
+        this.applyParams(filter);
+        return this.fetch(_.extend(options, {
+          refresh: true
+        }));
+      } else {
+        return this.reset(this.query(filter));
+      }
+>>>>>>> e1c230f566f4ee2a633f9454a81a3370ef1a7bac
     },
     applyParams: function(params) {
       this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
@@ -2069,8 +2080,8 @@
       return this.collection.bind("reset", this.populateCheckboxes);
     },
     afterRender: function() {
-      var _ref, _ref2;
-      if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
+      var _ref;
+      if (((_ref = this.collection) != null ? _ref.length : void 0) > 0) {
         return this.populateCheckboxes();
       } else {
         return this.collection.trigger("reset");

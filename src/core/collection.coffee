@@ -135,9 +135,11 @@ Luca.Collection = (Backbone.QueryCollection || Backbone.Collection).extend
   remoteFilter: true
 
   applyFilter: (filter={}, options={})->
-    options.refresh = @remoteFilter is true
-    @applyParams(filter)
-    @fetch(options)
+    if options.remote? is true
+      @applyParams(filter)
+      @fetch _.extend(options,refresh:true)
+    else
+      @reset @query filter
 
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified
