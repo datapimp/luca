@@ -37,6 +37,47 @@ _.def("Luca.components.Panel").extends("Luca.View").with
 
   bottomToolbar: undefined
 
+  # Load Mask will apply a transparent overlay over the form
+  # upon submission, with a moving progress bar which will be
+  # hidden upon successful response
+  loadMask: false
+  loadMaskTemplate: ["components/load_mask"]
+
+  initialize: (@options={})->
+    Luca.View::initialize.apply(@, arguments)
+
+    if @loadMask is true
+      @defer ()=>
+        @$el.addClass('with-mask')
+
+        if @$('.load-mask').length is 0
+          @loadMaskTarget().prepend Luca.template(@loadMaskTemplate, @)
+          @$('.load-mask').hide()
+      .until("after:render")
+
+      @on "enable:loadmask", @applyLoadMask
+      @on "disable:loadmask", @applyLoadMask
+
+  loadMaskTarget: ()->
+    if @loadMaskEl? then @$(@loadMaskEl) else @$bodyEl()
+
+  applyLoadMask: ()->
+    if @$('.load-mask').is(":visible")
+      @$('.load-mask .bar').css("width","100%")
+      @$('.load-mask').hide()
+      clearInterval(@loadMaskInterval)
+    else
+      @$('.load-mask').show().find('.bar').css("width","0%")
+      maxWidth = @$('.load-mask .progress').width()
+      if maxWidth < 20 and (maxWidth = @$el.width()) < 20
+        maxWidth = @$el.parent().width()
+
+      @loadMaskInterval = setInterval ()=>
+        currentWidth = @$('.load-mask .bar').width()
+        newWidth = currentWidth + 12
+        @$('.load-mask .bar').css('width', newWidth)
+      , 200
+
   applyStyles: (styles={},body=false)->
 
     target = if body then @$bodyEl() else @$el

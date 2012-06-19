@@ -79,6 +79,7 @@
   Luca.template = function(template_name, variables) {
     var jst, luca, needle, template, _ref;
     window.JST || (window.JST = {});
+    if (_.isFunction(template_name)) return template_name(variables);
     luca = (_ref = Luca.templates) != null ? _ref[template_name] : void 0;
     jst = typeof JST !== "undefined" && JST !== null ? JST[template_name] : void 0;
     if (!((luca != null) || (jst != null))) {
@@ -574,16 +575,16 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (this.name != null) this.cid = _.uniqueId(this.name);
+      if (template = this.bodyTemplate) {
+        this.$el.empty();
+        Luca.View.prototype.$html.call(this, Luca.template(template, this));
+      }
       Luca.cache(this.cid, this);
       unique = _(Luca.View.prototype.hooks.concat(this.hooks)).uniq();
       this.setupHooks(unique);
       if (this.autoBindEventHandlers === true) this.bindAllEventHandlers();
       this.trigger("after:initialize", this);
       this.registerCollectionEvents();
-      if (template = this.bodyTemplate) {
-        this.$el.empty();
-        this.$html(Luca.template(template, this));
-      }
       return this.delegateEvents();
     },
     $wrap: function(wrapper) {
@@ -710,7 +711,7 @@
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
     definition.render = function() {
-      var deferredRender, fn, target, view, _base2, _name,
+      var autoTrigger, fn, target, trigger, view,
         _this = this;
       view = this;
       if (this.deferrable) {
@@ -718,20 +719,20 @@
         if (!Luca.isBackboneCollection(this.deferrable)) {
           this.deferrable = this.collection;
         }
-        deferredRender = _.once(function() {
-          _base.apply(_this, arguments);
-          return _this.trigger("after:render", _this);
-        });
-        (this.deferrable_target || this.deferrable).bind(this.deferrable_event || "reset", deferredRender);
-        this.trigger("before:render", this);
-        if (!this.deferrable_trigger) {
-          if (typeof (_base2 = this.deferrable)[_name = this.deferrable_method || "fetch"] === "function") {
-            _base2[_name]();
-          }
+        target || (target = this.deferrable);
+        trigger = this.deferrable_event ? this.deferrable_event : "reset";
+        view.defer(function() {
+          _base.call(view);
+          return view.trigger("after:render", view);
+        }).until(target, trigger);
+        view.trigger("before:render", this);
+        autoTrigger = this.deferrable_trigger || this.deferUntil;
+        if (!(autoTrigger != null)) {
+          target[this.deferrable_method || "fetch"].call(target);
         } else {
           fn = _.once(function() {
-            var _base3, _name2;
-            return typeof (_base3 = _this.deferrable)[_name2 = _this.deferrable_method || "fetch"] === "function" ? _base3[_name2]() : void 0;
+            var _base2, _name;
+            return typeof (_base2 = _this.deferrable)[_name = _this.deferrable_method || "fetch"] === "function" ? _base2[_name]() : void 0;
           });
           (this.deferrable_target || this).bind(this.deferrable_trigger, fn);
         }
@@ -1134,6 +1135,52 @@
   _.def("Luca.components.Panel")["extends"]("Luca.View")["with"]({
     topToolbar: void 0,
     bottomToolbar: void 0,
+    loadMask: false,
+    loadMaskTemplate: ["components/load_mask"],
+    initialize: function(options) {
+      var _this = this;
+      this.options = options != null ? options : {};
+      Luca.View.prototype.initialize.apply(this, arguments);
+      if (this.loadMask === true) {
+        this.defer(function() {
+          _this.$el.addClass('with-mask');
+          if (_this.$('.load-mask').length === 0) {
+            _this.loadMaskTarget().prepend(Luca.template(_this.loadMaskTemplate, _this));
+            return _this.$('.load-mask').hide();
+          }
+        }).until("after:render");
+        this.on("enable:loadmask", this.applyLoadMask);
+        return this.on("disable:loadmask", this.applyLoadMask);
+      }
+    },
+    loadMaskTarget: function() {
+      if (this.loadMaskEl != null) {
+        return this.$(this.loadMaskEl);
+      } else {
+        return this.$bodyEl();
+      }
+    },
+    applyLoadMask: function() {
+      var maxWidth,
+        _this = this;
+      if (this.$('.load-mask').is(":visible")) {
+        this.$('.load-mask .bar').css("width", "100%");
+        this.$('.load-mask').hide();
+        return clearInterval(this.loadMaskInterval);
+      } else {
+        this.$('.load-mask').show().find('.bar').css("width", "0%");
+        maxWidth = this.$('.load-mask .progress').width();
+        if (maxWidth < 20 && (maxWidth = this.$el.width()) < 20) {
+          maxWidth = this.$el.parent().width();
+        }
+        return this.loadMaskInterval = setInterval(function() {
+          var currentWidth, newWidth;
+          currentWidth = _this.$('.load-mask .bar').width();
+          newWidth = currentWidth + 12;
+          return _this.$('.load-mask .bar').css('width', newWidth);
+        }, 200);
+      }
+    },
     applyStyles: function(styles, body) {
       var setting, target, value;
       if (styles == null) styles = {};
@@ -1320,11 +1367,11 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('');}return __p.join('');};
+  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-view-panel\'>\n  <ul class=\'form-view-flash-container\'></ul>\n  <div class=\'form-view-body\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'>\n    <div class=\'toolbar-container top\'></div>\n  </div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'>\n    <div class=\'toolbar-container bottom\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'></div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1332,7 +1379,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'progress progress-striped active\'>\n  <div class=\'bar\' style=\'width:1%\'></div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'load-mask\'>\n  <div class=\'progress progress-striped active\'>\n    <div class=\'bar\' style=\'width:1%\'></div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -1951,7 +1998,6 @@
 (function() {
 
   _.def('Luca.containers.SplitView')["extends"]('Luca.core.Container')["with"]({
-    layout: '100',
     componentType: 'split_view',
     containerTemplate: 'containers/basic',
     className: 'luca-ui-split-view',
@@ -2333,7 +2379,11 @@
       if ((_ref = Luca.containers.CardView.prototype.afterRender) != null) {
         _ref.apply(this, arguments);
       }
-      return this.registerEvent("click #" + this.cid + "-tabs-selector li a", "select");
+      this.registerEvent("click #" + this.cid + "-tabs-selector li a", "select");
+      if (Luca.enableBootstrap && (this.tab_position === "left" || this.tab_position === "right")) {
+        this.tabContainerWrapper().addClass("span2");
+        return this.tabContentWrapper().addClass("span9");
+      }
     },
     createTabSelectors: function() {
       var tabView;

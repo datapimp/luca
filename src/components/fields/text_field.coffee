@@ -10,6 +10,8 @@ _.def('Luca.fields.TextField').extends('Luca.core.Field').with
 
   autoBindEventHandlers: true
 
+  send_blanks: true
+
   initialize: (@options={})->
     Luca.core.Field::initialize.apply @, arguments
 

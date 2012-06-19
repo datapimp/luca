@@ -743,17 +743,6 @@ button.close{padding:0;cursor:pointer;background:transparent;border:0;-webkit-ap
     margin: 0px auto; }
     .form-view-footer .toolbar-container .luca-ui-form-toolbar .luca-ui-field, .form-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
       float: left; }
-
-.luca-ui-form-view.with-mask {
-  position: relative; }
-  .luca-ui-form-view.with-mask .load-mask {
-    background-color: rgba(255, 255, 255, 0.6);
-    width: 100%;
-    height: 100%;
-    position: absolute; }
-    .luca-ui-form-view.with-mask .load-mask .progress {
-      margin: 50px auto;
-      width: 50%; }
 .scrollable-g-view {
   /* define height and width of scrollable area. Add 16px to width for scrollbar          */
   /* Reset overflow value to hidden for all non-IE browsers. */
@@ -819,17 +808,24 @@ button.close{padding:0;cursor:pointer;background:transparent;border:0;-webkit-ap
   .scrollable-g-view tbody.scrollable td {
     padding: 5px; }
 
-.luca-ui-g-view-footer .toolbar-container {
+.luca-ui-g-view .toolbar-container {
   float: left;
   width: 100%;
   clear: both;
-  display: block; }
-  .luca-ui-g-view-footer .toolbar-container .luca-ui-toolbar {
-    display: block;
-    float: right;
-    clear: right; }
-    .luca-ui-g-view-footer .toolbar-container .luca-ui-toolbar .luca-ui-field {
-      float: left; }
+  display: block;
+  padding-right: 12px; }
+  .luca-ui-g-view .toolbar-container .luca-ui-toolbar {
+    padding: 2px 0px; }
+.with-mask {
+  position: relative; }
+  .with-mask .load-mask {
+    background-color: rgba(255, 255, 255, 0.6);
+    width: 100%;
+    height: 100%;
+    position: absolute; }
+    .with-mask .load-mask .progress {
+      margin: 50px auto;
+      width: 50%; }
 .toolbar-container {
   overflow: hidden;
   clear: both; }

@@ -28,16 +28,12 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   legend: ""
 
+  bodyClassName: "form-view-body"
   bodyTemplate: ["components/form_view"]
 
-
-  # Load Mask will apply a transparent overlay over the form
-  # upon submission, with a moving progress bar which will be
-  # hidden upon successful response
-  loadMask: true
-  loadMaskTemplate: ["components/load_mask"]
-
   initialize: (@options={})->
+    @loadMask = Luca.enableBootstrap unless @loadMask?
+
     Luca.core.Container::initialize.apply @, arguments
 
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars", "applyLoadMask"
@@ -47,18 +43,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @setupHooks( @hooks )
 
     @applyStyleClasses()
-
-    if @loadMask is true
-      @defer ()=>
-        @$el.addClass('with-mask')
-
-        if @$('.load-mask').length is 0
-          @$bodyEl().prepend Luca.template(@loadMaskTemplate, @)
-          @$('.load-mask').hide()
-      .until("after:render")
-
-      @on "before:submit", @applyLoadMask
-      @on "after:submit", @applyLoadMask
 
     if @toolbar is true and not (@bottomToolbar? or @topToolbar?)
       @bottomToolbar =
@@ -77,17 +61,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
           className: 'submit-button'
           align: 'right'
         ]
-
-  applyLoadMask: ()->
-    if @$('.load-mask').is(":visible")
-      @$('.load-mask').hide()
-      clearInterval(@loadMaskInterval)
-    else
-      @$('.load-mask').show().find('.bar').css("width","0%")
-      @loadMaskInterval = setInterval ()=>
-        currentWidth = @$('.load-mask .bar').width()
-        @$('.load-mask .bar').css('width', currentWidth + 50 )
-      , 25
 
   applyStyleClasses: ()->
     if Luca.enableBootstrap
@@ -113,6 +86,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   submitHandler: (e)->
     me = my = $( e.currentTarget )
     @trigger "before:submit", @
+    @trigger "enable:loadmask", @ if @loadMask is true
     @submit() if @hasModel()
 
   afterComponents: ()->
@@ -220,6 +194,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
+    @trigger "disable:loadmask", @ if @loadMask is true
 
     if response and response?.success is true
       @trigger "after:submit:success", @, model, response

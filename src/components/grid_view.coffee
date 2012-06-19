@@ -59,12 +59,21 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
 
+    @loadMask = Luca.enableBootstrap unless @loadMask?
+    @loadMaskEl ||= ".luca-ui-g-view-body" if @loadMask is true
+
     Luca.components.Panel::initialize.apply(@, arguments)
 
     @configure_collection(true)
 
+    @collection.bind "before:fetch", ()=>
+      console.log "Triggering Enable Load Mask"
+      @trigger "enable:loadmask" if @loadMask is true
+
     @collection.bind "reset", (collection) =>
       @refresh()
+      console.log "Triggering Disable LoadMask"
+      @trigger "disable:loadmask" if @loadMask is true
       @trigger "after:collection:load", collection
 
     # if a model changes, then we will update the row's contents

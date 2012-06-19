@@ -1,0 +1,4 @@
+.form-view-panel
+  %ul.form-view-flash-container
+  .form-view-body
+

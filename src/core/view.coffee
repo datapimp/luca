@@ -36,6 +36,10 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @cid = _.uniqueId(@name) if @name?
 
+    if template = @bodyTemplate
+      @$el.empty()
+      Luca.View::$html.call(@, Luca.template(template, @) )
+
     #### View Caching
     #
     # Luca.View(s) which get created get stored in a global cache by their
@@ -54,9 +58,7 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @registerCollectionEvents()
 
-    if template = @bodyTemplate
-      @$el.empty()
-      @$html( Luca.template(template, @) )
+
 
     @delegateEvents()
 
@@ -243,10 +245,7 @@ customizeRender = (definition)->
       target ||= @deferrable
       trigger = if @deferrable_event then @deferrable_event else "reset"
 
-      console.log "deferrable set", target, trigger
-
       view.defer ()->
-        console.log "deferred render function being called", view.name
         _base.call(view)
         view.trigger "after:render", view
       .until(target,trigger)
@@ -256,7 +255,6 @@ customizeRender = (definition)->
       autoTrigger = @deferrable_trigger || @deferUntil
 
       if !autoTrigger?
-        console.log("no deferrable trigger, doing it live")
         target[ (@deferrable_method||"fetch") ].call(target)
       else
         fn = _.once ()=> @deferrable[ (@deferrable_method||"fetch") ]?()

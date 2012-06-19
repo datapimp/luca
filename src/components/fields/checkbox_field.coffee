@@ -19,6 +19,8 @@ _.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
 
   hooks: ["checked","unchecked"]
 
+  send_blanks: true
+
   initialize: (@options={})->
     _.extend @, @options
     _.bindAll @, "change_handler"

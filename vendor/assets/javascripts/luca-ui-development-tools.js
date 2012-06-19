@@ -17246,6 +17246,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   _.def("Luca.tools.ClassBrowser")["extends"]("Luca.containers.SplitView")["with"]({
     name: "class_browser",
     className: "luca-class-browser row",
+    layout: ["span3", "span9"],
     components: ["class_browser_list", "class_browser_detail"],
     componentEvents: {
       "class_browser_list component:loaded": "loadSourceCode"
@@ -17808,7 +17809,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       }, {
         ctype: "code_editor",
         name: "ctester_edit",
-        className: 'font-small fixed-height',
+        className: 'font-large fixed-height',
         minHeight: '350px',
         styles: {
           "position": "absolute",
@@ -17953,7 +17954,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       this.$('.luca-ui-toolbar.toolbar-bottom').css('margin', '0px');
       changeHandler = _.idleMedium(function() {
         if (_this.autoEvaluateCode === true) return _this.applyTestRun();
-      }, 1500);
+      }, 500);
       return this.getEditor().bind("code:change", changeHandler);
     },
     getEditor: function() {
@@ -18006,7 +18007,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         container = this.make("div", {
           id: "devtools-console-wrapper",
           "class": "devtools-console-container modal",
-          style: "width:850px"
+          style: "width:900px;height:650px;"
         }, this.developmentConsole.el);
         $('body').append(container);
         this.consoleContainerAppended = true;
@@ -18349,8 +18350,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         readOnly: true,
         lineNumbers: false,
         mode: "javascript",
-        maxHeight: '250px',
-        height: '250px',
+        height: "621px",
+        maxHeight: "621px",
         lineWrapping: true,
         gutter: false
       }, {

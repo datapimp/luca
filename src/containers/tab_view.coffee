@@ -40,6 +40,11 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     Luca.containers.CardView::afterRender?.apply @, arguments
     @registerEvent("click ##{ @cid }-tabs-selector li a", "select")
 
+    if Luca.enableBootstrap and (@tab_position is "left" or @tab_position is "right")
+      @tabContainerWrapper().addClass("span2")
+      @tabContentWrapper().addClass("span9")
+
+
   createTabSelectors: ()->
     tabView = @
     @each (component,index)->
