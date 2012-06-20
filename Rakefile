@@ -13,16 +13,21 @@ namespace :release do
     File.open( File.join(App.root,'vendor','assets','javascripts','luca-ui.js'), 'w+' ) do |fh|
       fh.puts(App.sprockets["luca-ui.js"].to_s)
     end
+
+    File.open( File.join(App.root,'vendor','assets','javascripts','luca-ui-development-tools.js'), 'w+' ) do |fh|
+      fh.puts(App.sprockets["luca-ui-development-tools.coffee"].to_s)
+    end
   end
 
-  desc "Build the gem" 
+  desc "Minify the assets"
+  task :minify do
+    `uglifyjs vendor/assets/javascripts/luca-ui.js > vendor/assets/javascripts/luca-ui.min.js`
+    `uglifyjs vendor/assets/javascripts/luca-ui-development-tools.js > vendor/assets/javascripts/luca-ui-development-tools.min.js`
+  end
+
+  desc "Build the gem"
   task :gem do
     `gem build luca.gemspec`
   end
 
-  desc "Push a new release to github"
-  task :push => :assets do
-    `git commit -a -m "pushing new release"`
-    `git push origin master`
-  end
 end
