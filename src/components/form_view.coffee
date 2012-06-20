@@ -83,13 +83,13 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @$el.addClass('form-inline') if @inlineForm
 
   resetHandler: (e)->
-    me = my = $( e.currentTarget )
+    me = my = $( e?.target )
     @trigger "before:reset", @
     @reset()
     @trigger "after:reset", @
 
   submitHandler: (e)->
-    me = my = $( e.currentTarget )
+    me = my = $( e?.target )
     @trigger "before:submit", @
     @trigger "enable:loadmask", @ if @loadMask is true
     @submit() if @hasModel()

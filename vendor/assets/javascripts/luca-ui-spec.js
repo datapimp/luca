@@ -964,7 +964,7 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
-      if ((options.remote != null) === true) {
+      if ((options.remote != null) === true || this.remoteFiltering === true) {
         this.applyParams(filter);
         return this.fetch(_.extend(options, {
           refresh: true
@@ -3402,14 +3402,14 @@
     },
     resetHandler: function(e) {
       var me, my;
-      me = my = $(e.currentTarget);
+      me = my = $(e != null ? e.target : void 0);
       this.trigger("before:reset", this);
       this.reset();
       return this.trigger("after:reset", this);
     },
     submitHandler: function(e) {
       var me, my;
-      me = my = $(e.currentTarget);
+      me = my = $(e != null ? e.target : void 0);
       this.trigger("before:submit", this);
       if (this.loadMask === true) this.trigger("enable:loadmask", this);
       if (this.hasModel()) return this.submit();

@@ -964,7 +964,7 @@
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
-      if ((options.remote != null) === true) {
+      if ((options.remote != null) === true || this.remoteFiltering === true) {
         this.applyParams(filter);
         return this.fetch(_.extend(options, {
           refresh: true
