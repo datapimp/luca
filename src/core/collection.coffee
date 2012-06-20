@@ -170,7 +170,7 @@ _.def("Luca.Collection").extends( source ).with
   remoteFilter: true
 
   applyFilter: (filter={}, options={})->
-    if options.remote? is true or @remoteFiltering is true
+    if options.remote? is true or @remoteFilter is true
       @applyParams(filter)
       @fetch _.extend(options,refresh:true)
     else
