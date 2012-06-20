@@ -1,5 +1,4 @@
-.form-horizontal
-  .control-group
-    %label{:for=>"<%= input_id %>"}
-      <%= label %>
-    .controls
+.control-group
+  %label{:for=>"<%= input_id %>"}
+    <%= label %>
+  .controls

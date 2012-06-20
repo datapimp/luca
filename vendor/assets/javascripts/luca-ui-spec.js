@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.0",
+    VERSION: "0.9.1",
     core: {},
     containers: {},
     components: {},
@@ -1427,7 +1427,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-horizontal\'>\n  <div class=\'control-group\'>\n    <label for=\'', input_id ,'\'>\n      ', label ,'\n    </label>\n    <div class=\'controls\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'control-group\'>\n  <label for=\'', input_id ,'\'>\n    ', label ,'\n  </label>\n  <div class=\'controls\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -2736,7 +2736,7 @@
       if (this.collection == null) {
         throw "Collection Views must specify a collection";
       }
-      if (!((this.itemTemplate != null) || (this.itemRenderer != null))) {
+      if (!((this.itemTemplate != null) || (this.itemRenderer != null) || (this.itemProperty != null))) {
         throw "Collection Views must specify an item template or item renderer function";
       }
       Luca.components.Panel.prototype.initialize.apply(this, arguments);
@@ -2761,7 +2761,9 @@
       if ((this.itemRenderer != null) && _.isFunction(this.itemRenderer)) {
         content = this.itemRenderer.call(this, item);
       }
-      return content || "";
+      if (this.itemProperty) {
+        return content = _.isFunction(this.itemProperty) ? this.itemProperty() : item.model.get(this.itemProperty) || item.model[this.itemProperty];
+      }
     },
     makeItem: function(model, index) {
       var item;
@@ -2772,7 +2774,12 @@
       return make(this.itemTagName, this.attributesForItem(item), this.contentForItem(item));
     },
     getModels: function() {
-      return this.collection.models;
+      var _ref;
+      if (((_ref = this.collection) != null ? _ref.query : void 0) && (this.filter || this.filterOptions)) {
+        return this.collection.query(this.filter, this.filterOptions);
+      } else {
+        return this.collection.models;
+      }
     },
     refresh: function() {
       var panel;
@@ -2882,84 +2889,127 @@
 
 }).call(this);
 (function() {
+  var make;
+
+  make = Luca.View.prototype.make;
 
   _.def('Luca.fields.CheckboxArray')["extends"]('Luca.core.Field')["with"]({
+    version: 2,
     template: "fields/checkbox_array",
     events: {
       "click input": "clickHandler"
     },
+    selectedItems: [],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.modules.Deferrable);
-      _.bindAll(this, "populateCheckboxes", "clickHandler", "_updateModel");
+      _.bindAll(this, "renderCheckboxes", "clickHandler", "checkSelected");
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.valueField || (this.valueField = "id");
-      this.displayField || (this.displayField = "name");
-      return this.selectedItems = [];
+      return this.displayField || (this.displayField = "name");
     },
     afterInitialize: function(options) {
+      var cbArray;
       this.options = options != null ? options : {};
       try {
         this.configure_collection();
       } catch (e) {
         console.log("Error Configuring Collection", this, e.message);
       }
-      return this.collection.bind("reset", this.populateCheckboxes);
-    },
-    afterRender: function() {
-      var _ref;
-      if (((_ref = this.collection) != null ? _ref.length : void 0) > 0) {
-        return this.populateCheckboxes();
+      cbArray = this;
+      if (this.collection.length > 0) {
+        return this.renderCheckboxes();
       } else {
-        return this.collection.trigger("reset");
+        return this.defer("renderCheckboxes").until(this.collection, "reset");
       }
     },
     clickHandler: function(event) {
       var checkbox;
-      checkbox = event.target;
-      if (checkbox.checked) {
-        this.selectedItems.push(checkbox.value);
+      checkbox = $(event.target);
+      if (checkbox.prop('checked')) {
+        return this.selectedItems.push(checkbox.val());
       } else {
-        if (this.selectedItems.indexOf(checkbox.value) !== -1) {
-          this.selectedItems = _.without(this.selectedItems, [checkbox.value]);
+        if (_(this.selectedItems).include(checkbox.val())) {
+          return this.selectedItems = _(this.selectedItems).without(checkbox.val());
         }
       }
-      return this._updateModel();
     },
-    populateCheckboxes: function() {
-      var controls,
-        _this = this;
-      controls = $(this.el).find('.controls');
-      controls.empty();
-      if (!_.isUndefined(this.getModel())) {
-        this.selectedItems = this.getModel().get(this.name);
-      }
+    controls: function() {
+      return this.$('.controls');
+    },
+    renderCheckboxes: function() {
+      var _this = this;
+      this.controls().empty();
+      this.selectedItems = [];
       this.collection.each(function(model) {
-        var input_id, label, value;
+        var element, inputElement, input_id, label, value;
         value = model.get(_this.valueField);
         label = model.get(_this.displayField);
-        input_id = _.uniqueId('field');
-        controls.append(Luca.templates["fields/checkbox_array_item"]({
-          label: label,
+        input_id = _.uniqueId("" + _this.cid + "_checkbox");
+        inputElement = make("input", {
+          type: "checkbox",
+          name: _this.input_name,
           value: value,
-          input_id: input_id,
-          input_name: _this.input_name
-        }));
-        if (_(_this.selectedItems).indexOf(value) !== -1) {
-          return _this.$("#" + input_id).attr("checked", "checked");
-        }
+          id: input_id
+        });
+        element = make("label", {
+          "for": input_id
+        }, inputElement);
+        $(element).append(" " + label);
+        return _this.controls().append(element);
       });
-      return $(this.container).append(this.$el);
+      this.trigger("checkboxes:rendered", this.checkboxesRendered = true);
+      return this;
     },
-    _updateModel: function() {
-      var attributes;
-      attributes = {};
-      attributes[this.name] = this.selectedItems;
-      return this.getModel().set(attributes);
+    uncheckAll: function() {
+      return this.allFields().prop('checked', false);
+    },
+    allFields: function() {
+      return this.controls().find("input[type='checkbox']");
+    },
+    checkSelected: function(items) {
+      var checkbox, value, _i, _len, _ref;
+      if (items != null) this.selectedItems = items;
+      this.uncheckAll();
+      _ref = this.selectedItems;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        value = _ref[_i];
+        checkbox = this.controls().find("input[value='" + value + "']");
+        checkbox.prop('checked', true);
+      }
+      return this.selectedItems;
+    },
+    getValue: function() {
+      var field, _i, _len, _ref, _results;
+      _ref = this.allFields();
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        field = _ref[_i];
+        if (this.$(field).prop('checked')) _results.push(this.$(field).val());
+      }
+      return _results;
+    },
+    setValue: function(items) {
+      var cbArray;
+      this.selectedItems = items;
+      if (this.checkboxesRendered === true) {
+        return this.checkSelected(items);
+      } else {
+        cbArray = this;
+        return this.defer(function() {
+          return cbArray.checkSelected(items);
+        }).until("checkboxes:rendered");
+      }
+    },
+    getValues: function() {
+      return this.getValue();
+    },
+    setValues: function(items) {
+      return this.setValue(items);
     }
   });
 
@@ -4082,56 +4132,20 @@
 
   describe('The Checkbox Array Field', function() {
     beforeEach(function() {
-      var collection;
-      this.model = new Backbone.Model({
-        item_ids: ["1"]
-      });
-      collection = new Luca.Collection;
-      this.formView = new Luca.components.FormView({
-        components: [
-          {
-            ctype: "checkbox_array",
-            name: 'item_ids',
-            collection: collection
-          }
-        ]
-      });
-      this.formView.render();
-      this.formView.loadModel(this.model);
-      collection.reset([
+      this.collection = new Luca.Collection([
         {
           id: "1",
-          name: "Item1"
-        }, {
-          id: "2",
-          name: "Item2"
-        }, {
-          id: "3",
-          name: "Item3"
+          name: "jon"
         }
       ]);
-      return this.field = this.formView.getFields()[0];
+      this.field = new Luca.fields.CheckboxArray({
+        collection: this.collection
+      });
+      $('body').append("<div id='jasmine-helper' style='display:none' />");
+      return $('#jasmine-helper').html(this.field.render().el);
     });
-    it("should create a checkbox array field", function() {
-      expect(this.formView.currentModel()).toEqual(this.model);
-      return expect(this.field.selectedItems).toEqual(["1"]);
-    });
-    it("should render the list of checkboxes", function() {
-      expect(this.field.$el.html()).toContain("Item1");
-      expect(this.field.$el.html()).toContain("Item2");
-      return expect(this.field.$el.html()).toContain("Item3");
-    });
-    it("should check off each checkbox in the collection that is selected", function() {
-      expect(this.field.$el.find("input[value='1']")[0].checked).toBeTruthy();
-      expect(this.field.$el.find("input[value='2']")[0].checked).toBeFalsy();
-      return expect(this.field.$el.find("input[value='3']")[0].checked).toBeFalsy();
-    });
-    return it("should update the form model's attribute to be an array of selected items on click", function() {
-      var checkbox;
-      checkbox = $(this.field.$el.find("input[value='2']")[0]);
-      checkbox.prop("checked", true);
-      checkbox.click();
-      return expect(this.field.getModel().get('item_ids')).toEqual(["1", "2"]);
+    return it("should render checkboxes", function() {
+      return expect(this.field.checkboxesRendered).toEqual(true);
     });
   });
 
@@ -5022,7 +5036,7 @@
     beforeEach(function() {
       this.fetchSpy = sinon.spy();
       this.customSpy = sinon.spy();
-      this.collection = new Luca.Collection({
+      this.collection = new Luca.Collection([], {
         url: "/models",
         fetch: this.fetchSpy,
         custom: this.customSpy,

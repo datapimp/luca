@@ -83,7 +83,7 @@ describe "Deferrable Rendering", ->
     @fetchSpy   = sinon.spy()
     @customSpy  = sinon.spy()
 
-    @collection = new Luca.Collection
+    @collection = new Luca.Collection [],
       url: "/models"
       fetch: @fetchSpy
       custom: @customSpy

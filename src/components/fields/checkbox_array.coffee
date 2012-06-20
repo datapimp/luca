@@ -1,6 +1,7 @@
 make = Luca.View::make
 
 _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
+  version: 2
 
   template: "fields/checkbox_array"
 
@@ -12,7 +13,7 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.modules.Deferrable
-    _.bindAll @, "populateCheckboxes", "clickHandler"
+    _.bindAll @, "renderCheckboxes", "clickHandler", "checkSelected"
 
     Luca.core.Field::initialize.apply @, arguments
 
@@ -28,13 +29,12 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
     catch e
       console.log "Error Configuring Collection", @, e.message
 
-    @collection.bind "reset", @populateCheckboxes
+    cbArray = @
 
-  afterRender: ()->
-    if @collection?.length > 0
-      @populateCheckboxes()
+    if @collection.length > 0
+      @renderCheckboxes()
     else
-      @collection.trigger("reset")
+      @defer("renderCheckboxes").until(@collection,"reset")
 
   clickHandler: (event)->
     checkbox = $(event.target)
@@ -48,7 +48,7 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
   controls: ()->
     @$('.controls')
 
-  populateCheckboxes: ()->
+  renderCheckboxes: ()->
     @controls().empty()
     @selectedItems = []
 
@@ -63,13 +63,18 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
       $( element ).append(" #{ label }")
       @controls().append( element )
 
+    @trigger("checkboxes:rendered", @checkboxesRendered = true)
+    @
+
   uncheckAll: ()->
     @allFields().prop('checked', false)
 
   allFields: ()->
     @controls().find("input[type='checkbox']")
 
-  checkSelected: ()->
+  checkSelected: (items)->
+    @selectedItems = items if items?
+
     @uncheckAll()
 
     for value in @selectedItems
@@ -83,7 +88,14 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
 
   setValue: (items)->
     @selectedItems = items
-    @checkSelected()
+
+    if @checkboxesRendered is true
+      @checkSelected(items)
+    else
+      cbArray = @
+      @defer ()->
+        cbArray.checkSelected(items)
+      .until("checkboxes:rendered")
 
   getValues: ()->
     @getValue()

@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.0",
+    VERSION: "0.9.1",
     core: {},
     containers: {},
     components: {},
@@ -1427,7 +1427,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-horizontal\'>\n  <div class=\'control-group\'>\n    <label for=\'', input_id ,'\'>\n      ', label ,'\n    </label>\n    <div class=\'controls\'></div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'control-group\'>\n  <label for=\'', input_id ,'\'>\n    ', label ,'\n  </label>\n  <div class=\'controls\'></div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
