@@ -1153,6 +1153,7 @@
     bottomToolbar: void 0,
     loadMask: false,
     loadMaskTemplate: ["components/load_mask"],
+    loadMaskTimeout: 3000,
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -1176,25 +1177,32 @@
         return this.$bodyEl();
       }
     },
-    applyLoadMask: function() {
+    disableLoadMask: function() {
+      this.$('.load-mask .bar').css("width", "100%");
+      this.$('.load-mask').hide();
+      return clearInterval(this.loadMaskInterval);
+    },
+    enableLoadMask: function() {
       var maxWidth,
         _this = this;
+      this.$('.load-mask').show().find('.bar').css("width", "0%");
+      maxWidth = this.$('.load-mask .progress').width();
+      if (maxWidth < 20 && (maxWidth = this.$el.width()) < 20) {
+        maxWidth = this.$el.parent().width();
+      }
+      this.loadMaskInterval = setInterval(function() {
+        var currentWidth, newWidth;
+        currentWidth = _this.$('.load-mask .bar').width();
+        newWidth = currentWidth + 12;
+        return _this.$('.load-mask .bar').css('width', newWidth);
+      }, 200);
+      return _.delay(this.disableLoadMask, this.loadMaskTimeout);
+    },
+    applyLoadMask: function() {
       if (this.$('.load-mask').is(":visible")) {
-        this.$('.load-mask .bar').css("width", "100%");
-        this.$('.load-mask').hide();
-        return clearInterval(this.loadMaskInterval);
+        return this.disableLoadMask();
       } else {
-        this.$('.load-mask').show().find('.bar').css("width", "0%");
-        maxWidth = this.$('.load-mask .progress').width();
-        if (maxWidth < 20 && (maxWidth = this.$el.width()) < 20) {
-          maxWidth = this.$el.parent().width();
-        }
-        return this.loadMaskInterval = setInterval(function() {
-          var currentWidth, newWidth;
-          currentWidth = _this.$('.load-mask .bar').width();
-          newWidth = currentWidth + 12;
-          return _this.$('.load-mask .bar').css('width', newWidth);
-        }, 200);
+        return this.enableLoadMask();
       }
     },
     applyStyles: function(styles, body) {

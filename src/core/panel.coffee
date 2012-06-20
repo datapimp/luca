@@ -42,6 +42,7 @@ _.def("Luca.components.Panel").extends("Luca.View").with
   # hidden upon successful response
   loadMask: false
   loadMaskTemplate: ["components/load_mask"]
+  loadMaskTimeout: 3000
 
   initialize: (@options={})->
     Luca.View::initialize.apply(@, arguments)
@@ -61,22 +62,37 @@ _.def("Luca.components.Panel").extends("Luca.View").with
   loadMaskTarget: ()->
     if @loadMaskEl? then @$(@loadMaskEl) else @$bodyEl()
 
+  disableLoadMask: ()->
+    @$('.load-mask .bar').css("width","100%")
+    @$('.load-mask').hide()
+    clearInterval(@loadMaskInterval)
+
+  enableLoadMask: ()->
+    @$('.load-mask').show().find('.bar').css("width","0%")
+    maxWidth = @$('.load-mask .progress').width()
+    if maxWidth < 20 and (maxWidth = @$el.width()) < 20
+      maxWidth = @$el.parent().width()
+
+    @loadMaskInterval = setInterval ()=>
+      currentWidth = @$('.load-mask .bar').width()
+      newWidth = currentWidth + 12
+      @$('.load-mask .bar').css('width', newWidth)
+    , 200
+
+    return unless @loadMaskTimeout?
+
+    _.delay ()=>
+      console.log "Disabling LoadMask"
+      @disableLoadMask()
+
+    , @loadMaskTimeout
+
   applyLoadMask: ()->
     if @$('.load-mask').is(":visible")
-      @$('.load-mask .bar').css("width","100%")
-      @$('.load-mask').hide()
-      clearInterval(@loadMaskInterval)
+      @disableLoadMask()
     else
-      @$('.load-mask').show().find('.bar').css("width","0%")
-      maxWidth = @$('.load-mask .progress').width()
-      if maxWidth < 20 and (maxWidth = @$el.width()) < 20
-        maxWidth = @$el.parent().width()
+      @enableLoadMask()
 
-      @loadMaskInterval = setInterval ()=>
-        currentWidth = @$('.load-mask .bar').width()
-        newWidth = currentWidth + 12
-        @$('.load-mask .bar').css('width', newWidth)
-      , 200
 
   applyStyles: (styles={},body=false)->
 
