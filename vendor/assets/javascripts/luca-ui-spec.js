@@ -1196,7 +1196,11 @@
         newWidth = currentWidth + 12;
         return _this.$('.load-mask .bar').css('width', newWidth);
       }, 200);
-      return _.delay(this.disableLoadMask, this.loadMaskTimeout);
+      if (this.loadMaskTimeout == null) return;
+      return _.delay(function() {
+        console.log("Disabling LoadMask");
+        return _this.disableLoadMask();
+      }, this.loadMaskTimeout);
     },
     applyLoadMask: function() {
       if (this.$('.load-mask').is(":visible")) {
