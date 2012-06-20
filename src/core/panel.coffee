@@ -1,7 +1,7 @@
 # This is a helper for creating the DOM element that go along with
 # a given component, if it is configured to use one via the topToolbar
 # and bottomToolbar properties
-attachToolbar = (config={})->
+attachToolbar = (config={}, targetEl)->
   config.orientation ||= "top"
   config.ctype ||= @toolbarType || "panel_toolbar"
 
@@ -25,7 +25,7 @@ attachToolbar = (config={})->
     when "bottom", "right"
       if hasBody then "after" else "append"
 
-  @$bodyEl()[action]( container )
+  (targetEl || @$bodyEl() )[action]( container )
 
 # A Panel is a basic Luca.View but with Toolbar extensions
 #
@@ -140,4 +140,4 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     config.parent = @
     config.orientation = orientation
 
-    attachToolbar.call(@, config)
+    attachToolbar.call(@, config, config.targetEl )

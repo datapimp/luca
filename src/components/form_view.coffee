@@ -1,3 +1,22 @@
+defaultToolbar =
+  buttons:[
+    icon:"remove-sign"
+    label: "Reset"
+    eventId: "click:reset"
+    className:"reset-button"
+    align: 'right'
+  ,
+    icon:"ok-sign"
+    white: true
+    label: "Save Changes"
+    eventId: "click:submit"
+    color: "success"
+    className: 'submit-button'
+    align: 'right'
+  ]
+
+Luca.util.defaultFormToolbar = ()-> defaultToolbar
+
 _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   tagName: 'form'
@@ -29,7 +48,6 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   legend: ""
 
   bodyClassName: "form-view-body"
-  bodyTemplate: ["components/form_view"]
 
   initialize: (@options={})->
     @loadMask = Luca.enableBootstrap unless @loadMask?
@@ -44,23 +62,9 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
     @applyStyleClasses()
 
-    if @toolbar is true and not (@bottomToolbar? or @topToolbar?)
-      @bottomToolbar =
-        buttons:[
-          icon:"remove-sign"
-          label: "Reset"
-          eventId: "click:reset"
-          className:"reset-button"
-          align: 'right'
-        ,
-          icon:"ok-sign"
-          white: true
-          label: "Save Changes"
-          eventId: "click:submit"
-          color: "success"
-          className: 'submit-button'
-          align: 'right'
-        ]
+    if @toolbar isnt false and (not @topToolbar and not @bottomToolbar)
+      @topToolbar = Luca.util.defaultFormToolbar() if @toolbar is "both" or @toolbar is "top"
+      @bottomToolbar = Luca.util.defaultFormToolbar() unless @toolbar is "top"
 
   applyStyleClasses: ()->
     if Luca.enableBootstrap
@@ -229,3 +233,23 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   setLegend: (@legend)->
     $('fieldset legend', @el).first().html(@legend)
+
+  flash: (message)->
+    if @$('.toolbar-container.top').length > 0
+      @$('.toolbar-container.top').after(message)
+    else
+      @$bodyEl().prepend(message)
+
+  successFlashDelay: 1500
+
+  successMessage: (message)->
+    @$('.alert.alert-success').remove()
+    @flash Luca.template("components/form_alert", className:"alert alert-success", message: message)
+    _.delay ()=>
+      @$('.alert.alert-success').fadeOut()
+    , @successFlashDelay || 0
+
+  errorMessage: (message)->
+    @$('.alert.alert-error').remove()
+    @flash Luca.template("components/form_alert", className:"alert alert-error", message: message)
+

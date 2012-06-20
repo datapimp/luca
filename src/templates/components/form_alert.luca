@@ -1,0 +1,3 @@
+%div{:class=>"<%= className %>"}
+  %a.close{:href=>"#",:data=>{:dismiss=>"alert"}} x
+  <%= message %>

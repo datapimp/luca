@@ -84,3 +84,7 @@
 
 0.9.1
   - Bugfix Release
+
+0.9.2 ( not yet released )
+  - FormView has errorMessage, successMessage methods which use twitter bootstrap alerts as flash message
+  - FormView toolbar accepts new options: true, both, bottom, or top

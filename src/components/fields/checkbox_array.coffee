@@ -5,6 +5,8 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
 
   template: "fields/checkbox_array"
 
+  className: "luca-ui-checkbox-array"
+
   events:
     "click input" : "clickHandler"
 
@@ -57,7 +59,7 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
       label = model.get(@displayField)
       input_id = _.uniqueId("#{ @cid }_checkbox")
 
-      inputElement = make("input",type:"checkbox",name:@input_name,value:value,id: input_id)
+      inputElement = make("input",type:"checkbox",class:"array-checkbox",name:@input_name,value:value,id: input_id)
       element = make("label", {for:input_id}, inputElement)
 
       $( element ).append(" #{ label }")

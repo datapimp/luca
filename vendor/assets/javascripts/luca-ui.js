@@ -1114,7 +1114,7 @@
 (function() {
   var attachToolbar;
 
-  attachToolbar = function(config) {
+  attachToolbar = function(config, targetEl) {
     var action, container, hasBody, id, toolbar;
     if (config == null) config = {};
     config.orientation || (config.orientation = "top");
@@ -1145,7 +1145,7 @@
           }
       }
     })();
-    return this.$bodyEl()[action](container);
+    return (targetEl || this.$bodyEl())[action](container);
   };
 
   _.def("Luca.components.Panel")["extends"]("Luca.View")["with"]({
@@ -1383,7 +1383,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-view-panel\'>\n  <ul class=\'form-view-flash-container\'></ul>\n  <div class=\'form-view-body\'></div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-view-body\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
