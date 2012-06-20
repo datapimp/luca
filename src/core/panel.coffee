@@ -47,6 +47,8 @@ _.def("Luca.components.Panel").extends("Luca.View").with
   initialize: (@options={})->
     Luca.View::initialize.apply(@, arguments)
 
+    _.bindAll @, "applyLoadMask", "disableLoadMask"
+
     if @loadMask is true
       @defer ()=>
         @$el.addClass('with-mask')
@@ -82,9 +84,7 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     return unless @loadMaskTimeout?
 
     _.delay ()=>
-      console.log "Disabling LoadMask"
       @disableLoadMask()
-
     , @loadMaskTimeout
 
   applyLoadMask: ()->
@@ -92,7 +92,6 @@ _.def("Luca.components.Panel").extends("Luca.View").with
       @disableLoadMask()
     else
       @enableLoadMask()
-
 
   applyStyles: (styles={},body=false)->
 

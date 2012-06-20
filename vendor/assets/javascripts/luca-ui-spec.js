@@ -1158,6 +1158,7 @@
       var _this = this;
       this.options = options != null ? options : {};
       Luca.View.prototype.initialize.apply(this, arguments);
+      _.bindAll(this, "applyLoadMask", "disableLoadMask");
       if (this.loadMask === true) {
         this.defer(function() {
           _this.$el.addClass('with-mask');
@@ -1198,7 +1199,6 @@
       }, 200);
       if (this.loadMaskTimeout == null) return;
       return _.delay(function() {
-        console.log("Disabling LoadMask");
         return _this.disableLoadMask();
       }, this.loadMaskTimeout);
     },
