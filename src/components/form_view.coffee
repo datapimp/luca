@@ -15,8 +15,6 @@ defaultToolbar =
     align: 'right'
   ]
 
-Luca.util.defaultFormToolbar = ()-> defaultToolbar
-
 _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   tagName: 'form'
@@ -63,8 +61,11 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @applyStyleClasses()
 
     if @toolbar isnt false and (not @topToolbar and not @bottomToolbar)
-      @topToolbar = Luca.util.defaultFormToolbar() if @toolbar is "both" or @toolbar is "top"
-      @bottomToolbar = Luca.util.defaultFormToolbar() unless @toolbar is "top"
+      @topToolbar = @getDefaultToolbar() if @toolbar is "both" or @toolbar is "top"
+      @bottomToolbar = @getDefaultToolbar() unless @toolbar is "top"
+
+  getDefaultToolbar: ()->
+    defaultToolbar
 
   applyStyleClasses: ()->
     if Luca.enableBootstrap

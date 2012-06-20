@@ -1266,7 +1266,7 @@
       if (config == null) config = {};
       config.parent = this;
       config.orientation = orientation;
-      return attachToolbar.call(this, config);
+      return attachToolbar.call(this, config, config.targetEl);
     }
   });
 
@@ -1383,7 +1383,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-view-panel\'>\n  <div class=\'form-view-body\'></div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', className ,'\'>\n  <a class=\'close\' data-dismiss=\'alert\' href=\'#\'>x</a>\n  ', message ,'\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});

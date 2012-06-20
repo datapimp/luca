@@ -1266,7 +1266,7 @@
       if (config == null) config = {};
       config.parent = this;
       config.orientation = orientation;
-      return attachToolbar.call(this, config);
+      return attachToolbar.call(this, config, config.targetEl);
     }
   });
 
@@ -1383,7 +1383,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["components/form_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-view-panel\'>\n  <div class=\'form-view-body\'></div>\n</div>\n');}return __p.join('');};
+  Luca.templates["components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', className ,'\'>\n  <a class=\'close\' data-dismiss=\'alert\' href=\'#\'>x</a>\n  ', message ,'\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -2896,6 +2896,7 @@
   _.def('Luca.fields.CheckboxArray')["extends"]('Luca.core.Field')["with"]({
     version: 2,
     template: "fields/checkbox_array",
+    className: "luca-ui-checkbox-array",
     events: {
       "click input": "clickHandler"
     },
@@ -2952,6 +2953,7 @@
         input_id = _.uniqueId("" + _this.cid + "_checkbox");
         inputElement = make("input", {
           type: "checkbox",
+          "class": "array-checkbox",
           name: _this.input_name,
           value: value,
           id: input_id
@@ -3333,6 +3335,27 @@
 
 }).call(this);
 (function() {
+  var defaultToolbar;
+
+  defaultToolbar = {
+    buttons: [
+      {
+        icon: "remove-sign",
+        label: "Reset",
+        eventId: "click:reset",
+        className: "reset-button",
+        align: 'right'
+      }, {
+        icon: "ok-sign",
+        white: true,
+        label: "Save Changes",
+        eventId: "click:submit",
+        color: "success",
+        className: 'submit-button',
+        align: 'right'
+      }
+    ]
+  };
 
   _.def("Luca.components.FormView")["extends"]('Luca.core.Container')["with"]({
     tagName: 'form',
@@ -3345,7 +3368,6 @@
     toolbar: true,
     legend: "",
     bodyClassName: "form-view-body",
-    bodyTemplate: ["components/form_view"],
     initialize: function(options) {
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.enableBootstrap;
@@ -3354,27 +3376,17 @@
       this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
       this.applyStyleClasses();
-      if (this.toolbar === true && !((this.bottomToolbar != null) || (this.topToolbar != null))) {
-        return this.bottomToolbar = {
-          buttons: [
-            {
-              icon: "remove-sign",
-              label: "Reset",
-              eventId: "click:reset",
-              className: "reset-button",
-              align: 'right'
-            }, {
-              icon: "ok-sign",
-              white: true,
-              label: "Save Changes",
-              eventId: "click:submit",
-              color: "success",
-              className: 'submit-button',
-              align: 'right'
-            }
-          ]
-        };
+      if (this.toolbar !== false && (!this.topToolbar && !this.bottomToolbar)) {
+        if (this.toolbar === "both" || this.toolbar === "top") {
+          this.topToolbar = this.getDefaultToolbar();
+        }
+        if (this.toolbar !== "top") {
+          return this.bottomToolbar = this.getDefaultToolbar();
+        }
       }
+    },
+    getDefaultToolbar: function() {
+      return defaultToolbar;
     },
     applyStyleClasses: function() {
       if (Luca.enableBootstrap) this.applyBootstrapStyleClasses();
@@ -3544,6 +3556,32 @@
     setLegend: function(legend) {
       this.legend = legend;
       return $('fieldset legend', this.el).first().html(this.legend);
+    },
+    flash: function(message) {
+      if (this.$('.toolbar-container.top').length > 0) {
+        return this.$('.toolbar-container.top').after(message);
+      } else {
+        return this.$bodyEl().prepend(message);
+      }
+    },
+    successFlashDelay: 1500,
+    successMessage: function(message) {
+      var _this = this;
+      this.$('.alert.alert-success').remove();
+      this.flash(Luca.template("components/form_alert", {
+        className: "alert alert-success",
+        message: message
+      }));
+      return _.delay(function() {
+        return _this.$('.alert.alert-success').fadeOut();
+      }, this.successFlashDelay || 0);
+    },
+    errorMessage: function(message) {
+      this.$('.alert.alert-error').remove();
+      return this.flash(Luca.template("components/form_alert", {
+        className: "alert alert-error",
+        message: message
+      }));
     }
   });
 
