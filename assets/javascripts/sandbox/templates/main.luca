@@ -20,6 +20,7 @@
   .span4
     %h3 Component Driven Design
     %p Luca is a collection of common components needed to build large single page applications.  Twitter's Bootstrap is responsible for all of the styling, and Backbone.js is responsible for everything else.
+    %p Luca encourages a style of application design centered around building isolated components, and using framework helpers to glue them together in a very readable, declarative style.
 
   .span4
     %h3 Interchangeable

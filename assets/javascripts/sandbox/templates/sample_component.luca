@@ -1,0 +1,9 @@
+#sample-component-wrapper
+  %h1 Container
+  #sample-component
+    #form-view
+      %h1 Form View
+    #collection-view
+      %h1 Collection View
+    #toolbar
+      %h1 Toolbar

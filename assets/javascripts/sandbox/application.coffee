@@ -2,7 +2,6 @@ Sandbox.Application = Luca.Application.extend
   name: 'sandbox_application'
   el: '#viewport'
   fluid: true
-
   topNav:'top_navigation'
 
   useKeyRouter: true
@@ -16,6 +15,7 @@ Sandbox.Application = Luca.Application.extend
     name: 'pages'
     components:[
       name: "main"
+      ctype: "panel"
       bodyTemplate: 'main'
     ,
       name :"class_browser"
