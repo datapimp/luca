@@ -32,6 +32,10 @@ _.extend Luca,
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events
 
+# When using Luca.define() should we automatically register
+# the component with the registry?
+Luca.autoRegister = true
+
 # if developmentMode is true, you have access to some neat development tools
 Luca.developmentMode = false
 
@@ -81,6 +85,14 @@ Luca.isBackboneView = (obj)->
 Luca.isBackboneCollection = (obj)->
   _.isFunction(obj?.fetch) and _.isFunction(obj?.reset)
 
+Luca.isViewPrototype = (obj)->
+  obj? and obj::make? and obj::$? and obj::render?
+
+Luca.isModelPrototype = (obj)->
+  obj? and obj::save? and obj::changedAttributes?
+
+Luca.isCollectionPrototype = (obj)->
+  obj? and !Luca.isModelPrototype(obj) and obj::reset? and obj::select? and obj::reject?
 
 # This is a convenience method for accessing the templates
 # available to the client side app, either the ones which ship with Luca

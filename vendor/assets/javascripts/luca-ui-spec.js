@@ -30,6 +30,8 @@
 
   _.extend(Luca, Backbone.Events);
 
+  Luca.autoRegister = true;
+
   Luca.developmentMode = false;
 
   Luca.enableGlobalObserver = false;
@@ -74,6 +76,18 @@
 
   Luca.isBackboneCollection = function(obj) {
     return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
+  };
+
+  Luca.isViewPrototype = function(obj) {
+    return (obj != null) && (obj.prototype.make != null) && (obj.prototype.$ != null) && (obj.prototype.render != null);
+  };
+
+  Luca.isModelPrototype = function(obj) {
+    return (obj != null) && (obj.prototype.save != null) && (obj.prototype.changedAttributes != null);
+  };
+
+  Luca.isCollectionPrototype = function(obj) {
+    return (obj != null) && !Luca.isModelPrototype(obj) && (obj.prototype.reset != null) && (obj.prototype.select != null) && (obj.prototype.reject != null);
   };
 
   Luca.template = function(template_name, variables) {
@@ -310,7 +324,9 @@
         at = Luca.util.resolve(this.namespace, window || global);
       }
       at[this.componentId] = Luca.extend(this.superClassName, this.componentName, properties);
-      Luca.register(_.string.underscored(this.componentId), this.componentName);
+      if (Luca.autoRegister === true && Luca.isViewPrototype(at[this.componentId])) {
+        Luca.register(_.string.underscored(this.componentId), this.componentName);
+      }
       return at[this.componentId];
     };
 
@@ -5424,7 +5440,7 @@
       expect(Luca.isBackboneCollection(obj)).toEqual(true);
       return expect(Luca.isBackboneCollection({})).toEqual(false);
     });
-    return it("should detect if an object is probably a backbone model", function() {
+    it("should detect if an object is probably a backbone model", function() {
       var obj;
       obj = {
         set: sinon.spy(),
@@ -5433,6 +5449,16 @@
       };
       expect(Luca.isBackboneModel(obj)).toEqual(true);
       return expect(Luca.isBackboneModel({})).toEqual(false);
+    });
+    it("should detect if a prototype is a luca view", function() {
+      var MyView;
+      MyView = Luca.View.extend({});
+      return expect(Luca.isViewPrototype(MyView)).toEqual(true);
+    });
+    return it("should detect if a prototype is a backbone view", function() {
+      var MyView;
+      MyView = Backbone.View.extend();
+      return expect(Luca.isViewPrototype(MyView)).toEqual(true);
     });
   });
 

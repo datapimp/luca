@@ -68,6 +68,13 @@ describe "The Luca Framework", ->
     expect( Luca.isBackboneModel(obj) ).toEqual true
     expect( Luca.isBackboneModel({}) ).toEqual false
 
+  it "should detect if a prototype is a luca view", ->
+    MyView = Luca.View.extend({})
+    expect( Luca.isViewPrototype(MyView) ).toEqual true
+
+  it "should detect if a prototype is a backbone view", ->
+    MyView = Backbone.View.extend()
+    expect( Luca.isViewPrototype(MyView) ).toEqual true
 
 describe "Luca Component Definition", ->
   beforeEach ->
