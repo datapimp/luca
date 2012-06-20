@@ -960,7 +960,7 @@
       this.base_params = Luca.Collection.baseParams();
       return this;
     },
-    remoteFilter: true,
+    remoteFilter: false,
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};

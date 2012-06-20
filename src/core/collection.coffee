@@ -167,7 +167,7 @@ _.def("Luca.Collection").extends( source ).with
 
   # if filtering a collection should handle via a call to a REST API
   # and return the filtered results that way, then leave this true
-  remoteFilter: true
+  remoteFilter: false
 
   applyFilter: (filter={}, options={})->
     if options.remote? is true or @remoteFilter is true

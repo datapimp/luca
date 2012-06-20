@@ -67,12 +67,10 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
     @configure_collection(true)
 
     @collection.bind "before:fetch", ()=>
-      console.log "Triggering Enable Load Mask"
       @trigger "enable:loadmask" if @loadMask is true
 
     @collection.bind "reset", (collection) =>
       @refresh()
-      console.log "Triggering Disable LoadMask"
       @trigger "disable:loadmask" if @loadMask is true
       @trigger "after:collection:load", collection
 
@@ -84,9 +82,9 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
       try
         rowEl = @getRowEl( model.id || model.get('id') || model.cid )
         cells = @render_row(model, @collection.indexOf(model), cellsOnly: true )
-        $( rowEl ).html( cells )
+        $( rowEl ).html( cells.join(" ") )
       catch error
-        console.log "Error in change handler for GridView.collection", error, @, model, rowEl, cells
+        console.log "Error in change handler for GridView.collection", error, @, model
 
   beforeRender: ()->
     Luca.components.Panel::beforeRender?.apply(@, arguments)

@@ -960,7 +960,7 @@
       this.base_params = Luca.Collection.baseParams();
       return this;
     },
-    remoteFilter: true,
+    remoteFilter: false,
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
@@ -3619,12 +3619,10 @@
       Luca.components.Panel.prototype.initialize.apply(this, arguments);
       this.configure_collection(true);
       this.collection.bind("before:fetch", function() {
-        console.log("Triggering Enable Load Mask");
         if (_this.loadMask === true) return _this.trigger("enable:loadmask");
       });
       this.collection.bind("reset", function(collection) {
         _this.refresh();
-        console.log("Triggering Disable LoadMask");
         if (_this.loadMask === true) _this.trigger("disable:loadmask");
         return _this.trigger("after:collection:load", collection);
       });
@@ -3636,9 +3634,9 @@
           cells = _this.render_row(model, _this.collection.indexOf(model), {
             cellsOnly: true
           });
-          return $(rowEl).html(cells);
+          return $(rowEl).html(cells.join(" "));
         } catch (error) {
-          return console.log("Error in change handler for GridView.collection", error, _this, model, rowEl, cells);
+          return console.log("Error in change handler for GridView.collection", error, _this, model);
         }
       });
     },

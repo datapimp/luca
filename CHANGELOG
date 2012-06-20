@@ -89,3 +89,4 @@
   - FormView has errorMessage, successMessage methods which use twitter bootstrap alerts as flash message
   - FormView toolbar accepts new options: true, both, bottom, or top
   - Luca.Collection has a property @remoteFiltering which makes applyFilter always use remote fetch
+  - Bugfix in GridView collection change handler
