@@ -43,6 +43,7 @@ class Luca.CollectionManager
   constructor: (@options={})->
     _.extend @, @options
     _.extend @, Backbone.Events
+    _.extend @, Luca.Events
 
     # if you are going to use more than one collection
     # manager, then you will have to specify which
