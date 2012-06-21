@@ -247,10 +247,11 @@ customizeRender = (definition)->
       target ||= @deferrable
       trigger = if @deferrable_event then @deferrable_event else "reset"
 
-      view.defer ()->
+      deferred = ()->
         _base.call(view)
-        view.trigger "after:render", view
-      .until(target,trigger)
+        view.trigger("after:render", view)
+
+      view.defer(deferred).until(target, trigger)
 
       view.trigger "before:render", @
 

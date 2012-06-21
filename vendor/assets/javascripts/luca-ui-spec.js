@@ -2581,8 +2581,10 @@
         this.collectionManager || (this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get() : void 0);
         this.collectionManager || (this.collectionManager = new this.collectionManagerClass(this.collectionManagerOptions || (this.collectionManagerOptions = {})));
       }
-      this.state = new Backbone.Model(this.defaultState);
-      this.defer("render").until("ready");
+      this.state = new Luca.Model(this.defaultState);
+      this.defer(function() {
+        return _this.render();
+      }).until("ready");
       if (this.useKeyRouter === true && (this.keyEvents != null)) {
         this.setupKeyRouter();
       }

@@ -56,6 +56,9 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
       @$('input').focus()
   ]
 
+  show: ()->
+    @$el.addClass('modal').modal()
+
   getContext: ()->
     window
 

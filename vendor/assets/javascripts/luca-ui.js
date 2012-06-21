@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.1",
+    VERSION: "0.9.15",
     core: {},
     containers: {},
     components: {},
@@ -738,7 +738,7 @@
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
     definition.render = function() {
-      var autoTrigger, fn, target, trigger, view,
+      var autoTrigger, deferred, fn, target, trigger, view,
         _this = this;
       view = this;
       if (this.deferrable) {
@@ -748,10 +748,11 @@
         }
         target || (target = this.deferrable);
         trigger = this.deferrable_event ? this.deferrable_event : "reset";
-        view.defer(function() {
+        deferred = function() {
           _base.call(view);
           return view.trigger("after:render", view);
-        }).until(target, trigger);
+        };
+        view.defer(deferred).until(target, trigger);
         view.trigger("before:render", this);
         autoTrigger = this.deferrable_trigger || this.deferUntil;
         if (!(autoTrigger != null)) {
@@ -2581,8 +2582,10 @@
         this.collectionManager || (this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get() : void 0);
         this.collectionManager || (this.collectionManager = new this.collectionManagerClass(this.collectionManagerOptions || (this.collectionManagerOptions = {})));
       }
-      this.state = new Backbone.Model(this.defaultState);
-      this.defer("render").until("ready");
+      this.state = new Luca.Model(this.defaultState);
+      this.defer(function() {
+        return _this.render();
+      }).until("ready");
       if (this.useKeyRouter === true && (this.keyEvents != null)) {
         this.setupKeyRouter();
       }
