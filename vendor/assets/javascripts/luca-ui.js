@@ -2802,13 +2802,16 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.bindAll(this, "refresh");
-      if (this.collection == null) {
+      if (!((this.collection != null) || this.options.collection)) {
         throw "Collection Views must specify a collection";
       }
       if (!((this.itemTemplate != null) || (this.itemRenderer != null) || (this.itemProperty != null))) {
         throw "Collection Views must specify an item template or item renderer function";
       }
       Luca.components.Panel.prototype.initialize.apply(this, arguments);
+      if (_.isString(this.collection) && Luca.CollectionManager.get()) {
+        this.collection = Luca.CollectionManager.get().get(this.collection);
+      }
       if (Luca.isBackboneCollection(this.collection)) {
         this.collection.bind("reset", this.refresh);
         this.collection.bind("add", this.refresh);

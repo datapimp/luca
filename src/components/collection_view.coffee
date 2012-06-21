@@ -22,13 +22,16 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
     _.bindAll @, "refresh"
 
-    unless @collection?
+    unless @collection? or @options.collection
       throw "Collection Views must specify a collection"
 
     unless @itemTemplate? || @itemRenderer? || @itemProperty?
       throw "Collection Views must specify an item template or item renderer function"
 
     Luca.components.Panel::initialize.apply(@, arguments)
+
+    if _.isString(@collection) and Luca.CollectionManager.get()
+      @collection = Luca.CollectionManager.get().get(@collection)
 
     if Luca.isBackboneCollection(@collection)
       @collection.bind "reset", @refresh
