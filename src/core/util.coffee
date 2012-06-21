@@ -80,3 +80,19 @@ Luca.util.loadScript = (url, callback) ->
 
   script.src = url
   document.body.appendChild(script)
+
+Luca.util.make = Backbone.View::make
+
+# generates a badge element
+# valid types are success, warning, important, info, inverse
+Luca.util.label = (contents="", type, baseClass="label")->
+  cssClass = baseClass
+  cssClass += " #{ baseClass}-#{ type }" if type?
+  Luca.util.make("span",{class:cssClass},contents)
+
+# generates a badge element
+# valid types are success, warning, important, info, inverse
+Luca.util.badge = (contents="", type, baseClass="badge")->
+  cssClass = baseClass
+  cssClass += " #{ baseClass }-#{ type }" if type?
+  Luca.util.make("span",{class:cssClass},contents)

@@ -1,15 +1,8 @@
 _.def("Luca.components.NavBar").extends("Luca.View").with
   fixed: true
-
   position: 'top'
-
   className: 'navbar'
-
-  initialize: (@options={})->
-    Luca.View::initialize.apply(@, arguments)
-
   brand: "Luca.js"
-
   bodyTemplate: 'nav_bar'
   bodyClassName: 'luca-ui-navbar-body'
 
@@ -18,6 +11,9 @@ _.def("Luca.components.NavBar").extends("Luca.View").with
 
     if @brand?
       @content().append("<a class='brand' href='#'>#{ @brand }</a>")
+
+    if @template
+      @content().append Luca.template(@template, @)
 
   render: ()->
     @
