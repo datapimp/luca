@@ -53,12 +53,12 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
       @collectionManager ||= Luca.CollectionManager.get?()
       @collectionManager ||= new @collectionManagerClass( @collectionManagerOptions||={} )
 
-    @state = new Backbone.Model( @defaultState )
+    @state = new Luca.Model( @defaultState )
 
     # we will render when all of the various components
     # which handle our data dependencies determine that
     # we are ready
-    @defer("render").until("ready")
+    @defer(()=>@render()).until("ready")
 
     # the keyRouter allows us to specify
     # keyEvents on our application with an API very similar
