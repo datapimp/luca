@@ -825,72 +825,7 @@
 
   _.def("Luca.Collection")["extends"](source)["with"]({
     cachedMethods: [],
-    restoreMethodCache: function() {
-      var config, name, _ref, _results;
-      _ref = this._methodCache;
-      _results = [];
-      for (name in _ref) {
-        config = _ref[name];
-        if (config.original != null) {
-          config.args = void 0;
-          _results.push(this[name] = config.original);
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    },
-    clearMethodCache: function(method) {
-      return this._methodCache[method].value = void 0;
-    },
-    clearAllMethodsCache: function() {
-      var config, name, _ref, _results;
-      _ref = this._methodCache;
-      _results = [];
-      for (name in _ref) {
-        config = _ref[name];
-        _results.push(this.clearMethodCache(name));
-      }
-      return _results;
-    },
-    setupMethodCaching: function() {
-      var cache, collection, membershipEvents;
-      collection = this;
-      membershipEvents = ["reset", "add", "remove"];
-      cache = this._methodCache = {};
-      return _(this.cachedMethods).each(function(method) {
-        var dependencies, dependency, membershipEvent, _i, _j, _len, _len2, _ref, _results;
-        cache[method] = {
-          name: method,
-          original: collection[method],
-          value: void 0
-        };
-        collection[method] = function() {
-          var _base;
-          return (_base = cache[method]).value || (_base.value = cache[method].original.apply(collection, arguments));
-        };
-        for (_i = 0, _len = membershipEvents.length; _i < _len; _i++) {
-          membershipEvent = membershipEvents[_i];
-          collection.bind(membershipEvent, function() {
-            return collection.clearAllMethodsCache();
-          });
-        }
-        dependencies = method.split(':')[1];
-        if (dependencies) {
-          _ref = dependencies.split(",");
-          _results = [];
-          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
-            dependency = _ref[_j];
-            _results.push(collection.bind("change:" + dependency, function() {
-              return collection.clearMethodCache({
-                method: method
-              });
-            }));
-          }
-          return _results;
-        }
-      });
-    },
+    remoteFilter: false,
     initialize: function(models, options) {
       var table,
         _this = this;
@@ -910,6 +845,7 @@
       }
       this.name || (this.name = this.registerAs);
       this.manager || (this.manager = this.registerWith);
+      this.manager = _.isFunction(this.manager) ? this.manager() : this.manager;
       if (this.name && !this.manager) this.manager = Luca.CollectionManager.get();
       if (this.manager) {
         this.name || (this.name = this.cache_key());
@@ -973,10 +909,9 @@
       return _.uniq(parts).join("&");
     },
     resetFilter: function() {
-      this.base_params = Luca.Collection.baseParams();
+      this.base_params = _(Luca.Collection.baseParams()).clone();
       return this;
     },
-    remoteFilter: false,
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
@@ -990,8 +925,9 @@
       }
     },
     applyParams: function(params) {
-      this.base_params || (this.base_params = _(Luca.Collection.baseParams()).clone());
-      return _.extend(this.base_params, params);
+      this.base_params = _(Luca.Collection.baseParams()).clone();
+      _.extend(this.base_params, params);
+      return this;
     },
     register: function(collectionManager, key, collection) {
       if (collectionManager == null) {
@@ -1075,7 +1011,7 @@
       scope = options.scope || this;
       if (this.length > 0 && !this.fetching) fn.apply(scope, [this]);
       this.bind("reset", function(collection) {
-        return fn.apply(scope, [collection]);
+        return fn.call(scope, collection);
       });
       if (!(this.fetching === true || !options.autoFetch || this.length > 0)) {
         return this.fetch();
@@ -1090,6 +1026,81 @@
         Luca.Collection.cache(this.bootstrap_cache_key, models);
       }
       return models;
+    },
+    restoreMethodCache: function() {
+      var config, name, _ref, _results;
+      _ref = this._methodCache;
+      _results = [];
+      for (name in _ref) {
+        config = _ref[name];
+        if (config.original != null) {
+          config.args = void 0;
+          _results.push(this[name] = config.original);
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    },
+    clearMethodCache: function(method) {
+      return this._methodCache[method].value = void 0;
+    },
+    clearAllMethodsCache: function() {
+      var config, name, _ref, _results;
+      _ref = this._methodCache;
+      _results = [];
+      for (name in _ref) {
+        config = _ref[name];
+        _results.push(this.clearMethodCache(name));
+      }
+      return _results;
+    },
+    setupMethodCaching: function() {
+      var cache, collection, membershipEvents;
+      collection = this;
+      membershipEvents = ["reset", "add", "remove"];
+      cache = this._methodCache = {};
+      return _(this.cachedMethods).each(function(method) {
+        var dependencies, dependency, membershipEvent, _i, _j, _len, _len2, _ref, _results;
+        cache[method] = {
+          name: method,
+          original: collection[method],
+          value: void 0
+        };
+        collection[method] = function() {
+          var _base;
+          return (_base = cache[method]).value || (_base.value = cache[method].original.apply(collection, arguments));
+        };
+        for (_i = 0, _len = membershipEvents.length; _i < _len; _i++) {
+          membershipEvent = membershipEvents[_i];
+          collection.bind(membershipEvent, function() {
+            return collection.clearAllMethodsCache();
+          });
+        }
+        dependencies = method.split(':')[1];
+        if (dependencies) {
+          _ref = dependencies.split(",");
+          _results = [];
+          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+            dependency = _ref[_j];
+            _results.push(collection.bind("change:" + dependency, function() {
+              return collection.clearMethodCache({
+                method: method
+              });
+            }));
+          }
+          return _results;
+        }
+      });
+    },
+    query: function(filter, options) {
+      if (filter == null) filter = {};
+      if (options == null) options = {};
+      if (Backbone.QueryCollection != null) {
+        return Backbone.QueryCollection.prototype.query.apply(this, arguments);
+      } else {
+        return this.models;
+      }
     }
   });
 
@@ -1108,7 +1119,7 @@
   Luca.Collection.baseParams = function(obj) {
     if (obj) return Luca.Collection._baseParams = obj;
     if (_.isFunction(Luca.Collection._baseParams)) {
-      return Luca.Collection._baseParams.call();
+      return Luca.Collection._baseParams();
     }
     if (_.isObject(Luca.Collection._baseParams)) {
       return Luca.Collection._baseParams;
@@ -1856,6 +1867,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
+      _.extend(this, Luca.Events);
       instances.push(this);
       this.state = new Backbone.Model;
       if (this.initialCollections) {
