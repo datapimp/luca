@@ -18384,8 +18384,9 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         }
       }
     ],
-    show: function() {
-      return this.$el.addClass('modal').modal();
+    show: function(options) {
+      if (options == null) options = {};
+      return this.$el.addClass('modal').modal(options);
     },
     getContext: function() {
       return window;

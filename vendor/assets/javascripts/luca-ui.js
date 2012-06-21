@@ -266,6 +266,30 @@
     return document.body.appendChild(script);
   };
 
+  Luca.util.make = Backbone.View.prototype.make;
+
+  Luca.util.label = function(contents, type, baseClass) {
+    var cssClass;
+    if (contents == null) contents = "";
+    if (baseClass == null) baseClass = "label";
+    cssClass = baseClass;
+    if (type != null) cssClass += " " + baseClass + "-" + type;
+    return Luca.util.make("span", {
+      "class": cssClass
+    }, contents);
+  };
+
+  Luca.util.badge = function(contents, type, baseClass) {
+    var cssClass;
+    if (contents == null) contents = "";
+    if (baseClass == null) baseClass = "badge";
+    cssClass = baseClass;
+    if (type != null) cssClass += " " + baseClass + "-" + type;
+    return Luca.util.make("span", {
+      "class": cssClass
+    }, contents);
+  };
+
 }).call(this);
 (function() {
   var DeferredBindingProxy, DefineProxy;
@@ -3887,17 +3911,16 @@
     fixed: true,
     position: 'top',
     className: 'navbar',
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.View.prototype.initialize.apply(this, arguments);
-    },
     brand: "Luca.js",
     bodyTemplate: 'nav_bar',
     bodyClassName: 'luca-ui-navbar-body',
     beforeRender: function() {
       if (this.fixed) this.$el.addClass("navbar-fixed-" + this.position);
       if (this.brand != null) {
-        return this.content().append("<a class='brand' href='#'>" + this.brand + "</a>");
+        this.content().append("<a class='brand' href='#'>" + this.brand + "</a>");
+      }
+      if (this.template) {
+        return this.content().append(Luca.template(this.template, this));
       }
     },
     render: function() {
