@@ -12,54 +12,13 @@ _.def("Luca.Collection").extends( source ).with
   # @resetEvents are 'add','remove',reset' and 'change'.
   cachedMethods: []
 
-  restoreMethodCache: ()->
-    for name, config of @_methodCache
-      if config.original?
-        config.args = undefined
-        @[ name ] = config.original
-
-  clearMethodCache: (method)->
-    @_methodCache[method].value = undefined
-
-  clearAllMethodsCache: ()->
-    for name, config of @_methodCache
-      @clearMethodCache(name)
-
-  setupMethodCaching: ()->
-    collection = @
-    membershipEvents = ["reset","add","remove"]
-    cache = @_methodCache = {}
-
-    _( @cachedMethods ).each (method)->
-      # store a reference to the unwrapped version of the method
-      # and a placeholder for the cached value
-      cache[ method ] =
-        name: method
-        original: collection[method]
-        value: undefined
-
-      # wrap the collection method with a basic memoize operation
-      collection[ method ] = ()->
-        cache[method].value ||= cache[method].original.apply collection, arguments
-
-      # bind to events on the collection, which once triggered, will
-      # invalidate the cached value.  causing us to have to restore it
-      for membershipEvent in membershipEvents
-        collection.bind membershipEvent, ()->
-          collection.clearAllMethodsCache()
-
-      dependencies = method.split(':')[1]
-
-      if dependencies
-        for dependency in dependencies.split(",")
-          collection.bind "change:#{dependency}", ()->
-            collection.clearMethodCache(method: method)
+  # if filtering a collection should handle via a call to a REST API
+  # and return the filtered results that way, then leave this true
+  remoteFilter: false
 
   initialize: (models=[], @options)->
     _.extend @, @options
-
     @setupMethodCaching()
-
     @_reset()
 
     # By specifying a @cache_key property or method, you can instruct
@@ -79,6 +38,8 @@ _.def("Luca.Collection").extends( source ).with
     # support the older configuration API
     @name ||= @registerAs
     @manager ||= @registerWith
+
+    @manager = if _.isFunction(@manager) then @manager() else @manager
 
     # if they specify a
     if @name and not @manager
@@ -162,12 +123,8 @@ _.def("Luca.Collection").extends( source ).with
     _.uniq(parts).join("&")
 
   resetFilter: ()->
-    @base_params = Luca.Collection.baseParams()
+    @base_params = _( Luca.Collection.baseParams() ).clone()
     @
-
-  # if filtering a collection should handle via a call to a REST API
-  # and return the filtered results that way, then leave this true
-  remoteFilter: false
 
   applyFilter: (filter={}, options={})->
     if options.remote? is true or @remoteFilter is true
@@ -179,8 +136,10 @@ _.def("Luca.Collection").extends( source ).with
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified
   applyParams: (params)->
-    @base_params ||= _( Luca.Collection.baseParams() ).clone()
+    @base_params = _( Luca.Collection.baseParams() ).clone()
     _.extend @base_params, params
+
+    @
 
   # If this collection is to be registered with some global collection
   # tracker such as new Luca.CollectionManager() then we will register
@@ -286,7 +245,7 @@ _.def("Luca.Collection").extends( source ).with
     if @length > 0 and not @fetching
       fn.apply scope, [@]
 
-    @bind "reset", (collection)=> fn.apply scope, [collection]
+    @bind "reset", (collection)=> fn.call(scope,collection)
 
     unless @fetching is true or !options.autoFetch or @length > 0
       @fetch()
@@ -312,6 +271,62 @@ _.def("Luca.Collection").extends( source ).with
 
     models
 
+  # Method Caching
+  #
+  # Method Caching is a way of saving the output of a method on your collection.
+  # And then expiring that value if any changes are detected to the models in
+  # the collection
+  restoreMethodCache: ()->
+    for name, config of @_methodCache
+      if config.original?
+        config.args = undefined
+        @[ name ] = config.original
+
+  clearMethodCache: (method)->
+    @_methodCache[method].value = undefined
+
+  clearAllMethodsCache: ()->
+    for name, config of @_methodCache
+      @clearMethodCache(name)
+
+  setupMethodCaching: ()->
+    collection = @
+    membershipEvents = ["reset","add","remove"]
+    cache = @_methodCache = {}
+
+    _( @cachedMethods ).each (method)->
+      # store a reference to the unwrapped version of the method
+      # and a placeholder for the cached value
+      cache[ method ] =
+        name: method
+        original: collection[method]
+        value: undefined
+
+      # wrap the collection method with a basic memoize operation
+      collection[ method ] = ()->
+        cache[method].value ||= cache[method].original.apply collection, arguments
+
+      # bind to events on the collection, which once triggered, will
+      # invalidate the cached value.  causing us to have to restore it
+      for membershipEvent in membershipEvents
+        collection.bind membershipEvent, ()->
+          collection.clearAllMethodsCache()
+
+      dependencies = method.split(':')[1]
+
+      if dependencies
+        for dependency in dependencies.split(",")
+          collection.bind "change:#{dependency}", ()->
+            collection.clearMethodCache(method: method)
+
+  # make sure the querying interface from backbone.query is present
+  # in the case backbone-query isn't loaded.  without it, it will
+  # just return the models
+  query: (filter={},options={})->
+    if Backbone.QueryCollection?
+      return Backbone.QueryCollection::query.apply(@, arguments)
+    else
+      @models
 
 # Global Collection Observer
 _.extend Luca.Collection.prototype,
@@ -329,7 +344,7 @@ Luca.Collection.baseParams = (obj)->
   return Luca.Collection._baseParams = obj if obj
 
   if _.isFunction( Luca.Collection._baseParams )
-    return Luca.Collection._baseParams.call()
+    return Luca.Collection._baseParams()
 
   if _.isObject( Luca.Collection._baseParams )
     Luca.Collection._baseParams

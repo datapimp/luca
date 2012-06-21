@@ -9,6 +9,8 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   # by default unless otherwise specified
   useCollectionManager: true
 
+  collectionManagerClass: "Luca.CollectionManager"
+
   # Luca plugin apps are apps which mount onto existing
   # luca apps, and will not have the behavior of a main
   # app which acts as a singleton
@@ -46,16 +48,18 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     ]
 
     if @useCollectionManager is true
+      @collectionManagerClass = Luca.util.resolve( @collectionManagerClass ) if _.isString( @collectionManagerClass )
+
       @collectionManager ||= Luca.CollectionManager.get?()
-      @collectionManager ||= new Luca.CollectionManager( @collectionManagerOptions||={} )
+      @collectionManager ||= new @collectionManagerClass( @collectionManagerOptions||={} )
 
     @state = new Backbone.Model( @defaultState )
 
     # we will render when all of the various components
     # which handle our data dependencies determine that
     # we are ready
-    @bind "ready", ()=>
-      @render()
+    @defer("render").until("ready")
+
     # the keyRouter allows us to specify
     # keyEvents on our application with an API very similar
     # to the DOM events API for Backbone.View

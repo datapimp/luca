@@ -1,6 +1,18 @@
+General
+-------
 - Make development mode options easily disabled
-- Add StateMachine model to all instances of Luca.View
-- Luca.core.Container should relay all activation events to @components
-- Integrate with requireJs
+- Integrate with requireJs or some other AMD system
 - Move to node.js
 - Replace .luca template with standard jst
+
+Luca.View
+---------
+- Add StateMachine model to all instances of Luca.View
+
+Containers
+----------
+- Luca.core.Container should relay all activation events to @components
+
+Luca.CollectionManager
+----------------------
+- Add concept of base params for a given scope of the collection manager
