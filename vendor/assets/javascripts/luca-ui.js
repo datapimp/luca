@@ -2441,10 +2441,10 @@
     bodyEl: "div.tab-content",
     initialize: function(options) {
       this.options = options != null ? options : {};
+      if (this.navStyle === "list") this.navClass = "nav-list";
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "select", "highlightSelectedTab");
       this.setupHooks(this.hooks);
-      if (this.navStyle === "list") this.navClass = "nav-list";
       return this.bind("after:card:switch", this.highlightSelectedTab);
     },
     activeTabSelector: function() {
@@ -2846,8 +2846,10 @@
         content = this.itemRenderer.call(this, item);
       }
       if (this.itemProperty) {
-        return content = _.isFunction(this.itemProperty) ? this.itemProperty() : item.model.get(this.itemProperty) || item.model[this.itemProperty];
+        content = item.model.get(this.itemProperty) || item.model[this.itemProperty];
+        if (_.isFunction(content)) content = content();
       }
+      return content;
     },
     makeItem: function(model, index) {
       var item;

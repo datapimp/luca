@@ -49,7 +49,10 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
       content = @itemRenderer.call(@, item)
 
     if @itemProperty
-      content = if _.isFunction(@itemProperty) then @itemProperty() else (item.model.get(@itemProperty) || item.model[ @itemProperty ])
+      content = item.model.get(@itemProperty) || item.model[ @itemProperty ]
+      content = content() if _.isFunction(content)
+
+    content
 
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
