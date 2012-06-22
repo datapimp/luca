@@ -1475,7 +1475,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
+  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav ', navClass ,'\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -2472,14 +2472,21 @@
       var tabView;
       tabView = this;
       return this.each(function(component, index) {
-        var icon, link, selector;
+        var icon, link, selector, _ref;
         if (component.tabIcon) icon = "<i class='icon-" + component.tabIcon;
         link = "<a href='#'>" + (icon || '') + " " + component.title + "</a>";
         selector = tabView.make("li", {
           "class": "tab-selector",
           "data-target": index
         }, link);
-        return tabView.tabContainer().append(selector);
+        tabView.tabContainer().append(selector);
+        if ((component.navHeading != null) && !((_ref = tabView.navHeadings) != null ? _ref[component.navHeading] : void 0)) {
+          $(selector).before(tabView.make('li', {
+            "class": "nav-header"
+          }, component.navHeading));
+          tabView.navHeadings || (tabView.navHeadings = {});
+          return tabView.navHeadings[component.navHeading] = true;
+        }
       });
     },
     highlightSelectedTab: function() {
