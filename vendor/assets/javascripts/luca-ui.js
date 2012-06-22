@@ -2474,7 +2474,7 @@
       return this.each(function(component, index) {
         var icon, link, selector;
         if (component.tabIcon) icon = "<i class='icon-" + component.tabIcon;
-        link = "<a href='#'>" + icon + " " + component.title + "</a>";
+        link = "<a href='#'>" + (icon || '') + " " + component.title + "</a>";
         selector = tabView.make("li", {
           "class": "tab-selector",
           "data-target": index

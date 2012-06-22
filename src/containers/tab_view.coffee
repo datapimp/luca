@@ -54,7 +54,7 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     tabView = @
     @each (component,index)->
       icon = "<i class='icon-#{ component.tabIcon }" if component.tabIcon
-      link = "<a href='#'>#{ icon } #{ component.title }</a>"
+      link = "<a href='#'>#{ icon || ''} #{ component.title }</a>"
       selector = tabView.make("li",{class:"tab-selector","data-target":index}, link)
       tabView.tabContainer().append(selector)
 
