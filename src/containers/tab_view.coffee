@@ -58,6 +58,11 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
       selector = tabView.make("li",{class:"tab-selector","data-target":index}, link)
       tabView.tabContainer().append(selector)
 
+      if component.navHeading? and not tabView.navHeadings?[ component.navHeading ]
+        $( selector ).before( tabView.make('li',{class:"nav-header"}, component.navHeading))
+        tabView.navHeadings ||= {}
+        tabView.navHeadings[ component.navHeading ] = true
+
   highlightSelectedTab: ()->
     @tabSelectors().removeClass('active')
     @activeTabSelector().addClass('active')
