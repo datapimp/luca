@@ -2436,6 +2436,7 @@
     className: 'luca-ui-tab-view tabbable',
     tab_position: 'top',
     tabVerticalOffset: '50px',
+    navClass: "nav-tabs",
     bodyTemplate: "containers/tab_view",
     bodyEl: "div.tab-content",
     initialize: function(options) {
@@ -2443,6 +2444,7 @@
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "select", "highlightSelectedTab");
       this.setupHooks(this.hooks);
+      if (this.navStyle === "list") this.navClass = "nav-list";
       return this.bind("after:card:switch", this.highlightSelectedTab);
     },
     activeTabSelector: function() {
@@ -2470,11 +2472,13 @@
       var tabView;
       tabView = this;
       return this.each(function(component, index) {
-        var selector;
+        var icon, link, selector;
+        if (component.tabIcon) icon = "<i class='icon-" + component.tabIcon;
+        link = "<a href='#'>" + icon + " " + component.title + "</a>";
         selector = tabView.make("li", {
           "class": "tab-selector",
           "data-target": index
-        }, "<a>" + component.title + "</a>");
+        }, link);
         return tabView.tabContainer().append(selector);
       });
     },
@@ -2484,6 +2488,7 @@
     },
     select: function(e) {
       var me, my;
+      e.preventDefault();
       me = my = $(e.target);
       this.trigger("before:select", this);
       this.activate(my.parent().data('target'));
@@ -2499,7 +2504,7 @@
       return $("#" + this.cid + "-tabs-selector");
     },
     tabContainer: function() {
-      return this.$('ul.nav-tabs', this.tabContainerWrapper());
+      return this.$('ul.#{ @navClass }', this.tabContainerWrapper());
     },
     tabSelectors: function() {
       return this.$('li.tab-selector', this.tabContainer());

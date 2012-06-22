@@ -13,6 +13,8 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
 
   tabVerticalOffset: '50px'
 
+  navClass: "nav-tabs"
+
   bodyTemplate: "containers/tab_view"
   bodyEl: "div.tab-content"
 
@@ -22,6 +24,9 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     _.bindAll @, "select", "highlightSelectedTab"
 
     @setupHooks( @hooks )
+
+    if @navStyle is "list"
+      @navClass = "nav-list"
 
     @bind "after:card:switch", @highlightSelectedTab
 
@@ -48,7 +53,9 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
   createTabSelectors: ()->
     tabView = @
     @each (component,index)->
-      selector = tabView.make("li",{class:"tab-selector","data-target":index}, "<a>#{ component.title }</a>")
+      icon = "<i class='icon-#{ component.tabIcon }" if component.tabIcon
+      link = "<a href='#'>#{ icon } #{ component.title }</a>"
+      selector = tabView.make("li",{class:"tab-selector","data-target":index}, link)
       tabView.tabContainer().append(selector)
 
   highlightSelectedTab: ()->
@@ -56,6 +63,8 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     @activeTabSelector().addClass('active')
 
   select: (e)->
+    e.preventDefault()
+
     me = my = $( e.target )
 
     @trigger "before:select", @
@@ -72,7 +81,7 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     $("##{ @cid }-tabs-selector")
 
   tabContainer: ()->
-    @$('ul.nav-tabs', @tabContainerWrapper() )
+    @$('ul.#{ @navClass }', @tabContainerWrapper() )
 
   tabSelectors: ()->
     @$( 'li.tab-selector', @tabContainer() )
