@@ -1,1 +1,3 @@
-%a Hi
+%ul.nav
+  %li
+    %a{:href=>"#"} Intro

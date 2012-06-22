@@ -19,14 +19,13 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
   bodyEl: "div.tab-content"
 
   initialize: (@options={})->
+    @navClass = "nav-list"if @navStyle is "list"
+
     Luca.containers.CardView::initialize.apply @, arguments
 
     _.bindAll @, "select", "highlightSelectedTab"
 
     @setupHooks( @hooks )
-
-    if @navStyle is "list"
-      @navClass = "nav-list"
 
     @bind "after:card:switch", @highlightSelectedTab
 
