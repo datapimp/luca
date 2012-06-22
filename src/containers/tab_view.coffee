@@ -81,7 +81,7 @@ _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
     $("##{ @cid }-tabs-selector")
 
   tabContainer: ()->
-    @$('ul.#{ @navClass }', @tabContainerWrapper() )
+    @$("ul.#{ @navClass }", @tabContainerWrapper() )
 
   tabSelectors: ()->
     @$( 'li.tab-selector', @tabContainer() )

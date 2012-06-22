@@ -2504,7 +2504,7 @@
       return $("#" + this.cid + "-tabs-selector");
     },
     tabContainer: function() {
-      return this.$('ul.#{ @navClass }', this.tabContainerWrapper());
+      return this.$("ul." + this.navClass, this.tabContainerWrapper());
     },
     tabSelectors: function() {
       return this.$('li.tab-selector', this.tabContainer());
