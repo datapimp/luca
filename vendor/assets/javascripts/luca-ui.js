@@ -639,7 +639,7 @@
       return this.delegateEvents();
     },
     $wrap: function(wrapper) {
-      if (!wrapper.match(/[<>]/)) {
+      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
         wrapper = this.make("div", {
           "class": wrapper
         });
@@ -1299,7 +1299,7 @@
       return $(this.el);
     },
     $wrap: function(wrapper) {
-      if (!wrapper.match(/[<>]/)) {
+      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
         wrapper = this.make("div", {
           "class": wrapper
         });
@@ -2529,11 +2529,12 @@
     wrapperClass: 'row',
     initialize: function(options) {
       this.options = options != null ? options : {};
-      Luca.core.Container.prototype.initialize.apply(this, arguments);
+      _.extend(this, this.options);
       if (Luca.enableBootstrap === true) {
         if (this.fluid === true) this.wrapperClass = "row-fluid";
-        this.$el.wrap("<div class='" + this.wrapperClass + "' />").addClass('span12');
+        this.$wrap(this.wrapperClass);
       }
+      Luca.core.Container.prototype.initialize.apply(this, arguments);
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
     },
     beforeRender: function() {
@@ -2541,11 +2542,17 @@
       if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
         _ref.apply(this, arguments);
       }
-      if (Luca.enableBootstrap && this.topNav && this.fullscreen) {
-        $('body').css('padding', '40px');
-      }
       if (this.topNav != null) this.renderTopNavigation();
       if (this.bottomNav != null) return this.renderBottomNavigation();
+    },
+    afterRender: function() {
+      var _ref;
+      if ((_ref = Luca.containers.CardView.prototype.after) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (Luca.enableBootstrap === true) {
+        return this.$el.children().wrap('<div class="container" />');
+      }
     },
     renderTopNavigation: function() {
       var _base;

@@ -129,7 +129,7 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     $(@el)
 
   $wrap: (wrapper)->
-    if !wrapper.match(/[<>]/)
+    if _.isString(wrapper) and not wrapper.match(/[<>]/)
       wrapper = @make("div",class:wrapper)
 
     @$el.wrap( wrapper )

@@ -11,23 +11,31 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   wrapperClass: 'row'
 
   initialize: (@options={})->
-    Luca.core.Container::initialize.apply(@, arguments)
+    _.extend @, @options
 
     if Luca.enableBootstrap is true
       @wrapperClass = "row-fluid" if @fluid is true
-      @$el.wrap("<div class='#{ @wrapperClass }' />").addClass('span12')
+      @$wrap( @wrapperClass )
+
+    Luca.core.Container::initialize.apply(@, arguments)
 
     $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
 
   beforeRender: ()->
     Luca.containers.CardView::beforeRender?.apply(@, arguments)
 
-    if Luca.enableBootstrap and @topNav and @fullscreen
-      $('body').css('padding','40px')
+    #if Luca.enableBootstrap and @topNav and @fullscreen
+    #  $('body').css('padding','40px')
 
     @renderTopNavigation() if @topNav?
     @renderBottomNavigation() if @bottomNav?
 
+  afterRender: ()->
+    Luca.containers.CardView::after?.apply(@, arguments)
+
+    if Luca.enableBootstrap is true
+      @$el.children().wrap('<div class="container" />')
+        
   renderTopNavigation: ()->
     return unless @topNav?
 
@@ -45,6 +53,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
 
   renderBottomNavigation: ()->
+    # IMPLEMENT
 
 
 

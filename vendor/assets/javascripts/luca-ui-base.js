@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.1",
+    VERSION: "0.9.15",
     core: {},
     containers: {},
     components: {},
@@ -264,6 +264,30 @@
     }
     script.src = url;
     return document.body.appendChild(script);
+  };
+
+  Luca.util.make = Backbone.View.prototype.make;
+
+  Luca.util.label = function(contents, type, baseClass) {
+    var cssClass;
+    if (contents == null) contents = "";
+    if (baseClass == null) baseClass = "label";
+    cssClass = baseClass;
+    if (type != null) cssClass += " " + baseClass + "-" + type;
+    return Luca.util.make("span", {
+      "class": cssClass
+    }, contents);
+  };
+
+  Luca.util.badge = function(contents, type, baseClass) {
+    var cssClass;
+    if (contents == null) contents = "";
+    if (baseClass == null) baseClass = "badge";
+    cssClass = baseClass;
+    if (type != null) cssClass += " " + baseClass + "-" + type;
+    return Luca.util.make("span", {
+      "class": cssClass
+    }, contents);
   };
 
 }).call(this);
@@ -615,7 +639,7 @@
       return this.delegateEvents();
     },
     $wrap: function(wrapper) {
-      if (!wrapper.match(/[<>]/)) {
+      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
         wrapper = this.make("div", {
           "class": wrapper
         });
@@ -738,7 +762,7 @@
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
     definition.render = function() {
-      var autoTrigger, fn, target, trigger, view,
+      var autoTrigger, deferred, fn, target, trigger, view,
         _this = this;
       view = this;
       if (this.deferrable) {
@@ -748,10 +772,11 @@
         }
         target || (target = this.deferrable);
         trigger = this.deferrable_event ? this.deferrable_event : "reset";
-        view.defer(function() {
+        deferred = function() {
           _base.call(view);
           return view.trigger("after:render", view);
-        }).until(target, trigger);
+        };
+        view.defer(deferred).until(target, trigger);
         view.trigger("before:render", this);
         autoTrigger = this.deferrable_trigger || this.deferUntil;
         if (!(autoTrigger != null)) {
@@ -1274,7 +1299,7 @@
       return $(this.el);
     },
     $wrap: function(wrapper) {
-      if (!wrapper.match(/[<>]/)) {
+      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
         wrapper = this.make("div", {
           "class": wrapper
         });
@@ -1450,7 +1475,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
+  Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav ', navClass ,'\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -2411,10 +2436,12 @@
     className: 'luca-ui-tab-view tabbable',
     tab_position: 'top',
     tabVerticalOffset: '50px',
+    navClass: "nav-tabs",
     bodyTemplate: "containers/tab_view",
     bodyEl: "div.tab-content",
     initialize: function(options) {
       this.options = options != null ? options : {};
+      if (this.navStyle === "list") this.navClass = "nav-list";
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       _.bindAll(this, "select", "highlightSelectedTab");
       this.setupHooks(this.hooks);
@@ -2445,12 +2472,21 @@
       var tabView;
       tabView = this;
       return this.each(function(component, index) {
-        var selector;
+        var icon, link, selector, _ref;
+        if (component.tabIcon) icon = "<i class='icon-" + component.tabIcon;
+        link = "<a href='#'>" + (icon || '') + " " + component.title + "</a>";
         selector = tabView.make("li", {
           "class": "tab-selector",
           "data-target": index
-        }, "<a>" + component.title + "</a>");
-        return tabView.tabContainer().append(selector);
+        }, link);
+        tabView.tabContainer().append(selector);
+        if ((component.navHeading != null) && !((_ref = tabView.navHeadings) != null ? _ref[component.navHeading] : void 0)) {
+          $(selector).before(tabView.make('li', {
+            "class": "nav-header"
+          }, component.navHeading));
+          tabView.navHeadings || (tabView.navHeadings = {});
+          return tabView.navHeadings[component.navHeading] = true;
+        }
       });
     },
     highlightSelectedTab: function() {
@@ -2459,6 +2495,7 @@
     },
     select: function(e) {
       var me, my;
+      e.preventDefault();
       me = my = $(e.target);
       this.trigger("before:select", this);
       this.activate(my.parent().data('target'));
@@ -2474,7 +2511,7 @@
       return $("#" + this.cid + "-tabs-selector");
     },
     tabContainer: function() {
-      return this.$('ul.nav-tabs', this.tabContainerWrapper());
+      return this.$("ul." + this.navClass, this.tabContainerWrapper());
     },
     tabSelectors: function() {
       return this.$('li.tab-selector', this.tabContainer());
@@ -2492,11 +2529,12 @@
     wrapperClass: 'row',
     initialize: function(options) {
       this.options = options != null ? options : {};
-      Luca.core.Container.prototype.initialize.apply(this, arguments);
+      _.extend(this, this.options);
       if (Luca.enableBootstrap === true) {
         if (this.fluid === true) this.wrapperClass = "row-fluid";
-        this.$el.wrap("<div class='" + this.wrapperClass + "' />").addClass('span12');
+        this.$wrap(this.wrapperClass);
       }
+      Luca.core.Container.prototype.initialize.apply(this, arguments);
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
     },
     beforeRender: function() {
@@ -2504,11 +2542,17 @@
       if ((_ref = Luca.containers.CardView.prototype.beforeRender) != null) {
         _ref.apply(this, arguments);
       }
-      if (Luca.enableBootstrap && this.topNav && this.fullscreen) {
-        $('body').css('padding', '40px');
-      }
       if (this.topNav != null) this.renderTopNavigation();
       if (this.bottomNav != null) return this.renderBottomNavigation();
+    },
+    afterRender: function() {
+      var _ref;
+      if ((_ref = Luca.containers.CardView.prototype.after) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (Luca.enableBootstrap === true) {
+        return this.$el.children().wrap('<div class="container" />');
+      }
     },
     renderTopNavigation: function() {
       var _base;
