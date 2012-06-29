@@ -4,6 +4,18 @@ task :environment do
 end
 
 namespace :release do
+  desc "Release new version of sandbox site"
+  task :sandbox => [:assets, :minify] do
+    stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
+    scripts = ["dependencies.js","luca-ui-bootstrap.js","luca-ui-development-tools.js","sandbox.js"]
+    asset_folder = File.join(App.root,'site','assets')
+
+    [stylesheets,scripts].flatten.each do |filename|
+      asset = App.sprockets.find_asset(filename)
+      FileUtils.cp(asset.pathname.to_s, asset_folder)
+    end    
+  end
+
   desc "Compile all the assets"
   task :assets => :environment do
     File.open( File.join(App.root,'vendor','assets','stylesheets','luca-ui.css'), 'w+' ) do |fh|
@@ -26,7 +38,7 @@ namespace :release do
   end
 
   desc "Build the gem"
-  task :gem do
+  task :gem,  do
     `gem build luca.gemspec`
   end
 

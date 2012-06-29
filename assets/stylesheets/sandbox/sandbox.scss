@@ -1,2 +1,17 @@
 #viewport {
+  line-height: 1.5;
+  color: #333;
+
+  p {
+    font-size: 14px;
+  }
+
+  #information .row.heading {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+
+  #information .row h3 {
+    margin-bottom: 4px;  
+  }
 }

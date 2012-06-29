@@ -11,36 +11,41 @@
 
 %hr
 
-%h2 Composite Application Architecture
-.row
-  .span4
-    %h3 Component Driven Design
-    %p Luca is a collection of common components needed to build large single page applications. Luca provides base classes for Model, View, and Collection classes which you can choose to extend where needed.  Luca also provides an extensive library of application building components and UI elements which you can piece together in a variety of ways to build responsive, and snappy single page apps. 
+#information
+  .row.heading
+    .span12
+      %h2 Composite Application Architecture
+  .row
+    .span4
+      %h3 Component Driven Design
+      %p Luca is a collection of common components needed to build large single page applications. Luca provides base classes for Model, View, and Collection classes which you can choose to extend where needed.  Luca also provides an extensive library of application building components and UI elements which you can piece together in a variety of ways to build responsive, and snappy single page apps. 
 
-  .span4
-    %h3 Backbone and Luca work together 
-    %p Luca is not a replacement for Backbone, it is a smart use of Backbone's core classes.  Large apps require layers of abstraction and patterns for communication between various components, Luca provides these for you.
-    %p Like Backbone, you only have to use what you need.
+    .span4
+      %h3 Backbone and Luca work together 
+      %p Luca is not a replacement for Backbone, it is a smart use of Backbone's core classes.  Large apps require layers of abstraction and patterns for communication between various components, Luca provides these for you.
+      %p Like Backbone, you only have to use what you need.
 
-  .span4
-    %h3 Relies on good patterns 
-    %p We have extracted all of the common patterns and optimizations we have learned over the course of a year developing several large applications. Using Luca allows you to leverage the power of Backbone.js but only focus on what makes your app unique.
+    .span4
+      %h3 Relies on good patterns 
+      %p We have extracted all of the common patterns and optimizations we have learned over the course of a year developing several large applications. Using Luca allows you to leverage the power of Backbone.js but only focus on what makes your app unique.
 
-  %a{href:"https://github.com/datapimp/luca"}
-    %img{style:"position: absolute; top: 0; right: 0; border: 0; z-index:9000;",src:"https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png",alt:"Fork me on GitHub"}
+    %a{href:"https://github.com/datapimp/luca"}
+      %img{style:"position: absolute; top: 0; right: 0; border: 0; z-index:9000;",src:"https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png",alt:"Fork me on GitHub"}
 
-%h2 Develop Apps Faster 
-.row
-  .span4
-    %h3 Development Tools
-    %p If you enable the Luca development tools, you have access to things like an in browser Coffeescript console, a CodeMirror based IDE to edit and test your components, live reloading of javascript prototype changes as well as re-rendering and evaluating the code changes.
+  .row.heading
+    .span12
+      %h2 Develop Apps Faster 
+  .row
+    .span4
+      %h3 Development Tools
+      %p If you enable the Luca development tools, you have access to things like an in browser Coffeescript console, a CodeMirror based IDE to edit and test your components which live reloads javascript prototype changes and re-renders your components, so that you can experiment directly in the browser. 
+      %p Live reloading of your code changes is also supported if you use the ruby gem and make changes in your favorite editor.
+    .span4
+      %h3 Experimentation and Debugging
+      %p The way the Luca framework was designed encourages us to define our apps mostly using JSON configuration, which then gets interpreted, and structural components and style rules are generated for us.  Events get binded, and things just work.  
+      %p Because large parts of the application's code are just configuration strings, it is very easy to provide you with a suite of development tools that allow you to inspect what is going on behind the scenes and make changes directly in the environment if you want to experiment with some ideas.
 
-  .span4
-    %h3 Luca apps are easier to debug and modify
-    %p The way the Luca framework was designed encourages us to define our apps mostly using JSON configuration, which then gets interpreted, and structural components and style rules are generated for us.  Events get binded, and things just work.  
-    %p Because large parts of the application's code are just configuration strings, it is very easy to build a suite of development tools that allow you to inspect what is going on behind the scenes and make changes directly in the environment if you want to experiment with some ideas.
-
-  .span4
-    %h3 Not only for Ruby Developers
-    %p Luca is just javascript and css, and will work with any server backend.
-    %p That being said, Luca was developed against Rails and Sinatra apps and comes with many development helpers which work in these environments.  The development environment and sandbox is a Sinatra app, but like everything else in the framework you can only use what you need.
+    .span4
+      %h3 Not only for Ruby Developers
+      %p Luca is just javascript and css, and will work with any server backend.
+      %p That being said, Luca was developed against Rails and Sinatra apps and comes with many development helpers which work in these environments.  The development environment and sandbox is a Sinatra app, but like everything else in the framework you can only use what you need.
