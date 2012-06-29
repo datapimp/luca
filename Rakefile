@@ -3,16 +3,24 @@ task :environment do
   require 'pry'
 end
 
+
+stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
+scripts = ["dependencies.js","luca-ui-bootstrap.js","luca-ui-development-tools.js","sandbox.js"]
+
 namespace :release do
   desc "Release new version of sandbox site"
   task :sandbox => [:assets, :minify] do
-    stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
-    scripts = ["dependencies.js","luca-ui-bootstrap.js","luca-ui-development-tools.js","sandbox.js"]
+
     asset_folder = File.join(App.root,'site','assets')
 
     [stylesheets,scripts].flatten.each do |filename|
       asset = App.sprockets.find_asset(filename)
-      FileUtils.cp(asset.pathname.to_s, asset_folder)
+      destination = File.join( asset_folder, filename)
+      puts "Generating #{ destination }"
+      
+      File.open( destination , 'w+' ) do |fh|
+        fh.puts( asset.to_s )
+      end
     end    
   end
 
