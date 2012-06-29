@@ -5,7 +5,7 @@ end
 
 
 stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
-scripts = ["dependencies.js","luca-ui-bootstrap.js","luca-ui-development-tools.js","sandbox.js"]
+scripts = ["dependencies.js","sandbox.js"]
 
 namespace :release do
   desc "Release new version of sandbox site"
@@ -15,13 +15,14 @@ namespace :release do
 
     [stylesheets,scripts].flatten.each do |filename|
       asset = App.sprockets.find_asset(filename)
-      destination = File.join( asset_folder, filename)
-      puts "Generating #{ destination }"
-      
-      File.open( destination , 'w+' ) do |fh|
-        fh.puts( asset.to_s )
+      File.open( File.join( App.root, 'site', 'assets', filename) , 'w+' ) do |fh|
+        fh.puts(asset.to_s)
       end
     end    
+
+    FileUtils.cp( File.join(App.root,'assets','javascripts','dependencies','bootstrap.min.js'), asset_folder)
+    FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui.min.js'), asset_folder)
+    FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui-development-tools.min.js'), asset_folder)
   end
 
   desc "Compile all the assets"
