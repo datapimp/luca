@@ -33,8 +33,8 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   afterRender: ()->
     Luca.containers.CardView::after?.apply(@, arguments)
 
-    if Luca.enableBootstrap is true
-      @$el.children().wrap('<div class="container" />')
+    if Luca.enableBootstrap is true and @containerClassName
+      @$el.children().wrap('<div class="#{ containerClassName }" />')
         
   renderTopNavigation: ()->
     return unless @topNav?

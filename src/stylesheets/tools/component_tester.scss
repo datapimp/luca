@@ -6,3 +6,21 @@ ul.typeahead.dropdown-menu {
   font-size: 18px;
   line-height: 1.7;
 }
+
+
+#component_tester {
+  #editor_container {
+    .toolbar-container.bottom {
+      margin: 0px;  
+      .luca-ui-toolbar {
+        margin: 0px;
+        padding: 0px;
+      }
+    }
+  }
+  [data-luca-owner="component_detail"] {
+    max-height: 600px;
+    overflow: scroll;
+    min-height: 400px;
+  }
+}

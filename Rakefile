@@ -12,6 +12,7 @@ namespace :release do
   task :sandbox => [:assets, :minify] do
 
     asset_folder = File.join(App.root,'site','assets')
+    img_folder = File.join(App.root,'site','img')
 
     [stylesheets,scripts].flatten.each do |filename|
       asset = App.sprockets.find_asset(filename)
@@ -23,6 +24,10 @@ namespace :release do
     FileUtils.cp( File.join(App.root,'assets','javascripts','dependencies','bootstrap.min.js'), asset_folder)
     FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui.min.js'), asset_folder)
     FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui-development-tools.min.js'), asset_folder)
+
+    FileUitls.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings-white.png'), img_folder )
+    FileUitls.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings.png'), img_folder )
+
   end
 
   desc "Compile all the assets"

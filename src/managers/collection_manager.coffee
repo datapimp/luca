@@ -34,10 +34,10 @@
 # Special Thanks to @tjbladez for this wonderful initialModelsa
 #
 
-instances = []
-
 # _.def('Luca.CollectionManager').extends('Luca').with
 class Luca.CollectionManager
+  name: "main"
+
   __collections: {}
 
   constructor: (@options={})->
@@ -45,14 +45,14 @@ class Luca.CollectionManager
     _.extend @, Backbone.Events
     _.extend @, Luca.Events
 
-    # if you are going to use more than one collection
-    # manager, then you will have to specify which
-    # collection manager your views need to interact
-    # with for their collectionEvents configuration handling
-    instances.push(@)
+    manager = @
 
-    # model to maintain state of the collection manager
-    @state = new Backbone.Model
+    Luca.CollectionManager.get ||= (name)->
+      return manager unless name?
+      Luca.CollectionManager.instances ||= {}
+
+     # model to maintain state of the collection manager
+    @state = new Luca.Model()
 
     if @initialCollections
       @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
@@ -164,6 +164,7 @@ class Luca.CollectionManager
   private: (key, collectionOptions={}, initialModels=[])->
     @create(key,collectionOptions,initialModels,true)
 
-Luca.CollectionManager.destroyAll = ()-> instances = []
-Luca.CollectionManager.instances = ()-> instances
-Luca.CollectionManager.get = ()-> _( instances ).last()
+Luca.CollectionManager.instances = {}
+
+Luca.CollectionManager.destroyAll = ()-> 
+  Luca.CollectionManager.instances = {} 

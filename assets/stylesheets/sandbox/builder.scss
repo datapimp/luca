@@ -1,0 +1,15 @@
+#builder {
+  // TODO 
+ // this is a bug in luca 
+ .toolbar-container {
+    padding-right: 12px;
+
+    .luca-ui-toolbar.toolbar-bottom {
+      margin-top: 0px;
+    }
+    .luca-ui-toolbar.toolbar-top {
+      margin-bottom: 0px;
+    }
+ }
+
+}
