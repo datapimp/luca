@@ -1,6 +1,8 @@
 _.def("Luca.tools.CoffeeEditor").extends("Luca.tools.CodeMirrorField").with
   name : "coffeescript_editor"
 
+  autoCompile: true
+
   compileOptions:
     bare: true
 
@@ -51,10 +53,6 @@ _.def("Luca.tools.CoffeeEditor").extends("Luca.tools.CodeMirrorField").with
   currentMode: ()->
     @state.get("currentMode")
 
-  fixTabs: ()->
-    value = @getValue(false)
-    debugger
-
   editorChange: ()->
-    @fixTabs()
-    @state.set( @currentMode(), @getValue() )
+    if @autoCompile is true
+      @state.set( @currentMode(), @getValue() )

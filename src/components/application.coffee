@@ -1,4 +1,24 @@
+# Luca.Application 
+#
+# The Application class is the global state tracking mechanism
+# for your single page application, as well as the entry point.
+#
+# By default it contains a main controller which is a Luca.components.Controller instance. 
+#
+# In a typical application, the router will use the applications @navigate() method to switch
+# from page to page on the main controller, or any other controllers nested inside of it.
+# Control flow when the controller fires activation events on the nested view components inside of it.
+#
+# Decoupling application control flow from the URL Fragment from Backbone.History and preventing
+# your components from directly caring about the URL Fragment, allows you to build applications as
+# isolated components which can run separately or nested inside of other applications.   
+#
+#
+#
 _.def('Luca.Application').extends('Luca.containers.Viewport').with
+  # if autoBoot is set to true
+  autoBoot: false
+  name: "MyApp"
 
   # automatically starts the @router
   # if it exists, once the components
@@ -36,6 +56,13 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   ]
 
   initialize: (@options={})->
+    app             = @
+    appName         = @name
+    alreadyRunning  = Luca.getApplication?()
+
+    Luca.Application.instances ||= {}
+    Luca.Application.instances[ appName ] = app
+    
     Luca.containers.Viewport::initialize.apply @, arguments
 
     if @useController is true
@@ -58,7 +85,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # we will render when all of the various components
     # which handle our data dependencies determine that
     # we are ready
-    @defer(()=>@render()).until("ready")
+    @defer(()-> app.render()).until(@, "ready")
 
     # the keyRouter allows us to specify
     # keyEvents on our application with an API very similar
@@ -71,11 +98,33 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     #     forwardslash: "altSlashHandler"
     @setupKeyRouter() if @useKeyRouter is true and @keyEvents?
 
+    if _.isString( @router )
+      routerClass = Luca.util.resolve(@router)
+      @router = new routerClass({app})
+
+    # if this application has a router associated with it
+    # then we need to start backbone history on a certain event.
+    # you can control which by setting the @startHistoryOn property
+    if @router and @autoStartHistory
+      startHistory = ()-> Backbone.history.start()
+      @defer(startHistory, false).until(@, (@startHistoryOn||"before:render") )
+
     # if the application is a plugin designed to modify the behavior
     # of another app, then don't claim ownership.  otherwise the most common
     # use-case is that there will be one application instance
-    unless @plugin is true
-      Luca.getApplication = ()=> @
+    unless @plugin is true or alreadyRunning
+      Luca.getApplication = (name)=> 
+        return app unless name?
+        Luca.Application.instances[ name ] 
+
+
+    if @autoBoot
+      if Luca.util.resolve(@name)
+        throw "Attempting to override window.#{ @name } when it already exists"
+
+      $ ->
+        window[ appName ] = app 
+        app.boot()
 
   activeView: ()->
     if active = @activeSubSection()

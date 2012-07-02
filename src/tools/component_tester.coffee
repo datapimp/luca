@@ -95,12 +95,21 @@ ComponentPicker = Luca.fields.TypeAheadField.extend
 
 
 _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
+  id: "component_tester"
   name: "component_tester"
-
-  className:"span11"
 
   autoEvaluateCode: true
 
+  currentSize: 1
+
+  sizes:[
+    icon: "resize-full"
+    value: ()-> $(window).height() * 0.3
+  ,
+    icon: "resize-small"
+    value: ()-> $(window).height() * 0.6
+  ]
+  
   components:[
     ctype: 'card_view'
     name: "component_detail"
@@ -115,11 +124,6 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     name: "ctester_edit"
     className: 'font-large fixed-height'
     minHeight:'350px'
-
-    styles:
-      "position" : "absolute"
-      "bottom" : "0px"
-      "width" : "96%"
 
     currentBuffers: defaults
 
@@ -241,13 +245,6 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @defer("editComponent").until("after:render")
 
   afterRender: ()->
-    @getOutput().applyStyles('min-height':'400px')
-
-    # TEMP
-    # Visual hacks
-    @$('.toolbar-container').css('padding-right','12px')
-    @$('.luca-ui-toolbar.toolbar-bottom').css('margin','0px')
-
     changeHandler = _.idleMedium ()=>
       if @autoEvaluateCode is true
         @applyTestRun()
@@ -330,14 +327,7 @@ _.def("Luca.tools.ComponentTester").extends("Luca.core.Container").with
     @editBuffer @currentBufferName, (newMode is "javascript")
 
 
-  currentSize: 1
-  sizes:[
-    icon: "resize-full"
-    value: ()-> $(window).height() * 0.3
-  ,
-    icon: "resize-small"
-    value: ()-> $(window).height() * 0.6
-  ]
+
 
   toggleSize: (button)->
     index = @currentSize++ % @sizes.length

@@ -17242,33 +17242,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   };
 })();
 (function() {
-
-  _.def("Luca.tools.ClassBrowser")["extends"]("Luca.containers.SplitView")["with"]({
-    name: "class_browser",
-    className: "luca-class-browser row",
-    layout: ["span3", "span9"],
-    components: ["class_browser_list", "class_browser_detail"],
-    componentEvents: {
-      "class_browser_list component:loaded": "loadSourceCode"
-    },
-    bottomToolbar: {
-      buttons: [
-        {
-          label: "Add New",
-          icon: "plus",
-          color: "primary",
-          white: true,
-          align: 'right'
-        }
-      ]
-    },
-    loadSourceCode: function(model, response) {
-      return Luca("class_browser_detail").loadComponent(model);
-    }
-  });
-
-}).call(this);
-(function() {
   var BuffersModel, compilers;
 
   BuffersModel = Luca.Model.extend({
@@ -17654,6 +17627,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
   _.def("Luca.tools.CoffeeEditor")["extends"]("Luca.tools.CodeMirrorField")["with"]({
     name: "coffeescript_editor",
+    autoCompile: true,
     compileOptions: {
       bare: true
     },
@@ -17705,14 +17679,10 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     currentMode: function() {
       return this.state.get("currentMode");
     },
-    fixTabs: function() {
-      var value;
-      value = this.getValue(false);
-      debugger;
-    },
     editorChange: function() {
-      this.fixTabs();
-      return this.state.set(this.currentMode(), this.getValue());
+      if (this.autoCompile === true) {
+        return this.state.set(this.currentMode(), this.getValue());
+      }
     }
   });
 
@@ -17791,9 +17761,23 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   });
 
   _.def("Luca.tools.ComponentTester")["extends"]("Luca.core.Container")["with"]({
+    id: "component_tester",
     name: "component_tester",
-    className: "span11",
     autoEvaluateCode: true,
+    currentSize: 1,
+    sizes: [
+      {
+        icon: "resize-full",
+        value: function() {
+          return $(window).height() * 0.3;
+        }
+      }, {
+        icon: "resize-small",
+        value: function() {
+          return $(window).height() * 0.6;
+        }
+      }
+    ],
     components: [
       {
         ctype: 'card_view',
@@ -17811,11 +17795,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         name: "ctester_edit",
         className: 'font-large fixed-height',
         minHeight: '350px',
-        styles: {
-          "position": "absolute",
-          "bottom": "0px",
-          "width": "96%"
-        },
         currentBuffers: defaults,
         compiledBuffers: ["component", "setup", "implementation"],
         topToolbar: {
@@ -17947,11 +17926,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     afterRender: function() {
       var changeHandler,
         _this = this;
-      this.getOutput().applyStyles({
-        'min-height': '400px'
-      });
-      this.$('.toolbar-container').css('padding-right', '12px');
-      this.$('.luca-ui-toolbar.toolbar-bottom').css('margin', '0px');
       changeHandler = _.idleMedium(function() {
         if (_this.autoEvaluateCode === true) return _this.applyTestRun();
       }, 500);
@@ -18049,20 +18023,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       button.html(_.string.capitalize((newMode === "coffeescript" ? "View Javascript" : "View Coffeescript")));
       return this.editBuffer(this.currentBufferName, newMode === "javascript");
     },
-    currentSize: 1,
-    sizes: [
-      {
-        icon: "resize-full",
-        value: function() {
-          return $(window).height() * 0.3;
-        }
-      }, {
-        icon: "resize-small",
-        value: function() {
-          return $(window).height() * 0.6;
-        }
-      }
-    ],
     toggleSize: function(button) {
       var iconHolder, index, newIcon, newSize;
       index = this.currentSize++ % this.sizes.length;

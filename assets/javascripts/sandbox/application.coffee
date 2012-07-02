@@ -1,6 +1,13 @@
-Sandbox.Application = Luca.Application.extend
-  name: 'sandbox_application'
+_.def('Sandbox.Application').extends('Luca.Application').with
+
+  autoBoot: true
+
+  name: 'SandboxApp'
+
+  router: "Sandbox.Router"
+
   el: '#viewport'
+
   fluid: true
 
   topNav:'top_navigation'
@@ -18,17 +25,13 @@ Sandbox.Application = Luca.Application.extend
       name: "main"
       bodyTemplate: 'main'
     ,
-      name :"class_browser"
-      ctype: "class_browser"
-    ,
       name: "component_tester"
       ctype: "component_tester"
+    ,
+      name: "build"
+      ctype: "builder"
     ]
   ]
-
-  initialize: (@options={})->
-    Luca.Application::initialize.apply @, arguments
-    @router = new Sandbox.Router(app: @)
 
   developmentConsole: ()->
     @developmentConsole = Luca "coffeescript-console", ()->
@@ -42,10 +45,5 @@ Sandbox.Application = Luca.Application.extend
 
     $('#devtools-console-wrapper').modal(backdrop:false,show:true)
 
-  afterRender: ()->
-    @_super("afterRender", @, arguments)
-
-$ do ->
-  (window || global).SandboxApp = new Sandbox.Application()
-  SandboxApp.boot()
-  prettyPrint()
+$ -> 
+  new Sandbox.Application()

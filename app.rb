@@ -26,7 +26,10 @@ class App < Sinatra::Base
   configure do
     sprockets.append_path(File.join(root, 'assets', 'stylesheets'))
     sprockets.append_path(File.join(root, 'assets', 'javascripts'))
+    sprockets.append_path(File.join(root, 'vendor', 'assets', 'javascripts'))
+    sprockets.append_path(File.join(root, 'vendor', 'assets', 'stylesheets'))
     sprockets.append_path(File.join(root, 'assets', 'images'))
+    sprockets.append_path(File.join(root, 'vendor', 'assets', 'images'))
 
     sprockets.context_class.instance_eval do
       include AssetHelpers

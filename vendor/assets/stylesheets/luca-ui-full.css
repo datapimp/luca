@@ -1288,6 +1288,16 @@ ul.typeahead.dropdown-menu {
 .font-large .CodeMirror {
   font-size: 18px;
   line-height: 1.7; }
+
+#component_tester #editor_container .toolbar-container.bottom {
+  margin: 0px; }
+  #component_tester #editor_container .toolbar-container.bottom .luca-ui-toolbar {
+    margin: 0px;
+    padding: 0px; }
+#component_tester [data-luca-owner="component_detail"] {
+  max-height: 600px;
+  overflow: scroll;
+  min-height: 400px; }
 .luca-ui-console .CodeMirror {
   font-family: "Monaco";
   font-size: 14px;
