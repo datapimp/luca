@@ -1,27 +1,28 @@
-Documentation and Sandbox
--------------------------
-http://datapimp.github.com/luca
+# Component Driven Architecture with Luca.JS
 
-What Is Luca?
--------------
-Luca is a component / container library for Backbone.js which
-provides you with some sensible defaults, some common components and layout helpers,
-optimized View, Model, and Collection classes, and many other components needed for 
-an application with a solid architecture.
+Luca is a component architecture framework based on Backbone.js, which includes
+many development helpers, classes, patterns, and tools needed to build scalable
+and clean single page applications.
+
+It uses twitter bootstrap compatible markup and css naming conventions, 
+making it possible to generate completely styled user interfaces with JSON alone.
 
 Luca combines the functionality of other open source libraries as well, but you are not
-required to use any of them if you don't like.  These libraries are:
+required to use any of them if you don't like.
 
-Bootstrap by Twitter
-Backbone-Query by David Tonge
+### Dependencies
 
-Getting Started
----------------
-Luca doesn't require you to use Twitter Bootstrap.  But, if you plan to, you will be
-able to generate Bootstrap styled UI components completely in your Javascript.
+- [Bootstrap by Twitter](https://twitter.github.com/bootstrap)
+- [Backbone-Query by David Tonge](https://github.com/davidgtonge/backbone_query)
+- [Underscore String by Esa-Matti Suuronen](https://github.com/epeli/underscore.string)
 
-Using With Rails Asset Pipeline
-----------------
+### Development Tool Dependencies:
+
+- [CodeMirror IDE](https://codemirror.net)
+- [CoffeeScript Compiler](https://coffeescript.org)
+
+
+### Using With Rails Asset Pipeline
 
 ```ruby
   # Gemfile
@@ -32,16 +33,16 @@ In your css manifest:
 
 ```css
   /*
-   *= require 'luca-ui-bootstrap'
+   *= require 'luca-ui-full'
    *= require 'luca-ui-development-tools'
   */
 ```
 
-Javascript:
-
+All Javascript Dependencies:
 
 ```javascript
    //= require 'underscore'
+   //= require 'underscore-string.min'
    //= require 'jquery'
    //= require 'backbone'
    //= require 'bootstrap.min.js'
@@ -49,25 +50,32 @@ Javascript:
    //= require 'luca-ui-development-tools.min.js'
 ```
 
-Using With Twitter Bootstrap ( development tools are optional )
-----------------
+Or you can just use the dependencies we rely on.  Latest backbone.js, underscore.js, underscore.string.js, twitter boostrap js and css:
+
+```
+  //= require 'luca-ui-full.min.js'
+```
+
+## Standalone With Twitter Bootstrap ( development tools are optional )
 ```html
   <html>
     <head>
-      <link rel="stylesheet" href='bootstrap.min.css' />
-      <link rel="stylesheet" href='luca-ui.css' />
+      <link rel="stylesheet" href='luca-ui-full.css' />
       <link rel="stylesheet" href='luca-ui-development-tools.css' />
     </head>
     <body>
-      <script type='text/javascript' src="bootstrap.min.js" /> 
-      <script type='text/javascript' src="luca-ui.min.js" /> 
+      <script type='text/javascript' src="luca-ui-full.min.js" /> 
       <script type='text/javascript' src="luca-ui-development-tools.min.js" /> 
     </body>
   </html>
 ```
 
-Thanks To
----------
+## Interactive Documentation and Examples
+
+[View the Sandbox](http://datapimp.com/luca)
+
+## Thanks To
+
 @jashkenas for making coffeescript, underscore, backbone.js.
 
 @twitter for making bootstrap 2.0
@@ -78,6 +86,6 @@ Thanks To
 
 @luca. who i spent only two minutes making and am exponentially more proud to have created.
 
+## Contributing
 
-https://raw.github.com/datapimp/luca/development-tools/assets/javascripts/dependencies/underscore-string.min.js
-https://raw.github.com/datapimp/luca/development-tools/assets/javascripts/dependencies/backbond-string.min.js
+Please!
