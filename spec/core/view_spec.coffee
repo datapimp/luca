@@ -148,6 +148,7 @@ describe "The Collection Events API", ->
     name: "collectionEvents"
 
   beforeEach ()->
+    Luca.CollectionManager.destroyAll()
     @manager ||= new SampleManager()
     @collection = @manager.getOrCreate("sample")
 

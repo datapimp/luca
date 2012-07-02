@@ -268,6 +268,11 @@
 
   Luca.util.make = Backbone.View.prototype.make;
 
+  Luca.util.parentClasses = function(c) {
+    if (Luca.isComponentPrototype(c)) console.log('Prototype');
+    if (Luca.isComponent(c)) return console.log('Component');
+  };
+
   Luca.util.label = function(contents, type, baseClass) {
     var cssClass;
     if (contents == null) contents = "";
@@ -341,15 +346,20 @@
     };
 
     DefineProxy.prototype["with"] = function(properties) {
-      var at;
+      var at, componentType;
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
       if (this.namespaced && !(at != null)) {
         eval("(window||global)." + this.namespace + " = {}");
         at = Luca.util.resolve(this.namespace, window || global);
       }
       at[this.componentId] = Luca.extend(this.superClassName, this.componentName, properties);
-      if (Luca.autoRegister === true && Luca.isViewPrototype(at[this.componentId])) {
-        Luca.register(_.string.underscored(this.componentId), this.componentName);
+      if (Luca.autoRegister === true) {
+        if (Luca.isViewPrototype(at[this.componentId])) componentType = "view";
+        if (Luca.isCollectionPrototype(at[this.componentId])) {
+          componentType = "collection";
+        }
+        if (Luca.isModelPrototype(at[this.componentId])) componentType = "model";
+        Luca.register(_.string.underscored(this.componentId), this.componentName, componentType);
       }
       return at[this.componentId];
     };
@@ -498,7 +508,8 @@
 
   Luca.defaultComponentType = 'view';
 
-  Luca.register = function(component, prototypeName) {
+  Luca.register = function(component, prototypeName, componentType) {
+    if (componentType == null) componentType = "view";
     Luca.trigger("component:registered", component, prototypeName);
     return registry.classes[component] = prototypeName;
   };
@@ -1880,21 +1891,26 @@
 
 }).call(this);
 (function() {
-  var instances;
-
-  instances = [];
 
   Luca.CollectionManager = (function() {
+
+    CollectionManager.prototype.name = "main";
 
     CollectionManager.prototype.__collections = {};
 
     function CollectionManager(options) {
+      var manager, _base;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Backbone.Events);
       _.extend(this, Luca.Events);
-      instances.push(this);
-      this.state = new Backbone.Model;
+      manager = this;
+      (_base = Luca.CollectionManager).get || (_base.get = function(name) {
+        var _base2;
+        if (name == null) return manager;
+        return (_base2 = Luca.CollectionManager).instances || (_base2.instances = {});
+      });
+      this.state = new Luca.Model();
       if (this.initialCollections) {
         this.state.set({
           loaded_collections_count: 0,
@@ -2011,16 +2027,10 @@
 
   })();
 
+  Luca.CollectionManager.instances = {};
+
   Luca.CollectionManager.destroyAll = function() {
-    return instances = [];
-  };
-
-  Luca.CollectionManager.instances = function() {
-    return instances;
-  };
-
-  Luca.CollectionManager.get = function() {
-    return _(instances).last();
+    return Luca.CollectionManager.instances = {};
   };
 
 }).call(this);
@@ -2550,8 +2560,8 @@
       if ((_ref = Luca.containers.CardView.prototype.after) != null) {
         _ref.apply(this, arguments);
       }
-      if (Luca.enableBootstrap === true) {
-        return this.$el.children().wrap('<div class="container" />');
+      if (Luca.enableBootstrap === true && this.containerClassName) {
+        return this.$el.children().wrap('<div class="#{ containerClassName }" />');
       }
     },
     renderTopNavigation: function() {
@@ -2592,6 +2602,8 @@
 (function() {
 
   _.def('Luca.Application')["extends"]('Luca.containers.Viewport')["with"]({
+    autoBoot: false,
+    name: "MyApp",
     autoStartHistory: true,
     useCollectionManager: true,
     collectionManagerClass: "Luca.CollectionManager",
@@ -2606,9 +2618,14 @@
       }
     ],
     initialize: function(options) {
-      var definedComponents, _base,
+      var alreadyRunning, app, appName, definedComponents, routerClass, _base, _base2,
         _this = this;
       this.options = options != null ? options : {};
+      app = this;
+      appName = this.name;
+      alreadyRunning = typeof Luca.getApplication === "function" ? Luca.getApplication() : void 0;
+      (_base = Luca.Application).instances || (_base.instances = {});
+      Luca.Application.instances[appName] = app;
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       if (this.useController === true) definedComponents = this.components || [];
       this.components = [
@@ -2622,20 +2639,41 @@
         if (_.isString(this.collectionManagerClass)) {
           this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
         }
-        this.collectionManager || (this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get() : void 0);
+        this.collectionManager || (this.collectionManager = typeof (_base2 = Luca.CollectionManager).get === "function" ? _base2.get() : void 0);
         this.collectionManager || (this.collectionManager = new this.collectionManagerClass(this.collectionManagerOptions || (this.collectionManagerOptions = {})));
       }
       this.state = new Luca.Model(this.defaultState);
       this.defer(function() {
-        return _this.render();
-      }).until("ready");
+        return app.render();
+      }).until(this, "ready");
       if (this.useKeyRouter === true && (this.keyEvents != null)) {
         this.setupKeyRouter();
       }
-      if (this.plugin !== true) {
-        return Luca.getApplication = function() {
-          return _this;
+      if (_.isString(this.router)) {
+        routerClass = Luca.util.resolve(this.router);
+        this.router = new routerClass({
+          app: app
+        });
+      }
+      if (this.router && this.autoStartHistory) {
+        this.defer(function() {
+          return Backbone.history.start();
+        }).until(this, this.startHistoryOn || "after:render");
+      }
+      if (!(this.plugin === true || alreadyRunning)) {
+        Luca.getApplication = function(name) {
+          if (name == null) return app;
+          return Luca.Application.instances[name];
         };
+      }
+      if (this.autoBoot) {
+        if (Luca.util.resolve(this.name)) {
+          throw "Attempting to override window." + this.name + " when it already exists";
+        }
+        return $(function() {
+          window[appName] = app;
+          return app.boot();
+        });
       }
     },
     activeView: function() {
@@ -2651,22 +2689,6 @@
     },
     activeSection: function() {
       return this.get("active_section");
-    },
-    beforeRender: function() {
-      var routerStartEvent, _ref;
-      if ((_ref = Luca.containers.Viewport.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      if ((this.router != null) && this.autoStartHistory === true) {
-        routerStartEvent = this.startRouterOn || "after:render";
-        if (routerStartEvent === "before:render") {
-          return Backbone.history.start();
-        } else {
-          return this.bind(routerStartEvent, function() {
-            return Backbone.history.start();
-          });
-        }
-      }
     },
     afterComponents: function() {
       var _ref, _ref2, _ref3,
