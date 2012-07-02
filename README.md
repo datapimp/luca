@@ -28,7 +28,7 @@ Using With Rails Asset Pipeline
   gem 'luca' 
 ```
 
-In your manifest files:
+In your css manifest:
 
 ```css
   /*
@@ -36,6 +36,9 @@ In your manifest files:
    *= require 'luca-ui-development-tools'
   */
 ```
+
+Javascript:
+
 
 ```javascript
    //= require 'underscore'
