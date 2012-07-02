@@ -82,7 +82,7 @@ Luca.registry.findInstancesByClassName = (className)->
     instance.displayName is className or instance._superClass?()?.displayName is className
 
 Luca.registry.classes = (toString=false)->
-  _( registry.classes ).map (className, ctype)->
+  _(_.extend({},registry.classes,registry.model_classes,registry.collection_classes)).map (className, ctype)->
     if toString
       className
     else
