@@ -1,11 +1,3 @@
-#### Luca Base View
-
-# The Luca.View class adds some very commonly used patterns
-# and functionality to the stock Backbone.View class. Features
-# such as auto event binding, the facilitation of deferred rendering
-# against a Backbone.Model or Backbone.Collection reset event, Caching
-# views into a global Component Registry, and more.
-
 _.def("Luca.View").extends("Backbone.View").with
 
   additionalClassNames:[]
@@ -41,10 +33,6 @@ _.def("Luca.View").extends("Backbone.View").with
       @$el.empty()
       Luca.View::$html.call(@, Luca.template(template, @) )
 
-    #### View Caching
-    #
-    # Luca.View(s) which get created get stored in a global cache by their
-    # component id.  This allows us to re-use views when it makes sense
     Luca.cache( @cid, @ )
 
     unique = _( Luca.View.prototype.hooks.concat( @hooks ) ).uniq()

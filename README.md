@@ -28,18 +28,22 @@ Using With Rails Asset Pipeline
   gem 'luca' 
 ```
 
-In your layout:
+In your manifest files:
 
 ```css
   /*
-   *= stylesheet_include_tag 'luca-ui-bootstrap'
-   *= stylesheet_include_tag 'luca-ui-development-tools'
+   *= require 'luca-ui-bootstrap'
+   *= require 'luca-ui-development-tools'
   */
 ```
 
 ```javascript
-  //= javascript_include_tag 'underscore', 'backbone', 'jquery', 'bootstrap.min.js'
-  //= javascript_include_tag 'luca-ui.min.js', 'luca-ui-development-tools.min.js'
+   //= require 'underscore'
+   //= require 'jquery'
+   //= require 'backbone'
+   //= require 'bootstrap.min.js'
+   //= require 'luca-ui.min.js'
+   //= require 'luca-ui-development-tools.min.js'
 ```
 
 Using With Twitter Bootstrap ( development tools are optional )
