@@ -79,21 +79,27 @@ Luca.isComponentPrototype = (obj)->
   Luca.isViewPrototype(obj) or Luca.isModelPrototype(obj) or Luca.isCollectionPrototype(obj)
 
 Luca.isBackboneModel = (obj)->
+  obj = Luca.util.resolve(obj) if _.isString(obj)
   _.isFunction(obj?.set) and _.isFunction(obj?.get) and _.isObject(obj?.attributes)
 
 Luca.isBackboneView = (obj)->
+  obj = Luca.util.resolve(obj) if _.isString(obj)
   _.isFunction(obj?.render) and !_.isUndefined(obj?.el)
 
 Luca.isBackboneCollection = (obj)->
+  obj = Luca.util.resolve(obj) if _.isString(obj)
   _.isFunction(obj?.fetch) and _.isFunction(obj?.reset)
 
 Luca.isViewPrototype = (obj)->
+  obj = Luca.util.resolve(obj) if _.isString(obj)
   obj? and obj::? and obj::make? and obj::$? and obj::render?
 
 Luca.isModelPrototype = (obj)->
+  obj = Luca.util.resolve(obj) if _.isString(obj)
   obj? and obj::? obj::save? and obj::changedAttributes?
 
 Luca.isCollectionPrototype = (obj)->
+  obj = Luca.util.resolve(obj) if _.isString(obj)
   obj? and obj::? and !Luca.isModelPrototype(obj) and obj::reset? and obj::select? and obj::reject?
 
 Luca.inheritanceChain = (obj)->

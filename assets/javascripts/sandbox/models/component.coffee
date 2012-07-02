@@ -1,1 +1,0 @@
-_.def("Sandbox.models.Component").extends("Luca.models.Component").with()

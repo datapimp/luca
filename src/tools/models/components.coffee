@@ -5,12 +5,30 @@ _.def("Luca.models.Component").extends("Luca.Model").with
   root: ()->
     @get("className").split('.')[0]
 
+  className: ()->
+    @get("className")
+
+  instances: ()->
+    Luca.registry.findInstancesByClassName @className()
+
+  definitionPrototype: ()->
+    @definition()?.prototype 
+
+  parentClasses: ()->
+    Luca.parentClasses( @className() )  
+
+  definition: ()->
+    Luca.util.resolve @className()
+
   namespace: ()->
     return "" unless @get("className")?
 
     parts = @get("className").split('.')
     parts.pop()
     parts.join "."
+
+
+# The Collection
 
 _.def('Luca.collections.Components').extends('Luca.Collection').with
   model: Luca.models.Component
@@ -19,6 +37,9 @@ _.def('Luca.collections.Components').extends('Luca.Collection').with
     "namespaces"
     "classes"
     "roots"
+    "views"
+    "collections"
+    "models"
   ]
 
   cache_key: "luca_components"
@@ -32,6 +53,15 @@ _.def('Luca.collections.Components').extends('Luca.Collection').with
     Luca.Collection.cache @cache_key, Luca.registry.classes()
 
     Luca.Collection::initialize.apply(@, arguments)
+  
+  collections: ()->
+    @select (component)-> Luca.isCollectionPrototype( component.definition() )
+
+  modelClasses: ()->
+    @select (component)-> Luca.isModelPrototype( component.definition() )
+
+  views: ()->
+    @select (component)-> Luca.isViewPrototype( component.definition() )
 
   classes: ()->
     _.uniq( @pluck "className" )
