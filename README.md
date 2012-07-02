@@ -26,7 +26,7 @@ required to use any of them if you don't like.
 
 ```ruby
   # Gemfile
-  gem 'luca' 
+  gem 'luca', '>= 0.9.2', :git => "git@github.com:datapimp/luca.git" 
 ```
 
 In your css manifest:
