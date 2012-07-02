@@ -1,4 +1,9 @@
 _.def('Luca.components.Controller').extends('Luca.containers.CardView').with
+
+  additionalClassNames:['luca-ui-controller']
+
+  activeAttribute: "active-section"
+
   initialize: (@options)->
     Luca.containers.CardView::initialize.apply @, arguments
 
@@ -6,12 +11,30 @@ _.def('Luca.components.Controller').extends('Luca.containers.CardView').with
 
     throw "Controllers must specify a defaultCard property and/or the first component must have a name" unless @defaultCard
 
-    @state = new Backbone.Model
+    @state = new Backbone.Model 
       active_section: @defaultCard
 
   each: (fn)->
     _( @components ).each (component)=>
       fn.apply @, [component]
+
+  activeSection: ()->
+    @get("activeSection")
+
+  controllers:(deep=false)->
+    @select 'ctype', 'controller', deep
+
+  availableSections: ()->
+    base = {}
+    base[ @name ] = @sectionNames()
+
+    _( @controllers() ).reduce (memo,controller)=>
+      memo[ controller.name ] = controller.sectionNames()  
+      memo
+    , base 
+
+  sectionNames: (deep=false)->
+    @pluck('name')
 
   default: (callback)->
     @navigate_to(@defaultCard, callback)

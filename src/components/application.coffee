@@ -83,22 +83,18 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     else
       @view( @activeSection() )
 
+  # this presumes one controller, with many nested controllers
+  # but only that deep.  this is more than good enough for most
+  # apps I have built, but might need to use a different strategy
+  # for tracking what is active if you need something else
   activeSubSection: ()->
     @get("active_sub_section")
 
   activeSection: ()->
     @get("active_section")
 
-  beforeRender: ()->
-    Luca.containers.Viewport::beforeRender?.apply(@, arguments)
-
-    if @router? and @autoStartHistory is true
-      routerStartEvent = @startRouterOn || "after:render"
-
-      if routerStartEvent is "before:render"
-        Backbone.history.start()
-      else
-        @bind routerStartEvent, ()-> Backbone.history.start()
+  activePages: ()->
+    @$('.luca-ui-controller').map (index,element)=> $(element).data('active-section')
 
   afterComponents: ()->
     Luca.containers.Viewport::afterComponents?.apply @, arguments
@@ -114,7 +110,6 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
       if component.ctype.match(/controller$/)
         component.bind "after:card:switch", (previous,current)=>
           @state.set(active_sub_section:current.name)
-
 
   # boot should trigger the ready event, which will call the initial call
   # to render() your application, which will have a cascading effect on every

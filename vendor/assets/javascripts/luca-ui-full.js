@@ -1942,6 +1942,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         }
       });
     },
+    pluck: function(attribute) {
+      return _(this.components).pluck(attribute);
+    },
+    invoke: function(method) {
+      return _(this.components).invoke(method);
+    },
     select: function(attribute, value, deep) {
       var components;
       if (deep == null) deep = false;
@@ -1950,8 +1956,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         matches = [];
         test = component[attribute];
         if (test === value) matches.push(component);
-        if (deep === true && component.isContainer === true) {
-          matches.push(component.select(attribute, value, true));
+        if (deep === true) {
+          matches.push(typeof component.select === "function" ? component.select(attribute, value, true) : void 0);
         }
         return _.compact(matches);
       });
@@ -2338,7 +2344,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous, _ref, _ref2, _ref3, _ref4;
+      var current, previous, _ref, _ref2, _ref3, _ref4,
+        _this = this;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
         silent = false;
@@ -2364,6 +2371,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
             _ref2.apply(previous, ["before:activation", this, previous, current]);
           }
         }
+        _.defer(function() {
+          return _this.$el.data(_this.activeAttribute || "active-card", current.name);
+        });
       }
       this.componentElements().hide();
       if (!current.previously_activated) {
@@ -2707,8 +2717,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if ((_ref = Luca.containers.CardView.prototype.after) != null) {
         _ref.apply(this, arguments);
       }
-      if (Luca.enableBootstrap === true) {
-        return this.$el.children().wrap('<div class="container" />');
+      if (Luca.enableBootstrap === true && this.containerClassName) {
+        return this.$el.children().wrap('<div class="#{ containerClassName }" />');
       }
     },
     renderTopNavigation: function() {
@@ -2749,6 +2759,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 (function() {
 
   _.def('Luca.Application')["extends"]('Luca.containers.Viewport')["with"]({
+    autoBoot: false,
+    name: "MyApp",
     autoStartHistory: true,
     useCollectionManager: true,
     collectionManagerClass: "Luca.CollectionManager",
@@ -2763,9 +2775,14 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
     ],
     initialize: function(options) {
-      var definedComponents, _base,
+      var alreadyRunning, app, appName, definedComponents, routerClass, startHistory, _base, _base2,
         _this = this;
       this.options = options != null ? options : {};
+      app = this;
+      appName = this.name;
+      alreadyRunning = typeof Luca.getApplication === "function" ? Luca.getApplication() : void 0;
+      (_base = Luca.Application).instances || (_base.instances = {});
+      Luca.Application.instances[appName] = app;
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       if (this.useController === true) definedComponents = this.components || [];
       this.components = [
@@ -2779,20 +2796,42 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (_.isString(this.collectionManagerClass)) {
           this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
         }
-        this.collectionManager || (this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get() : void 0);
+        this.collectionManager || (this.collectionManager = typeof (_base2 = Luca.CollectionManager).get === "function" ? _base2.get() : void 0);
         this.collectionManager || (this.collectionManager = new this.collectionManagerClass(this.collectionManagerOptions || (this.collectionManagerOptions = {})));
       }
       this.state = new Luca.Model(this.defaultState);
       this.defer(function() {
-        return _this.render();
-      }).until("ready");
+        return app.render();
+      }).until(this, "ready");
       if (this.useKeyRouter === true && (this.keyEvents != null)) {
         this.setupKeyRouter();
       }
-      if (this.plugin !== true) {
-        return Luca.getApplication = function() {
-          return _this;
+      if (_.isString(this.router)) {
+        routerClass = Luca.util.resolve(this.router);
+        this.router = new routerClass({
+          app: app
+        });
+      }
+      if (this.router && this.autoStartHistory) {
+        startHistory = function() {
+          return Backbone.history.start();
         };
+        this.defer(startHistory, false).until(this, this.startHistoryOn || "before:render");
+      }
+      if (!(this.plugin === true || alreadyRunning)) {
+        Luca.getApplication = function(name) {
+          if (name == null) return app;
+          return Luca.Application.instances[name];
+        };
+      }
+      if (this.autoBoot) {
+        if (Luca.util.resolve(this.name)) {
+          throw "Attempting to override window." + this.name + " when it already exists";
+        }
+        return $(function() {
+          window[appName] = app;
+          return app.boot();
+        });
       }
     },
     activeView: function() {
@@ -2809,21 +2848,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     activeSection: function() {
       return this.get("active_section");
     },
-    beforeRender: function() {
-      var routerStartEvent, _ref;
-      if ((_ref = Luca.containers.Viewport.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      if ((this.router != null) && this.autoStartHistory === true) {
-        routerStartEvent = this.startRouterOn || "after:render";
-        if (routerStartEvent === "before:render") {
-          return Backbone.history.start();
-        } else {
-          return this.bind(routerStartEvent, function() {
-            return Backbone.history.start();
-          });
-        }
-      }
+    activePages: function() {
+      var _this = this;
+      return this.$('.luca-ui-controller').map(function(index, element) {
+        return $(element).data('active-section');
+      });
     },
     afterComponents: function() {
       var _ref, _ref2, _ref3,
@@ -3060,6 +3089,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 (function() {
 
   _.def('Luca.components.Controller')["extends"]('Luca.containers.CardView')["with"]({
+    additionalClassNames: ['luca-ui-controller'],
+    activeAttribute: "active-section",
     initialize: function(options) {
       var _ref;
       this.options = options;
@@ -3077,6 +3108,27 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return _(this.components).each(function(component) {
         return fn.apply(_this, [component]);
       });
+    },
+    activeSection: function() {
+      return this.get("activeSection");
+    },
+    controllers: function(deep) {
+      if (deep == null) deep = false;
+      return this.select('ctype', 'controller', deep);
+    },
+    availableSections: function() {
+      var base,
+        _this = this;
+      base = {};
+      base[this.name] = this.sectionNames();
+      return _(this.controllers()).reduce(function(memo, controller) {
+        memo[controller.name] = controller.sectionNames();
+        return memo;
+      }, base);
+    },
+    sectionNames: function(deep) {
+      if (deep == null) deep = false;
+      return this.pluck('name');
     },
     "default": function(callback) {
       return this.navigate_to(this.defaultCard, callback);

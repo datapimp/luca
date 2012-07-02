@@ -5,6 +5,10 @@ General
 - Move to node.js for build / testing
 - Replace .luca template with standard jst
 - Eliminate underscore-string dependency.  just copy necessary functions.
+- Eliminate pointless CSS selectors
+
+- Rely on data attributes for functionality instead of css selectors
+- BUT in general don't tie views to the DOM anyway
 
 Luca.View
 ---------

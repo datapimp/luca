@@ -1839,6 +1839,12 @@
         }
       });
     },
+    pluck: function(attribute) {
+      return _(this.components).pluck(attribute);
+    },
+    invoke: function(method) {
+      return _(this.components).invoke(method);
+    },
     select: function(attribute, value, deep) {
       var components;
       if (deep == null) deep = false;
@@ -1847,8 +1853,8 @@
         matches = [];
         test = component[attribute];
         if (test === value) matches.push(component);
-        if (deep === true && component.isContainer === true) {
-          matches.push(component.select(attribute, value, true));
+        if (deep === true) {
+          matches.push(typeof component.select === "function" ? component.select(attribute, value, true) : void 0);
         }
         return _.compact(matches);
       });
@@ -2235,7 +2241,8 @@
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous, _ref, _ref2, _ref3, _ref4;
+      var current, previous, _ref, _ref2, _ref3, _ref4,
+        _this = this;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
         silent = false;
@@ -2261,6 +2268,9 @@
             _ref2.apply(previous, ["before:activation", this, previous, current]);
           }
         }
+        _.defer(function() {
+          return _this.$el.data(_this.activeAttribute || "active-card", current.name);
+        });
       }
       this.componentElements().hide();
       if (!current.previously_activated) {

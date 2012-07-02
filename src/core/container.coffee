@@ -265,7 +265,13 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
         component?.trigger?.call component, "first:activation", component, activator
         component.previously_activated = true
 
-  #### Component Finder Methods
+  #### Underscore Methods For Working with Components
+  pluck: (attribute)-> 
+    _( @components ).pluck attribute
+
+  invoke: (method)->
+    _( @components ).invoke method
+
   select: (attribute, value, deep=false)->
     components = _( @components ).map (component)->
       matches = []
@@ -273,8 +279,8 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
       matches.push( component ) if test is value
 
-      if deep is true and component.isContainer is true
-        matches.push component.select(attribute, value, true)
+      # recursively traverse our components
+      matches.push component.select?(attribute, value, true) if deep is true
 
       _.compact matches
 

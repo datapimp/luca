@@ -92,4 +92,14 @@
   - Bugfix in GridView collection change handler
   - Added Luca.isViewPrototype, Luca.isModelPrototype, Luca.isCollectionPrototype helpers
   - Added configuration option to control auto registration of components with the registry
-  - Only View Prototypes will be registered with the component registry
+  - Added Luca.parentClass and Luca.inheritanceChain methods for inspecting a component or prototype  
+  - Changed single instance tracking mechanism on CollectionManager.  Will throw an error if more than one
+    is created without specifying a name.
+  - Added Luca.getCollectionManager() helper as an Alias for Luca.CollectionManager.get()
+  - Luca.getApplication() and Luca.getCollectionManager() accept a name argument
+  - Classes like Luca.Application and Luca.CollectionManager which normally are singletons
+    can have more than one instance if a unique name is given 
+
+0.9.3
+  - CardViews and Controllers set data attributes on their elements for the active card / page
+  - 
