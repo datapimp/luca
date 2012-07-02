@@ -18,15 +18,16 @@ _.def('Sandbox.Application').extends('Luca.Application').with
     meta:
       forwardslash: "developmentConsole"
 
+  collectionManager:
+    initialCollections: ["components"]
+
   components:[
     ctype: 'controller'
     name: 'pages'
     components:[
       name: "main"
+      className:"marketing-content"
       bodyTemplate: 'main'
-    ,
-      name: "component_tester"
-      ctype: "component_tester"
     ,
       name: "build"
       ctype: "builder"

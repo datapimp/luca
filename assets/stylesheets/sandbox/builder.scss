@@ -1,7 +1,10 @@
+
 #builder {
-  // TODO 
- // this is a bug in luca 
- .toolbar-container {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+
+  .toolbar-container {
     padding-right: 12px;
 
     .luca-ui-toolbar.toolbar-bottom {

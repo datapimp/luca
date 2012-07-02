@@ -1,14 +1,10 @@
-#viewport {
+.marketing-content {
   line-height: 1.5;
   color: #333; }
-  #viewport p {
+  .marketing-content p {
     font-size: 14px; }
-  #viewport #information .row.heading {
+  .marketing-content .row.heading {
     margin-top: 12px;
     margin-bottom: 12px; }
-  #viewport #information .row h3 {
+  .marketing-content .row h3 {
     margin-bottom: 4px; }
-/*
-
- */
-
