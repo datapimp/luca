@@ -106,7 +106,8 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # then we need to start backbone history on a certain event.
     # you can control which by setting the @startHistoryOn property
     if @router and @autoStartHistory
-      @defer( ()-> Backbone.history.start() ).until(@, (@startHistoryOn||"after:render") )
+      startHistory = ()-> Backbone.history.start()
+      @defer(startHistory, false).until(@, (@startHistoryOn||"before:render") )
 
     # if the application is a plugin designed to modify the behavior
     # of another app, then don't claim ownership.  otherwise the most common
