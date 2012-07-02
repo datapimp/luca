@@ -4,7 +4,7 @@ assets_path = Dir.pwd + '/vendor/assets'
 javascript_path = File.join( assets_path, 'javascripts' )
 stylesheets_path = File.join( assets_path, 'stylesheets' )
 
-unless ENV['TEST_MODE']
+unless ENV['TEST_MODE'] or ENV['RUN_TESTS']
   unless ENV['SKIP_JAVASCRIPTS']
     guard 'sprockets2', :clean=>false, :assets_path => javascript_path, :sprockets => App.sprockets, :precompile=>[/^luca-ui.+(coffee|js)$/], :digest => false, :gz => false do
       watch(%r{^src/.+$})

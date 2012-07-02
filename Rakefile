@@ -23,6 +23,7 @@ namespace :release do
 
     FileUtils.cp( File.join(App.root,'assets','javascripts','dependencies','bootstrap.min.js'), asset_folder)
     FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui.min.js'), asset_folder)
+    FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui-full.min.js'), asset_folder)
     FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui-development-tools.min.js'), asset_folder)
 
     FileUitls.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings-white.png'), img_folder )
@@ -40,6 +41,10 @@ namespace :release do
       fh.puts(App.sprockets["luca-ui.js"].to_s)
     end
 
+    File.open( File.join(App.root,'vendor','assets','javascripts','luca-ui-full.js'), 'w+' ) do |fh|
+      fh.puts(App.sprockets["luca-ui-full.js"].to_s)
+    end
+
     File.open( File.join(App.root,'vendor','assets','javascripts','luca-ui-development-tools.js'), 'w+' ) do |fh|
       fh.puts(App.sprockets["luca-ui-development-tools.coffee"].to_s)
     end
@@ -48,6 +53,7 @@ namespace :release do
   desc "Minify the assets"
   task :minify do
     `uglifyjs vendor/assets/javascripts/luca-ui.js > vendor/assets/javascripts/luca-ui.min.js`
+    `uglifyjs vendor/assets/javascripts/luca-ui-full.js > vendor/assets/javascripts/luca-ui-full.min.js`
     `uglifyjs vendor/assets/javascripts/luca-ui-development-tools.js > vendor/assets/javascripts/luca-ui-development-tools.min.js`
   end
 

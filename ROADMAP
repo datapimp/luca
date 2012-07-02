@@ -2,8 +2,9 @@ General
 -------
 - Make development mode options easily disabled
 - Integrate with requireJs or some other AMD system
-- Move to node.js
+- Move to node.js for build / testing
 - Replace .luca template with standard jst
+- Eliminate underscore-string dependency.  just copy necessary functions.
 
 Luca.View
 ---------
