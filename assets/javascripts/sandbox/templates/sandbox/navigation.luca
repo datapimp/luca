@@ -1,3 +1,5 @@
 %ul.nav
   %li
-    %a{:href=>"#"} Intro
+    %a{:href=>"#intro"} Intro
+  %li
+    %a{:href=>"#build"} Component Builder

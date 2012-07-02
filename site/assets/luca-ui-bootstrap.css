@@ -847,6 +847,13 @@ button.close{padding:0;cursor:pointer;background:transparent;border:0;-webkit-ap
     .with-mask .load-mask .progress {
       margin: 50px auto;
       width: 50%; }
+html.luca-ui-fullscreen, body.luca-ui-fullscreen {
+  height: 100%; }
+
+.luca-ui-fullscreen .luca-ui-viewport, .luca-ui-fullscreen .fullscreen-container {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%; }
 .toolbar-container {
   overflow: hidden;
   clear: both; }
@@ -1286,6 +1293,16 @@ ul.typeahead.dropdown-menu {
 .font-large .CodeMirror {
   font-size: 18px;
   line-height: 1.7; }
+
+#component_tester #editor_container .toolbar-container.bottom {
+  margin: 0px; }
+  #component_tester #editor_container .toolbar-container.bottom .luca-ui-toolbar {
+    margin: 0px;
+    padding: 0px; }
+#component_tester [data-luca-owner="component_detail"] {
+  max-height: 600px;
+  overflow: scroll;
+  min-height: 400px; }
 .luca-ui-console .CodeMirror {
   font-family: "Monaco";
   font-size: 14px;

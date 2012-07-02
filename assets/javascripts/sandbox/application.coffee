@@ -29,6 +29,10 @@ _.def('Sandbox.Application').extends('Luca.Application').with
       className:"marketing-content"
       bodyTemplate: 'main'
     ,
+      name: "intro"
+      className:"marketing-content"
+      bodyTemplate: "readme"
+    ,
       name: "build"
       ctype: "builder"
     ]

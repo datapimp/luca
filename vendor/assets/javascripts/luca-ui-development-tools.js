@@ -18455,6 +18455,22 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     root: function() {
       return this.get("className").split('.')[0];
     },
+    className: function() {
+      return this.get("className");
+    },
+    instances: function() {
+      return Luca.registry.findInstancesByClassName(this.className());
+    },
+    definitionPrototype: function() {
+      var _ref;
+      return (_ref = this.definition()) != null ? _ref.prototype : void 0;
+    },
+    parentClasses: function() {
+      return Luca.parentClasses(this.className());
+    },
+    definition: function() {
+      return Luca.util.resolve(this.className());
+    },
     namespace: function() {
       var parts;
       if (this.get("className") == null) return "";
@@ -18466,7 +18482,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
   _.def('Luca.collections.Components')["extends"]('Luca.Collection')["with"]({
     model: Luca.models.Component,
-    cachedMethods: ["namespaces", "classes", "roots"],
+    cachedMethods: ["namespaces", "classes", "roots", "views", "collections", "models"],
     cache_key: "luca_components",
     name: "components",
     url: function() {
@@ -18475,6 +18491,21 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     initialize: function(models, options) {
       Luca.Collection.cache(this.cache_key, Luca.registry.classes());
       return Luca.Collection.prototype.initialize.apply(this, arguments);
+    },
+    collections: function() {
+      return this.select(function(component) {
+        return Luca.isCollectionPrototype(component.definition());
+      });
+    },
+    modelClasses: function() {
+      return this.select(function(component) {
+        return Luca.isModelPrototype(component.definition());
+      });
+    },
+    views: function() {
+      return this.select(function(component) {
+        return Luca.isViewPrototype(component.definition());
+      });
     },
     classes: function() {
       return _.uniq(this.pluck("className"));

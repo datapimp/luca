@@ -71,26 +71,32 @@
   };
 
   Luca.isBackboneModel = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
   };
 
   Luca.isBackboneView = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return _.isFunction(obj != null ? obj.render : void 0) && !_.isUndefined(obj != null ? obj.el : void 0);
   };
 
   Luca.isBackboneCollection = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
   };
 
   Luca.isViewPrototype = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return (obj != null) && (obj.prototype != null) && (obj.prototype.make != null) && (obj.prototype.$ != null) && (obj.prototype.render != null);
   };
 
   Luca.isModelPrototype = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return (obj != null) && (typeof obj.prototype === "function" ? obj.prototype((obj.prototype.save != null) && (obj.prototype.changedAttributes != null)) : void 0);
   };
 
   Luca.isCollectionPrototype = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return (obj != null) && (obj.prototype != null) && !Luca.isModelPrototype(obj) && (obj.prototype.reset != null) && (obj.prototype.select != null) && (obj.prototype.reject != null);
   };
 
@@ -379,7 +385,7 @@
     };
 
     DefineProxy.prototype["with"] = function(properties) {
-      var at, componentType;
+      var at, componentType, _base;
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
       if (this.namespaced && !(at != null)) {
         eval("(window||global)." + this.namespace + " = {}");
@@ -389,6 +395,8 @@
       if (Luca.autoRegister === true) {
         if (Luca.isViewPrototype(at[this.componentId])) componentType = "view";
         if (Luca.isCollectionPrototype(at[this.componentId])) {
+          (_base = Luca.Collection).namespaces || (_base.namespaces = []);
+          Luca.Collection.namespaces.push(this.namespace);
           componentType = "collection";
         }
         if (Luca.isModelPrototype(at[this.componentId])) componentType = "model";
@@ -608,7 +616,7 @@
 
   Luca.registry.classes = function(toString) {
     if (toString == null) toString = false;
-    return _(registry.classes).map(function(className, ctype) {
+    return _(_.extend({}, registry.classes, registry.model_classes, registry.collection_classes)).map(function(className, ctype) {
       if (toString) {
         return className;
       } else {
@@ -2031,10 +2039,17 @@
     };
 
     CollectionManager.prototype.guessCollectionClass = function(key) {
-      var classified, guess;
+      var classified, guess, guesses, _ref;
       classified = Luca.util.classify(key);
       guess = (this.collectionNamespace || (window || global))[classified];
       guess || (guess = (this.collectionNamespace || (window || global))["" + classified + "Collection"]);
+      if (!(guess != null) && ((_ref = Luca.Collection.namespaces) != null ? _ref.length : void 0) > 0) {
+        guesses = _(Luca.Collection.namespaces.reverse()).map(function(namespace) {
+          return Luca.util.resolve("" + namespace + "." + classified) || Luca.util.resolve("" + namespace + "." + classified + "Collection");
+        });
+        guesses = _(guesses).compact();
+        if (guesses.length > 0) guess = guesses[0];
+      }
       return guess;
     };
 
@@ -2672,7 +2687,7 @@
       }
     ],
     initialize: function(options) {
-      var alreadyRunning, app, appName, definedComponents, routerClass, startHistory, _base, _base2,
+      var alreadyRunning, app, appName, collectionManagerOptions, definedComponents, routerClass, startHistory, _base, _base2, _ref, _ref2,
         _this = this;
       this.options = options != null ? options : {};
       app = this;
@@ -2693,8 +2708,20 @@
         if (_.isString(this.collectionManagerClass)) {
           this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
         }
-        this.collectionManager || (this.collectionManager = typeof (_base2 = Luca.CollectionManager).get === "function" ? _base2.get() : void 0);
-        this.collectionManager || (this.collectionManager = new this.collectionManagerClass(this.collectionManagerOptions || (this.collectionManagerOptions = {})));
+        collectionManagerOptions = this.collectionManagerOptions;
+        if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
+          collectionManagerOptions = this.collectionManager;
+          this.collectionManager = void 0;
+        }
+        if (_.isString(this.collectionManager)) {
+          collectionManagerOptions = {
+            name: this.collectionManager
+          };
+        }
+        this.collectionManager = typeof (_base2 = Luca.CollectionManager).get === "function" ? _base2.get(collectionManagerOptions.name) : void 0;
+        if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
+          this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
+        }
       }
       this.state = new Luca.Model(this.defaultState);
       this.defer(function() {

@@ -1,10 +1,24 @@
+#builder {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%; }
+  #builder .toolbar-container {
+    padding-right: 12px; }
+    #builder .toolbar-container .luca-ui-toolbar.toolbar-bottom {
+      margin-top: 0px; }
+    #builder .toolbar-container .luca-ui-toolbar.toolbar-top {
+      margin-bottom: 0px; }
 .marketing-content {
   line-height: 1.5;
   color: #333; }
   .marketing-content p {
     font-size: 14px; }
-  .marketing-content .row.heading {
+  .marketing-content #information .row.heading {
     margin-top: 12px;
     margin-bottom: 12px; }
-  .marketing-content .row h3 {
+  .marketing-content #information .row h3 {
     margin-bottom: 4px; }
+/*
+
+ */
+
