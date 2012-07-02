@@ -168,7 +168,6 @@ Luca.available_templates = (filter="")->
     available
 
 
-
 UnderscoreExtensions =
   module: (base,module)->
     _.extend base, module

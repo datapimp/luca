@@ -78,8 +78,19 @@ class Luca.CollectionManager
 
   guessCollectionClass: (key)->
     classified = Luca.util.classify( key )
+    # support our naming convention of Books
     guess = (@collectionNamespace || (window || global) )[ classified ]
+    # support naming covention like BooksCollection
     guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
+
+    if not guess? and Luca.Collection.namespaces?.length > 0
+      guesses = _( Luca.Collection.namespaces.reverse() ).map (namespace)->
+        Luca.util.resolve("#{ namespace }.#{ classified }") || Luca.util.resolve("#{ namespace }.#{ classified }Collection")
+
+      guesses = _( guesses ).compact()
+
+      guess = guesses[0] if guesses.length > 0
+
     guess
 
   loadInitialCollections: ()->

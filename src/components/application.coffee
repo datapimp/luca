@@ -77,8 +77,21 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     if @useCollectionManager is true
       @collectionManagerClass = Luca.util.resolve( @collectionManagerClass ) if _.isString( @collectionManagerClass )
 
-      @collectionManager ||= Luca.CollectionManager.get?()
-      @collectionManager ||= new @collectionManagerClass( @collectionManagerOptions||={} )
+      collectionManagerOptions = @collectionManagerOptions
+
+
+      if _.isObject(@collectionManager) and not _.isFunction( @collectionManager?.get )
+        collectionManagerOptions = @collectionManager
+        @collectionManager = undefined
+
+      if _.isString(@collectionManager)
+        collectionManagerOptions = 
+          name: @collectionManager
+
+      @collectionManager = Luca.CollectionManager.get?( collectionManagerOptions.name )
+
+      unless _.isFunction(@collectionManager?.get)
+        @collectionManager = new @collectionManagerClass( collectionManagerOptions )
 
     @state = new Luca.Model( @defaultState )
 

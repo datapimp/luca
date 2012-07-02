@@ -3,8 +3,10 @@ html.luca-ui-fullscreen, body.luca-ui-fullscreen {
 }
 
 .luca-ui-fullscreen {
-  .luca-ui-viewport {
-    
+  .luca-ui-viewport, .fullscreen-container {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
   } 
 }
 

@@ -35,7 +35,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
     if Luca.enableBootstrap is true and @containerClassName
       @$el.children().wrap('<div class="#{ containerClassName }" />')
-        
+
   renderTopNavigation: ()->
     return unless @topNav?
 
@@ -51,9 +51,6 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
     $('body').prepend( @topNav.render().el )
 
-
   renderBottomNavigation: ()->
     # IMPLEMENT
-
-
 
