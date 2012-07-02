@@ -2,39 +2,61 @@ Documentation and Sandbox
 -------------------------
 http://datapimp.github.com/luca
 
-
 What Is Luca?
 -------------
 Luca is a component / container library for Backbone.js which
-encompasses all of the best practices for laying out a large
-app with many nested views and containers.
+provides you with some sensible defaults, some common components and layout helpers,
+optimized View, Model, and Collection classes, and many other components needed for 
+an application with a solid architecture.
 
-To run the sandbox:
+Luca combines the functionality of other open source libraries as well, but you are not
+required to use any of them if you don't like.  These libraries are:
 
-* `bundle install`
-* `rackup`
+Bootstrap by Twitter
+Backbone-Query by David Tonge
 
-visit http://localhost:9292
+Getting Started
+---------------
+Luca doesn't require you to use Twitter Bootstrap.  But, if you plan to, you will be
+able to generate Bootstrap styled UI components completely in your Javascript.
 
-Using it with Rails
--------------------
+Using With Rails Asset Pipeline
+----------------
+
 ```ruby
-# Gemfile
-gem 'luca'
+  # Gemfile
+  gem 'luca' 
 ```
 
-javascript manifest
-
-```javascript
-//= require luca-ui
-```
-
-stylesheet manifest
+In your layout:
 
 ```css
-/*
- *= require luca-ui
-*/
+  /*
+   *= stylesheet_include_tag 'luca-ui-bootstrap'
+   *= stylesheet_include_tag 'luca-ui-development-tools'
+  */
+```
+
+```javascript
+  //= javascript_include_tag 'underscore', 'backbone', 'jquery', 'bootstrap.min.js'
+  //= javascript_include_tag 'luca-ui.min.js', 'luca-ui-development-tools.min.js'
+```
+
+Using With Twitter Bootstrap ( development tools are optional )
+----------------
+```html
+  <html>
+    <head>
+      <link rel="stylesheet" href='bootstrap.min.css' />
+      <link rel="stylesheet" href='luca-ui.css' />
+      <link rel="stylesheet" href='luca-ui-development-tools.css' />
+    </head>
+    <body>
+      <script type='text/javascript' src="bootstrap.min.js" /> 
+      <script type='text/javascript' src="luca-ui.min.js" /> 
+      <script type='text/javascript' src="luca-ui-development-tools.min.js" /> 
+    </body>
+  </html>
 ```
 
 Thanks To
