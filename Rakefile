@@ -26,8 +26,8 @@ namespace :release do
     FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui-full.min.js'), asset_folder)
     FileUtils.cp( File.join(App.root,'vendor/assets/javascripts/luca-ui-development-tools.min.js'), asset_folder)
 
-    FileUitls.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings-white.png'), img_folder )
-    FileUitls.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings.png'), img_folder )
+    FileUtils.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings-white.png'), img_folder )
+    FileUtils.cp( File.join(App.root,'vendor/assets/images/glyphicons-halflings.png'), img_folder )
 
   end
 
