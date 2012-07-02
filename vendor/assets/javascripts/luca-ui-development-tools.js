@@ -17654,7 +17654,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
   _.def("Luca.tools.CoffeeEditor")["extends"]("Luca.tools.CodeMirrorField")["with"]({
     name: "coffeescript_editor",
-    autoCompile: true,
     compileOptions: {
       bare: true
     },
@@ -17706,10 +17705,14 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     currentMode: function() {
       return this.state.get("currentMode");
     },
+    fixTabs: function() {
+      var value;
+      value = this.getValue(false);
+      debugger;
+    },
     editorChange: function() {
-      if (this.autoCompile === true) {
-        return this.state.set(this.currentMode(), this.getValue());
-      }
+      this.fixTabs();
+      return this.state.set(this.currentMode(), this.getValue());
     }
   });
 
@@ -17788,7 +17791,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   });
 
   _.def("Luca.tools.ComponentTester")["extends"]("Luca.core.Container")["with"]({
-    id: "component_tester",
     name: "component_tester",
     className: "span11",
     autoEvaluateCode: true,
@@ -17945,6 +17947,11 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     afterRender: function() {
       var changeHandler,
         _this = this;
+      this.getOutput().applyStyles({
+        'min-height': '400px'
+      });
+      this.$('.toolbar-container').css('padding-right', '12px');
+      this.$('.luca-ui-toolbar.toolbar-bottom').css('margin', '0px');
       changeHandler = _.idleMedium(function() {
         if (_this.autoEvaluateCode === true) return _this.applyTestRun();
       }, 500);
