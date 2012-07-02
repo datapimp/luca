@@ -15,12 +15,11 @@
     definition = payload.defines
     inheritsFrom = payload.extends
 
-
   if _.isFunction( fallback = _(args).last() )
     return fallback()
 
 _.extend Luca,
-  VERSION: "0.9.15"
+  VERSION: "0.9.2"
   core: {}
   containers: {}
   components: {}
@@ -76,6 +75,9 @@ Luca.supportsEvents = Luca.supportsBackboneEvents = (obj)->
 Luca.isComponent = (obj)->
   Luca.isBackboneModel(obj) or Luca.isBackboneView(obj) or Luca.isBackboneCollection(obj)
 
+Luca.isComponentPrototype = (obj)->
+  Luca.isViewPrototype(obj) or Luca.isModelPrototype(obj) or Luca.isCollectionPrototype(obj)
+
 Luca.isBackboneModel = (obj)->
   _.isFunction(obj?.set) and _.isFunction(obj?.get) and _.isObject(obj?.attributes)
 
@@ -86,13 +88,43 @@ Luca.isBackboneCollection = (obj)->
   _.isFunction(obj?.fetch) and _.isFunction(obj?.reset)
 
 Luca.isViewPrototype = (obj)->
-  obj? and obj::make? and obj::$? and obj::render?
+  obj? and obj::? and obj::make? and obj::$? and obj::render?
 
 Luca.isModelPrototype = (obj)->
-  obj? and obj::save? and obj::changedAttributes?
+  obj? and obj::? obj::save? and obj::changedAttributes?
 
 Luca.isCollectionPrototype = (obj)->
-  obj? and !Luca.isModelPrototype(obj) and obj::reset? and obj::select? and obj::reject?
+  obj? and obj::? and !Luca.isModelPrototype(obj) and obj::reset? and obj::select? and obj::reject?
+
+Luca.inheritanceChain = (obj)->
+  _( Luca.parentClasses(obj) ).map (className)-> Luca.util.resolve(className)
+    
+Luca.parentClasses = (obj)->
+  list = []
+
+  if _.isString(obj)
+    obj = Luca.util.resolve(obj)
+
+  list.push( obj.displayName || obj::?.displayName || Luca.parentClass(obj) )
+
+  classes = until not Luca.parentClass(obj)?
+    obj = Luca.parentClass(obj)
+
+  list = list.concat(classes)
+
+  _.uniq list
+
+Luca.parentClass = (obj)->
+  list = []
+
+  if _.isString( obj )
+    obj = Luca.util.resolve(obj)
+
+  if Luca.isComponent(obj)
+    obj.displayName
+
+  else if Luca.isComponentPrototype(obj)
+    obj::_superClass?()?.displayName
 
 # This is a convenience method for accessing the templates
 # available to the client side app, either the ones which ship with Luca

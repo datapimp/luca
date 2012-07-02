@@ -5,6 +5,7 @@ describe "The Collection Manager", ->
     url: "/models"
 
   beforeEach ()->
+    Luca.CollectionManager.destroyAll()
     @manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections)
 
   it "should be defined", ->
@@ -22,7 +23,7 @@ describe "The Collection Manager", ->
     expect( collection.url ).toEqual "/models"
 
 describe "Adding Collections", ->
-  manager = new Luca.CollectionManager
+  manager = Luca.CollectionManager.get?() || new Luca.CollectionManager(name:"blahblah") 
   first   = new Luca.Collection([],name:"added",prop:"val2")
   second  = new Luca.Collection([],name:"added",prop:"val1")
 

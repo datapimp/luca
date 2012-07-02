@@ -4,7 +4,7 @@
     %p This is a collection of application design components that you should use to build your next large backbone.js application.
     %p It combines the elegance and simplicity of backbone.js and bootstrap.css, with the experience of developers who have been building single page javascript apps since you were a baby.
 
-    %a.btn.btn-large.btn-primary{:href=>"#class_browser"}
+    %a.btn.btn-large.btn-primary{:href=>"https://github.com/datapimp/luca/zipball/master"}
       Download 
 
     %a.btn.btn-success.btn-large{:href=>"#build"}

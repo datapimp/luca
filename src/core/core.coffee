@@ -59,9 +59,13 @@ class DefineProxy
 
     at[@componentId] = Luca.extend(@superClassName,@componentName, properties)
 
-    if Luca.autoRegister is true and Luca.isViewPrototype( at[@componentId] )
+    if Luca.autoRegister is true 
+      componentType = "view" if Luca.isViewPrototype( at[@componentId] )
+      componentType = "collection" if Luca.isCollectionPrototype( at[@componentId] )
+      componentType = "model" if Luca.isModelPrototype( at[@componentId] )
+
       # automatically register this with the component registry
-      Luca.register( _.string.underscored(@componentId), @componentName)
+      Luca.register( _.string.underscored(@componentId), @componentName, componentType)
 
     at[@componentId]
 

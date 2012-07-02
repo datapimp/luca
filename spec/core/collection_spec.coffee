@@ -44,7 +44,7 @@ describe "Method Caching", ->
 
 describe "Luca.Collection", ->
   it "should accept a name and collection manager", ->
-    mgr = new Luca.CollectionManager()
+    mgr = Luca.CollectionManager.get?('collection-spec') || new Luca.CollectionManager(name:"collection-spec")
     collection = new Luca.Collection([], name:"booya",manager:mgr)
     expect( collection.name ).toEqual("booya")
     expect( collection.manager ).toEqual(mgr)
@@ -170,16 +170,16 @@ describe "The onceLoaded helper", ->
 describe "Registering with the collection manager", ->
 
   it "should be able to find a default collection manager", ->
-    mgr = new Luca.CollectionManager()
+    mgr = Luca.CollectionManager.get() || new Luca.CollectionManager()
     expect( Luca.CollectionManager.get() ).toEqual(mgr)
 
   it "should automatically register with the manager if I specify a name", ->
-    mgr = new Luca.CollectionManager()
+    mgr = Luca.CollectionManager.get() || new Luca.CollectionManager()
     collection = new Luca.Collection([],name:"auto_register")
     expect( mgr.get("auto_register") ).toEqual(collection)
 
   it "should register with a specific manager", ->
-    window.other_manager = new Luca.CollectionManager()
+    window.other_manager = new Luca.CollectionManager(name:"other_manager")
 
     collection = new Luca.Collection [],
       name: "other_collection"
@@ -188,7 +188,7 @@ describe "Registering with the collection manager", ->
     expect( window.other_manager.get("other_collection") ).toEqual(collection)
 
   it "should find a collection manager by string", ->
-    window.find_mgr_by_string = new Luca.CollectionManager()
+    window.find_mgr_by_string = new Luca.CollectionManager(name:"find_by_string")
 
     collection = new Luca.Collection [],
       name: "biggie"
@@ -197,7 +197,7 @@ describe "Registering with the collection manager", ->
     expect( collection.manager ).toBeDefined()
 
   it "should not register with a collection manager if it is marked as private", ->
-    manager = new Luca.CollectionManager()
+    manager = new Luca.CollectionManager(name:"private")
 
     registerSpy = sinon.spy()
 

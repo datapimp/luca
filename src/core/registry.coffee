@@ -1,5 +1,7 @@
 registry =
   classes:{}
+  model_classes: {}
+  collection_classes: {}
   namespaces:['Luca.containers','Luca.components']
 
 component_cache =
@@ -13,11 +15,17 @@ Luca.defaultComponentType = 'view'
 
 # When you use _.def to define a component, you say
 # which class it extends() from, and with() which enhancements.
-
 # We register that component class for you:
-Luca.register = (component, prototypeName)->
+Luca.register = (component, prototypeName, componentType="view")->
   Luca.trigger "component:registered", component, prototypeName
-  registry.classes[ component ] = prototypeName
+
+  switch componentType
+    when "model"
+      registry.model_classes[ component ] = prototypeName
+    when "collection"
+      registry.model_classes[ component ] = prototypeName
+    else
+      registry.classes[ component ] = prototypeName
 
 Luca.development_mode_register = (component, prototypeName)->
   existing = registry.classes[component]

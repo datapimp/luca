@@ -130,7 +130,7 @@ _.def("Luca.View").extends("Backbone.View").with
   # if you want to use more than one collection manager, over ride this
   # function in your views with your own logic
   getCollectionManager: ()->
-    @collectionManager || Luca.CollectionManager.get?.call()
+    @collectionManager || Luca.CollectionManager.get?()
 
   ##### Collection Events
   #
