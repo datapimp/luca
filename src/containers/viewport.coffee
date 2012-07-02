@@ -2,7 +2,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
   activeItem: 0
 
-  className: 'luca-ui-viewport'
+  additionalClassNames: 'luca-ui-viewport'
 
   fullscreen: true
 

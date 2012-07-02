@@ -2587,7 +2587,7 @@
 
   _.def('Luca.containers.Viewport').extend('Luca.containers.CardView')["with"]({
     activeItem: 0,
-    className: 'luca-ui-viewport',
+    additionalClassNames: 'luca-ui-viewport',
     fullscreen: true,
     fluid: false,
     wrapperClass: 'row',
@@ -2614,8 +2614,8 @@
       if ((_ref = Luca.containers.CardView.prototype.after) != null) {
         _ref.apply(this, arguments);
       }
-      if (Luca.enableBootstrap === true && this.containerClassName) {
-        return this.$el.children().wrap('<div class="#{ containerClassName }" />');
+      if (Luca.enableBootstrap === true) {
+        return this.$el.children().wrap('<div class="container" />');
       }
     },
     renderTopNavigation: function() {
@@ -2656,8 +2656,6 @@
 (function() {
 
   _.def('Luca.Application')["extends"]('Luca.containers.Viewport')["with"]({
-    autoBoot: false,
-    name: "MyApp",
     autoStartHistory: true,
     useCollectionManager: true,
     collectionManagerClass: "Luca.CollectionManager",
@@ -2672,14 +2670,9 @@
       }
     ],
     initialize: function(options) {
-      var alreadyRunning, app, appName, definedComponents, routerClass, startHistory, _base, _base2,
+      var definedComponents, _base,
         _this = this;
       this.options = options != null ? options : {};
-      app = this;
-      appName = this.name;
-      alreadyRunning = typeof Luca.getApplication === "function" ? Luca.getApplication() : void 0;
-      (_base = Luca.Application).instances || (_base.instances = {});
-      Luca.Application.instances[appName] = app;
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       if (this.useController === true) definedComponents = this.components || [];
       this.components = [
@@ -2693,42 +2686,20 @@
         if (_.isString(this.collectionManagerClass)) {
           this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
         }
-        this.collectionManager || (this.collectionManager = typeof (_base2 = Luca.CollectionManager).get === "function" ? _base2.get() : void 0);
+        this.collectionManager || (this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get() : void 0);
         this.collectionManager || (this.collectionManager = new this.collectionManagerClass(this.collectionManagerOptions || (this.collectionManagerOptions = {})));
       }
       this.state = new Luca.Model(this.defaultState);
       this.defer(function() {
-        return app.render();
-      }).until(this, "ready");
+        return _this.render();
+      }).until("ready");
       if (this.useKeyRouter === true && (this.keyEvents != null)) {
         this.setupKeyRouter();
       }
-      if (_.isString(this.router)) {
-        routerClass = Luca.util.resolve(this.router);
-        this.router = new routerClass({
-          app: app
-        });
-      }
-      if (this.router && this.autoStartHistory) {
-        startHistory = function() {
-          return Backbone.history.start();
+      if (this.plugin !== true) {
+        return Luca.getApplication = function() {
+          return _this;
         };
-        this.defer(startHistory, false).until(this, this.startHistoryOn || "before:render");
-      }
-      if (!(this.plugin === true || alreadyRunning)) {
-        Luca.getApplication = function(name) {
-          if (name == null) return app;
-          return Luca.Application.instances[name];
-        };
-      }
-      if (this.autoBoot) {
-        if (Luca.util.resolve(this.name)) {
-          throw "Attempting to override window." + this.name + " when it already exists";
-        }
-        return $(function() {
-          window[appName] = app;
-          return app.boot();
-        });
       }
     },
     activeView: function() {
