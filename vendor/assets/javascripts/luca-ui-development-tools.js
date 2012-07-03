@@ -17733,7 +17733,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       return Luca.Collection.prototype.initialize.apply(this, arguments);
     },
     url: function() {
-      return "/source-map.js";
+      return "/luca/source-map.js";
     },
     collections: function() {
       return this.select(function(component) {
