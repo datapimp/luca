@@ -18,7 +18,7 @@ _.def('Luca.collections.Components').extends('Luca.Collection').with
     Luca.Collection::initialize.apply(@, arguments)
     
   url: ()->
-    "/source-map.js"
+    "/luca/source-map.js"
 
   collections: ()->
     @select (component)-> Luca.isCollectionPrototype( component.definition() )

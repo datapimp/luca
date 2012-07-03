@@ -50,7 +50,7 @@ class App < Sinatra::Base
 
   Luca::CodeBrowser.look_for_source_in( File.join(File.expand_path('../', __FILE__),'src') )
 
-  get "/source-map.js" do
+  get "/luca/source-map.js" do
     source_map = {}
 
     files = (["src/**/*.coffee","assets/javascripts/sandbox/**/*.coffee"]).map do |location|
