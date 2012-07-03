@@ -21,3 +21,9 @@ Containers
 Luca.CollectionManager
 ----------------------
 - Add concept of base params for a given scope of the collection manager
+
+Luca.Application
+----------------
+- Modify boot sequence so that rendering can happen on DOM ready, but all other
+  operations, such as fetching collections, etc, can happen immediately upon
+  initialization
