@@ -17,7 +17,7 @@
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
-  Luca.templates["main"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'container\'>\n  <div class=\'hero-unit\'>\n    <h1>Want to build apps with Backbone?</h1>\n    <p>This is a collection of application design components that you should use to build your next large backbone.js application.</p>\n    <p>It combines the elegance and simplicity of backbone.js and bootstrap.css, with the experience of developers who have been building single page javascript apps since you were a baby.</p>\n    <a class=\'btn btn-large btn-primary\' href=\'https://github.com/datapimp/luca/zipball/master\'>\n      Download\n    </a>\n    <a class=\'btn btn-success btn-large\' href=\'#build\'>\n      Build an App\n    </a>\n  </div>\n  <hr />\n  <div id=\'information\'>\n    <div class=\'row heading\'>\n      <div class=\'span12\'>\n        <h2>Composite Application Architecture</h2>\n      </div>\n    </div>\n    <div class=\'row\'>\n      <div class=\'span4\'>\n        <h3>Component Driven Design</h3>\n        <p>Luca is a collection of common components needed to build large single page applications. Luca provides base classes for Model, View, and Collection classes which you can choose to extend where needed.  Luca also provides an extensive library of application building components and UI elements which you can piece together in a variety of ways to build responsive, and snappy single page apps.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Backbone and Luca work together</h3>\n        <p>Luca is not a replacement for Backbone, it is a smart use of Backbone\'s core classes.  Large apps require layers of abstraction and patterns for communication between various components, Luca provides these for you.</p>\n        <p>Like Backbone, you only have to use what you need.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Well Tested Patterns</h3>\n        <p>We have extracted all of the common patterns and optimizations we have learned over the course of a year developing several large applications. Using Luca allows you to leverage the power of Backbone.js but only focus on what makes your app unique.</p>\n      </div>\n      <a href=\'https://github.com/datapimp/luca\'>\n        <img alt=\'Fork me on GitHub\' src=\'https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png\' style=\'position: absolute; top: 0; right: 0; border: 0; z-index:9000;\' />\n      </a>\n    </div>\n    <div class=\'row heading\'>\n      <div class=\'span12\'>\n        <h2>Develop Apps Faster</h2>\n      </div>\n    </div>\n    <div class=\'row\'>\n      <div class=\'span4\'>\n        <h3>Development Tools</h3>\n        <p>If you enable the Luca development tools, you have access to things like an in browser Coffeescript console, a CodeMirror based IDE to edit and test your components which live reloads javascript prototype changes and re-renders your components, so that you can experiment directly in the browser.</p>\n        <p>Live reloading of your code changes is also supported if you use the ruby gem and make changes in your favorite editor.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Experimentation and Debugging</h3>\n        <p>The way the Luca framework was designed encourages us to define our apps mostly using JSON configuration, which then gets interpreted, and structural components and style rules are generated for us.  Events get binded, and things just work.</p>\n        <p>Because large parts of the application\'s code are just configuration strings, it is very easy to provide you with a suite of development tools that allow you to inspect what is going on behind the scenes and make changes directly in the environment if you want to experiment with some ideas.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Not only for Ruby Developers</h3>\n        <p>Luca is just javascript and css, and will work with any server backend.</p>\n        <p>That being said, Luca was developed against Rails and Sinatra apps and comes with many development helpers which work in these environments.  The development environment and sandbox is a Sinatra app, but like everything else in the framework you can only use what you need.</p>\n      </div>\n    </div>\n  </div>\n</div>\n');}return __p.join('');};
+  Luca.templates["main"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'container\'>\n  <div class=\'hero-unit\'>\n    <h1>Want to build apps with Backbone?</h1>\n    <p>This is a collection of application design components that you should use to build your next large backbone.js application.</p>\n    <p>It combines the elegance and simplicity of backbone.js and bootstrap.css, with the experience of developers who have been building single page javascript apps since you were a baby.</p>\n    <a class=\'btn btn-large btn-primary\' href=\'https://github.com/datapimp/luca/zipball/master\'>\n      Download\n    </a>\n    <a class=\'btn btn-success btn-large\' href=\'#build\'>\n      Build an App\n    </a>\n  </div>\n  <hr />\n  <div id=\'information\'>\n    <div class=\'row heading\'>\n      <div class=\'span12\'>\n        <h2>Composite Application Architecture</h2>\n      </div>\n    </div>\n    <div class=\'row\'>\n      <div class=\'span4\'>\n        <h3>Component Driven Design</h3>\n        <p>Luca is a collection of common components needed to build large single page applications. Luca provides base classes for Model, View, and Collection classes which you can choose to extend where needed.  Luca also provides an extensive library of application building components and UI elements which you can piece together in a variety of ways to build responsive, and snappy single page apps.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Backbone and Luca work together</h3>\n        <p>Luca is not a replacement for Backbone, it is a smart use of Backbone\'s core classes.  Large apps require layers of abstraction and patterns for communication between various components, Luca provides these for you.</p>\n        <p>Like Backbone, you only have to use what you need.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Well Tested Patterns</h3>\n        <p>We have extracted all of the common patterns and optimizations we have learned over the course of a year developing several large applications. Using Luca allows you to leverage the power of Backbone.js but only focus on what makes your app unique.</p>\n      </div>\n      <a href=\'https://github.com/datapimp/luca\'>\n        <img alt=\'Fork me on GitHub\' src=\'https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png\' style=\'position: absolute; top: 0; right: 0; border: 0; z-index:9000;\' />\n      </a>\n    </div>\n    <div class=\'row heading\'>\n      <div class=\'span12\'>\n        <h2>Develop Apps Faster</h2>\n      </div>\n    </div>\n    <div class=\'row\'>\n      <div class=\'span4\'>\n        <h3>Development Tools</h3>\n        <p>Luca\'s development tools include an in-browser Coffeescript console, a CodeMirror based IDE which performs live updates in the browser.</p>\n        <p>Live reloading of your code changes is also supported if you use the ruby gem and make changes in your favorite editor.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Experimentation and Debugging</h3>\n        <p>The Luca framework was designed encourage developers to define apps mostly using JSON configuration, The structural components and style rules are generated for us,  events get bound, and things just work.</p>\n      </div>\n      <div class=\'span4\'>\n        <h3>Not only for Ruby Developers</h3>\n        <p>Luca is just javascript and css, and will work with any server backend.</p>\n        <p>That being said, Luca was developed against Rails and Sinatra apps and comes with many development helpers which work in these environments.  The development environment and sandbox is a Sinatra app, but like everything else in the framework you can only use what you need.</p>\n      </div>\n    </div>\n  </div>\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   Luca.templates || (Luca.templates = {});
@@ -42,25 +42,42 @@
         className: "builder-canvas"
       }, {
         ctype: "container",
+        name: "editor_container",
+        bodyClassName: "row-fluid",
+        topToolbar: {
+          buttons: [
+            {
+              align: "left",
+              label: "View",
+              dropdown: [["toggle:all", "All"], ["toggle:collections", "Collections"], ["toggle:models", "Models"], ["toggle:views", "Views"]]
+            }
+          ]
+        },
+        componentEvents: {
+          "component_list selected": "onComponentSelection"
+        },
         components: [
           {
+            ctype: "component_list",
+            name: "component_list",
+            className: "span3",
+            beforeRender: function() {
+              return this.collection.fetch();
+            }
+          }, {
             ctype: "builder_editor",
-            className: "builder-editor fixed-height",
-            topToolbar: {
-              buttons: [
-                {
-                  label: "Views"
-                }, {
-                  label: "Collections"
-                }, {
-                  label: "Models"
-                }, {
-                  label: "Templates"
-                }
-              ]
+            className: "span9 builder-editor-container",
+            styles: {
+              "margin-left": "0px",
+              "width": "76%"
             }
           }
-        ]
+        ],
+        onComponentSelection: function(component) {
+          Luca("builder_editor").setValue(component.get('source'));
+          Luca("builder_editor").state.set('currentMode', 'coffeescript');
+          return Luca("builder_editor").updateToggleSourceButton();
+        }
       }
     ],
     initialize: function(options) {
@@ -80,23 +97,24 @@
     editor: function() {
       return Luca("builder_editor");
     },
+    componentList: function() {
+      return Luca("component_list");
+    },
     fitToScreen: function() {
       var half, toolbarHeight, viewportHeight;
       viewportHeight = $(window).height();
       half = viewportHeight * 0.5;
       toolbarHeight = 0;
       toolbarHeight += this.$('.toolbar-container.top').height() * this.$('.toolbar-container.top').length;
-      this.canvas().$el.height(half - toolbarHeight);
+      this.canvas().$el.height(half - toolbarHeight - 40);
+      this.componentList().$el.height(half);
       this.editor().$el.height(half);
-      return this.editor().setHeight(half);
+      return this.editor().setHeight(half - 50);
     },
     activation: function() {
-      $('body .navbar').toggle();
       return this.fitToScreen();
     },
-    deactivation: function() {
-      return $('body .navbar').toggle();
-    },
+    deactivation: function() {},
     beforeRender: function() {
       var _ref;
       if ((_ref = Luca.core.Container.prototype.beforeRender) != null) {
@@ -118,7 +136,49 @@
 (function() {
 
   _.def("Sandbox.views.BuilderEditor")["extends"]("Luca.tools.CoffeeEditor")["with"]({
-    name: "builder_editor"
+    name: "builder_editor",
+    bottomToolbar: {
+      buttons: [
+        {
+          eventId: "toggle:source",
+          label: "mode: coffeescript"
+        }
+      ]
+    },
+    toggleSource: function() {
+      this._super("toggleMode", this, arguments);
+      return this.updateToggleSourceButton();
+    },
+    updateToggleSourceButton: function() {
+      return this.$('[data-eventid="toggle:source"]').html("mode: " + (this.currentMode()));
+    }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Sandbox.views.ComponentList")["extends"]("Luca.components.CollectionView")["with"]({
+    name: "component_list",
+    id: "component_list",
+    className: "span3",
+    collection: "components",
+    itemTagName: "div",
+    itemRenderer: function(item, model, index) {
+      return Luca.util.make("a", {
+        "data-index": index
+      }, model.className());
+    },
+    autoBindEventHandlers: true,
+    events: {
+      "click div.collection-item a": "clickHandler"
+    },
+    clickHandler: function(e) {
+      var component, me, my;
+      e.preventDefault();
+      me = my = $(e.target);
+      component = this.collection.at(my.data('index'));
+      return this.trigger("selected", component);
+    }
   });
 
 }).call(this);
@@ -160,7 +220,7 @@
     el: '#viewport',
     fluid: true,
     topNav: 'top_navigation',
-    useKeyRouter: true,
+    useKeyHandler: true,
     keyEvents: {
       meta: {
         forwardslash: "developmentConsole"

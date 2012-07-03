@@ -25,7 +25,8 @@
     modules: {},
     util: {},
     fields: {},
-    registry: {}
+    registry: {},
+    options: {}
   });
 
   _.extend(Luca, Backbone.Events);
@@ -695,6 +696,7 @@
           this.$el.addClass(additional);
         }
       }
+      if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
       this.trigger("after:initialize", this);
       this.registerCollectionEvents();
       return this.delegateEvents();
@@ -2467,9 +2469,6 @@
       return _(elements).each(function(element) {
         return _this.$el.append(element);
       });
-    },
-    afterRender: function() {
-      return this._super("afterRender", this, arguments);
     }
   });
 
@@ -2610,8 +2609,9 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (Luca.enableBootstrap === true) {
-        if (this.fluid === true) this.wrapperClass = "row-fluid";
-        this.$wrap(this.wrapperClass);
+        if (this.fluid === true) {
+          this.wrapperClass = "row-fluid fluid-viewport-wrapper";
+        }
       }
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
@@ -2669,15 +2669,24 @@
 
 }).call(this);
 (function() {
+  var startHistory;
+
+  startHistory = function() {
+    return Backbone.history.start();
+  };
 
   _.def('Luca.Application')["extends"]('Luca.containers.Viewport')["with"]({
-    autoBoot: false,
     name: "MyApp",
-    autoStartHistory: true,
+    defaultState: {},
+    autoBoot: false,
+    autoStartHistory: "before:render",
     useCollectionManager: true,
+    collectionManager: {},
     collectionManagerClass: "Luca.CollectionManager",
     plugin: false,
     useController: true,
+    useKeyHandler: false,
+    keyEvents: {},
     components: [
       {
         ctype: 'template',
@@ -2687,7 +2696,7 @@
       }
     ],
     initialize: function(options) {
-      var alreadyRunning, app, appName, collectionManagerOptions, definedComponents, routerClass, startHistory, _base, _base2, _ref, _ref2,
+      var alreadyRunning, app, appName, _base,
         _this = this;
       this.options = options != null ? options : {};
       app = this;
@@ -2696,51 +2705,16 @@
       (_base = Luca.Application).instances || (_base.instances = {});
       Luca.Application.instances[appName] = app;
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
-      if (this.useController === true) definedComponents = this.components || [];
-      this.components = [
-        {
-          ctype: 'controller',
-          name: "main_controller",
-          components: definedComponents
-        }
-      ];
-      if (this.useCollectionManager === true) {
-        if (_.isString(this.collectionManagerClass)) {
-          this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
-        }
-        collectionManagerOptions = this.collectionManagerOptions;
-        if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
-          collectionManagerOptions = this.collectionManager;
-          this.collectionManager = void 0;
-        }
-        if (_.isString(this.collectionManager)) {
-          collectionManagerOptions = {
-            name: this.collectionManager
-          };
-        }
-        this.collectionManager = typeof (_base2 = Luca.CollectionManager).get === "function" ? _base2.get(collectionManagerOptions.name) : void 0;
-        if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
-          this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
-        }
-      }
       this.state = new Luca.Model(this.defaultState);
+      this.setupMainController();
+      this.setupCollectionManager();
       this.defer(function() {
         return app.render();
       }).until(this, "ready");
-      if (this.useKeyRouter === true && (this.keyEvents != null)) {
-        this.setupKeyRouter();
-      }
-      if (_.isString(this.router)) {
-        routerClass = Luca.util.resolve(this.router);
-        this.router = new routerClass({
-          app: app
-        });
-      }
-      if (this.router && this.autoStartHistory) {
-        startHistory = function() {
-          return Backbone.history.start();
-        };
-        this.defer(startHistory, false).until(this, this.startHistoryOn || "before:render");
+      this.setupRouter();
+      console.log("The useKeyRouter property is being deprecated. switch to useKeyHandler instead");
+      if ((this.useKeyHandler === true || this.useKeyRouter === true) && (this.keyEvents != null)) {
+        this.setupKeyHandler();
       }
       if (!(this.plugin === true || alreadyRunning)) {
         Luca.getApplication = function(name) {
@@ -2766,40 +2740,17 @@
         return this.view(this.activeSection());
       }
     },
-    activeSubSection: function() {
-      return this.get("active_sub_section");
-    },
     activeSection: function() {
       return this.get("active_section");
+    },
+    activeSubSection: function() {
+      return this.get("active_sub_section");
     },
     activePages: function() {
       var _this = this;
       return this.$('.luca-ui-controller').map(function(index, element) {
         return $(element).data('active-section');
       });
-    },
-    afterComponents: function() {
-      var _ref, _ref2, _ref3,
-        _this = this;
-      if ((_ref = Luca.containers.Viewport.prototype.afterComponents) != null) {
-        _ref.apply(this, arguments);
-      }
-      if ((_ref2 = this.getMainController()) != null) {
-        _ref2.bind("after:card:switch", function(previous, current) {
-          return _this.state.set({
-            active_section: current.name
-          });
-        });
-      }
-      return (_ref3 = this.getMainController()) != null ? _ref3.each(function(component) {
-        if (component.ctype.match(/controller$/)) {
-          return component.bind("after:card:switch", function(previous, current) {
-            return _this.state.set({
-              active_sub_section: current.name
-            });
-          });
-        }
-      }) : void 0;
     },
     boot: function() {
       return this.trigger("ready");
@@ -2810,12 +2761,8 @@
     get: function(attribute) {
       return this.state.get(attribute);
     },
-    getMainController: function() {
-      if (this.useController === true) return this.components[0];
-      return Luca.cache('main_controller');
-    },
-    set: function(attributes) {
-      return this.state.set(attributes);
+    set: function(attribute, value, options) {
+      return this.state.set.apply(this.state, arguments);
     },
     view: function(name) {
       return Luca.cache(name);
@@ -2823,17 +2770,11 @@
     navigate_to: function(component_name, callback) {
       return this.getMainController().navigate_to(component_name, callback);
     },
-    setupKeyRouter: function() {
-      var router, _base;
-      if (!this.keyEvents) return;
-      (_base = this.keyEvents).control_meta || (_base.control_meta = {});
-      if (this.keyEvents.meta_control) {
-        _.extend(this.keyEvents.control_meta, this.keyEvents.meta_control);
-      }
-      router = _.bind(this.keyRouter, this);
-      return $(document).keydown(router);
+    getMainController: function() {
+      if (this.useController === true) return this.components[0];
+      return Luca.cache('main_controller');
     },
-    keyRouter: function(e) {
+    keyHandler: function(e) {
       var control, isInputEvent, keyEvent, keyname, meta, source, _ref;
       if (!(e && this.keyEvents)) return;
       isInputEvent = $(e.target).is('input') || $(e.target).is('textarea');
@@ -2853,6 +2794,88 @@
           return this.trigger(keyEvent);
         }
       }
+    },
+    setupControllerBindings: function() {
+      var _ref, _ref2,
+        _this = this;
+      if ((_ref = this.getMainController()) != null) {
+        _ref.bind("after:card:switch", function(previous, current) {
+          return _this.state.set({
+            active_section: current.name
+          });
+        });
+      }
+      return (_ref2 = this.getMainController()) != null ? _ref2.each(function(component) {
+        if (component.ctype.match(/controller$/)) {
+          return component.bind("after:card:switch", function(previous, current) {
+            return _this.state.set({
+              active_sub_section: current.name
+            });
+          });
+        }
+      }) : void 0;
+    },
+    setupMainController: function() {
+      var definedComponents;
+      if (this.useController === true) {
+        definedComponents = this.components || [];
+        this.components = [
+          {
+            ctype: 'controller',
+            name: "main_controller",
+            components: definedComponents
+          }
+        ];
+        return this.defer(this.setupControllerBindings, false).until("after:components");
+      }
+    },
+    setupCollectionManager: function() {
+      var collectionManagerOptions, _base, _ref, _ref2;
+      if (this.useCollectionManager === true) {
+        if (_.isString(this.collectionManagerClass)) {
+          this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
+        }
+        collectionManagerOptions = this.collectionManagerOptions;
+        if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
+          collectionManagerOptions = this.collectionManager;
+          this.collectionManager = void 0;
+        }
+        if (_.isString(this.collectionManager)) {
+          collectionManagerOptions = {
+            name: this.collectionManager
+          };
+        }
+        this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
+        if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
+          return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
+        }
+      }
+    },
+    setupRouter: function() {
+      var app, routerClass;
+      app = this;
+      if (_.isString(this.router)) {
+        routerClass = Luca.util.resolve(this.router);
+        this.router = new routerClass({
+          app: app
+        });
+      }
+      if (this.router && this.autoStartHistory) {
+        if (this.autoStartHistory === true) {
+          this.autoStartHistory = "before:render";
+        }
+        return this.defer(startHistory, false).until(this, this.autoStartHistory);
+      }
+    },
+    setupKeyHandler: function() {
+      var handler, _base;
+      if (!this.keyEvents) return;
+      (_base = this.keyEvents).control_meta || (_base.control_meta = {});
+      if (this.keyEvents.meta_control) {
+        _.extend(this.keyEvents.control_meta, this.keyEvents.meta_control);
+      }
+      handler = _.bind(this.keyHandler, this);
+      return $(document).keydown(handler);
     }
   });
 
@@ -2960,7 +2983,7 @@
         content = templateFn.call(this, item);
       }
       if ((this.itemRenderer != null) && _.isFunction(this.itemRenderer)) {
-        content = this.itemRenderer.call(this, item);
+        content = this.itemRenderer.call(this, item, item.model, item.index);
       }
       if (this.itemProperty) {
         content = item.model.get(this.itemProperty) || item.model[this.itemProperty];

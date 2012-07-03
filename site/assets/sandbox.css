@@ -8,6 +8,17 @@
       margin-top: 0px; }
     #builder .toolbar-container .luca-ui-toolbar.toolbar-top {
       margin-bottom: 0px; }
+
+.builder-editor-container .CodeMirror {
+  font-size: 1.2em;
+  line-height: 1.5; }
+
+#component_list {
+  overflow: scroll;
+  height: 100%; }
+  #component_list .collection-item {
+    padding: 3px 0px 3px 4px;
+    cursor: pointer; }
 .marketing-content {
   line-height: 1.5;
   color: #333; }

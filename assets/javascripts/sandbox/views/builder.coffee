@@ -39,10 +39,9 @@ _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
     ]
 
     onComponentSelection: (component)->
-      component.fetch success: (response)->
-        Luca("builder_editor").setValue( component.get('source') )
-        Luca("builder_editor").state.set('currentMode','coffeescript')
-        Luca("builder_editor").updateToggleSourceButton()
+      Luca("builder_editor").setValue( component.get('source') )
+      Luca("builder_editor").state.set('currentMode','coffeescript')
+      Luca("builder_editor").updateToggleSourceButton()
   ]
 
 

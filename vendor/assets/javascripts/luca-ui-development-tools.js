@@ -17636,7 +17636,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       var editor;
       this.options = options;
       Luca.tools.CodeMirrorField.prototype.initialize.apply(this, arguments);
-      _.bindAll(this, "editorChange");
+      _.bindAll(this, "editorChange", "toggleSource");
       editor = this;
       this.state = new Luca.Model({
         currentMode: "coffeescript",
@@ -17651,9 +17651,16 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
           return model.set('javascript', compiled);
         });
       });
-      return this.state.bind("change:javascript", function(model) {
+      this.state.bind("change:javascript", function(model) {
         var _ref;
         return (_ref = editor.onJavascriptChange) != null ? _ref.call(editor, model.get('javascript')) : void 0;
+      });
+      return this.state.bind("change:currentMode", function(model) {
+        if (model.get('currentMode') === "javascript") {
+          return editor.setValue(model.get('javascript'));
+        } else {
+          return editor.setValue(model.get('coffeescript'));
+        }
       });
     },
     compile: function(code, callback) {
@@ -17676,8 +17683,28 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         };
       }
     },
+    toggleMode: function() {
+      if (this.currentMode() === "coffeescript") {
+        return this.state.set('currentMode', 'javascript');
+      } else if (this.currentMode() === "javascript") {
+        return this.state.set('currentMode', 'coffeescript');
+      }
+    },
     currentMode: function() {
       return this.state.get("currentMode");
+    },
+    getCoffeescript: function() {
+      return this.state.get("coffeescript");
+    },
+    getJavascript: function(recompile) {
+      var js, results;
+      if (recompile == null) recompile = false;
+      js = this.state.get("javascript");
+      if (recompile === true || (js != null ? js.length : void 0) === 0) {
+        results = this.compile(this.getCoffeescript());
+        js = results != null ? results.compiled : void 0;
+      }
+      return js;
     },
     editorChange: function() {
       if (this.autoCompile === true) {
@@ -17692,6 +17719,68 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   _.def("Luca.tools.CollectionInspector")["extends"]("Luca.View")["with"]({
     name: "collection_inspector",
     className: "collection-inspector"
+  });
+
+}).call(this);
+(function() {
+
+  _.def('Luca.collections.Components')["extends"]('Luca.Collection')["with"]({
+    cachedMethods: ["namespaces", "classes", "roots", "views", "collections", "models"],
+    cache_key: "luca_components",
+    name: "components",
+    initialize: function() {
+      this.model = Luca.models.Component;
+      return Luca.Collection.prototype.initialize.apply(this, arguments);
+    },
+    url: function() {
+      return "/source-map.js";
+    },
+    collections: function() {
+      return this.select(function(component) {
+        return Luca.isCollectionPrototype(component.definition());
+      });
+    },
+    modelClasses: function() {
+      return this.select(function(component) {
+        return Luca.isModelPrototype(component.definition());
+      });
+    },
+    views: function() {
+      return this.select(function(component) {
+        return Luca.isViewPrototype(component.definition());
+      });
+    },
+    classes: function() {
+      return _.uniq(this.pluck("className"));
+    },
+    roots: function() {
+      return _.uniq(this.invoke("root"));
+    },
+    namespaces: function() {
+      return _.uniq(this.invoke("namespace"));
+    },
+    asTree: function() {
+      var classes, namespaces, roots, tree;
+      classes = this.classes();
+      namespaces = this.namespaces();
+      roots = this.roots();
+      tree = _(roots).inject(function(memo, root) {
+        var regexp;
+        memo[root] || (memo[root] = {});
+        regexp = new RegExp("^" + root);
+        memo[root] = _(namespaces).select(function(namespace) {
+          return regexp.exec(namespace) && _(namespaces).include(namespace) && namespace.split('.').length === 2;
+        });
+        return memo;
+      }, {});
+      return _(tree).inject(function(memo, namespaces, root) {
+        memo[root] = {};
+        _(namespaces).each(function(namespace) {
+          return memo[root][namespace] = {};
+        });
+        return memo;
+      }, {});
+    }
   });
 
 }).call(this);
@@ -18172,115 +18261,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
 }).call(this);
 (function() {
-
-  _.def("Luca.tools.ClassBrowserDetail")["extends"]('Luca.core.Container')["with"]({
-    components: [
-      {
-        ctype: "code_editor"
-      }
-    ],
-    loadComponent: function(model) {
-      this.components[0].compiled = void 0;
-      return this.components[0].editor.setValue(model.get('source'));
-    }
-  });
-
-}).call(this);
-(function() {
-
-  _.def("Luca.tools.ClassBrowserList")["extends"]("Luca.View")["with"]({
-    tagName: "ul",
-    className: "nav nav-list class-browser-list",
-    autoBindEventHandlers: true,
-    events: {
-      "click li.namespace a": "namespaceClickHandler",
-      "click li.className a": "classClickHandler"
-    },
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return this.deferrable = this.collection = new Luca.collections.Components();
-    },
-    collapseAllNamespaceLists: function() {
-      return this.$('ul.classList').collapse('hide');
-    },
-    namespaceClickHandler: function(e) {
-      var classList, me, my;
-      me = my = $(e.target);
-      classList = my.siblings('.classList');
-      return classList.collapse('toggle');
-    },
-    classClickHandler: function(e) {
-      var className, list, me, model, my;
-      e.preventDefault();
-      me = my = $(e.currentTarget);
-      className = my.data('component');
-      list = this;
-      model = this.collection.detect(function(component) {
-        return component.get("className") === className;
-      });
-      if (model && !model.get("contents")) {
-        return model.fetch({
-          success: _.once(function(model, response) {
-            return list.trigger("component:loaded", model, response);
-          })
-        });
-      }
-    },
-    afterRender: function() {
-      var _ref;
-      this.collapseAllNamespaceLists();
-      return (_ref = Luca.View.prototype.afterRender) != null ? _ref.apply(this, arguments) : void 0;
-    },
-    attach: _.once(Luca.View.prototype.$attach),
-    render: function() {
-      var data, tree;
-      tree = this;
-      data = this.collection.asTree();
-      _(data).each(function(namespace, root) {
-        var li, namespaceElements, namespaceList, target, ul;
-        target = tree.make("a", {}, root);
-        li = tree.make("li", {
-          "class": "root"
-        }, target);
-        namespaceList = _(namespace).keys();
-        namespaceElements = _(namespaceList).map(function(namespace) {
-          var classElements, classId, classes, cul, nli, resolved;
-          classId = namespace.toLowerCase().replace(/\./g, '-');
-          target = tree.make("a", {}, namespace);
-          nli = tree.make("li", {
-            "class": "namespace " + classId
-          }, target);
-          resolved = Luca.util.resolve(namespace, window || global);
-          classes = _(resolved).keys();
-          classElements = _(classes).map(function(componentClass) {
-            var fullName, link;
-            fullName = "" + namespace + "." + componentClass;
-            link = tree.make("a", {
-              "data-component": fullName
-            }, fullName);
-            classId = fullName.toLowerCase().replace(/\./g, '-');
-            return tree.make("li", {
-              "class": "className " + classId
-            }, link);
-          });
-          cul = tree.make("ul", {
-            "class": "classList"
-          }, classElements);
-          $(nli).append(cul);
-          return nli;
-        });
-        ul = tree.make("ul", {
-          "class": "namespace"
-        }, namespaceElements);
-        $(li).append(ul);
-        return tree.$append(li);
-      });
-      return this.attach();
-    }
-  });
-
-}).call(this);
-(function() {
   var codeMirrorOptions;
 
   codeMirrorOptions = {
@@ -18449,9 +18429,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 (function() {
 
   _.def("Luca.models.Component")["extends"]("Luca.Model")["with"]({
-    url: function() {
-      return "/components?component=" + (this.get('className'));
-    },
     root: function() {
       return this.get("className").split('.')[0];
     },
@@ -18477,66 +18454,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       parts = this.get("className").split('.');
       parts.pop();
       return parts.join(".");
-    }
-  });
-
-  _.def('Luca.collections.Components')["extends"]('Luca.Collection')["with"]({
-    model: Luca.models.Component,
-    cachedMethods: ["namespaces", "classes", "roots", "views", "collections", "models"],
-    cache_key: "luca_components",
-    name: "components",
-    url: function() {
-      return "/luca/components";
-    },
-    initialize: function(models, options) {
-      Luca.Collection.cache(this.cache_key, Luca.registry.classes());
-      return Luca.Collection.prototype.initialize.apply(this, arguments);
-    },
-    collections: function() {
-      return this.select(function(component) {
-        return Luca.isCollectionPrototype(component.definition());
-      });
-    },
-    modelClasses: function() {
-      return this.select(function(component) {
-        return Luca.isModelPrototype(component.definition());
-      });
-    },
-    views: function() {
-      return this.select(function(component) {
-        return Luca.isViewPrototype(component.definition());
-      });
-    },
-    classes: function() {
-      return _.uniq(this.pluck("className"));
-    },
-    roots: function() {
-      return _.uniq(this.invoke("root"));
-    },
-    namespaces: function() {
-      return _.uniq(this.invoke("namespace"));
-    },
-    asTree: function() {
-      var classes, namespaces, roots, tree;
-      classes = this.classes();
-      namespaces = this.namespaces();
-      roots = this.roots();
-      tree = _(roots).inject(function(memo, root) {
-        var regexp;
-        memo[root] || (memo[root] = {});
-        regexp = new RegExp("^" + root);
-        memo[root] = _(namespaces).select(function(namespace) {
-          return regexp.exec(namespace) && _(namespaces).include(namespace) && namespace.split('.').length === 2;
-        });
-        return memo;
-      }, {});
-      return _(tree).inject(function(memo, namespaces, root) {
-        memo[root] = {};
-        _(namespaces).each(function(namespace) {
-          return memo[root][namespace] = {};
-        });
-        return memo;
-      }, {});
     }
   });
 
