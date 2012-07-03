@@ -7,19 +7,24 @@ _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
     className: "builder-canvas"
   ,
     ctype: "container"
+    bodyClassName:"row"
+    topToolbar:
+      buttons:[
+        align:"left"
+        label:"View"
+        dropdown:[
+          ["toggle:all","All"]
+          ["toggle:collections","Collections"]
+          ["toggle:models","Models"]
+          ["toggle:views","Views"],
+        ]
+      ]
     components:[
+      ctype:"panel"
+      className:"span2"
+    ,
       ctype: "builder_editor"  
-      className:"builder-editor fixed-height"
-      topToolbar:
-        buttons:[
-          label: "Views"
-        ,
-          label: "Collections"
-        ,
-          label: "Models"
-        ,
-          label: "Templates"
-        ]          
+      className:"span10"
     ]
   ]
 

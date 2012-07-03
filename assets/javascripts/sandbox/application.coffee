@@ -12,7 +12,7 @@ _.def('Sandbox.Application').extends('Luca.Application').with
 
   topNav:'top_navigation'
 
-  useKeyRouter: true
+  useKeyHandler: true
 
   keyEvents:
     meta:

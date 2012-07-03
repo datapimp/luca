@@ -133,7 +133,9 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # keyEvents:
     #   meta:
     #     forwardslash: "altSlashHandler"
-    @setupKeyHandler() if @useKeyHandler is true and @keyEvents?
+    console.log "The useKeyRouter property is being deprecated. switch to useKeyHandler instead"
+    
+    @setupKeyHandler() if (@useKeyHandler is true or @useKeyRouter is true) and @keyEvents?
 
     # if the application is a plugin designed to modify the behavior
     # of another app, then don't claim ownership.  otherwise the most common
