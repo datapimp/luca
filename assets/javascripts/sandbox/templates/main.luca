@@ -39,12 +39,11 @@
     .row
       .span4
         %h3 Development Tools
-        %p If you enable the Luca development tools, you have access to things like an in browser Coffeescript console, a CodeMirror based IDE to edit and test your components which live reloads javascript prototype changes and re-renders your components, so that you can experiment directly in the browser. 
+        %p Luca's development tools include an in-browser Coffeescript console, a CodeMirror based IDE which performs live updates in the browser. 
         %p Live reloading of your code changes is also supported if you use the ruby gem and make changes in your favorite editor.
       .span4
         %h3 Experimentation and Debugging
-        %p The way the Luca framework was designed encourages us to define our apps mostly using JSON configuration, which then gets interpreted, and structural components and style rules are generated for us.  Events get binded, and things just work.  
-        %p Because large parts of the application's code are just configuration strings, it is very easy to provide you with a suite of development tools that allow you to inspect what is going on behind the scenes and make changes directly in the environment if you want to experiment with some ideas.
+        %p The Luca framework was designed encourage developers to define apps mostly using JSON configuration, The structural components and style rules are generated for us,  events get bound, and things just work.
 
       .span4
         %h3 Not only for Ruby Developers
