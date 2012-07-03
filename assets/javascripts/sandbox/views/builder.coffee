@@ -1,13 +1,14 @@
 _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
   name: "builder"
   id: "builder"
-
   components:[
     ctype: "builder_canvas"
     className: "builder-canvas"
   ,
     ctype: "container"
-    bodyClassName:"row"
+    name:"editor_container"
+    bodyClassName:"row-fluid" 
+
     topToolbar:
       buttons:[
         align:"left"
@@ -19,15 +20,30 @@ _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
           ["toggle:views","Views"],
         ]
       ]
+
+    componentEvents:
+      "component_list selected" : "onComponentSelection"
+
     components:[
-      ctype:"panel"
-      className:"span2"
+      ctype:"component_list"
+      name: "component_list"
+      className:"span3"
+      beforeRender: ()->
+        @collection.fetch()
     ,
       ctype: "builder_editor"  
-      className:"span10"
+      className:"span9 builder-editor-container"
+      styles:
+        "margin-left":"0px"
+        "width":"76%"
     ]
-  ]
 
+    onComponentSelection: (component)->
+      component.fetch success: (response)->
+        Luca("builder_editor").setValue( component.get('source') )
+        Luca("builder_editor").state.set('currentMode','coffeescript')
+        Luca("builder_editor").updateToggleSourceButton()
+  ]
 
 
   initialize: (@options={})->
@@ -41,6 +57,7 @@ _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
 
   canvas: ()-> Luca("builder_canvas")
   editor: ()-> Luca("builder_editor")
+  componentList: ()-> Luca("component_list")
 
   fitToScreen: ()->
     viewportHeight = $(window).height()
@@ -48,16 +65,16 @@ _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
     toolbarHeight = 0
     toolbarHeight += @$('.toolbar-container.top').height() * @$('.toolbar-container.top').length
 
-    @canvas().$el.height( half - toolbarHeight )
+    @canvas().$el.height( half - toolbarHeight - 40 )
+
+    @componentList().$el.height( half )
     @editor().$el.height( half )
-    @editor().setHeight( half )
+    @editor().setHeight( half - 50 )
 
   activation: ()->
-    $('body .navbar').toggle()
     @fitToScreen()
 
   deactivation: ()->
-    $('body .navbar').toggle()
 
   beforeRender: ()->
     Luca.core.Container::beforeRender?.apply(@, arguments)

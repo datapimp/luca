@@ -1,3 +1,4 @@
+
 task :environment do
   require './app'
   require 'pry'
@@ -6,6 +7,39 @@ end
 
 stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
 scripts = ["dependencies.js","sandbox.js"]
+
+namespace :source do
+  desc "Create a source map for the project"
+  task :map => :environment do
+    require 'json'
+    source_map = (["src/**/*.coffee","assets/javascripts/sandbox/**/*.coffee"]).map do |location|
+      files = Dir.glob( location )
+      files.inject( {} ) do |memo, file|
+        definitions = IO.read(file).lines.to_a.grep /_\.def/
+
+        definitions.each do |definition|
+          component = definition.match(/_\.def\(['"](.+)['"]\)\./)
+
+          if component and component[1]
+            componentId = component[1].gsub(/['"].*$/,'')
+            if componentId
+              memo[ componentId ] = {file:file,source:IO.read(file)}
+            end
+          end
+        end
+
+        memo
+      end
+    end
+
+    sourceMapFile = File.join( App.root, 'public', 'source-map.js')
+
+    File.open(sourceMapFile,'w+') do |fh| 
+      fh.puts( JSON.generate( source_map ) )
+    end
+
+  end
+end
 
 namespace :release do
   desc "Release new version of sandbox site"

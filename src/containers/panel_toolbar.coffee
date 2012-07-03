@@ -149,8 +149,3 @@ _.def("Luca.containers.PanelToolbar").extends("Luca.View").with
     elements = prepareButtons(@buttons)
     _( elements ).each (element)=>
       @$el.append( element )
-
-  afterRender: ()->
-    @_super("afterRender", @, arguments)
-    #  @$('.toolbar-component label').remove()
-    #  @$('.toolbar-component').addClass('btn-group')

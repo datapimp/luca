@@ -16,3 +16,19 @@
  }
 
 }
+
+.builder-editor-container {
+  .CodeMirror {
+    font-size: 1.2em;
+    line-height: 1.5; 
+  }
+}
+
+#component_list {
+  overflow: scroll;
+  height:100%;
+  .collection-item {
+    padding: 3px 0px 3px 4px;
+    cursor: pointer;
+  }
+}

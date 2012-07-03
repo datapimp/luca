@@ -14,8 +14,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
     _.extend @, @options
 
     if Luca.enableBootstrap is true
-      @wrapperClass = "row-fluid" if @fluid is true
-      @$wrap( @wrapperClass )
+      @wrapperClass = "row-fluid fluid-viewport-wrapper" if @fluid is true
 
     Luca.core.Container::initialize.apply(@, arguments)
 

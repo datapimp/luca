@@ -46,6 +46,8 @@ _.def("Luca.View").extends("Backbone.View").with
       @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
       @$el.addClass( additional ) for additional in @additionalClassNames
 
+    @$wrap(@wrapperClass) if @wrapperClass?
+
     @trigger "after:initialize", @
 
     @registerCollectionEvents()

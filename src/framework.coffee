@@ -27,6 +27,7 @@ _.extend Luca,
   util: {}
   fields: {}
   registry:{}
+  options: {}
 
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events

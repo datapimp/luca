@@ -13,7 +13,7 @@ _.def("Luca.tools.CoffeeEditor").extends("Luca.tools.CodeMirrorField").with
   initialize: (@options)->
     Luca.tools.CodeMirrorField::initialize.apply(@, arguments)
 
-    _.bindAll(@, "editorChange")
+    _.bindAll(@, "editorChange", "toggleSource")
 
     editor = @
 
@@ -31,6 +31,12 @@ _.def("Luca.tools.CoffeeEditor").extends("Luca.tools.CodeMirrorField").with
 
     @state.bind "change:javascript", (model)->
       editor.onJavascriptChange?.call(editor, model.get('javascript') )
+
+    @state.bind "change:currentMode", (model)->
+      if model.get('currentMode') is "javascript"
+        editor.setValue model.get('javascript')
+      else 
+        editor.setValue model.get('coffeescript')
 
   compile: (code, callback)->
     response = {}
@@ -50,8 +56,26 @@ _.def("Luca.tools.CoffeeEditor").extends("Luca.tools.CodeMirrorField").with
         compiled: ''
         message: error.message
 
+  toggleMode: ()->
+    if @currentMode() is "coffeescript"
+      @state.set('currentMode', 'javascript')
+    else if @currentMode() is "javascript"
+      @state.set('currentMode', 'coffeescript')
+
   currentMode: ()->
     @state.get("currentMode")
+
+  getCoffeescript: ()->
+    @state.get("coffeescript")
+      
+  getJavascript: (recompile=false)->
+    js = @state.get("javascript")
+
+    if recompile is true or js?.length is 0
+      results = @compile( @getCoffeescript() ) 
+      js = results?.compiled
+
+    js
 
   editorChange: ()->
     if @autoCompile is true

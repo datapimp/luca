@@ -46,7 +46,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
       content = templateFn.call(@, item)
 
     if @itemRenderer? and _.isFunction( @itemRenderer )
-      content = @itemRenderer.call(@, item)
+      content = @itemRenderer.call(@, item, item.model, item.index)
 
     if @itemProperty
       content = item.model.get(@itemProperty) || item.model[ @itemProperty ]
