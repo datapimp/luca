@@ -1,4 +1,4 @@
-_.def("Luca.models.Component").extends("Luca.Model").with
+_.def("Luca.app.Component").extends("Luca.Model").with
   root: ()->
     @get("className").split('.')[0]
 

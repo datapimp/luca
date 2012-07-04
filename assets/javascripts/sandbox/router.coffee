@@ -3,6 +3,7 @@ Sandbox.Router = Luca.Router.extend
     ""                : "default"
     "build"           : "build"
     "intro"           : "intro"
+    "application"     : "inspector"
 
   default: ()->
     @app.navigate_to("pages").navigate_to "main"
@@ -12,3 +13,7 @@ Sandbox.Router = Luca.Router.extend
 
   intro: ()->
     @app.navigate_to("pages").navigate_to "intro"
+
+  inspector: ()->
+    inspector = Luca "application_inspector", new Luca.tools.ApplicationInspector()
+    inspector.toggle()

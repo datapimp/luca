@@ -11,13 +11,16 @@ _.def("Sandbox.views.Builder").extends("Luca.core.Container").with
 
     topToolbar:
       buttons:[
-        align:"left"
-        label:"View"
-        dropdown:[
-          ["toggle:all","All"]
-          ["toggle:collections","Collections"]
-          ["toggle:models","Models"]
-          ["toggle:views","Views"],
+        group: true
+        wrapper:"selectable"
+        buttons:[
+          label:"Show:"
+        ,
+          label:"Collections"
+        ,
+          label:"Models"
+        ,
+          label:"Views"
         ]
       ]
 

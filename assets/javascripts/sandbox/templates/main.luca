@@ -44,6 +44,8 @@
       .span4
         %h3 Experimentation and Debugging
         %p The Luca framework was designed encourage developers to define apps mostly using JSON configuration, The structural components and style rules are generated for us,  events get bound, and things just work.
+        %p 
+          %a{href:"#application_inspector"} Take a look at this application in the inspector.
 
       .span4
         %h3 Not only for Ruby Developers

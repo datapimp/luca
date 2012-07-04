@@ -1,4 +1,4 @@
-_.def('Luca.collections.Components').extends('Luca.Collection').with
+_.def('Luca.app.Components').extends('Luca.Collection').with
 
   cachedMethods: [
     "namespaces"
@@ -14,7 +14,7 @@ _.def('Luca.collections.Components').extends('Luca.Collection').with
   name: "components"
 
   initialize: ()->
-    @model = Luca.models.Component
+    @model = Luca.app.Component
     Luca.Collection::initialize.apply(@, arguments)
     
   url: ()->
@@ -30,7 +30,7 @@ _.def('Luca.collections.Components').extends('Luca.Collection').with
     @select (component)-> Luca.isViewPrototype( component.definition() )
 
   classes: ()->
-    _.uniq( @pluck "className" )
+    _.uniq( @pluck("className") )
 
   roots: ()->
     _.uniq( @invoke("root") )
