@@ -228,6 +228,64 @@
 
 }).call(this);
 (function() {
+  var DeferredBindingProxy;
+
+  DeferredBindingProxy = (function() {
+
+    function DeferredBindingProxy(object, operation, wrapWithUnderscore) {
+      var fn,
+        _this = this;
+      this.object = object;
+      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
+      if (_.isFunction(operation)) {
+        fn = operation;
+      } else if (_.isString(operation) && _.isFunction(this.object[operation])) {
+        fn = this.object[operation];
+      }
+      if (!_.isFunction(fn)) {
+        throw "Must pass a function or a string representing one";
+      }
+      if (wrapWithUnderscore === true) {
+        this.fn = function() {
+          return _.defer(fn);
+        };
+      } else {
+        this.fn = fn;
+      }
+      this;
+    }
+
+    DeferredBindingProxy.prototype.until = function(watch, trigger) {
+      if ((watch != null) && !(trigger != null)) {
+        trigger = watch;
+        watch = this.object;
+      }
+      watch.once(trigger, this.fn);
+      return this.object;
+    };
+
+    return DeferredBindingProxy;
+
+  })();
+
+  Luca.Events = {
+    defer: function(operation, wrapWithUnderscore) {
+      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
+      return new DeferredBindingProxy(this, operation, wrapWithUnderscore);
+    },
+    once: function(trigger, callback, context) {
+      var onceFn;
+      context || (context = this);
+      onceFn = function() {
+        callback.apply(context, arguments);
+        return this.unbind(trigger, onceFn);
+      };
+      return this.bind(trigger, onceFn);
+    }
+  };
+
+}).call(this);
+(function() {
   var currentNamespace;
 
   Luca.util.resolve = function(accessor, source_object) {
@@ -337,7 +395,7 @@
 
 }).call(this);
 (function() {
-  var DeferredBindingProxy, DefineProxy;
+  var DefineProxy;
 
   Luca.define = function(componentName) {
     return new DefineProxy(componentName);
@@ -432,107 +490,6 @@
   _.mixin({
     def: Luca.define
   });
-
-  DeferredBindingProxy = (function() {
-
-    function DeferredBindingProxy(object, operation, wrapWithUnderscore) {
-      var fn,
-        _this = this;
-      this.object = object;
-      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
-      if (_.isFunction(operation)) {
-        fn = operation;
-      } else if (_.isString(operation) && _.isFunction(this.object[operation])) {
-        fn = this.object[operation];
-      }
-      if (!_.isFunction(fn)) {
-        throw "Must pass a function or a string representing one";
-      }
-      if (wrapWithUnderscore === true) {
-        this.fn = function() {
-          return _.defer(fn);
-        };
-      } else {
-        this.fn = fn;
-      }
-      this;
-    }
-
-    DeferredBindingProxy.prototype.until = function(watch, trigger) {
-      if ((watch != null) && !(trigger != null)) {
-        trigger = watch;
-        watch = this.object;
-      }
-      watch.once(trigger, this.fn);
-      return this.object;
-    };
-
-    return DeferredBindingProxy;
-
-  })();
-
-  Luca.Events = {
-    defer: function(operation, wrapWithUnderscore) {
-      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
-      return new DeferredBindingProxy(this, operation, wrapWithUnderscore);
-    },
-    once: function(trigger, callback, context) {
-      var onceFn;
-      context || (context = this);
-      onceFn = function() {
-        callback.apply(context, arguments);
-        return this.unbind(trigger, onceFn);
-      };
-      return this.bind(trigger, onceFn);
-    }
-  };
-
-  Luca.ScriptLoader = (function() {
-
-    ScriptLoader.loaded = {};
-
-    function ScriptLoader(options) {
-      var ready;
-      if (options == null) options = {};
-      _.extend(this, Backbone.Events, Luca.Events);
-      this.autoStart = options.autoStart === true;
-      this.scripts = options.scripts;
-      ready = function() {
-        return this.trigger("ready");
-      };
-      this.ready = _.after(this.scripts.length, ready);
-      _.bindAll(this, "load", "ready");
-      this.defer("load").until(this, "start");
-      if (this.autoStart === true) this.trigger("start");
-      this.bind("ready", this.onReady);
-    }
-
-    ScriptLoader.prototype.applyPrefix = function(script) {
-      return script;
-    };
-
-    ScriptLoader.prototype.onReady = function() {
-      return console.log("All dependencies loaded");
-    };
-
-    ScriptLoader.prototype.start = function() {
-      return this.trigger("start");
-    };
-
-    ScriptLoader.prototype.load = function() {
-      var script, _i, _len, _ref, _results;
-      _ref = this.scripts;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        script = _ref[_i];
-        _results.push(Luca.util.loadScript(this.applyPrefix(script), this.ready));
-      }
-      return _results;
-    };
-
-    return ScriptLoader;
-
-  })();
 
 }).call(this);
 (function() {
@@ -650,7 +607,9 @@
   var customizeRender, originalExtend;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
+    include: ['Luca.Events'],
     additionalClassNames: [],
+    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     debug: function() {
       var message, _i, _len, _results;
       if (!(this.debugMode || (window.LucaDebugMode != null))) return;
@@ -672,7 +631,6 @@
       }
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
-    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
       var additional, template, unique, _i, _len, _ref;
       this.options = options != null ? options : {};
@@ -869,29 +827,35 @@
 
 }).call(this);
 (function() {
+  var setupComputedProperties;
+
+  setupComputedProperties = function() {
+    var attr, dependencies, _ref, _results,
+      _this = this;
+    if (_.isUndefined(this.computed)) return;
+    this._computed = {};
+    _ref = this.computed;
+    _results = [];
+    for (attr in _ref) {
+      dependencies = _ref[attr];
+      this.on("change:" + attr, function() {
+        return _this._computed[attr] = _this[attr].call(_this);
+      });
+      _results.push(_(dependencies).each(function(dep) {
+        _this.on("change:" + dep, function() {
+          return _this.trigger("change:" + attr);
+        });
+        if (_this.has(dep)) return _this.trigger("change:" + attr);
+      }));
+    }
+    return _results;
+  };
 
   _.def('Luca.Model')["extends"]('Backbone.Model')["with"]({
+    include: ['Luca.Events'],
     initialize: function() {
-      var attr, dependencies, _ref, _results,
-        _this = this;
       Backbone.Model.prototype.initialize(this, arguments);
-      if (_.isUndefined(this.computed)) return;
-      this._computed = {};
-      _ref = this.computed;
-      _results = [];
-      for (attr in _ref) {
-        dependencies = _ref[attr];
-        this.on("change:" + attr, function() {
-          return _this._computed[attr] = _this[attr].call(_this);
-        });
-        _results.push(_(dependencies).each(function(dep) {
-          _this.on("change:" + dep, function() {
-            return _this.trigger("change:" + attr);
-          });
-          if (_this.has(dep)) return _this.trigger("change:" + attr);
-        }));
-      }
-      return _results;
+      return setupComputedProperties.call(this);
     },
     get: function(attr) {
       var _ref;
@@ -912,6 +876,7 @@
   if (Backbone.QueryCollection != null) source = 'Backbone.QueryCollection';
 
   _.def("Luca.Collection")["extends"](source)["with"]({
+    include: ['Luca.Events'],
     cachedMethods: [],
     remoteFilter: false,
     initialize: function(models, options) {
@@ -2659,6 +2624,11 @@
 }).call(this);
 (function() {
 
+
+
+}).call(this);
+(function() {
+
   _.def('Luca.components.Template')["extends"]('Luca.View')["with"]({
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -4388,12 +4358,6 @@
 }).call(this);
 (function() {
 
-  _.extend(Luca, Luca.Events);
 
-  _.extend(Luca.View.prototype, Luca.Events);
-
-  _.extend(Luca.Collection.prototype, Luca.Events);
-
-  _.extend(Luca.Model.prototype, Luca.Events);
 
 }).call(this);

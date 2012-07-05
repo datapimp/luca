@@ -17242,6 +17242,14 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   };
 })();
 (function() {
+
+  _.def("Luca.tools.ApplicationInspector")["extends"]("Luca.core.Container")["with"]({
+    name: "application_inspector",
+    components: []
+  });
+
+}).call(this);
+(function() {
   var BuffersModel, compilers;
 
   BuffersModel = Luca.Model.extend({
@@ -17724,12 +17732,12 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 }).call(this);
 (function() {
 
-  _.def('Luca.collections.Components')["extends"]('Luca.Collection')["with"]({
+  _.def('Luca.app.Components')["extends"]('Luca.Collection')["with"]({
     cachedMethods: ["namespaces", "classes", "roots", "views", "collections", "models"],
     cache_key: "luca_components",
     name: "components",
     initialize: function() {
-      this.model = Luca.models.Component;
+      this.model = Luca.app.Component;
       return Luca.Collection.prototype.initialize.apply(this, arguments);
     },
     url: function() {
@@ -17780,6 +17788,33 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         });
         return memo;
       }, {});
+    }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.app.Instances")["extends"]("Luca.Collection")["with"]({
+    name: "instances",
+    refresh: function(options) {
+      var models;
+      if (options == null) options = {};
+      models = _(Luca.registry.instances()).map(function(instance) {
+        return {
+          cid: instance.cid,
+          name: instance.name,
+          ctype: instance.ctype,
+          displayName: instance.displayName || instance.prototype.displayName,
+          object: instance
+        };
+      });
+      return this.reset(models, options);
+    },
+    initialize: function(initialModels, options) {
+      if (initialModels == null) initialModels = [];
+      this.options = options != null ? options : {};
+      this.model = Luca.app.Instance;
+      return Luca.Collection.prototype.initialize.apply(this, arguments);
     }
   });
 
@@ -18428,7 +18463,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 }).call(this);
 (function() {
 
-  _.def("Luca.models.Component")["extends"]("Luca.Model")["with"]({
+  _.def("Luca.app.Component")["extends"]("Luca.Model")["with"]({
     root: function() {
       return this.get("className").split('.')[0];
     },
@@ -18455,6 +18490,13 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       parts.pop();
       return parts.join(".");
     }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.app.Instance")["extends"]("Luca.Model")["with"]({
+    version: 1
   });
 
 }).call(this);

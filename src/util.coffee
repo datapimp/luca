@@ -83,6 +83,15 @@ Luca.util.loadScript = (url, callback) ->
 
 Luca.util.make = Backbone.View::make
 
+Luca.util.list = (list,options={},ordered)->
+  container = if ordered then "ol" else "ul"
+  container = Luca.util.make(container,options)
+  if _.isArray(list)
+    for item in list
+      $(container).append Luca.util.make("li",{},item)
+
+  container.outerHTML
+
 # generates a badge element
 # valid types are success, warning, important, info, inverse
 Luca.util.label = (contents="", type, baseClass="label")->

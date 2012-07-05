@@ -1,6 +1,17 @@
 _.def("Luca.View").extends("Backbone.View").with
+  
+  include: ['Luca.Events']
 
   additionalClassNames:[]
+
+  hooks:[
+    "after:initialize"
+    "before:render"
+    "after:render"
+    "first:activation"
+    "activation"
+    "deactivation"
+  ]
 
   debug: ()->
     return unless @debugMode or window.LucaDebugMode?
@@ -13,15 +24,6 @@ _.def("Luca.View").extends("Backbone.View").with
         Luca.ViewObserver.relay @, arguments
 
     Backbone.View.prototype.trigger.apply @, arguments
-
-  hooks:[
-    "after:initialize"
-    "before:render"
-    "after:render"
-    "first:activation"
-    "activation"
-    "deactivation"
-  ]
 
   initialize: (@options={})->
 

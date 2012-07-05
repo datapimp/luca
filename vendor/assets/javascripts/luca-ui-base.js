@@ -25,7 +25,8 @@
     modules: {},
     util: {},
     fields: {},
-    registry: {}
+    registry: {},
+    options: {}
   });
 
   _.extend(Luca, Backbone.Events);
@@ -71,26 +72,32 @@
   };
 
   Luca.isBackboneModel = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
   };
 
   Luca.isBackboneView = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return _.isFunction(obj != null ? obj.render : void 0) && !_.isUndefined(obj != null ? obj.el : void 0);
   };
 
   Luca.isBackboneCollection = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
   };
 
   Luca.isViewPrototype = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return (obj != null) && (obj.prototype != null) && (obj.prototype.make != null) && (obj.prototype.$ != null) && (obj.prototype.render != null);
   };
 
   Luca.isModelPrototype = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return (obj != null) && (typeof obj.prototype === "function" ? obj.prototype((obj.prototype.save != null) && (obj.prototype.changedAttributes != null)) : void 0);
   };
 
   Luca.isCollectionPrototype = function(obj) {
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
     return (obj != null) && (obj.prototype != null) && !Luca.isModelPrototype(obj) && (obj.prototype.reset != null) && (obj.prototype.select != null) && (obj.prototype.reject != null);
   };
 
@@ -221,6 +228,64 @@
 
 }).call(this);
 (function() {
+  var DeferredBindingProxy;
+
+  DeferredBindingProxy = (function() {
+
+    function DeferredBindingProxy(object, operation, wrapWithUnderscore) {
+      var fn,
+        _this = this;
+      this.object = object;
+      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
+      if (_.isFunction(operation)) {
+        fn = operation;
+      } else if (_.isString(operation) && _.isFunction(this.object[operation])) {
+        fn = this.object[operation];
+      }
+      if (!_.isFunction(fn)) {
+        throw "Must pass a function or a string representing one";
+      }
+      if (wrapWithUnderscore === true) {
+        this.fn = function() {
+          return _.defer(fn);
+        };
+      } else {
+        this.fn = fn;
+      }
+      this;
+    }
+
+    DeferredBindingProxy.prototype.until = function(watch, trigger) {
+      if ((watch != null) && !(trigger != null)) {
+        trigger = watch;
+        watch = this.object;
+      }
+      watch.once(trigger, this.fn);
+      return this.object;
+    };
+
+    return DeferredBindingProxy;
+
+  })();
+
+  Luca.Events = {
+    defer: function(operation, wrapWithUnderscore) {
+      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
+      return new DeferredBindingProxy(this, operation, wrapWithUnderscore);
+    },
+    once: function(trigger, callback, context) {
+      var onceFn;
+      context || (context = this);
+      onceFn = function() {
+        callback.apply(context, arguments);
+        return this.unbind(trigger, onceFn);
+      };
+      return this.bind(trigger, onceFn);
+    }
+  };
+
+}).call(this);
+(function() {
   var currentNamespace;
 
   Luca.util.resolve = function(accessor, source_object) {
@@ -330,7 +395,7 @@
 
 }).call(this);
 (function() {
-  var DeferredBindingProxy, DefineProxy;
+  var DefineProxy;
 
   Luca.define = function(componentName) {
     return new DefineProxy(componentName);
@@ -379,7 +444,7 @@
     };
 
     DefineProxy.prototype["with"] = function(properties) {
-      var at, componentType;
+      var at, componentType, _base;
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
       if (this.namespaced && !(at != null)) {
         eval("(window||global)." + this.namespace + " = {}");
@@ -389,6 +454,8 @@
       if (Luca.autoRegister === true) {
         if (Luca.isViewPrototype(at[this.componentId])) componentType = "view";
         if (Luca.isCollectionPrototype(at[this.componentId])) {
+          (_base = Luca.Collection).namespaces || (_base.namespaces = []);
+          Luca.Collection.namespaces.push(this.namespace);
           componentType = "collection";
         }
         if (Luca.isModelPrototype(at[this.componentId])) componentType = "model";
@@ -423,107 +490,6 @@
   _.mixin({
     def: Luca.define
   });
-
-  DeferredBindingProxy = (function() {
-
-    function DeferredBindingProxy(object, operation, wrapWithUnderscore) {
-      var fn,
-        _this = this;
-      this.object = object;
-      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
-      if (_.isFunction(operation)) {
-        fn = operation;
-      } else if (_.isString(operation) && _.isFunction(this.object[operation])) {
-        fn = this.object[operation];
-      }
-      if (!_.isFunction(fn)) {
-        throw "Must pass a function or a string representing one";
-      }
-      if (wrapWithUnderscore === true) {
-        this.fn = function() {
-          return _.defer(fn);
-        };
-      } else {
-        this.fn = fn;
-      }
-      this;
-    }
-
-    DeferredBindingProxy.prototype.until = function(watch, trigger) {
-      if ((watch != null) && !(trigger != null)) {
-        trigger = watch;
-        watch = this.object;
-      }
-      watch.once(trigger, this.fn);
-      return this.object;
-    };
-
-    return DeferredBindingProxy;
-
-  })();
-
-  Luca.Events = {
-    defer: function(operation, wrapWithUnderscore) {
-      if (wrapWithUnderscore == null) wrapWithUnderscore = true;
-      return new DeferredBindingProxy(this, operation, wrapWithUnderscore);
-    },
-    once: function(trigger, callback, context) {
-      var onceFn;
-      context || (context = this);
-      onceFn = function() {
-        callback.apply(context, arguments);
-        return this.unbind(trigger, onceFn);
-      };
-      return this.bind(trigger, onceFn);
-    }
-  };
-
-  Luca.ScriptLoader = (function() {
-
-    ScriptLoader.loaded = {};
-
-    function ScriptLoader(options) {
-      var ready;
-      if (options == null) options = {};
-      _.extend(this, Backbone.Events, Luca.Events);
-      this.autoStart = options.autoStart === true;
-      this.scripts = options.scripts;
-      ready = function() {
-        return this.trigger("ready");
-      };
-      this.ready = _.after(this.scripts.length, ready);
-      _.bindAll(this, "load", "ready");
-      this.defer("load").until(this, "start");
-      if (this.autoStart === true) this.trigger("start");
-      this.bind("ready", this.onReady);
-    }
-
-    ScriptLoader.prototype.applyPrefix = function(script) {
-      return script;
-    };
-
-    ScriptLoader.prototype.onReady = function() {
-      return console.log("All dependencies loaded");
-    };
-
-    ScriptLoader.prototype.start = function() {
-      return this.trigger("start");
-    };
-
-    ScriptLoader.prototype.load = function() {
-      var script, _i, _len, _ref, _results;
-      _ref = this.scripts;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        script = _ref[_i];
-        _results.push(Luca.util.loadScript(this.applyPrefix(script), this.ready));
-      }
-      return _results;
-    };
-
-    return ScriptLoader;
-
-  })();
 
 }).call(this);
 (function() {
@@ -608,7 +574,7 @@
 
   Luca.registry.classes = function(toString) {
     if (toString == null) toString = false;
-    return _(registry.classes).map(function(className, ctype) {
+    return _(_.extend({}, registry.classes, registry.model_classes, registry.collection_classes)).map(function(className, ctype) {
       if (toString) {
         return className;
       } else {
@@ -641,7 +607,9 @@
   var customizeRender, originalExtend;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
+    include: ['Luca.Events'],
     additionalClassNames: [],
+    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     debug: function() {
       var message, _i, _len, _results;
       if (!(this.debugMode || (window.LucaDebugMode != null))) return;
@@ -663,7 +631,6 @@
       }
       return Backbone.View.prototype.trigger.apply(this, arguments);
     },
-    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
       var additional, template, unique, _i, _len, _ref;
       this.options = options != null ? options : {};
@@ -687,6 +654,7 @@
           this.$el.addClass(additional);
         }
       }
+      if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
       this.trigger("after:initialize", this);
       this.registerCollectionEvents();
       return this.delegateEvents();
@@ -859,29 +827,35 @@
 
 }).call(this);
 (function() {
+  var setupComputedProperties;
+
+  setupComputedProperties = function() {
+    var attr, dependencies, _ref, _results,
+      _this = this;
+    if (_.isUndefined(this.computed)) return;
+    this._computed = {};
+    _ref = this.computed;
+    _results = [];
+    for (attr in _ref) {
+      dependencies = _ref[attr];
+      this.on("change:" + attr, function() {
+        return _this._computed[attr] = _this[attr].call(_this);
+      });
+      _results.push(_(dependencies).each(function(dep) {
+        _this.on("change:" + dep, function() {
+          return _this.trigger("change:" + attr);
+        });
+        if (_this.has(dep)) return _this.trigger("change:" + attr);
+      }));
+    }
+    return _results;
+  };
 
   _.def('Luca.Model')["extends"]('Backbone.Model')["with"]({
+    include: ['Luca.Events'],
     initialize: function() {
-      var attr, dependencies, _ref, _results,
-        _this = this;
       Backbone.Model.prototype.initialize(this, arguments);
-      if (_.isUndefined(this.computed)) return;
-      this._computed = {};
-      _ref = this.computed;
-      _results = [];
-      for (attr in _ref) {
-        dependencies = _ref[attr];
-        this.on("change:" + attr, function() {
-          return _this._computed[attr] = _this[attr].call(_this);
-        });
-        _results.push(_(dependencies).each(function(dep) {
-          _this.on("change:" + dep, function() {
-            return _this.trigger("change:" + attr);
-          });
-          if (_this.has(dep)) return _this.trigger("change:" + attr);
-        }));
-      }
-      return _results;
+      return setupComputedProperties.call(this);
     },
     get: function(attr) {
       var _ref;
@@ -902,6 +876,7 @@
   if (Backbone.QueryCollection != null) source = 'Backbone.QueryCollection';
 
   _.def("Luca.Collection")["extends"](source)["with"]({
+    include: ['Luca.Events'],
     cachedMethods: [],
     remoteFilter: false,
     initialize: function(models, options) {
@@ -2031,10 +2006,17 @@
     };
 
     CollectionManager.prototype.guessCollectionClass = function(key) {
-      var classified, guess;
+      var classified, guess, guesses, _ref;
       classified = Luca.util.classify(key);
       guess = (this.collectionNamespace || (window || global))[classified];
       guess || (guess = (this.collectionNamespace || (window || global))["" + classified + "Collection"]);
+      if (!(guess != null) && ((_ref = Luca.Collection.namespaces) != null ? _ref.length : void 0) > 0) {
+        guesses = _(Luca.Collection.namespaces.reverse()).map(function(namespace) {
+          return Luca.util.resolve("" + namespace + "." + classified) || Luca.util.resolve("" + namespace + "." + classified + "Collection");
+        });
+        guesses = _(guesses).compact();
+        if (guesses.length > 0) guess = guesses[0];
+      }
       return guess;
     };
 
@@ -2452,9 +2434,6 @@
       return _(elements).each(function(element) {
         return _this.$el.append(element);
       });
-    },
-    afterRender: function() {
-      return this._super("afterRender", this, arguments);
     }
   });
 
@@ -2595,8 +2574,9 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       if (Luca.enableBootstrap === true) {
-        if (this.fluid === true) this.wrapperClass = "row-fluid";
-        this.$wrap(this.wrapperClass);
+        if (this.fluid === true) {
+          this.wrapperClass = "row-fluid fluid-viewport-wrapper";
+        }
       }
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       if (this.fullscreen) return $('html,body').addClass('luca-ui-fullscreen');
@@ -2635,6 +2615,11 @@
     },
     renderBottomNavigation: function() {}
   });
+
+}).call(this);
+(function() {
+
+
 
 }).call(this);
 (function() {
