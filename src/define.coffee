@@ -97,9 +97,10 @@ Luca.extend = (superClassName, childName, properties={})->
 
   definition = superClass.extend(properties)
 
+  # _.def("MyView").extends("View").with
+  #   include: ['Luca.Events']
   if _.isArray( properties?.include )
     for mixin in properties.include
-      console.log "Applying Mixin", mixin, childName
       mixin = Luca.util.resolve(mixin) if _.isString(mixin)
       _.extend(definition::, mixin)
 

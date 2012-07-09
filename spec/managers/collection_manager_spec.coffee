@@ -8,19 +8,16 @@ describe "The Collection Manager", ->
     Luca.CollectionManager.destroyAll()
     @manager = new Luca.CollectionManager(name:"manager",collectionNamespace: App.collections)
 
-  it "should be defined", ->
-    expect( Luca.CollectionManager ).toBeDefined()
-
   it "should make the latest instance accessible by class function", ->
     expect( Luca.CollectionManager.get().name ).toEqual("manager")
-
-  it "should be able to guess a collection constructor class", ->
-    base = @manager.guessCollectionClass("sample_collection")
-    expect( base ).toEqual(App.collections.SampleCollection)
 
   it "should create a collection on demand", ->
     collection = @manager.getOrCreate("sample_collection")
     expect( collection.url ).toEqual "/models"
+
+  it "should destroy a collection", ->
+    @manager.destroy("sample_collection")
+    expect( @manager.get("sample_collection") ).toBeUndefined()
 
 describe "Adding Collections", ->
   manager = Luca.CollectionManager.get?() || new Luca.CollectionManager(name:"blahblah") 

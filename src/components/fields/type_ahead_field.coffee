@@ -2,6 +2,7 @@ _.def('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
   className: 'luca-ui-field'
 
   getSource: ()->
+    return @source() if _.isFunction(@source)
     @source || []
 
   matcher: (item)->

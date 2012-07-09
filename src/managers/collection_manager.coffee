@@ -1,7 +1,11 @@
 class Luca.CollectionManager
   name: "primary"
 
+  collectionNamespace: Luca.Collection.namespace
+
   __collections: {}
+
+  relayEvents: true 
 
   constructor: (@options={})->
     _.extend @, @options
@@ -24,16 +28,11 @@ class Luca.CollectionManager
 
     @state = new Luca.Model()
 
+
     if @initialCollections
-      @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
-      @state.bind "change:loaded_collections_count", @collectionCountDidChange
+      handleInitialCollections.call(@)
 
-      if @useProgressLoader
-        @loaderView ||= new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
 
-      @loadInitialCollections()
-
-    @
 
   add: (key, collection)->
     @currentScope()[ key ] ||= collection
@@ -46,19 +45,21 @@ class Luca.CollectionManager
   # skip registering this collection
   create: (key, collectionOptions={}, initialModels=[])->
     CollectionClass = collectionOptions.base
-    CollectionClass ||= @guessCollectionClass(key)
+    CollectionClass ||= guessCollectionClass.call(@, key)
     collectionOptions.name = "" if collectionOptions.private
 
     collection = new CollectionClass(initialModels,collectionOptions)
 
     @add(key, collection)
 
+    collectionManager = @
+
+    if @relayEvents is true
+      @bind "*", ()->
+        console.log "Relay Events on Collection Manager *", collection, arguments
+
     return collection
 
-
-  collectionNamespace: Luca.Collection.namespace
-
- 
   currentScope: ()->
     if current_scope = @getScope()
       @__collections[ current_scope ] ||= {}
@@ -73,36 +74,13 @@ class Luca.CollectionManager
 
   getScope: ()-> undefined
 
+  destroy: (key)->
+    c = @get(key)
+    delete @currentScope()[key]
+    c
+
   getOrCreate: (key,collectionOptions={},initialModels=[])->
     @get(key) || @create(key,collectionOptions,initialModels,false)
-
-  guessCollectionClass: (key)->
-    classified = Luca.util.classify( key )
-    # support our naming convention of Books
-    guess = (@collectionNamespace || (window || global) )[ classified ]
-    # support naming covention like BooksCollection
-    guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
-
-    if not guess? and Luca.Collection.namespaces?.length > 0
-      guesses = _( Luca.Collection.namespaces.reverse() ).map (namespace)->
-        Luca.util.resolve("#{ namespace }.#{ classified }") || Luca.util.resolve("#{ namespace }.#{ classified }Collection")
-
-      guesses = _( guesses ).compact()
-
-      guess = guesses[0] if guesses.length > 0
-
-    guess
-
-  loadInitialCollections: ()->
-    collectionDidLoad = (collection) =>
-      collection.unbind "reset"
-      @trigger "collection_loaded", collection.name
-
-    _(@initialCollections).each (name) =>
-      collection = @getOrCreate(name)
-      collection.bind "reset", ()->
-        collectionDidLoad(collection)
-      collection.fetch()
 
   collectionCountDidChange: ()->
     @trigger "all_collections_loaded" if @totalCollectionsCount() == @loadedCollectionsCount()
@@ -118,3 +96,42 @@ class Luca.CollectionManager
 
 Luca.CollectionManager.destroyAll = ()-> 
   Luca.CollectionManager.instances = {} 
+
+guessCollectionClass = (key)->
+  classified = Luca.util.classify( key )
+  # support our naming convention of Books
+  guess = (@collectionNamespace || (window || global) )[ classified ]
+  # support naming covention like BooksCollection
+  guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
+
+  if not guess? and Luca.Collection.namespaces?.length > 0
+    guesses = _( Luca.Collection.namespaces.reverse() ).map (namespace)->
+      Luca.util.resolve("#{ namespace }.#{ classified }") || Luca.util.resolve("#{ namespace }.#{ classified }Collection")
+
+    guesses = _( guesses ).compact()
+
+    guess = guesses[0] if guesses.length > 0
+
+  guess
+
+loadInitialCollections = ()->
+  collectionDidLoad = (collection) =>
+    collection.unbind "reset"
+    @trigger "collection_loaded", collection.name
+
+  _(@initialCollections).each (name) =>
+    collection = @getOrCreate(name)
+    collection.bind "reset", ()->
+      collectionDidLoad(collection)
+    collection.fetch()
+
+handleInitialCollections = ()->
+  @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
+  @state.bind "change:loaded_collections_count", @collectionCountDidChange
+
+  if @useProgressLoader
+    @loaderView ||= new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
+
+  loadInitialCollections.call(@)
+
+  @

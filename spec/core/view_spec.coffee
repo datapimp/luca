@@ -39,9 +39,12 @@ describe "Luca.View", ->
     expect( view.$el.is(".yes-yes.yall") ).toEqual true
 
 
-describe "Introspection Helpers", ->
+describe "Development Tool Helpers", ->
   beforeEach ->
-    @view = new Luca.View
+    _.def("Luca.views.IntrospectionView").extends("Luca.View").with
+      include:["Luca.DevelopmentToolHelpers"]
+
+    @view = new Luca.views.IntrospectionView 
       events:
         "click .a" : "clickHandler"
         "hover .a" : "hoverHandler"
@@ -152,23 +155,8 @@ describe "The Collection Events API", ->
     @manager ||= new SampleManager()
     @collection = @manager.getOrCreate("sample")
 
-  it "should know which collection manager to use", ->
-    view = new SampleView()
-    expect( view.getCollectionManager().name ).toEqual( "collectionEvents" )
-
-  it "should create a reference to the collection", ->
-    view = new SampleView()
-    expect( view.sampleCollection ).toBeDefined()
-
   it "should call the resetHandler callback on the view", ->
     view = new SampleView()
     collection = @manager.get("sample")
     collection.reset([])
     expect( view.resetHandler ).toHaveBeenCalled()
-
-
-describe "Code Refresh", ->
-  beforeEach ->
-
-  it "should reference the event handler function property names", ->
-  it "should reference the event handler functions", ->

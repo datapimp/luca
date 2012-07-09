@@ -1,6 +1,6 @@
 #= require ./framework
 #= require ./util
-#= require ./events
+#= require_tree ./plugins
 #= require ./define
 
 #= require_tree ./templates

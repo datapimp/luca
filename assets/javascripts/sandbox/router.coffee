@@ -15,5 +15,5 @@ Sandbox.Router = Luca.Router.extend
     @app.navigate_to("pages").navigate_to "intro"
 
   inspector: ()->
-    inspector = Luca "application_inspector", new Luca.tools.ApplicationInspector()
+    inspector = Luca "application_inspector", new Sandbox.views.ApplicationInspector() 
     inspector.toggle()
