@@ -1,18 +1,49 @@
+bindAllEventHandlers = ()->
+  _( @events ).each (handler,event)=>
+    if _.isString(handler)
+      _.bindAll @, handler
+
+registerCollectionEvents = ()->
+  manager = @collectionManager || Luca.CollectionManager.get()
+
+  _( @collectionEvents ).each (handler, signature)=>
+
+  for key, eventTrigger of @collectionEvents
+    [key,eventTrigger] = signature.split(" ")
+
+    collection = @["#{ key }Collection"] = manager.getOrCreate( key )
+
+    if !collection
+      throw "Could not find collection specified by #{ key } in collection events on #{ @name || @cid }"
+
+    if _.isString(handler)
+      handler = @[handler]
+
+    unless _.isFunction(handler)
+      throw "invalid collectionEvents configuration on #{ @name || @cid }"
+
+    try
+      collection.bind(eventTrigger, handler)
+    catch e
+      console.log "Error Binding To Collection in registerCollectionEvents", @
+      throw e
+
+registerApplicationEvents = ()->
+  app = @app || Luca.getApplication()
+  for trigger, handler of @applicationEvents
+    if _.isString(handler)
+      handler = @[handler]
+
+    unless _.isFunction( handler )
+      throw "Invalid Handler referenced in application events configuration. #{ @name || @cid }"
+
+    app.bind(trigger, handler)
+
 _.def("Luca.View").extends("Backbone.View").with
 
   additionalClassNames:[]
 
-  debug: ()->
-    return unless @debugMode or window.LucaDebugMode?
-    console.log [(@name || @cid),message] for message in arguments
 
-  trigger: ()->
-    if Luca.enableGlobalObserver
-      if Luca.developmentMode is true or @observeEvents is true
-        Luca.ViewObserver ||= new Luca.Observer(type:"view")
-        Luca.ViewObserver.relay @, arguments
-
-    Backbone.View.prototype.trigger.apply @, arguments
 
   hooks:[
     "after:initialize"
@@ -40,7 +71,7 @@ _.def("Luca.View").extends("Backbone.View").with
     @setupHooks( unique )
 
     if @autoBindEventHandlers is true
-      @bindAllEventHandlers()
+      bindAllEventHandlers.call(@)
 
     if @additionalClassNames
       @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
@@ -50,7 +81,8 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @trigger "after:initialize", @
 
-    @registerCollectionEvents()
+    registerCollectionEvents.call(@)
+    registerApplicationEvents.call(@)
 
     @delegateEvents()
 
@@ -110,102 +142,31 @@ _.def("Luca.View").extends("Backbone.View").with
 
       @bind eventId, callback
 
-
-  #### Luca.Collection and Luca.CollectionManager integration
-
-  # under the hood, this will find your collection manager using
-  # Luca.CollectionManager.get, which is a function that returns
-  # the first instance of the CollectionManager class ever created.
-  #
-  # if you want to use more than one collection manager, over ride this
-  # function in your views with your own logic
-  getCollectionManager: ()->
-    @collectionManager || Luca.CollectionManager.get?()
-
-  ##### Collection Events
-  #
-  # By defining a hash of collectionEvents in the form of
-  #
-  # "books add" : "onBookAdd"
-  #
-  # the Luca.View will bind to the collection found in the
-  # collectionManager with that key, and bind to that event.
-  # a property of @booksCollection will be created on the view,
-  # and the "add" event will trigger "onBookAdd"
-  #
-  # you may also specify a function directly.  this
-  #
-  registerCollectionEvents: ()->
-    manager = @getCollectionManager()
-
-    _( @collectionEvents ).each (handler, signature)=>
-      [key,event] = signature.split(" ")
-
-      collection = @["#{ key }Collection"] = manager.getOrCreate( key )
-
-      if !collection
-        throw "Could not find collection specified by #{ key }"
-
-      if _.isString(handler)
-        handler = @[handler]
-
-      unless _.isFunction(handler)
-        throw "invalid collectionEvents configuration"
-
-      try
-        collection.bind(event, handler)
-      catch e
-        console.log "Error Binding To Collection in registerCollectionEvents", @
-        throw e
-
   registerEvent: (selector, handler)->
     @events ||= {}
     @events[ selector ] = handler
     @delegateEvents()
 
-  bindAllEventHandlers: ()->
-    _( @events ).each (handler,event)=>
-      if _.isString(handler)
-        _.bindAll @, handler
-
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
 
-  # refreshCode happens whenever the Luca.Framework extension
-  # system is run after there are running instances of a given component
 
-  # in the context of views, what this means is that each eventHandler which
-  # is bound to a specific object via _.bind or _.bindAll, or autoBindEventHandlers
-  # is refreshed with the prototype method of the component that it inherits from,
-  # and then delegateEvents is called to refresh any of the updated event handlers
-
-  # in addition to this, all properties of the instance of a given view which are
-  # also backbone views will have the same process run against them
-  refreshCode: ()->
-    view = @
-
-    _( @eventHandlerProperties() ).each (prop)->
-      view[ prop ] = view.definitionClass()[prop]
-
-    if @autoBindEventHandlers is true
-      @bindAllEventHandlers()
-
-    @delegateEvents()
-
-  eventHandlerProperties: ()->
-    handlerIds = _( @events ).values()
-    _( handlerIds ).select (v)->
-      _.isString(v)
-
-  eventHandlerFunctions: ()->
-    handlerIds = _( @events ).values()
-    _( handlerIds ).map (handlerId)=>
-      if _.isFunction(handlerId) then handlerId else @[handlerId]
 
   collections: ()-> Luca.util.selectProperties( Luca.isBackboneCollection, @ )
   models: ()-> Luca.util.selectProperties( Luca.isBackboneModel, @ )
   views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
 
+  debug: ()->
+    return unless @debugMode or window.LucaDebugMode?
+    console.log [(@name || @cid),message] for message in arguments
+
+  trigger: ()->
+    if Luca.enableGlobalObserver
+      if Luca.developmentMode is true or @observeEvents is true
+        Luca.ViewObserver ||= new Luca.Observer(type:"view")
+        Luca.ViewObserver.relay @, arguments
+
+    Backbone.View.prototype.trigger.apply @, arguments
 
 originalExtend = Backbone.View.extend
 
