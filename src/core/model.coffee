@@ -20,9 +20,12 @@ setupComputedProperties = ()->
     @on "change:#{attr}", ()=>
       @_computed[attr] = @[attr].call @
 
+    dependencies = dependencies.split(',') if _.isString(dependencies)
+
     _(dependencies).each (dep)=>
       @on "change:#{dep}", ()=>
         @trigger "change:#{attr}"
+        
       @trigger "change:#{attr}" if @has(dep) 
 
 

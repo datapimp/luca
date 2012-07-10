@@ -272,7 +272,10 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   invoke: (method)->
     _( @components ).invoke method
 
-  select: (attribute, value, deep=false)->
+  map: (fn)->
+    _( @components ).map(fn)
+    
+  selectByAttribute: (attribute, value, deep=false)->
     components = _( @components ).map (component)->
       matches = []
       test = component[ attribute ]
@@ -285,6 +288,10 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       _.compact matches
 
     _.flatten( components )
+
+  select: (attribute, value, deep=false)->
+    console.log "Container.select will be replaced by selectByAttribute in 1.0"
+    Luca.core.Container::selectByAttribute.apply(@, arguments)
 
   # event binding sugar for nested components
   #
@@ -347,6 +354,10 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     @components[ needle ]
 
   rootComponent: ()->
+    console.log "Calling rootComponent will be deprecated.  use isRootComponent instead"
+    !@getParent?
+
+  isRootComponent:()->
     !@getParent?
 
   getRootComponent: ()->
