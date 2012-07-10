@@ -2,7 +2,7 @@
 
 `Luca.Events` provides you with some additional event binding sugar.
 
-*once*
+**once**
 
 `once` is how you would run one function in response to an event, but only once.
 
@@ -15,7 +15,7 @@
   view.trigger("event:gets:triggered")
 ```
 
-*defer until*
+**defer until**
 
 `defer` is similar to `once', but with syntax I like a little better:
 
