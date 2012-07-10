@@ -1,4 +1,37 @@
-# Event Binding Helpers in Luca.js
+## once, defer
+
+`Luca.Events` provides you with some additional event binding sugar.
+
+*once*
+
+`once` is how you would run one function in response to an event, but only once.
+
+```coffeescript
+  view = new Luca.View()
+
+  view.once "event:gets:triggered", ()->
+    alert('sup baby')
+
+  view.trigger("event:gets:triggered")
+```
+
+*defer until*
+
+`defer` is similar to `once', but with syntax I like a little better:
+
+```coffeescript
+  _.def("MyView").extends("Luca.View").with
+    initialize: ()->
+      @defer(@setup).until("event:gets:triggered")
+```
+
+If you want to defer a callback until an event gets triggered on some other object:
+
+```
+  @defer(@setup).until(@someObject,"triggers:an:event")
+```
+
+## Component Bindings
 
 Luca provides a number of configuration API for its components
 which facilitate the binding of a component's methods to events that
