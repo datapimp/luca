@@ -1,4 +1,4 @@
-## once, defer
+## Event Binding Syntactic Sugar
 
 `Luca.Events` provides you with some additional event binding sugar.
 
