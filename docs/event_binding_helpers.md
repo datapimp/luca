@@ -27,8 +27,15 @@
 
 If you want to defer a callback until an event gets triggered on some other object:
 
-```
-  @defer(@setup).until(@someObject,"triggers:an:event")
+```coffeescript
+
+  _.def("MyView").extends("Luca.View").with
+  
+    initialize:()->
+  	  @defer(@setup).until(@someObject,"triggers:an:event")
+        
+    setup: ()->
+        
 ```
 
 ## Component Bindings
@@ -49,10 +56,13 @@ of the view.
 
 ```coffeescript
   _.def('MyApp.views.AutoBoundView').extends('Luca.View').with
+  
     bindAllEvents: true
+    
     events:
       "click a.btn" : "clickHandler"
       "click a.btn.btn-danger" : "dangerHandler"
+      
     initialize:()->
       # You no longer need to do this
       # if you want to have these handlers run
