@@ -40,3 +40,40 @@ If you want to refresh the BooksCollection from your API, just pass in an option
 ```coffeescript
 	booksCollection.fetch(refresh:true)
 ```
+
+## Base Params for RESTful API
+
+There are a lot of cases where you need every API call to pass along the same parameters ( authentication_tokens, keys, etc )
+
+`Luca.Collection` will wrap the `@url` property or method with a function which appends the base parameters as an HTTP Query Parameter string.
+
+```coffeescript
+  _.def("BooksCollection").extends("Luca.Collection").with
+    name: "books"
+    url: "/api/v1/books"
+  
+  app = Luca.getApplication()
+  
+  app.on "authenticated", ()->
+    Luca.Collection.baseParams = 
+      auth_token: app.get("authentication_token")
+      
+  app.collection("books").url() # => "/api/v1/books?auth_token=123456"
+
+```
+
+## onceLoaded and ifLoaded helpers
+
+There are cases where you want to do something on a collection if it has data, but if it doesn't, you need to fetch that data, and bind a callback to the reset event.  This can get tedious.
+
+Passing a callback to `collection.ifLoaded(callback)` will eliminate the boilerplate in this pattern.
+
+If you only want the callback to run once, use `collection.onceLoaded()`.
+
+In either of these methods, if you don't watch to automatically call `@fetch()` on the collection, pass an autoFetch option set to false
+
+```
+  app.collection("books").ifLoaded ()->
+    @doSomething()
+  , autoFetch: false
+```
