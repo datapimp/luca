@@ -3,3 +3,6 @@
     %a{:href=>"#intro"} Intro
   %li
     %a{:href=>"#build"} Component Builder
+  %li
+    %a{:href=>"#docs"} Documentation
+    

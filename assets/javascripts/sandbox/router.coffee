@@ -4,12 +4,17 @@ Sandbox.Router = Luca.Router.extend
     "build"           : "build"
     "intro"           : "intro"
     "application"     : "inspector"
+    "docs"            : "docs"
+    "docs/:section"   : "docs"
 
   default: ()->
     @app.navigate_to("pages").navigate_to "main"
 
   build: ()->
     @app.navigate_to("pages").navigate_to "build"
+
+  docs: (section="docs_index")->
+    @app.navigate_to("docs").navigate_to(section)
 
   intro: ()->
     @app.navigate_to("pages").navigate_to "intro"

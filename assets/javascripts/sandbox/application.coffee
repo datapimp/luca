@@ -35,6 +35,9 @@ _.def('Sandbox.Application').extends('Luca.Application').with
     ,
       name: "build"
       ctype: "builder"
+    ,
+      name: "docs"
+      ctype: "docs_controller"
     ]
   ]
 

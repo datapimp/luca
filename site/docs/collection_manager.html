@@ -1,0 +1,71 @@
+<h1>The Luca Collection Manager</h1>
+<p>The CollectionManager is a single instance which acts as a gateway to 
+the instances of Luca.Collection created in your app.  The intention is
+to provide a central place for creating one, and only one instance of a 
+given collection type.
+
+</p>
+<p>You can use CollectionManager independently, or you will get one by default
+when you use a Luca.Application with the default configuration.
+
+</p>
+<p>A CollectionManager has a name property which is 'primary' by default.  If
+you call <code>Luca.CollectionManager.get()</code> it will return the CollectionManager
+named 'primary' or the first one ever created.  Attempting to create an additional
+CollectionManager instance with a name that is already used, will throw an error.
+
+</p>
+<h2>Named Collections and Auto-Registering</h2>
+<p>You can configure your Luca.Collection classes to have their instances automatically
+register with the collection manager.  By specifying a <code>@name</code> property on your collection prototypes, they will automatically attempt to register with the running collection manager instance ( via <code>Luca.CollectionManager.get()</code> ) as soon as they are initialized.
+
+</p>
+<p>You can specify which manager you want a collection to register with by specifying a <code>@manager</code> property on your collection.  This can either be a string, which will get resolved when needed to a variable, or a direct reference to the collection manager.  The string is useful since, when declaring your Luca.Collection prototypes, the collection manager will most likely not be instantiated.
+
+</p>
+<pre><code class="lang-coffeescript">  _.def("MyCollection").extends("Luca.Collection").with
+    name: "my_collection"
+    manager: "AppInstance.collectionManager"</code></pre>
+<h2>Private Collections</h2>
+<p>You may not always want to use the global, single authoritative instance of a collection.  In this case, you can specify a <code>@private</code> or <code>@anonymous</code> property on your collection, and it will skip registering with the collection manager.
+
+</p>
+<h2>Collection Class Naming</h2>
+<p>Your custom Luca.Collection classes get named like MyApp.collections.SampleCollection. Through some string magic "SampleCollection" will get turned into "sample_collection".  If you try to call collectionManager.getOrCreate("sample_collection") it will attempt to get a collection named "sample_collection", and if it fails, will create a new instance of MyApp.collections.SampleCollection.  If you want to force your CollectionManager to look in a specific namespace, set a reference to MyApp.collections on Luca.Collection.namespace, otherwise it will look in all of the namespaces it knows about in the Luca.registry and find an appropriate collection.
+
+</p>
+<h2>Initial Collections</h2>
+<p>The CollectionManager can be configured with an @initialCollections property, which is an array of names of collection classes, similar to "sample_collection", or actual references to Collection Classes, or strings with their names. The CollectionManager will create instances of the collection for you, and call fetch() on all of them.
+
+</p>
+<pre><code class="lang-coffeescript">  _.def("App.collections.SampleCollection").extends("Luca.Collection").with
+    name: "sample_collection"
+
+  _.def("App.collections.ExampleCollection").extends("Luca.Collection").with
+    name: "example_collection"
+
+  class App.CollectionManager extends Luca.CollectionManager
+    initialCollections:[
+      "sample_collection"
+      "example_collection"
+    ]
+
+  # this will create instances of both of the above collections
+  # and call fetch() on all of them
+  collectionManager = new App.CollectionManager()</code></pre>
+<h2>Event Relaying</h2>
+<p>By default <code>@relayEvents</code> is set to true on the CollectionManager.  This means that
+any event that is triggered by a collection that is managed by the collection manager will be bubbled up to the manager.  This feature is used by the collectionEvents configuration API used by Luca.View, but can also be used in custom situations as well.  Simply bind to the CollectionManager instance.  
+
+</p>
+<p>Event triggers will look like <code>collection_name event</code>:
+
+
+</p>
+<pre><code class="lang-coffeescript">  collection = new App.collections.SampleCollection([],name:"sample_collection")
+  manager = new Luca.CollectionManager(collectionNamespace:App.collections)
+
+  manager.on "sample_collection reset", ()=&gt; @doSomething() 
+
+  # will trigger 'reset' and call doSomething()
+  collection.fetch()</code></pre>

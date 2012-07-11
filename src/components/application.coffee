@@ -70,6 +70,8 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
   # You can configure key events by specifying them by their name, as it exists in Luca.keyMap. For example:
   #
+  keyEvents: {} 
+
   # keyEvents
   #   keyup: keyUpHandler
   #   enter: enterHandler
@@ -81,7 +83,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   #   control_meta:
   #     keydown: metaControlKeyDownHandler
   #
-  keyEvents: {} 
+  #
 
   # applications have one component, the controller.
   # any components defined on the application class directly
@@ -237,7 +239,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
       if @[keyEvent]?
         @[keyEvent]?.call(@)
       else
-        @trigger(keyEvent)
+        @trigger(keyEvent, e, keyname)
 
   setupControllerBindings: ()->
     # any time the main controller card switches we should track
@@ -307,5 +309,6 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     handler = _.bind(@keyHandler, @)
 
-    $( document ).keydown( handler )
+    for keyEvent in (@keypressEvents || ["keydown"])
+      $( document ).on( keyEvent, handler )
 

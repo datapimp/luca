@@ -1,0 +1,75 @@
+     <h1>Luca.Collection</h1>
+<p>The <code>Luca.Collection</code> class is the base class for Luca components. A number of patterns and optimizations that are helpful in your collection classes have been extracted into the base class.
+
+</p>
+<h2>Backbone Query Integration</h2>
+<p>Luca.Collection either extends from <code>Backbone.Collection</code>, or if it is available <code>Backbone.QueryCollection</code>.  The Query Collection was developed by <a href="https://github.com/davidgtonge">Dave Tonge</a> and the project can be found on <a href="https://github.com/datapimp/backbone_query">Github</a>.  
+
+</p>
+<p><code>Luca.Collections</code> which extend from <code>Backbone.QueryCollection</code> will have a query method which provides you with an API for filtering your collection's models with an API similar to <a href="http://www.mongodb.org/display/DOCS/Advanced+Queries">MongoDB</a>
+
+</p>
+<h2>Bootstrapping your models on page load for performance</h2>
+<p>A good habit for any single page application is to not populate all of your collections via remote calls to your RESTful API.  In a lot of cases it is better to put the data that needs to end up in your collections into the initial page load.
+
+</p>
+<p>Luca.Collection classes optimize for this pattern through the bootstrap functionality that is baked into the component.
+
+</p>
+<p>The bootstrap configuration for <code>Luca.Collection</code> classes depends on the collection being defined with a <code>@cache_key</code> property. <code>@cache_key</code> is either a function which returns a string, or a string, for simple cases.
+
+</p>
+<p>To make an array of objects available as models for a collection, either store the objects in <code>Luca.Collection._bootstrapped_models</code> on a property matching the value of <code>@cache_key</code> or use the <code>Luca.Collection.cache()</code> method like such:
+
+</p>
+<pre><code class="lang-html">  &lt;body&gt;
+    &lt;script type="text/javascript"&gt;
+       Luca.Collection.cache("books",[{author:"Jonathan Soeder"}]
+    &lt;/script&gt;</code></pre>
+<p>This will work with the following collection:
+
+</p>
+<pre><code class="lang-coffeescript">  _.def("BooksCollection").extends("Luca.Collection").with
+    name:"books"
+    cache_key: "books"</code></pre>
+<p>Any calls to <code>(new BooksCollection()).fetch()</code> will look in the cached models first, and avoid an API call.
+
+</p>
+<p>If you want to refresh the BooksCollection from your API, just pass in an options hash like such:
+
+</p>
+<pre><code class="lang-coffeescript">    booksCollection.fetch(refresh:true)</code></pre>
+<h2>Base Params for RESTful API</h2>
+<p>There are a lot of cases where you need every API call to pass along the same parameters ( authentication_tokens, keys, etc )
+
+</p>
+<p><code>Luca.Collection</code> will wrap the <code>@url</code> property or method with a function which appends the base parameters as an HTTP Query Parameter string.
+
+</p>
+<pre><code class="lang-coffeescript">  _.def("BooksCollection").extends("Luca.Collection").with
+    name: "books"
+    url: "/api/v1/books"
+
+  app = Luca.getApplication()
+
+  app.on "authenticated", ()-&gt;
+    Luca.Collection.baseParams = 
+      auth_token: app.get("authentication_token")
+
+  app.collection("books").url() # =&gt; "/api/v1/books?auth_token=123456"</code></pre>
+<h2>onceLoaded and ifLoaded helpers</h2>
+<p>There are cases where you want to do something on a collection if it has data, but if it doesn't, you need to fetch that data, and bind a callback to the reset event.  This can get tedious.
+
+</p>
+<p>Passing a callback to <code>collection.ifLoaded(callback)</code> will eliminate the boilerplate in this pattern.
+
+</p>
+<p>If you only want the callback to run once, use <code>collection.onceLoaded()</code>.
+
+</p>
+<p>In either of these methods, if you don't watch to automatically call <code>@fetch()</code> on the collection, pass an autoFetch option set to false
+
+</p>
+<pre><code>  app.collection("books").ifLoaded ()-&gt;
+    @doSomething()
+  , autoFetch: false</code></pre>
