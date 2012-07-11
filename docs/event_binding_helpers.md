@@ -1,8 +1,8 @@
-## once, defer
+## Event Binding Syntactic Sugar
 
 `Luca.Events` provides you with some additional event binding sugar.
 
-*once*
+**once**
 
 `once` is how you would run one function in response to an event, but only once.
 
@@ -15,7 +15,7 @@
   view.trigger("event:gets:triggered")
 ```
 
-*defer until*
+**defer until**
 
 `defer` is similar to `once', but with syntax I like a little better:
 
@@ -27,8 +27,15 @@
 
 If you want to defer a callback until an event gets triggered on some other object:
 
-```
-  @defer(@setup).until(@someObject,"triggers:an:event")
+```coffeescript
+
+  _.def("MyView").extends("Luca.View").with
+  
+    initialize:()->
+  	  @defer(@setup).until(@someObject,"triggers:an:event")
+        
+    setup: ()->
+        
 ```
 
 ## Component Bindings
@@ -49,10 +56,13 @@ of the view.
 
 ```coffeescript
   _.def('MyApp.views.AutoBoundView').extends('Luca.View').with
+  
     bindAllEvents: true
+    
     events:
       "click a.btn" : "clickHandler"
       "click a.btn.btn-danger" : "dangerHandler"
+      
     initialize:()->
       # You no longer need to do this
       # if you want to have these handlers run
