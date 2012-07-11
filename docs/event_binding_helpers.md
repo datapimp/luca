@@ -17,7 +17,7 @@
 
 **defer until**
 
-`defer` is similar to `once', but with syntax I like a little better:
+`defer` is similar to `once`, but with syntax I like a little better:
 
 ```coffeescript
   _.def("MyView").extends("Luca.View").with
