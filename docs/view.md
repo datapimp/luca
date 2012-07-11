@@ -4,7 +4,9 @@ The `Luca.View` class is the base class for Luca components. A number of pattern
 
 ## Hooks
 
-In Backbone, views trigger events, and we can bind to them as normally, and that this is good.  Often, we are binding our view's methods to event's that get triggered.  Hooks are events you can define which be automatically called if events get triggered with names which match the pattern.  For example:
+In Backbone, views trigger events, and we can bind to them as normally, and that this is good.  Often, we are binding our view's methods to event's that get triggered.  In Luca, hooks are events you can declare on your component definition which will be automatically called if events get triggered with names which match the pattern.  
+
+For example:
 
 ```coffeescript
   _.def("Luca.View").extends("Backbone.View").with
