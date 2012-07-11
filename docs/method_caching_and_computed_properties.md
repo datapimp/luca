@@ -27,22 +27,51 @@ collection for when a model is added or removed will expire the cached value.
       @map (model)-> model.value()
 ```
 
-In the example above, the expensiveMethod is dependent on the attributeOne and attributeTwo attributes
-on each of the models in the collection, therefor if any of these values change, the cache needs to be expired.
+In the example above, the `expensiveMethod` is dependent on the `attributeOne` and `attributeTwo` attributes
+on each of the models in the collection, therefor if any of these values change, the cache needs to be expired and new value recalculated.
 
-the anotherExpensiveMethod call is not dependent on any specific values, so will only expire any time a new model
+The `anotherExpensiveMethod` call is not dependent on any specific values, so will only expire any time a new model
 is added or removed, or the collection is reset.
+
+
+Example: 
+
+```coffeescript
+  _.def("Users").extends("Luca.Collection").with
+    name: 'users'
+    
+    cachedMethods: [
+	  "averageAge:age"
+    ]
+    
+    averageAge: ()->
+      sum = @reduce (acc, user) -> 
+      	acc + user.get('age')
+      , 0
+      Math.floor(sum / @size)
+```
+An `averageAge` will be cached and recalculated only when either
+membership of the collection will change or `age` attribute on either member
 
 ## Computed Properties on Luca.Model
 
 ```coffeescript
   _.def("MyModel").extends("Luca.Model").with
     computed:
-      "expensiveMethod" : ["dependencyOne","dependencyTwo"]
+      "expensive" : ["dependencyOne","dependencyTwo"]
 
-    expensiveMethod: ()->
+    expensive: ()->
       @get("dependencyOne") + @get("dependencyTwo")
 ```
 
-In the example above, once expensiveMethod is called, its value will be cached and will be invalidated
-any time the dependencyOne or dependencyTwo attribute changes and triggers a change:dependencyTwo event.
+In the example above, `expensive` method will be converted to the `expensive` property which is be computed/updated on initialization and every time any of its dependent properties will change. That `expensive` property will act as any other attribute on the model (responds to `get` operations, can be available in `toJSON()` etc).
+
+Example:
+
+```coffeescript
+  _.def("User").extends("Luca.Model").with
+    computed:
+      "fullName": ["firstName","lastName"]
+    fullName: ()->
+      @get("firstName") + @get("lastName")
+```
