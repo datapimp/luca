@@ -33,6 +33,18 @@ If you want to maintain the functionality of the component you are extending fro
       Luca.View::beforeRender?.apply(@, arguments)
 ```
 
+## The @render() method
+
+The default implementation of @render() simply appends the view's `@$el` to the DOM element represented by the `$(@container)` property on the view.
+
+Whatever method you choose to implement for your `@render()` call should behave similar to how the Backbone.View::render() expects, in that it should return an instance of the view.
+
+Additionally, the call to `@render()` will trigger `before:render` and `after:render` as which, on a Luca.View is configured as a hook.  So any `@beforeRender()` and `@afterRender()` method will get called as well, if they exist.
+
+## Before Render
+
+Since in Luca, the actual render method just attaches the view to its container, setup related methods for building your view's content are best put in the `beforeRender()` method.  In addition to this, there are other options available for filling the content of the view, like `@bodyTemplate`.
+
 ## Luca.template helper
 
 `Luca.template()` is a util function which allows you reference your client side template system.  It accepts a name of a template ( which, if not found, it will attempt to match one for you ) and an object of interpolations to pass to the template function
