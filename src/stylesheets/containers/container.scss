@@ -1,6 +1,9 @@
-.luca-ui-container {
-
+.builder-canvas + .luca-ui-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }
+.luca-ui-container {}
 
 .luca-ui-card {
 }
