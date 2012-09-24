@@ -11,7 +11,7 @@ gem 'haml'
 group :test, :development do
   gem 'faker'
   gem 'guard-sprockets2'
-  gem 'rb-fsevent'
+  gem 'rb-fsevent', '>= 0.9.1'
   gem 'pry'
   gem 'guard-jasmine'
 end
