@@ -135,7 +135,8 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # keyEvents:
     #   meta:
     #     forwardslash: "altSlashHandler"
-    console.log "The useKeyRouter property is being deprecated. switch to useKeyHandler instead"
+    if @useKeyRouter
+      console.log "The useKeyRouter property is being deprecated. switch to useKeyHandler instead"
     
     @setupKeyHandler() if (@useKeyHandler is true or @useKeyRouter is true) and @keyEvents?
 

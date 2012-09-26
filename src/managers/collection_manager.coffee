@@ -121,7 +121,7 @@ loadInitialCollections = ()->
 
   _(@initialCollections).each (name) =>
     collection = @getOrCreate(name)
-    collection.bind "reset", ()->
+    collection.once "reset", ()->
       collectionDidLoad(collection)
     collection.fetch()
 
