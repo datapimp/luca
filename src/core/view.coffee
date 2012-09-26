@@ -18,9 +18,14 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @cid = _.uniqueId(@name) if @name?
 
+    templateVars = if @bodyTemplateVars
+      @bodyTemplateVars.call(@)
+    else
+      @
+
     if template = @bodyTemplate
       @$el.empty()
-      Luca.View::$html.call(@, Luca.template(template, @) )
+      Luca.View::$html.call(@, Luca.template(template, templateVars ) )
 
     Luca.cache( @cid, @ )
 
