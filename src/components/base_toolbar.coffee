@@ -1,6 +1,6 @@
 _.def('Luca.components.Toolbar').extends('Luca.core.Container').with
 
-  className: 'luca-ui-toolbar'
+  className: 'luca-ui-toolbar toolbar'
 
   position: 'bottom'
 
