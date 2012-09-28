@@ -34,8 +34,11 @@ Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
     _.extend(options, customOptions)
 
   getCodeMirror: ()->
-    @instance
+    @instance?.mirror
 
+  getCodeMirrorUI: ()->
+    @instance
+    
   getValue: (processed=true)->
     value = @getCodeMirror().getValue()
 
@@ -43,7 +46,7 @@ Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
     @getCodeMirror().setValue( value )
 
   afterRender: ()->
-    @instance = CodeMirror( @$bodyEl()[0], @codemirrorOptions() )
+    @instance = new CodeMirrorUI( @$bodyEl()[0], {searchMode:'popup'}, @codemirrorOptions() )
     @setMaxHeight()
     @setHeight()
 

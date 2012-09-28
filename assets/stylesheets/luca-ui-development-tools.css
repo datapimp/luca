@@ -1,5 +1,6 @@
 /*
  *= require ./codemirror.css
  #= require ./codemirror-monokai.css
+ #= require_tree ./codemirror-ui
  #= require_tree ./luca-ui/tools
  */

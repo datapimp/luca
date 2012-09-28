@@ -1,9 +1,12 @@
 #= require ./dependencies/coffee-script
 #= require ./dependencies/codemirror.js
+#= require ./dependencies/codemirror-searchcursor.js
 #= require ./dependencies/codemirror-coffeescript.js
 #= require ./dependencies/codemirror-javascript.js
 #= require ./dependencies/codemirror-html.js
 #= require ./dependencies/codemirror-css.js
 #= require ./dependencies/codemirror-less.js
 #= require ./dependencies/codemirror-vim.js
+#= require ./dependencies/codemirror-ui-find.js
+#= require ./dependencies/codemirror-ui.js
 #= require_tree ./luca-ui/tools

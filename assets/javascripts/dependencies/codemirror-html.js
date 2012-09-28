@@ -30,7 +30,7 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
     },
     doNotIndent: {"pre": true},
     allowUnquoted: true,
-    allowMissing: false
+    allowMissing: true
   } : {
     autoSelfClosers: {},
     implicitlyClosed: {},
@@ -83,7 +83,7 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
       var ok;
       if (stream.eat("#")) {
         if (stream.eat("x")) {
-          ok = stream.eatWhile(/[a-fA-F\d]/) && stream.eat(";");
+          ok = stream.eatWhile(/[a-fA-F\d]/) && stream.eat(";");          
         } else {
           ok = stream.eatWhile(/[\d]/) && stream.eat(";");
         }
@@ -229,7 +229,7 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
       if (type == "endTag") { popContext(); return cont(); }
       setStyle = "error";
       return cont(arguments.callee);
-    }
+    };
   }
   function maybePopContext(nextTagName) {
     var parentTagName;
@@ -308,22 +308,16 @@ CodeMirror.defineMode("xml", function(config, parserConfig) {
       else return 0;
     },
 
-    compareStates: function(a, b) {
-      if (a.indented != b.indented || a.tokenize != b.tokenize) return false;
-      for (var ca = a.context, cb = b.context; ; ca = ca.prev, cb = cb.prev) {
-        if (!ca || !cb) return ca == cb;
-        if (ca.tagName != cb.tagName) return false;
-      }
-    },
-
     electricChars: "/"
   };
 });
 
+CodeMirror.defineMIME("text/xml", "xml");
 CodeMirror.defineMIME("application/xml", "xml");
 if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
   CodeMirror.defineMIME("text/html", {name: "xml", htmlMode: true});
-CodeMirror.defineMode("htmlmixed", function(config, parserConfig) {
+
+CodeMirror.defineMode("htmlmixed", function(config) {
   var htmlMode = CodeMirror.getMode(config, {name: "xml", htmlMode: true});
   var jsMode = CodeMirror.getMode(config, "javascript");
   var cssMode = CodeMirror.getMode(config, "css");
@@ -334,27 +328,28 @@ CodeMirror.defineMode("htmlmixed", function(config, parserConfig) {
       if (/^script$/i.test(state.htmlState.context.tagName)) {
         state.token = javascript;
         state.localState = jsMode.startState(htmlMode.indent(state.htmlState, ""));
-        state.mode = "javascript";
       }
       else if (/^style$/i.test(state.htmlState.context.tagName)) {
         state.token = css;
         state.localState = cssMode.startState(htmlMode.indent(state.htmlState, ""));
-        state.mode = "css";
       }
     }
     return style;
   }
   function maybeBackup(stream, pat, style) {
     var cur = stream.current();
-    var close = cur.search(pat);
+    var close = cur.search(pat), m;
     if (close > -1) stream.backUp(cur.length - close);
+    else if (m = cur.match(/<\/?$/)) {
+      stream.backUp(cur[0].length);
+      if (!stream.match(pat, false)) stream.match(cur[0]);
+    }
     return style;
   }
   function javascript(stream, state) {
     if (stream.match(/^<\/\s*script\s*>/i, false)) {
       state.token = html;
       state.localState = null;
-      state.mode = "html";
       return html(stream, state);
     }
     return maybeBackup(stream, /<\/\s*script\s*>/,
@@ -364,7 +359,6 @@ CodeMirror.defineMode("htmlmixed", function(config, parserConfig) {
     if (stream.match(/^<\/\s*style\s*>/i, false)) {
       state.token = html;
       state.localState = null;
-      state.mode = "html";
       return html(stream, state);
     }
     return maybeBackup(stream, /<\/\s*style\s*>/,
@@ -397,14 +391,13 @@ CodeMirror.defineMode("htmlmixed", function(config, parserConfig) {
         return cssMode.indent(state.localState, textAfter);
     },
 
-    compareStates: function(a, b) {
-      if (a.mode != b.mode) return false;
-      if (a.localState) return CodeMirror.Pass;
-      return htmlMode.compareStates(a.htmlState, b.htmlState);
-    },
+    electricChars: "/{}:",
 
-    electricChars: "/{}:"
-  }
+    innerMode: function(state) {
+      var mode = state.token == html ? htmlMode : state.token == javascript ? jsMode : cssMode;
+      return {state: state.localState || state.htmlState, mode: mode};
+    }
+  };
 }, "xml", "javascript", "css");
 
 CodeMirror.defineMIME("text/html", "htmlmixed");
