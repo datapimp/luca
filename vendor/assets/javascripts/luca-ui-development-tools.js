@@ -17244,8 +17244,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 (function() {
 
   _.def("Luca.tools.ApplicationInspector")["extends"]("Luca.core.Container")["with"]({
-    name: "application_inspector",
-    components: []
+    name: "application_inspector"
   });
 
 }).call(this);

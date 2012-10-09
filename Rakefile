@@ -95,7 +95,7 @@ namespace :release do
   end
 
   desc "Build the gem"
-  task :gem,  do
+  task :gem do
     `gem build luca.gemspec`
   end
 

@@ -2,6 +2,33 @@
   min-height: 100%;
   height: auto !important;
   height: 100%; }
+  #builder .project-browser-container {
+    margin: 0px; }
+    #builder .project-browser-container .component-list-filter-form.well {
+      padding: 4px; }
+      #builder .project-browser-container .component-list-filter-form.well input {
+        width: 80%; }
+      #builder .project-browser-container .component-list-filter-form.well span.add-on {
+        cursor: pointer; }
+      #builder .project-browser-container .component-list-filter-form.well .control-group {
+        padding: 0px; }
+    #builder .project-browser-container #component_list {
+      overflow: scroll;
+      height: 100%; }
+      #builder .project-browser-container #component_list .collection-item {
+        padding: 3px 0px 3px 4px;
+        cursor: pointer; }
+  #builder .builder-editor-container .builder-editor {
+    margin-left: 0px; }
+  #builder .builder-editor-container .CodeMirror {
+    font-size: 1.2em;
+    line-height: 1.5; }
+  #builder .builder-canvas + .builder-editor {
+    position: fixed;
+    bottom: 0;
+    width: 100%; }
+  #builder .builder-canvas {
+    padding: 20px; }
   #builder .toolbar-container {
     padding-right: 12px; }
     #builder .toolbar-container .luca-ui-toolbar.toolbar-bottom {
@@ -9,16 +36,16 @@
     #builder .toolbar-container .luca-ui-toolbar.toolbar-top {
       margin-bottom: 0px; }
 
-.builder-editor-container .CodeMirror {
-  font-size: 1.2em;
-  line-height: 1.5; }
+#builder.canvas-position-below .builder-editor {
+  border-bottom: 1px solid #999;
+  -moz-box-shadow: 0px 0px 1px #333;
+  -webkit-box-shadow: 0px 0px 1px #333;
+  box-shadow: 0px 0px 1px #333; }
 
-#component_list {
-  overflow: scroll;
-  height: 100%; }
-  #component_list .collection-item {
-    padding: 3px 0px 3px 4px;
-    cursor: pointer; }
+.project-browser {
+  width: 30%;
+  top: 0px;
+  left: 0px; }
 .marketing-content {
   line-height: 1.5;
   color: #333; }
