@@ -6,3 +6,4 @@ vendor/assets/stylesheets/luca-ui
 node_modules
 tmp
 public/sandbox/temp.js
+*sublime-*
