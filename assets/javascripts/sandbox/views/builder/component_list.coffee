@@ -1,16 +1,35 @@
 _.def("Sandbox.views.ComponentList").extends("Luca.components.CollectionView").with
-  name: "component_list"
-  id: "component_list"
-  className:"span3"
-  collection:"components"
-  itemTagName:"div"
+  name:                     "component_list"
+  id:                       "component_list"
+  collection:               "components"
+  itemTagName:              "div"
+  autoBindEventHandlers: true
+  events:
+    "click div.collection-item a" : "clickHandler"
+
   itemRenderer: (item, model, index)->
     Luca.util.make("a",{"data-index":index}, model.className() )
 
-  autoBindEventHandlers: true
+  filterByName: (name)->
+    models = @collection.query
+      className:
+        $likeI:name
 
-  events:
-    "click div.collection-item a" : "clickHandler"
+    @collection.reset( models, silent: true )
+    @refresh()
+
+    if name?.length is 0 
+      @resetToDefault()
+
+  resetToDefault: ()->
+    @collection.reset( @initialComponents, silent: true )
+    @refresh()
+
+  beforeRender: ()->
+    success = (collection, response)=>
+      @initialComponents = response
+
+    @collection.fetch(success: success)  
 
   clickHandler: (e)->
     e.preventDefault()

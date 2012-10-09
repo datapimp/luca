@@ -68,7 +68,9 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   refresh: ()->
     panel = @
 
-    @$bodyEl().empty()
+    bodyEl = @$bodyEl() 
+
+    if bodyEl.length > 0 then bodyEl.empty() else @$el.empty()
 
     _( @getModels() ).each (model, index)->
       panel.$append( panel.makeItem(model, index) )

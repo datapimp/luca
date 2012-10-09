@@ -275,24 +275,6 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   map: (fn)->
     _( @components ).map(fn)
     
-  selectByAttribute: (attribute, value, deep=false)->
-    components = _( @components ).map (component)->
-      matches = []
-      test = component[ attribute ]
-
-      matches.push( component ) if test is value
-
-      # recursively traverse our components
-      matches.push component.select?(attribute, value, true) if deep is true
-
-      _.compact matches
-
-    _.flatten( components )
-
-  select: (attribute, value, deep=false)->
-    console.log "Container.select will be replaced by selectByAttribute in 1.0"
-    Luca.core.Container::selectByAttribute.apply(@, arguments)
-
   # event binding sugar for nested components
   #
   # you can define events like:
@@ -300,7 +282,6 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   # _.def("MyContainer").extends("Luca.View").with
   #   componentEvents:
   #     "component_name before:load" : "mySpecialHandler"
-  #
   componentEvents: {}
 
   registerComponentEvents: ()->
@@ -317,7 +298,6 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
   findComponent: (needle, haystack="name", deep=false)->
     @createComponents() unless @componentsCreated is true
-
 
     position = @componentIndex?[ haystack ][ needle ]
     component = @components?[ position ]
@@ -362,3 +342,22 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
   getRootComponent: ()->
     if @rootComponent() then @ else @getParent().getRootComponent()
+    
+  selectByAttribute: (attribute, value, deep=false)->
+    components = _( @components ).map (component)->
+      matches = []
+      test = component[ attribute ]
+
+      matches.push( component ) if test is value
+
+      # recursively traverse our components
+      matches.push component.select?(attribute, value, true) if deep is true
+
+      _.compact matches
+
+    _.flatten( components )
+
+  select: (attribute, value, deep=false)->
+    console.log "Container.select will be replaced by selectByAttribute in 1.0"
+    Luca.core.Container::selectByAttribute.apply(@, arguments)
+

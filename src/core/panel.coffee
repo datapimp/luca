@@ -137,6 +137,9 @@ _.def("Luca.components.Panel").extends("Luca.View").with
   $template: (template, variables={})->
     @$html( Luca.template(template,variables) )
 
+  $empty: ()->
+    @$bodyEl().empty()
+    
   $html: (content)->
     @$bodyEl().html( content )
 
