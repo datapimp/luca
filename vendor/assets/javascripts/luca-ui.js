@@ -909,6 +909,7 @@
     initialize: function(options) {
       var additional, template, templateVars, _i, _len, _ref;
       this.options = options != null ? options : {};
+      this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
       if (this.name != null) this.cid = _.uniqueId(this.name);
       templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
@@ -932,10 +933,17 @@
         }
       }
       if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
-      this.trigger("after:initialize", this);
       registerCollectionEvents.call(this);
       registerApplicationEvents.call(this);
-      return this.delegateEvents();
+      this.delegateEvents();
+      if (this.stateful === true && !(this.state != null)) {
+        this.state = new Backbone.Model(this.defaultState || {});
+        if (this.set == null) {
+          this.set = _.bind(this, this.state.set);
+          this.get = _.bind(this, this.state.get);
+        }
+      }
+      return this.trigger("after:initialize", this);
     },
     $wrap: function(wrapper) {
       if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
@@ -3027,6 +3035,7 @@
     itemTagName: 'li',
     itemClassName: 'collection-item',
     initialize: function(options) {
+      var _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.bindAll(this, "refresh");
@@ -3041,10 +3050,17 @@
         this.collection = Luca.CollectionManager.get().get(this.collection);
       }
       if (Luca.isBackboneCollection(this.collection)) {
-        this.collection.bind("reset", this.refresh);
+        this.collection.on("before:fetch", function() {
+          if (_this.loadMask === true) return _this.trigger("enable:loadmask");
+        });
+        this.collection.bind("reset", function() {
+          if (_this.loadMask === true) _this.trigger("disable:loadmask");
+          return _this.refresh();
+        });
         this.collection.bind("add", this.refresh);
-        return this.collection.bind("remove", this.refresh);
+        this.collection.bind("remove", this.refresh);
       }
+      if (this.collection.length > 0) return this.refresh();
     },
     attributesForItem: function(item) {
       return _.extend({}, {
@@ -3084,16 +3100,10 @@
       }
     },
     refresh: function() {
-      var bodyEl, panel;
-      panel = this;
-      bodyEl = this.$bodyEl();
-      if (bodyEl.length > 0) {
-        bodyEl.empty();
-      } else {
-        this.$el.empty();
-      }
+      var _this = this;
+      this.$bodyEl().empty();
       return _(this.getModels()).each(function(model, index) {
-        return panel.$append(panel.makeItem(model, index));
+        return _this.$append(panel.makeItem(model, index));
       });
     },
     registerEvent: function(domEvent, selector, handler) {
@@ -3629,7 +3639,7 @@
       this._super("afterRender", this, arguments);
       return this.$('input').typeahead({
         matcher: this.matcher,
-        source: this.getSource()()
+        source: this.getSource()
       });
     }
   });

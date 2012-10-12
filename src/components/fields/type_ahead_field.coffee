@@ -19,4 +19,4 @@ _.def('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
 
     @$('input').typeahead
       matcher: @matcher
-      source: @getSource()()
+      source: @getSource()

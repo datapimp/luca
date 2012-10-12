@@ -104,3 +104,6 @@
   - CardViews and Controllers set data attributes on their elements for the active card / page
   - Added convenience methods to container 'pluck', 'invoke'
   - Added methods to Controller for ease of autogenerating routes
+  - Added beforeInitialize hook on Luca.View 
+  - Luca.View can now automatically configure state machine models by passing `stateful:true`
+    in your view definition.

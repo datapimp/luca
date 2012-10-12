@@ -34,9 +34,18 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
       @collection = Luca.CollectionManager.get().get(@collection)
 
     if Luca.isBackboneCollection(@collection)
-      @collection.bind "reset", @refresh
+      @collection.on "before:fetch", ()=>
+        @trigger "enable:loadmask" if @loadMask is true
+        
+      @collection.bind "reset", ()=>
+        @trigger "disable:loadmask" if @loadMask is true
+        @refresh()
+
       @collection.bind "add", @refresh
       @collection.bind "remove", @refresh
+
+    if @collection.length > 0
+      @refresh()
 
   attributesForItem: (item)->
     _.extend {}, class: @itemClassName, "data-index": item.index
@@ -66,14 +75,9 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
       @collection.models
 
   refresh: ()->
-    panel = @
-
-    bodyEl = @$bodyEl() 
-
-    if bodyEl.length > 0 then bodyEl.empty() else @$el.empty()
-
-    _( @getModels() ).each (model, index)->
-      panel.$append( panel.makeItem(model, index) )
+    @$bodyEl().empty()
+    _( @getModels() ).each (model, index)=>
+      @$append( panel.makeItem(model, index) )
 
   registerEvent: (domEvent, selector, handler)->
     if !handler? and _.isFunction(selector)

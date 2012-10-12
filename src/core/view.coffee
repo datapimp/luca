@@ -13,10 +13,12 @@ _.def("Luca.View").extends("Backbone.View").with
   ]
 
   initialize: (@options={})->
+    @trigger "before:initialize", @, @options
 
     _.extend @, @options
 
     @cid = _.uniqueId(@name) if @name?
+
 
     templateVars = if @bodyTemplateVars
       @bodyTemplateVars.call(@)
@@ -37,14 +39,20 @@ _.def("Luca.View").extends("Backbone.View").with
       @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
       @$el.addClass( additional ) for additional in @additionalClassNames
 
-    @$wrap(@wrapperClass) if @wrapperClass?
-
-    @trigger "after:initialize", @
+    @$wrap( @wrapperClass ) if @wrapperClass?
 
     registerCollectionEvents.call(@)
     registerApplicationEvents.call( @)
 
     @delegateEvents()
+
+    if @stateful is true and not @state?
+      @state = new Backbone.Model(@defaultState || {})
+      unless @set?
+        @set = _.bind @, @state.set
+        @get = _.bind @, @state.get
+
+    @trigger "after:initialize", @
 
   $wrap: (wrapper)->
     if _.isString(wrapper) and not wrapper.match(/[<>]/)
