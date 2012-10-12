@@ -211,7 +211,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       # if you define a @getter property as a string on your component
       # we will create a function with that name on this container that
       # allows you to access this component
-      if component.getter and not @[ component.getter ]?
+      if getter = component.getter and not @[ getter ]?
         @[getter] = ()-> component 
 
       # if we're using base backbone views, then they don't extend themselves

@@ -107,3 +107,5 @@
   - Added beforeInitialize hook on Luca.View 
   - Luca.View can now automatically configure state machine models by passing `stateful:true`
     in your view definition.
+  - Containers will respond to getter attributes set on their components, by defining a getter
+    on the container
