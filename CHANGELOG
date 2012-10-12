@@ -109,3 +109,5 @@
     in your view definition.
   - Containers will respond to getter attributes set on their components, by defining a getter
     on the container
+0.9.31
+  - lazyComponent type property now goes through a map to allow for aliasing
