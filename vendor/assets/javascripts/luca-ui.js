@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.3",
+    VERSION: "0.9.31",
     core: {},
     containers: {},
     components: {},
@@ -803,8 +803,16 @@
     });
   };
 
+  Luca.registry.aliases = {
+    grid: "grid_view",
+    form: "form_view",
+    text: "text_field",
+    select: "select_field"
+  };
+
   Luca.registry.lookup = function(ctype) {
-    var c, className, fullPath, parents, _ref;
+    var alias, c, className, fullPath, parents, _ref;
+    if (alias = Luca.registry.aliases[ctype]) ctype = alias;
     c = registry.classes[ctype];
     if (c != null) return c;
     className = Luca.util.classify(ctype);
@@ -1841,7 +1849,7 @@
       this.components = _(this.components).map(function(object, index) {
         var component;
         component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, Luca.util.lazyComponent(object));
-        if (component.getter != null) {
+        if (_.isString(component.getter)) {
           _this[component.getter] = (function() {
             return component;
           });
