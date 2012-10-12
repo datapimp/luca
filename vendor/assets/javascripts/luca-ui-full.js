@@ -1944,10 +1944,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.components = _(this.components).map(function(object, index) {
         var component, getter;
         component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, Luca.util.lazyComponent(object));
-        if (getter = component.getter && !(_this[getter] != null)) {
-          _this[getter] = function() {
+        if (getter = component.getter) {
+          _this[getter] || (_this[getter] = function() {
             return component;
-          };
+          });
         }
         if (!component.container && component.options.container) {
           component.container = component.options.container;
