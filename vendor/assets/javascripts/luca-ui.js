@@ -1839,10 +1839,10 @@
         cid_index: {}
       };
       this.components = _(this.components).map(function(object, index) {
-        var component, getter;
+        var component;
         component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, Luca.util.lazyComponent(object));
-        if (getter = component.getter) {
-          _this[getter] || (_this[getter] = function() {
+        if (component.getter != null) {
+          _this[component.getter] = (function() {
             return component;
           });
         }
