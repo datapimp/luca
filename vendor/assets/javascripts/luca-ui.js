@@ -807,7 +807,9 @@
     grid: "grid_view",
     form: "form_view",
     text: "text_field",
-    select: "select_field"
+    select: "select_field",
+    card: "card_view",
+    collection: "collection_view"
   };
 
   Luca.registry.lookup = function(ctype) {
@@ -1825,17 +1827,18 @@
         }
       }
       return _(this.components).each(function(component, index) {
-        var container, panel, _ref2;
-        container = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
+        var componentContainerElement, panel, _ref2;
+        componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
         container["class"] = container["class"] || container.className || container.classes;
-        if (_this.appendContainers) {
-          panel = _this.make(_this.componentTag, container, '');
+        if (_this.appendContainers || (_this.appendContainers = _this.generateComponentElements)) {
+          panel = _this.make(_this.componentTag, componentContainerElement, '');
           _this.$append(panel);
+          component.container || (component.container = componentContainerElement.id);
         }
-        if (component.container == null) {
-          if (_this.appendContainers) component.container = "#" + container.id;
-          return component.container || (component.container = _this.$bodyEl());
+        if (_.isString(component.appendTo)) {
+          component.container || (component.container = component.appendTo);
         }
+        return component.container || (component.container = _this.$bodyEl());
       });
     },
     createComponents: function() {
@@ -1868,16 +1871,16 @@
       return map;
     },
     renderComponents: function(debugMode) {
-      var _this = this;
+      var container;
       this.debugMode = debugMode != null ? debugMode : "";
       this.debug("container render components");
+      container = this;
       return _(this.components).each(function(component) {
         component.getParent = function() {
-          return _this;
+          return container;
         };
-        $(component.container).append($(component.el));
         try {
-          return component.render();
+          return $(component.container).append(component.render().el);
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
           if (_.isObject(e)) {
@@ -2012,6 +2015,12 @@
       return Luca.core.Container.prototype.selectByAttribute.apply(this, arguments);
     }
   });
+
+  Luca.core.Container.componentRenderer = function(container, component) {
+    var attachMethod;
+    attachMethod = $(component.container)[component.attachWith || "append"];
+    return attachMethod(component.render().el);
+  };
 
 }).call(this);
 (function() {
@@ -2255,12 +2264,13 @@
     components: [],
     initialize: function(options) {
       this.options = options != null ? options : {};
+      console.log("Column Views are deprecated in favor of just using grid css on a normal container");
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       return this.setColumnWidths();
     },
     componentClass: 'luca-ui-column',
     containerTemplate: "containers/basic",
-    appendContainers: true,
+    generateComponentElements: true,
     autoColumnWidths: function() {
       var widths,
         _this = this;
@@ -2300,7 +2310,7 @@
     components: [],
     hooks: ['before:card:switch', 'after:card:switch'],
     componentClass: 'luca-ui-card',
-    appendContainers: true,
+    generateComponentElements: true,
     initialize: function(options) {
       this.options = options;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
@@ -2427,6 +2437,13 @@
   });
 
   _.def("Luca.containers.ModalView")["extends"]("Luca.ModalView")["with"]();
+
+}).call(this);
+(function() {
+
+  _.def("Luca.PageView")["extends"]("Luca.containers.CardView")["with"]({
+    version: 2
+  });
 
 }).call(this);
 (function() {
@@ -4214,6 +4231,13 @@
     content: function() {
       return this.$('.container').eq(0);
     }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.PageController")["extends"]("Luca.components.Controller")["with"]({
+    version: 2
   });
 
 }).call(this);
