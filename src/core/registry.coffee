@@ -62,10 +62,12 @@ Luca.registry.namespaces = (resolve=true)->
     if resolve then Luca.util.resolve( namespace ) else namespace
 
 Luca.registry.aliases = 
-  grid: "grid_view"
-  form: "form_view"
-  text: "text_field"
-  select: "select_field"
+  grid:       "grid_view"
+  form:       "form_view"
+  text:       "text_field"
+  select:     "select_field"
+  card:       "card_view"
+  collection: "collection_view"
 
 # Lookup a component in the Luca component registry
 # by it's ctype identifier.  If it doesn't exist,

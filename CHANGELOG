@@ -109,5 +109,10 @@
     in your view definition.
   - Containers will respond to getter attributes set on their components, by defining a getter
     on the container
+
 0.9.31
   - lazyComponent type property now goes through a map to allow for aliasing
+  - add ability to customize container / component render method by overriding Luca.core.Container.componentRenderer
+  - rename appendContainers property to generateComponentElements
+  - adding a Luca.PageView component as an alias for CardView
+  - adding a Luca.PageController component as an alias for Controller

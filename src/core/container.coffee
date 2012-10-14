@@ -162,18 +162,20 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       component = (type: component)
 
     _( @components ).each (component, index)=>
-      container = @componentContainers?[index]
+      componentContainerElement = @componentContainers?[index]
 
       # support a variety of the bad naming conventions
       container.class = container.class || container.className || container.classes
 
-      if @appendContainers
-        panel = @make(@componentTag, container, '')
+      if @appendContainers ||= @generateComponentElements
+        panel = @make(@componentTag, componentContainerElement, '')
         @$append( panel )
+        component.container ||= componentContainerElement.id
 
-      unless component.container?
-        component.container = "##{ container.id }" if @appendContainers
-        component.container ||= @$bodyEl()
+      if _.isString component.appendTo
+        component.container ||= component.appendTo 
+
+      component.container ||= @$bodyEl()
 
   # create components is responsible for turning the JSON syntax of the
   # container's definition into live objects against a given Luca Component
@@ -238,12 +240,14 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   # components
   renderComponents: (@debugMode="")->
     @debug "container render components"
-    _(@components).each (component)=>
-      component.getParent = ()=> @
-      $( component.container ).append $(component.el)
+
+    container = @ 
+    _(@components).each (component)->
+      component.getParent = ()-> 
+        container 
 
       try
-        component.render()
+        $( component.container ).append component.render().el
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
 
@@ -367,3 +371,9 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     console.log "Container.select will be replaced by selectByAttribute in 1.0"
     Luca.core.Container::selectByAttribute.apply(@, arguments)
 
+# This is the method by which a container injects the rendered child views
+# into the DOM.  It will get passed the container object, and the component
+# that is being rendered.  
+Luca.core.Container.componentRenderer = (container, component)->
+  attachMethod = $( component.container )[ component.attachWith || "append" ]
+  attachMethod( component.render().el )

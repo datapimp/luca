@@ -13,7 +13,7 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
   ]
 
   componentClass: 'luca-ui-card'
-  appendContainers: true
+  generateComponentElements: true
 
   initialize: (@options)->
     Luca.core.Container::initialize.apply @,arguments

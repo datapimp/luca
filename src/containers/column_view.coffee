@@ -6,6 +6,7 @@ _.def('Luca.containers.ColumnView').extends('Luca.core.Container').with
   components: []
 
   initialize: (@options={})->
+    console.log "Column Views are deprecated in favor of just using grid css on a normal container"
     Luca.core.Container::initialize.apply @, arguments
     @setColumnWidths()
 
@@ -13,7 +14,7 @@ _.def('Luca.containers.ColumnView').extends('Luca.core.Container').with
 
   containerTemplate: "containers/basic"
 
-  appendContainers: true
+  generateComponentElements: true
 
   autoColumnWidths: ()->
     widths = []
