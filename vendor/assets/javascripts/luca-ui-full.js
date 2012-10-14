@@ -1932,7 +1932,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return _(this.components).each(function(component, index) {
         var componentContainerElement, panel, _ref2;
         componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
-        container["class"] = container["class"] || container.className || container.classes;
+        componentContainerElement["class"] = componentContainerElement["class"] || componentContainerElement.className || componentContainerElement.classes;
         if (_this.appendContainers || (_this.appendContainers = _this.generateComponentElements)) {
           panel = _this.make(_this.componentTag, componentContainerElement, '');
           _this.$append(panel);

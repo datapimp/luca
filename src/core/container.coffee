@@ -165,7 +165,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       componentContainerElement = @componentContainers?[index]
 
       # support a variety of the bad naming conventions
-      container.class = container.class || container.className || container.classes
+      componentContainerElement.class = componentContainerElement.class || componentContainerElement.className || componentContainerElement.classes
 
       if @appendContainers ||= @generateComponentElements
         panel = @make(@componentTag, componentContainerElement, '')
