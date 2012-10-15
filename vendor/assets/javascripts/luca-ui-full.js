@@ -1930,18 +1930,19 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         }
       }
       return _(this.components).each(function(component, index) {
-        var componentContainerElement, panel, _ref2;
-        componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
-        componentContainerElement["class"] = componentContainerElement["class"] || componentContainerElement.className || componentContainerElement.classes;
-        if (_this.appendContainers || (_this.appendContainers = _this.generateComponentElements)) {
+        var ce, componentContainerElement, panel, _ref2;
+        ce = componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
+        ce["class"] = ce["class"] || ce.className || ce.classes;
+        if (_this.generateComponentElements) {
           panel = _this.make(_this.componentTag, componentContainerElement, '');
           _this.$append(panel);
-          component.container || (component.container = componentContainerElement.id);
         }
-        if (_.isString(component.appendTo)) {
-          component.container || (component.container = component.appendTo);
+        if (component.container == null) {
+          if (_this.generateComponentElements) {
+            component.container = "#" + componentContainerElement.id;
+          }
+          return component.container || (component.container = _this.$bodyEl());
         }
-        return component.container || (component.container = _this.$bodyEl());
       });
     },
     createComponents: function() {
@@ -1983,7 +1984,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           return container;
         };
         try {
-          return $(component.container).append(component.render().el);
+          $(component.container).append(component.el);
+          return component.render();
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
           if (_.isObject(e)) {

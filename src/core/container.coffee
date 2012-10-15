@@ -151,10 +151,6 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     @componentContainers = _( @components ).map (component, index)->
       applyDOMConfig.call(container, component, index)
 
-  # prepare components is where each component gets assigned
-  # a container to be rendered into.  if @appendContainers is
-  # set to true, then the view will automatically $append()
-  # elements created via Backbone.View::make() to the body element of the view
   prepareComponents: ()->
     # accept components as an array of strings representing
     # the luca component type
@@ -162,20 +158,18 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       component = (type: component)
 
     _( @components ).each (component, index)=>
-      componentContainerElement = @componentContainers?[index]
+      ce = componentContainerElement = @componentContainers?[index]
 
       # support a variety of the bad naming conventions
-      componentContainerElement.class = componentContainerElement.class || componentContainerElement.className || componentContainerElement.classes
+      ce.class = ce.class || ce.className || ce.classes
 
-      if @appendContainers ||= @generateComponentElements
+      if @generateComponentElements
         panel = @make(@componentTag, componentContainerElement, '')
         @$append( panel )
-        component.container ||= '#' + componentContainerElement.id
 
-      if _.isString(component.appendTo)
-        component.container ||= '#' + component.appendTo 
-
-      component.container ||= @$bodyEl()
+      unless component.container?
+        component.container = "##{ componentContainerElement.id }" if @generateComponentElements
+        component.container ||= @$bodyEl()
 
   # create components is responsible for turning the JSON syntax of the
   # container's definition into live objects against a given Luca Component
@@ -247,7 +241,8 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
         container 
 
       try
-        $( component.container ).append component.render().el
+        $( component.container ).append( component.el )
+        component.render() 
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
 
