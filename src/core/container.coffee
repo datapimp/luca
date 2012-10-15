@@ -170,10 +170,10 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       if @appendContainers ||= @generateComponentElements
         panel = @make(@componentTag, componentContainerElement, '')
         @$append( panel )
-        component.container ||= componentContainerElement.id
+        component.container ||= '#' + componentContainerElement.id
 
       if _.isString(component.appendTo)
-        component.container ||= component.appendTo 
+        component.container ||= '#' + component.appendTo 
 
       component.container ||= @$bodyEl()
 
