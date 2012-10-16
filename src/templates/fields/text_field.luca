@@ -3,14 +3,15 @@
   <%= label %>
 <% } %>
 
-<% if( typeof(addOn) !== "undefined" ) { %>
-%span.add-on
-  <%= addOn %>
-<% } %>
+.controls
+  <% if( typeof(addOn) !== "undefined" ) { %>
+  %span.add-on
+    <%= addOn %>
+  <% } %>
 
-%input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>",:placeholder=>"<%= placeHolder %>", :class=>"<%= input_class %>"}
+  %input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"text",:name=>"<%= input_name %>",:placeholder=>"<%= placeHolder %>", :class=>"<%= input_class %>"}
 
-<% if(helperText) { %>
-%p.helper-text.help-block
-  <%= helperText %>
-<% } %>
+  <% if(helperText) { %>
+  %p.helper-text.help-block
+    <%= helperText %>
+  <% } %>

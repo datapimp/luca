@@ -1,7 +1,8 @@
 %label{:for=>"<%= input_id %>"}
   <%= label %>
-%select{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:name=>"<%= input_name %>"}
-<% if(helperText) { %>
-%p.helper-text.help-block
-  <%= helperText %>
-<% } %>
+.controls
+  %select{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:name=>"<%= input_name %>"}
+  <% if(helperText) { %>
+  %p.helper-text.help-block
+    <%= helperText %>
+  <% } %>
