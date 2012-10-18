@@ -65,7 +65,6 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
-
     make(@itemTagName, @attributesForItem(item), @contentForItem(item))
 
   getModels: ()->
@@ -77,7 +76,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   refresh: ()->
     @$bodyEl().empty()
     _( @getModels() ).each (model, index)=>
-      @$append( panel.makeItem(model, index) )
+      @$append( @makeItem(model, index) )
 
   registerEvent: (domEvent, selector, handler)->
     if !handler? and _.isFunction(selector)

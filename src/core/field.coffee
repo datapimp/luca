@@ -44,7 +44,7 @@ _.def('Luca.core.Field').extends('Luca.View').with
 
     @$el.addClass('required') if @required
 
-    @$el.html Luca.templates[ @template ]( @ )
+    @$el.html Luca.template(@template, @)
     @input = $('input', @el)
 
   change_handler: (e)->

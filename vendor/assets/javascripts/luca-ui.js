@@ -1713,7 +1713,7 @@
     beforeRender: function() {
       if (Luca.enableBootstrap) this.$el.addClass('control-group');
       if (this.required) this.$el.addClass('required');
-      this.$el.html(Luca.templates[this.template](this));
+      this.$el.html(Luca.template(this.template, this));
       return this.input = $('input', this.el);
     },
     change_handler: function(e) {
@@ -3135,7 +3135,7 @@
       var _this = this;
       this.$bodyEl().empty();
       return _(this.getModels()).each(function(model, index) {
-        return _this.$append(panel.makeItem(model, index));
+        return _this.$append(_this.makeItem(model, index));
       });
     },
     registerEvent: function(domEvent, selector, handler) {

@@ -14,7 +14,7 @@ _.def("Luca.Collection").extends( source ).with
   cachedMethods: []
 
   # if filtering a collection should handle via a call to a REST API
-  # and return the filtered results that way, then leave this true
+  # and return the filtered results that way, then set this to true
   remoteFilter: false
 
   initialize: (models=[], @options)->
