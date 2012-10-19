@@ -3252,9 +3252,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     render: function() {
       this.refresh();
-      if (this.$el.parent().length > 0 && (this.container != null)) {
-        return this.$attach();
-      }
+      if (this.$el.parent().length > 0 && (this.container != null)) this.$attach();
+      return this;
     }
   });
 

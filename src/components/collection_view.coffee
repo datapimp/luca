@@ -89,3 +89,4 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   render: ()->
     @refresh()
     @$attach() if @$el.parent().length > 0 and @container?
+    @
