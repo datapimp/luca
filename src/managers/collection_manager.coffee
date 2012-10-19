@@ -28,11 +28,8 @@ class Luca.CollectionManager
 
     @state = new Luca.Model()
 
-
     if @initialCollections
       handleInitialCollections.call(@)
-
-
 
   add: (key, collection)->
     @currentScope()[ key ] ||= collection
@@ -83,7 +80,13 @@ class Luca.CollectionManager
     @get(key) || @create(key,collectionOptions,initialModels,false)
 
   collectionCountDidChange: ()->
-    @trigger "all_collections_loaded" if @totalCollectionsCount() == @loadedCollectionsCount()
+    if @allCollectionsLoaded() 
+      # for backwards compat
+      @trigger "all_collections_loaded" 
+      @trigger "initial:load"
+
+  allCollectionsLoaded:()->
+    @totalCollectionsCount() is @loadedCollectionsCount()
 
   totalCollectionsCount: ()->
     @state.get("collections_count")
@@ -116,8 +119,11 @@ guessCollectionClass = (key)->
 
 loadInitialCollections = ()->
   collectionDidLoad = (collection) =>
-    collection.unbind "reset"
+    current = @state.get("loaded_collections_count")
+
+    @state.set("loaded_collections_count", current + 1)
     @trigger "collection_loaded", collection.name
+    collection.unbind "reset"
 
   _(@initialCollections).each (name) =>
     collection = @getOrCreate(name)
@@ -127,7 +133,7 @@ loadInitialCollections = ()->
 
 handleInitialCollections = ()->
   @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
-  @state.bind "change:loaded_collections_count", @collectionCountDidChange
+  @state.bind "change:loaded_collections_count", ()=> @collectionCountDidChange()
 
   if @useProgressLoader
     @loaderView ||= new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
