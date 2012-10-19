@@ -1020,7 +1020,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     additionalClassNames: [],
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var additional, template, templateVars, _i, _len, _ref;
+      var additional, template, templateVars, _i, _len, _ref, _ref2;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
@@ -1039,9 +1039,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (_.isString(this.additionalClassNames)) {
           this.additionalClassNames = this.additionalClassNames.split(" ");
         }
-        _ref = this.additionalClassNames;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          additional = _ref[_i];
+      }
+      if (this.gridSpan) this.additionalClassNames.push("span" + this.gridSpan);
+      if (((_ref = this.additionalClassNames) != null ? _ref.length : void 0) > 0) {
+        _ref2 = this.additionalClassNames;
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          additional = _ref2[_i];
           this.$el.addClass(additional);
         }
       }
@@ -2080,7 +2083,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.components[this.activeItem];
     },
     componentElements: function() {
-      return $(">." + this.componentClass, this.el);
+      if (this.bodyClassName) {
+        return this.$(">." + this.componentClass, this.$("." + this.bodyClassName));
+      } else {
+        return this.$(">." + this.componentClass);
+      }
     },
     getComponent: function(needle) {
       return this.components[needle];
@@ -2223,9 +2230,14 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     };
 
     CollectionManager.prototype.collectionCountDidChange = function() {
-      if (this.totalCollectionsCount() === this.loadedCollectionsCount()) {
-        return this.trigger("all_collections_loaded");
+      if (this.allCollectionsLoaded()) {
+        this.trigger("all_collections_loaded");
+        return this.trigger("initial:load");
       }
+    };
+
+    CollectionManager.prototype.allCollectionsLoaded = function() {
+      return this.totalCollectionsCount() === this.loadedCollectionsCount();
     };
 
     CollectionManager.prototype.totalCollectionsCount = function() {
@@ -2269,8 +2281,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     var collectionDidLoad,
       _this = this;
     collectionDidLoad = function(collection) {
-      collection.unbind("reset");
-      return _this.trigger("collection_loaded", collection.name);
+      var current;
+      current = _this.state.get("loaded_collections_count");
+      _this.state.set("loaded_collections_count", current + 1);
+      _this.trigger("collection_loaded", collection.name);
+      return collection.unbind("reset");
     };
     return _(this.initialCollections).each(function(name) {
       var collection;
@@ -2283,11 +2298,14 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   handleInitialCollections = function() {
+    var _this = this;
     this.state.set({
       loaded_collections_count: 0,
       collections_count: this.initialCollections.length
     });
-    this.state.bind("change:loaded_collections_count", this.collectionCountDidChange);
+    this.state.bind("change:loaded_collections_count", function() {
+      return _this.collectionCountDidChange();
+    });
     if (this.useProgressLoader) {
       this.loaderView || (this.loaderView = new Luca.components.CollectionLoaderView({
         manager: this,
