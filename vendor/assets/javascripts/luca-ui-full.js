@@ -3169,6 +3169,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     itemRenderer: void 0,
     itemTagName: 'li',
     itemClassName: 'collection-item',
+    hooks: ["empty:results"],
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -3237,6 +3238,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     refresh: function() {
       var _this = this;
       this.$bodyEl().empty();
+      if (this.getModels().length === 0) this.trigger("empty:results");
       return _(this.getModels()).each(function(model, index) {
         return _this.$append(_this.makeItem(model, index));
       });

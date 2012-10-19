@@ -17,6 +17,10 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   itemClassName: 'collection-item'
 
+  hooks:[
+    "empty:results"
+  ]
+  
   initialize: (@options={})->
     _.extend(@, @options)
 
@@ -75,6 +79,10 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   refresh: ()->
     @$bodyEl().empty()
+
+    if @getModels().length is 0
+      @trigger("empty:results")
+
     _( @getModels() ).each (model, index)=>
       @$append( @makeItem(model, index) )
 
