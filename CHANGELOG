@@ -117,8 +117,9 @@
   - adding a Luca.PageView component as an alias for CardView
   - adding a Luca.PageController component as an alias for Controller
 
-0.9.32
+0.9.33
   - added gridSpan property to Luca.View.  This will automatically add the span class for you to snap your view to the grid.  
     Accepts a number 0-12.
   - fixed a bug in CardView.componentElements method with bodyClassName being present 
+  - Added LabelView component.  A form field which just displays a value.
 

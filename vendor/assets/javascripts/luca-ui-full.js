@@ -121,7 +121,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.32",
+    VERSION: "0.9.33",
     core: {},
     containers: {},
     components: {},
@@ -3581,6 +3581,25 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.input_name || (this.input_name = this.name);
       this.input_value || (this.input_value = this.value);
       return this.label || (this.label = this.name);
+    }
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.components.LabelField")["extends"]("Luca.core.Field")["with"]({
+    className: "luca-ui-field luca-ui-label-field",
+    getValue: function() {
+      return this.$('input').attr('value');
+    },
+    formatter: function(value) {
+      value || (value = this.getValue());
+      return _.str.titleize(value);
+    },
+    setValue: function(value) {
+      this.trigger("change", value, this.getValue());
+      this.$('input').attr('value', value);
+      return this.$('.value').html(this.formatter(value));
     }
   });
 
