@@ -333,10 +333,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     return @components[ @activeItem ]
 
   componentElements: ()->
-    if @bodyClassName
-      @$(">.#{ @componentClass }", @$(".#{ @bodyClassName }"))
-    else
-      @$(">.#{ @componentClass }")
+    @$(">.#{ @componentClass }", @$bodyEl())
 
   getComponent: (needle)->
     @components[ needle ]

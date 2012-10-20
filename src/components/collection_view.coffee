@@ -35,7 +35,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     Luca.components.Panel::initialize.apply(@, arguments)
 
     if _.isString(@collection) and Luca.CollectionManager.get()
-      @collection = Luca.CollectionManager.get().get(@collection)
+      @collection = Luca.CollectionManager.get().getOrCreate(@collection)
 
     if Luca.isBackboneCollection(@collection)
       @collection.on "before:fetch", ()=>
@@ -47,6 +47,8 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
       @collection.bind "add", @refresh
       @collection.bind "remove", @refresh
+    else
+      throw "Collection Views must have a valid backbone collection"
 
     if @collection.length > 0
       @refresh()

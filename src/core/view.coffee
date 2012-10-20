@@ -78,6 +78,9 @@ _.def("Luca.View").extends("Backbone.View").with
   $attach: ()->
     @$container().append( @el )
 
+  $bodyEl: ()->
+    @$el
+    
   $container: ()->
     $(@container)
 
