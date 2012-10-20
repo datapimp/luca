@@ -979,6 +979,9 @@
     $attach: function() {
       return this.$container().append(this.el);
     },
+    $bodyEl: function() {
+      return this.$el;
+    },
     $container: function() {
       return $(this.container);
     },
@@ -1980,11 +1983,7 @@
       return this.components[this.activeItem];
     },
     componentElements: function() {
-      if (this.bodyClassName) {
-        return this.$(">." + this.componentClass, this.$("." + this.bodyClassName));
-      } else {
-        return this.$(">." + this.componentClass);
-      }
+      return this.$(">." + this.componentClass, this.$bodyEl());
     },
     getComponent: function(needle) {
       return this.components[needle];
@@ -3098,7 +3097,7 @@
       }
       Luca.components.Panel.prototype.initialize.apply(this, arguments);
       if (_.isString(this.collection) && Luca.CollectionManager.get()) {
-        this.collection = Luca.CollectionManager.get().get(this.collection);
+        this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
       }
       if (Luca.isBackboneCollection(this.collection)) {
         this.collection.on("before:fetch", function() {
@@ -3110,6 +3109,8 @@
         });
         this.collection.bind("add", this.refresh);
         this.collection.bind("remove", this.refresh);
+      } else {
+        throw "Collection Views must have a valid backbone collection";
       }
       if (this.collection.length > 0) return this.refresh();
     },
