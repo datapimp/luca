@@ -91,6 +91,11 @@ _.def("Luca.Collection").extends( source ).with
   # and will automatically do this for you without you having
   # to write a special url handler.  If you want to use a normal
   # url without this feature, just set @useNormalUrl = true
+
+  # TODO
+  #
+  # This has got to go.  It is messing up URL for show actions
+  # for models part of luca collections when there are base query params
   __wrapUrl: ()->
     if _.isFunction(@url)
       @url = _.wrap @url, (fn)=>
