@@ -19,7 +19,6 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @cid = _.uniqueId(@name) if @name?
 
-
     templateVars = if @bodyTemplateVars
       @bodyTemplateVars.call(@)
     else
@@ -44,7 +43,6 @@ _.def("Luca.View").extends("Backbone.View").with
     if @additionalClassNames?.length > 0
       @$el.addClass( additional ) for additional in @additionalClassNames
 
-
     @$wrap( @wrapperClass ) if @wrapperClass?
 
     registerCollectionEvents.call(@)
@@ -57,6 +55,10 @@ _.def("Luca.View").extends("Backbone.View").with
       unless @set?
         @set = _.bind @, @state.set
         @get = _.bind @, @state.get
+
+    if @mixins?.length > 0
+      for module in @mixins
+        Luca.modules[ module ]._included.call(@, @, module)
 
     @trigger "after:initialize", @
 
@@ -235,7 +237,11 @@ registerCollectionEvents = ()->
       console.log "Error Binding To Collection in registerCollectionEvents", @
       throw e
 
+
 Luca.View.extend = (definition)->
   definition = customizeRender( definition )
-  originalExtend.call(@, definition)
 
+  if definition.mixins? and _.isArray( definition.mixins )
+    _.extend(definition, Luca.modules[module]) for module in definition.mixins
+
+  originalExtend.call(@, definition)

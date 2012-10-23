@@ -121,7 +121,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.33",
+    VERSION: "0.9.35",
     core: {},
     containers: {},
     components: {},
@@ -767,6 +767,65 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
 
+  Luca.modules.LoadMaskable = {
+    _included: function(self, module) {
+      var _this = this;
+      _.bindAll(self, "applyLoadMask", "disableLoadMask");
+      if (this.loadMask === true) {
+        this.defer(function() {
+          _this.$el.addClass('with-mask');
+          if (_this.$('.load-mask').length === 0) {
+            _this.loadMaskTarget().prepend(Luca.template(_this.loadMaskTemplate, _this));
+            return _this.$('.load-mask').hide();
+          }
+        }).until("after:render");
+        this.on("enable:loadmask", this.applyLoadMask);
+        return this.on("disable:loadmask", this.applyLoadMask);
+      }
+    },
+    loadMaskTarget: function() {
+      if (this.loadMaskEl != null) {
+        return this.$(this.loadMaskEl);
+      } else {
+        return this.$bodyEl();
+      }
+    },
+    disableLoadMask: function() {
+      this.$('.load-mask .bar').css("width", "100%");
+      this.$('.load-mask').hide();
+      return clearInterval(this.loadMaskInterval);
+    },
+    enableLoadMask: function() {
+      var maxWidth,
+        _this = this;
+      this.$('.load-mask').show().find('.bar').css("width", "0%");
+      maxWidth = this.$('.load-mask .progress').width();
+      if (maxWidth < 20 && (maxWidth = this.$el.width()) < 20) {
+        maxWidth = this.$el.parent().width();
+      }
+      this.loadMaskInterval = setInterval(function() {
+        var currentWidth, newWidth;
+        currentWidth = _this.$('.load-mask .bar').width();
+        newWidth = currentWidth + 12;
+        return _this.$('.load-mask .bar').css('width', newWidth);
+      }, 200);
+      if (this.loadMaskTimeout == null) return;
+      return _.delay(function() {
+        return _this.disableLoadMask();
+      }, this.loadMaskTimeout);
+    },
+    applyLoadMask: function() {
+      if (this.$('.load-mask').is(":visible")) {
+        return this.disableLoadMask();
+      } else {
+        return this.enableLoadMask();
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+
   Luca.LocalStore = (function() {
 
     function LocalStore(name) {
@@ -1020,7 +1079,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     additionalClassNames: [],
     hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var additional, template, templateVars, _i, _len, _ref, _ref2;
+      var additional, module, template, templateVars, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
@@ -1057,6 +1116,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (this.set == null) {
           this.set = _.bind(this, this.state.set);
           this.get = _.bind(this, this.state.get);
+        }
+      }
+      if (((_ref3 = this.mixins) != null ? _ref3.length : void 0) > 0) {
+        _ref4 = this.mixins;
+        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
+          module = _ref4[_j];
+          Luca.modules[module]._included.call(this, this, module);
         }
       }
       return this.trigger("after:initialize", this);
@@ -1247,7 +1313,15 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   Luca.View.extend = function(definition) {
+    var module, _i, _len, _ref;
     definition = customizeRender(definition);
+    if ((definition.mixins != null) && _.isArray(definition.mixins)) {
+      _ref = definition.mixins;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        module = _ref[_i];
+        _.extend(definition, Luca.modules[module]);
+      }
+    }
     return originalExtend.call(this, definition);
   };
 
@@ -1661,60 +1735,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     loadMask: false,
     loadMaskTemplate: ["components/load_mask"],
     loadMaskTimeout: 3000,
+    mixins: ["LoadMaskable"],
     initialize: function(options) {
-      var _this = this;
       this.options = options != null ? options : {};
-      Luca.View.prototype.initialize.apply(this, arguments);
-      _.bindAll(this, "applyLoadMask", "disableLoadMask");
-      if (this.loadMask === true) {
-        this.defer(function() {
-          _this.$el.addClass('with-mask');
-          if (_this.$('.load-mask').length === 0) {
-            _this.loadMaskTarget().prepend(Luca.template(_this.loadMaskTemplate, _this));
-            return _this.$('.load-mask').hide();
-          }
-        }).until("after:render");
-        this.on("enable:loadmask", this.applyLoadMask);
-        return this.on("disable:loadmask", this.applyLoadMask);
-      }
-    },
-    loadMaskTarget: function() {
-      if (this.loadMaskEl != null) {
-        return this.$(this.loadMaskEl);
-      } else {
-        return this.$bodyEl();
-      }
-    },
-    disableLoadMask: function() {
-      this.$('.load-mask .bar').css("width", "100%");
-      this.$('.load-mask').hide();
-      return clearInterval(this.loadMaskInterval);
-    },
-    enableLoadMask: function() {
-      var maxWidth,
-        _this = this;
-      this.$('.load-mask').show().find('.bar').css("width", "0%");
-      maxWidth = this.$('.load-mask .progress').width();
-      if (maxWidth < 20 && (maxWidth = this.$el.width()) < 20) {
-        maxWidth = this.$el.parent().width();
-      }
-      this.loadMaskInterval = setInterval(function() {
-        var currentWidth, newWidth;
-        currentWidth = _this.$('.load-mask .bar').width();
-        newWidth = currentWidth + 12;
-        return _this.$('.load-mask .bar').css('width', newWidth);
-      }, 200);
-      if (this.loadMaskTimeout == null) return;
-      return _.delay(function() {
-        return _this.disableLoadMask();
-      }, this.loadMaskTimeout);
-    },
-    applyLoadMask: function() {
-      if (this.$('.load-mask').is(":visible")) {
-        return this.disableLoadMask();
-      } else {
-        return this.enableLoadMask();
-      }
+      return Luca.View.prototype.initialize.apply(this, arguments);
     },
     applyStyles: function(styles, body) {
       var setting, target, value;
@@ -2114,7 +2138,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         test = component[attribute];
         if (test === value) matches.push(component);
         if (deep === true) {
-          matches.push(typeof component.select === "function" ? component.select(attribute, value, true) : void 0);
+          matches.push(typeof component.selectByAttribute === "function" ? component.selectByAttribute(attribute, value, true) : void 0);
         }
         return _.compact(matches);
       });
@@ -3952,7 +3976,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     getFields: function(attr, value) {
       var fields;
-      fields = this.select("isField", true, true);
+      fields = this.selectByAttribute("isField", true, true);
       if (!(attr && value)) return fields;
       _(fields).select(function(field) {
         var property;

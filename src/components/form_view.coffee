@@ -110,7 +110,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   getFields: (attr,value)->
     # do a deep search of all of the nested components
     # to find the fields
-    fields = @select("isField", true, true)
+    fields = @selectByAttribute("isField", true, true)
 
     return fields unless attr and value
     # if an optional attribute and value pair is passed

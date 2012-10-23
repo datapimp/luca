@@ -356,7 +356,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       matches.push( component ) if test is value
 
       # recursively traverse our components
-      matches.push component.select?(attribute, value, true) if deep is true
+      matches.push component.selectByAttribute?(attribute, value, true) if deep is true
 
       _.compact matches
 
