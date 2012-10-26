@@ -676,8 +676,8 @@
             return _this.$('.load-mask').hide();
           }
         }).until("after:render");
-        this.on("enable:loadmask", this.applyLoadMask);
-        return this.on("disable:loadmask", this.applyLoadMask);
+        this.on(this.loadmaskEnableEvent || "enable:loadmask", this.applyLoadMask);
+        return this.on(this.loadmaskDisableEvent || "disable:loadmask", this.applyLoadMask);
       }
     },
     loadMaskTarget: function() {
@@ -3097,8 +3097,6 @@
 (function() {
   var make;
 
-  make = Luca.View.prototype.make;
-
   _.def("Luca.components.CollectionView")["extends"]("Luca.components.Panel")["with"]({
     tagName: "div",
     className: "luca-ui-collection-view",
@@ -3198,6 +3196,8 @@
       return this;
     }
   });
+
+  make = Luca.View.prototype.make;
 
 }).call(this);
 (function() {
@@ -3875,10 +3875,10 @@
       var fields;
       fields = this.selectByAttribute("isField", true, true);
       if (!(attr && value)) return fields;
-      _(fields).select(function(field) {
+      fields = _(fields).select(function(field) {
         var property;
         property = field[attr];
-        return (property != null) && value === (_.isFunction(property) ? property() : property);
+        return typeof property === "function" ? property(value === (_.isFunction(property) ? property() : property)) : void 0;
       });
       return fields;
     },
