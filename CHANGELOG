@@ -126,4 +126,6 @@
 0.9.35
   - fixes bug in FormView.getFields() when passing in a filter.  getField by name falls back to input name check if name check fails.
   - fixes checkbox method for checking if underlying component is checked or not
+  - adds valueType option to core field object.  allows for typecasting on getValue function
+  - change behavior on enableKeyEvents on text field
 

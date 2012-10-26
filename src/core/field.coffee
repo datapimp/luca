@@ -57,7 +57,15 @@ _.def('Luca.core.Field').extends('Luca.View').with
     $("input", @el).attr('disabled', false)
 
   getValue: ()->
-    @input.attr('value')
+    raw = @input.attr('value')
+
+    return raw if _.str.isBlank( raw )
+
+    switch @valueType
+      when "integer" then parseInt(raw)
+      when "string" then "#{ raw }"
+      when "float" then parseFloat(raw)
+      else raw
 
   render: ()->
     $( @container ).append( @$el )

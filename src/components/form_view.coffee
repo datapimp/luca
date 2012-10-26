@@ -174,29 +174,45 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
     @syncFormWithModel() unless options.silent? is true
 
+  # Public: returns a hash of values for the form fields in this view.
+  #
+  # options - An options Hash to control the behavior of values returned (default: {}):
+  #           reject_blank: don't include values which are blank (default: true)
+  #           skip_buttons: don't include button fields (default: true)
+  #           blanks: an inverse alias for reject_blank (default: false)
   getValues: (options={})->
     options.reject_blank = true unless options.reject_blank?
     options.skip_buttons = true unless options.skip_buttons?
+    options.reject_blank = true if options.blanks is false
 
-    values = _( @getFields() ).inject (memo,field)->
-      value = field.getValue()
-      key = field.input_name || field.name
+    values = _( @getFields() ).inject (memo,field)=>
+      value   = field.getValue()
+      key     = field.input_name || field.name
 
-      skip = false
+      valueIsBlank      = !!(_.str.isBlank( value ) || _.isUndefined( value ))
 
-      # don't include the values of buttons in our values hash
-      skip = true if options.skip_buttons and field.ctype is "button_field"
+      allowBlankValues  = not options.reject_blank and not field.send_blanks
 
-      # if the value is blank and we are passed reject_blank in the options
-      # then we should not include this field in our hash.  however, if the
-      # field is setup to send blanks, then we will send this value anyway
-      if _.string.isBlank( value )
-        skip = true if options.reject_blank and !field.send_blanks
-        skip = true if field.input_name is "id"
+      if options.debug
+        console.log "#{ key } Options", options, "Value", value, "Value Is Blank?", valueIsBlank, "Allow Blanks?", allowBlankValues
 
-      memo[ key ] = value unless skip is true
+      if options.skip_buttons and field.ctype is "button_field"
+        skip = true
+      else
+        if valueIsBlank and allowBlankValues is false 
+          skip = true 
+
+        if field.input_name is "id" and valueIsBlank is true
+          skip = true
+
+      if options.debug
+        console.log "Skip is true on #{ key }"
+        
+      if skip isnt true
+        memo[ key ] = value 
 
       memo
+
     , (options.defaults || {})
 
     values

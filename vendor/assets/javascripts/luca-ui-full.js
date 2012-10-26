@@ -1859,7 +1859,19 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return $("input", this.el).attr('disabled', false);
     },
     getValue: function() {
-      return this.input.attr('value');
+      var raw;
+      raw = this.input.attr('value');
+      if (_.str.isBlank(raw)) return raw;
+      switch (this.valueType) {
+        case "integer":
+          return parseInt(raw);
+        case "string":
+          return "" + raw;
+        case "float":
+          return parseFloat(raw);
+        default:
+          return raw;
+      }
     },
     render: function() {
       return $(this.container).append(this.$el);
@@ -3674,7 +3686,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (!_.isArray(record)) return record;
         hash = {};
         hash[_this.valueField] = record[0];
-        hash[_this.displayField] = record[1];
+        hash[_this.displayField] = record[1] || record[0];
         return hash;
       });
     },
@@ -3769,11 +3781,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var change_handler;
-
-  change_handler = function(e) {
-    return this.trigger("on:change", this, e);
-  };
 
   _.def('Luca.fields.TextField')["extends"]('Luca.core.Field')["with"]({
     events: {
@@ -3784,9 +3791,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     template: 'fields/text_field',
     autoBindEventHandlers: true,
     send_blanks: true,
+    keyEventThrottle: 300,
     initialize: function(options) {
       this.options = options != null ? options : {};
-      Luca.core.Field.prototype.initialize.apply(this, arguments);
+      if (this.enableKeyEvents) this.registerEvent("keyup input", "keyup_handler");
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
@@ -3799,22 +3807,20 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         this.$el.addClass('input-append');
         this.addOn = this.append;
       }
-      if (this.enableKeyEvents) {
-        return this.registerEvent("keydown input", "keydown_handler");
-      }
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
+    },
+    keyup_handler: function(e) {
+      return this.trigger("on:keyup", this, e);
     },
     blur_handler: function(e) {
-      var me, my;
-      return me = my = $(e.currentTarget);
+      return this.trigger("on:blur", this, e);
     },
     focus_handler: function(e) {
-      var me, my;
-      return me = my = $(e.currentTarget);
+      return this.trigger("on:focus", this, e);
     },
-    change_handler: change_handler,
-    keydown_handler: _.throttle((function(e) {
-      return change_handler.apply(this, arguments);
-    }), 300)
+    change_handler: function(e) {
+      return this.trigger("on:change", this, e);
+    }
   });
 
 }).call(this);
@@ -4044,20 +4050,28 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if ((options.silent != null) !== true) return this.syncFormWithModel();
     },
     getValues: function(options) {
-      var values;
+      var values,
+        _this = this;
       if (options == null) options = {};
       if (options.reject_blank == null) options.reject_blank = true;
       if (options.skip_buttons == null) options.skip_buttons = true;
+      if (options.blanks === false) options.reject_blank = true;
       values = _(this.getFields()).inject(function(memo, field) {
-        var key, skip, value;
+        var allowBlankValues, key, skip, value, valueIsBlank;
         value = field.getValue();
         key = field.input_name || field.name;
-        skip = false;
-        if (options.skip_buttons && field.ctype === "button_field") skip = true;
-        if (_.string.isBlank(value)) {
-          if (options.reject_blank && !field.send_blanks) skip = true;
-          if (field.input_name === "id") skip = true;
+        valueIsBlank = !!(_.str.isBlank(value) || _.isUndefined(value));
+        allowBlankValues = !options.reject_blank && !field.send_blanks;
+        if (options.debug) {
+          console.log("" + key + " Options", options, "Value", value, "Value Is Blank?", valueIsBlank, "Allow Blanks?", allowBlankValues);
         }
+        if (options.skip_buttons && field.ctype === "button_field") {
+          skip = true;
+        } else {
+          if (valueIsBlank && allowBlankValues === false) skip = true;
+          if (field.input_name === "id" && valueIsBlank === true) skip = true;
+        }
+        if (options.debug) console.log("Skip is true on " + key);
         if (skip !== true) memo[key] = value;
         return memo;
       }, options.defaults || {});

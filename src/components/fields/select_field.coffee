@@ -50,12 +50,12 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
   parseData: ()->
     @collection.data = _( @collection.data ).map (record)=>
       return record if not _.isArray( record )
+
       hash = {}
       hash[ @valueField ] = record[0]
-      hash[ @displayField ] = record[1]
+      hash[ @displayField ] = record[1] || record[0]
 
       hash
-
 
   afterRender: ()->
     @input = $('select', @el)
