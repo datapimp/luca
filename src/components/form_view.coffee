@@ -115,9 +115,9 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     return fields unless attr and value
     # if an optional attribute and value pair is passed
     # then you can limit the array of fields even further
-    _(fields).select (field)->
+    fields = _(fields).select (field)->
       property = field[ attr ]
-      property? and value is (if _.isFunction(property) then property() else property)
+      property? value is (if _.isFunction(property) then property() else property)
 
     fields
 

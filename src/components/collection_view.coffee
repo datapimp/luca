@@ -1,4 +1,12 @@
-make = Luca.View::make
+# Public: The CollectionView renders a collection of models into a list of items.
+# 
+# Examples
+#
+#   _.def('App.ListView').extends('Luca.components.CollectionView').with
+#     collection: new App.SampleCollection()
+#     itemTemplate: "list_view_item"
+#     loadMask: true
+#
 
 _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   tagName: "div"
@@ -100,3 +108,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     @refresh()
     @$attach() if @$el.parent().length > 0 and @container?
     @
+
+# Private Helpers
+
+make = Luca.View::make

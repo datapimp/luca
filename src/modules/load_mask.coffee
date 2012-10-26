@@ -11,8 +11,8 @@ Luca.modules.LoadMaskable =
           @$('.load-mask').hide()
       .until("after:render")
 
-      @on "enable:loadmask", @applyLoadMask
-      @on "disable:loadmask", @applyLoadMask
+      @on (@loadmaskEnableEvent || "enable:loadmask"), @applyLoadMask
+      @on (@loadmaskDisableEvent || "disable:loadmask"), @applyLoadMask
 
   loadMaskTarget: ()->
     if @loadMaskEl? then @$(@loadMaskEl) else @$bodyEl()
