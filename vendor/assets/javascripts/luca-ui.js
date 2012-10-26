@@ -3438,20 +3438,20 @@
     events: {
       "change input": "change_handler"
     },
-    change_handler: function(e) {
-      var me, my;
-      me = my = $(e.currentTarget);
-      this.trigger("on:change", this, e);
-      if (me.checked === true) {
-        return this.trigger("checked");
-      } else {
-        return this.trigger("unchecked");
-      }
-    },
     className: 'luca-ui-checkbox-field luca-ui-field',
     template: 'fields/checkbox_field',
     hooks: ["checked", "unchecked"],
     send_blanks: true,
+    change_handler: function(e) {
+      var me, my;
+      me = my = $(e.target);
+      if (me.is(":checked")) {
+        this.trigger("checked");
+      } else {
+        this.trigger("unchecked");
+      }
+      return this.trigger("on:change", this, e, me.is(":checked"));
+    },
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
@@ -3468,7 +3468,7 @@
       return this.input.attr('checked', checked);
     },
     getValue: function() {
-      return this.input.attr('checked') === true;
+      return this.input.is(":checked");
     }
   });
 
@@ -3804,6 +3804,7 @@
     toolbar: true,
     legend: "",
     bodyClassName: "form-view-body",
+    version: "0.9.33333333",
     initialize: function(options) {
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.enableBootstrap;
@@ -3869,17 +3870,22 @@
       return _(this.getFields()).map(iterator);
     },
     getField: function(name) {
-      return _(this.getFields('name', name)).first();
+      var passOne;
+      passOne = _(this.getFields('name', name)).first();
+      if (passOne != null) return passOne;
+      return _(this.getFields('input_name', name)).first();
     },
     getFields: function(attr, value) {
       var fields;
       fields = this.selectByAttribute("isField", true, true);
-      if (!(attr && value)) return fields;
-      fields = _(fields).select(function(field) {
-        var property;
-        property = field[attr];
-        return typeof property === "function" ? property(value === (_.isFunction(property) ? property() : property)) : void 0;
-      });
+      if ((attr != null) && (value != null)) {
+        fields = _(fields).select(function(field) {
+          var property;
+          property = field[attr];
+          if (_.isFunction(property)) property = property.call(field);
+          return property === value;
+        });
+      }
       return fields;
     },
     loadModel: function(current_model) {
@@ -3935,10 +3941,11 @@
       if ((options.silent != null) !== true) return this.syncFormWithModel();
     },
     getValues: function(options) {
+      var values;
       if (options == null) options = {};
       if (options.reject_blank == null) options.reject_blank = true;
       if (options.skip_buttons == null) options.skip_buttons = true;
-      return _(this.getFields()).inject(function(memo, field) {
+      values = _(this.getFields()).inject(function(memo, field) {
         var key, skip, value;
         value = field.getValue();
         key = field.input_name || field.name;
@@ -3950,7 +3957,8 @@
         }
         if (skip !== true) memo[key] = value;
         return memo;
-      }, {});
+      }, options.defaults || {});
+      return values;
     },
     submit_success_handler: function(model, response, xhr) {
       this.trigger("after:submit", this, model, response);

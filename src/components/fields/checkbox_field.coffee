@@ -3,23 +3,20 @@ _.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
   events:
     "change input" : "change_handler"
 
+  className: 'luca-ui-checkbox-field luca-ui-field'
+  template: 'fields/checkbox_field'
+  hooks: ["checked","unchecked"]
+  send_blanks: true
+
   change_handler: (e)->
-    me = my = $(e.currentTarget)
+    me = my = $(e.target)
 
-    @trigger "on:change", @, e
-
-    if me.checked is true
+    if me.is(":checked")
       @trigger "checked"
     else
       @trigger "unchecked"
 
-  className: 'luca-ui-checkbox-field luca-ui-field'
-
-  template: 'fields/checkbox_field'
-
-  hooks: ["checked","unchecked"]
-
-  send_blanks: true
+    @trigger "on:change", @, e, me.is(":checked")
 
   initialize: (@options={})->
     _.extend @, @options
@@ -37,4 +34,4 @@ _.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
     @input.attr('checked', checked)
 
   getValue:()->
-    @input.attr('checked') is true
+    @input.is(":checked")

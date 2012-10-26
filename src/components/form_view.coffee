@@ -47,6 +47,8 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   bodyClassName: "form-view-body"
 
+  version: "0.9.33333333"
+
   initialize: (@options={})->
     @loadMask = Luca.enableBootstrap unless @loadMask?
 
@@ -105,19 +107,19 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     _( @getFields() ).map( iterator )
 
   getField: (name)->
-    _( @getFields('name', name) ).first()
+    passOne = _( @getFields('name', name) ).first()
+    return passOne if passOne?
+
+    _( @getFields('input_name', name) ).first() 
 
   getFields: (attr,value)->
-    # do a deep search of all of the nested components
-    # to find the fields
     fields = @selectByAttribute("isField", true, true)
 
-    return fields unless attr and value
-    # if an optional attribute and value pair is passed
-    # then you can limit the array of fields even further
-    fields = _(fields).select (field)->
-      property = field[ attr ]
-      property? value is (if _.isFunction(property) then property() else property)
+    if attr? and value?
+      fields = _(fields).select (field)->
+        property  = field[ attr ]
+        property  = property.call(field) if _.isFunction(property)
+        property is value
 
     fields
 
@@ -176,7 +178,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     options.reject_blank = true unless options.reject_blank?
     options.skip_buttons = true unless options.skip_buttons?
 
-    _( @getFields() ).inject (memo,field)->
+    values = _( @getFields() ).inject (memo,field)->
       value = field.getValue()
       key = field.input_name || field.name
 
@@ -195,7 +197,9 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
       memo[ key ] = value unless skip is true
 
       memo
-    , {}
+    , (options.defaults || {})
+
+    values
 
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
@@ -253,4 +257,3 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   errorMessage: (message)->
     @$('.alert.alert-error').remove()
     @flash Luca.template("components/form_alert", className:"alert alert-error", message: message)
-
