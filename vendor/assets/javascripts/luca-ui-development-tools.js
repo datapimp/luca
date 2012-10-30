@@ -18295,7 +18295,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
 }).call(this);
 (function() {
-  var codeMirrorOptions;
+  var codeMirrorOptions, _base;
 
   codeMirrorOptions = {
     readOnly: true,
@@ -18320,12 +18320,11 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     components: [
       {
         ctype: "code_mirror_field",
+        additionalClassNames: "clearfix",
         name: "code_output",
         readOnly: true,
         lineNumbers: false,
         mode: "javascript",
-        height: "621px",
-        maxHeight: "621px",
         lineWrapping: true,
         gutter: false
       }, {
@@ -18358,9 +18357,16 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         }
       }
     ],
+    afterRender: function() {
+      this.$container().modal({
+        backdrop: false
+      });
+      return this.$container.css;
+    },
     show: function(options) {
       if (options == null) options = {};
-      return this.$el.addClass('modal').modal(options);
+      this.$container().modal('show');
+      return this;
     },
     getContext: function() {
       return window;
@@ -18458,6 +18464,26 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       });
     }
   });
+
+  (_base = Luca.util).launchers || (_base.launchers = {});
+
+  Luca.util.launchers.developmentConsole = function(name) {
+    var _this = this;
+    if (name == null) name = "luca-development-console";
+    this._lucaDevConsole = Luca(name, function() {
+      var console;
+      _this.$el.append(Backbone.View.prototype.make("div", {
+        id: "" + name + "-wrapper",
+        "class": "modal fade"
+      }));
+      console = new Luca.tools.DevelopmentConsole({
+        name: name,
+        container: "#" + name + "-wrapper"
+      });
+      return console.render();
+    });
+    return this._lucaDevConsole.show();
+  };
 
 }).call(this);
 (function() {

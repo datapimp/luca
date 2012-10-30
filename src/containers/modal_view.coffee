@@ -1,4 +1,4 @@
-_.def("Luca.ModalView").extends("Luca.View").with
+_.def("Luca.ModalView").extends("Luca.core.Container").with
 
   closeOnEscape: true
 

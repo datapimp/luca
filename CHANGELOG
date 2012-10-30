@@ -1,4 +1,4 @@
-0.7.3:
+G0.7.3:
   - Models being loaded by the FormView will now call
     beforeFormLoad methods if they exist on those models
 
@@ -128,4 +128,6 @@
   - fixes checkbox method for checking if underlying component is checked or not
   - adds valueType option to core field object.  allows for typecasting on getValue function
   - change behavior on enableKeyEvents on text field
+  - added Luca.util.launchers for Development Tools usage
+  - added gridRow and gridRowFluid option to luca views to add row classes
 

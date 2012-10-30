@@ -237,7 +237,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     source = if meta and control then @keyEvents.meta_control else source
 
     if keyEvent = source?[keyname]
-      if @[keyEvent]?
+      if @[keyEvent]? and _.isFunction(@[keyEvent])
         @[keyEvent]?.call(@)
       else
         @trigger(keyEvent, e, keyname)

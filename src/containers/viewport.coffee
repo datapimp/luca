@@ -29,6 +29,12 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
     @renderTopNavigation() if @topNav?
     @renderBottomNavigation() if @bottomNav?
 
+  height: ()->
+    @$el.height()
+
+  width: ()->
+    @$el.width()
+
   afterRender: ()->
     Luca.containers.CardView::after?.apply(@, arguments)
 

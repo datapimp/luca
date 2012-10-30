@@ -20,12 +20,11 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
 
   components:[
     ctype: "code_mirror_field"
+    additionalClassNames: "clearfix"
     name: "code_output"
     readOnly: true
     lineNumbers: false
     mode: "javascript"
-    height:"621px"
-    maxHeight:"621px"
     lineWrapping: true
     gutter: false
   ,
@@ -56,8 +55,13 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
       @$('input').focus()
   ]
 
+  afterRender: ()->
+    @$container().modal(backdrop: false)
+    @$container.css
+
   show: (options={})->
-    @$el.addClass('modal').modal(options)
+    @$container().modal('show')
+    @
 
   getContext: ()->
     window
@@ -148,3 +152,17 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
     raw = Luca("code_input").getValue()
     compiled = compile raw, (compiled)->
       dev.evaluateCode(compiled, raw)
+
+Luca.util.launchers ||= {}
+
+Luca.util.launchers.developmentConsole = (name="luca-development-console")->
+  @_lucaDevConsole = Luca name, ()=>
+    @$el.append Backbone.View::make("div", id: "#{ name }-wrapper", class: "modal fade")
+
+    console = new Luca.tools.DevelopmentConsole
+      name: name
+      container: "##{ name }-wrapper"
+
+    console.render()
+
+  @_lucaDevConsole.show()

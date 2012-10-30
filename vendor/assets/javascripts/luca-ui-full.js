@@ -1100,6 +1100,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         }
       }
       if (this.gridSpan) this.additionalClassNames.push("span" + this.gridSpan);
+      if (this.gridRowFluid) this.additionalClassNames.push("row-fluid");
+      if (this.gridRow) this.additionalClassNames.push("row");
       if (((_ref = this.additionalClassNames) != null ? _ref.length : void 0) > 0) {
         _ref2 = this.additionalClassNames;
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
@@ -2566,7 +2568,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
 
-  _.def("Luca.ModalView")["extends"]("Luca.View")["with"]({
+  _.def("Luca.ModalView")["extends"]("Luca.core.Container")["with"]({
     closeOnEscape: true,
     showOnInitialize: false,
     backdrop: false,
@@ -2883,6 +2885,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (this.topNav != null) this.renderTopNavigation();
       if (this.bottomNav != null) return this.renderBottomNavigation();
     },
+    height: function() {
+      return this.$el.height();
+    },
+    width: function() {
+      return this.$el.width();
+    },
     afterRender: function() {
       var _ref;
       if ((_ref = Luca.containers.CardView.prototype.after) != null) {
@@ -3054,7 +3062,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       source = control ? this.keyEvents.control : source;
       source = meta && control ? this.keyEvents.meta_control : source;
       if (keyEvent = source != null ? source[keyname] : void 0) {
-        if (this[keyEvent] != null) {
+        if ((this[keyEvent] != null) && _.isFunction(this[keyEvent])) {
           return (_ref = this[keyEvent]) != null ? _ref.call(this) : void 0;
         } else {
           return this.trigger(keyEvent, e, keyname);
