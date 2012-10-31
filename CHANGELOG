@@ -1,4 +1,4 @@
-G0.7.3:
+0.7.3:
   - Models being loaded by the FormView will now call
     beforeFormLoad methods if they exist on those models
 
@@ -130,4 +130,4 @@ G0.7.3:
   - change behavior on enableKeyEvents on text field
   - added Luca.util.launchers for Development Tools usage
   - added gridRow and gridRowFluid option to luca views to add row classes
-
+  - added gridOffset to add grid offset bootstrap classes

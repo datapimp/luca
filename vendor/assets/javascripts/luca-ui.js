@@ -1000,6 +1000,9 @@
         }
       }
       if (this.gridSpan) this.additionalClassNames.push("span" + this.gridSpan);
+      if (this.gridOffset) {
+        this.additionalClassNames.push("offset" + this.gridOffset);
+      }
       if (this.gridRowFluid) this.additionalClassNames.push("row-fluid");
       if (this.gridRow) this.additionalClassNames.push("row");
       if (((_ref = this.additionalClassNames) != null ? _ref.length : void 0) > 0) {
@@ -2472,6 +2475,7 @@
     closeOnEscape: true,
     showOnInitialize: false,
     backdrop: false,
+    className: "luca-ui-container modal",
     container: function() {
       return $('body');
     },

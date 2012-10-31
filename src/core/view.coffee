@@ -40,6 +40,9 @@ _.def("Luca.View").extends("Backbone.View").with
     if @gridSpan
       @additionalClassNames.push "span#{ @gridSpan }"
 
+    if @gridOffset
+      @additionalClassNames.push "offset#{ @gridOffset }"
+
     if @gridRowFluid
       @additionalClassNames.push "row-fluid"
 
