@@ -65,8 +65,11 @@ Luca.registry.aliases =
   grid:       "grid_view"
   form:       "form_view"
   text:       "text_field"
+  button:     "button_field"
   select:     "select_field"
   card:       "card_view"
+  paged:      "card_view"
+  wizard:     "card_view"
   collection: "collection_view"
 
 # Lookup a component in the Luca component registry

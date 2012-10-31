@@ -866,8 +866,11 @@
     grid: "grid_view",
     form: "form_view",
     text: "text_field",
+    button: "button_field",
     select: "select_field",
     card: "card_view",
+    paged: "card_view",
+    wizard: "card_view",
     collection: "collection_view"
   };
 
@@ -2485,11 +2488,12 @@
       this.$el.addClass('modal');
       if (this.fade === true) this.$el.addClass('fade');
       $('body').append(this.$el);
-      return this.$el.modal({
+      this.$el.modal({
         backdrop: this.backdrop === true,
         keyboard: this.closeOnEscape === true,
         show: this.showOnInitialize === true
       });
+      return this;
     }
   });
 
