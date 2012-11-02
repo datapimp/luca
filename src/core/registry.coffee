@@ -87,8 +87,9 @@ Luca.registry.lookup = (ctype)->
 
   parents = Luca.registry.namespaces()
 
-  fullPath = _( parents ).chain().map((parent)->
-    parent[className]).compact().value()?[0]
+  fullPath = _( parents ).chain().map (parent)->
+    parent[className]
+  .compact().value()?[0]
 
 Luca.registry.instances = ()->
   _( component_cache.cid_index ).values()
