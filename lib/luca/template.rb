@@ -2,7 +2,11 @@ require 'tilt'
 
 module Luca
   class Template < Tilt::Template
-    attr_accessor :namespace
+
+    def self.namespace
+      'JST'
+    end
+
     def self.default_mime_type
       'application/javascript'
     end
@@ -20,7 +24,6 @@ module Luca
     def prepare
       options = @options.merge(:filename => eval_file, :line => line, :escape_attrs => false)
       @engine = ::Haml::Engine.new(data, options)
-      self.namespace = "window.JST"
     end
 
     def evaluate(scope, locals, &block)
@@ -28,15 +31,12 @@ module Luca
       code = EJS.compile(compiled)
       tmpl = scope.logical_path 
 
+      namespace = self.class.namespace 
+
       tmpl.gsub! /^.*\/templates\//, ''
-
+      
       <<-JST
-
-(function() {
-  #{namespace} || (#{namespace} = {});
-  #{namespace}[#{ tmpl.inspect }] = #{indent(code)};
-}).call(this);
-
+(function() {#{namespace} || (#{namespace} = {}); #{namespace}[#{ tmpl.inspect }] = #{indent(code)}; }).call(this);
       JST
     end
 

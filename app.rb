@@ -11,8 +11,16 @@ module AssetHelpers
   end
 end
 
-require "#{ File.expand_path('../', __FILE__) }/lib/sprockets/luca_template.rb"
+require "#{ File.expand_path('../', __FILE__) }/lib/luca/template.rb"
 require "#{ File.expand_path('../', __FILE__) }/lib/luca/code_browser.rb"
+
+module Luca
+  class Template
+    def self.namespace
+      "Luca.templates"
+    end
+  end
+end
 
 class App < Sinatra::Base
   set :root, File.expand_path('../', __FILE__)
@@ -21,7 +29,7 @@ class App < Sinatra::Base
   set :assets_prefix, 'assets'
   set :assets_path, File.join(root, 'public', assets_prefix)
 
-  sprockets.register_engine '.luca', Sprockets::LucaTemplate
+  sprockets.register_engine '.luca', Luca::Template 
 
   configure do
     sprockets.append_path(File.join(root, 'assets', 'stylesheets'))
