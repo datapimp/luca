@@ -18525,10 +18525,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   });
 
 }).call(this);
-(function() {
-  Luca.templates || (Luca.templates = {});
-  Luca.templates["component_tester/help"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<h1>Component Tester</h1>\n<p>This is a tool that enables you to build and test Luca components in an isolated sandbox environment.  The editor is currently enabled with vim keybindings</p>\n<h3>Setup</h3>\n<p>This is where you setup any data requirements needed for the test to work.  This is run every time before the implementation code is ran.</p>\n<h3>Teardown</h3>\n<p>This is where you clean up after the tests.  This will be run every time after the implementation code is ran.</p>\n<h3>Definitions</h3>\n<p>This is where you define the component you will be testing.  This is usually the code you will be shipping once you have completed testing.</p>\n<h3>Implementation</h3>\n<p>This is where you create an instance of the component and specify any of the necessary configuration settings. The component will be rendered into the output panel of the component tester.</p>\n');}return __p.join('');};
-}).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["component_tester/help"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<h1>Component Tester</h1>\n<p>This is a tool that enables you to build and test Luca components in an isolated sandbox environment.  The editor is currently enabled with vim keybindings</p>\n<h3>Setup</h3>\n<p>This is where you setup any data requirements needed for the test to work.  This is run every time before the implementation code is ran.</p>\n<h3>Teardown</h3>\n<p>This is where you clean up after the tests.  This will be run every time after the implementation code is ran.</p>\n<h3>Definitions</h3>\n<p>This is where you define the component you will be testing.  This is usually the code you will be shipping once you have completed testing.</p>\n<h3>Implementation</h3>\n<p>This is where you create an instance of the component and specify any of the necessary configuration settings. The component will be rendered into the output panel of the component tester.</p>\n');}return __p.join('');}; }).call(this);
 (function() {
 
 

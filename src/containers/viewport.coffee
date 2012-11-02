@@ -8,17 +8,30 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
   fluid: false
 
-  wrapperClass: 'row'
 
   initialize: (@options={})->
     _.extend @, @options
 
     if Luca.enableBootstrap is true
-      @wrapperClass = "row-fluid fluid-viewport-wrapper" if @fluid is true
+      @wrapperClass = if @fluid is true then Luca.containers.Viewport.fluidWrapperClass else Luca.containers.Viewport.defaultWrapperClass 
 
     Luca.core.Container::initialize.apply(@, arguments)
 
-    $('html,body').addClass('luca-ui-fullscreen') if @fullscreen
+    @enableFullscreen() if @fullscreen is true
+
+  enableFluid: ()->
+    @$el.parent().addClass( @wrapperClass ) 
+
+  disableFluid: ()->
+    @$el.parent().removeClass( @wrapperClass ) 
+
+  enableFullscreen: ()->
+    $('html,body').addClass('luca-ui-fullscreen')
+    @$el.addClass('fullscreen-enabled')
+
+  disableFullscreen: ()->
+    $('html,body').removeClass('luca-ui-fullscreen')
+    @$el.removeClass('fullscreen-enabled')
 
   beforeRender: ()->
     Luca.containers.CardView::beforeRender?.apply(@, arguments)
@@ -59,3 +72,6 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   renderBottomNavigation: ()->
     # IMPLEMENT
 
+
+Luca.containers.Viewport.defaultWrapperClass  = 'row'
+Luca.containers.Viewport.fluidWrapperClass    = 'row-fluid'

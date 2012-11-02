@@ -243,10 +243,12 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
         @trigger(keyEvent, e, keyname)
 
   setupControllerBindings: ()->
+    app = @
     # any time the main controller card switches we should track
     # the active card on the global state chart
     @getMainController()?.bind "after:card:switch", (previous,current)=>
       @state.set(active_section:current.name)
+      app.trigger "page:change"
 
     # any time the card switches on one of the sub controllers
     # then we should track the active sub section on the global state chart
@@ -254,6 +256,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
       if component.ctype.match(/controller$/)
         component.bind "after:card:switch", (previous,current)=>
           @state.set(active_sub_section:current.name)       
+          app.trigger "sub:page:change"
 
   setupMainController: ()->
     if @useController is true

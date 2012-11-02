@@ -37,17 +37,17 @@ _.def("Luca.View").extends("Backbone.View").with
     if @additionalClassNames
       @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
 
-    #if @gridSpan
-    #  @additionalClassNames.push "span#{ @gridSpan }"
+    if @gridSpan
+      @additionalClassNames.push "span#{ @gridSpan }"
 
-    #if @gridOffset
-    #  @additionalClassNames.push "offset#{ @gridOffset }"
+    if @gridOffset
+      @additionalClassNames.push "offset#{ @gridOffset }"
 
-    #if @gridRowFluid
-    #  @additionalClassNames.push "row-fluid"
+    if @gridRowFluid
+      @additionalClassNames.push "row-fluid"
 
-    #if @gridRow
-    #  @additionalClassNames.push "row"
+    if @gridRow
+      @additionalClassNames.push "row"
 
     if @additionalClassNames?.length > 0
       @$el.addClass( additional ) for additional in @additionalClassNames
