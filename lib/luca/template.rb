@@ -34,7 +34,7 @@ module Luca
       namespace = self.class.namespace 
 
       tmpl.gsub! /^.*\/templates\//, ''
-      
+
       <<-JST
 (function() {#{namespace} || (#{namespace} = {}); #{namespace}[#{ tmpl.inspect }] = #{indent(code)}; }).call(this);
       JST
