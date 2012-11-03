@@ -1,3 +1,3 @@
-//= require ./luca/framework
+//= require ./luca-src/framework
 //= require ./luca-templates
-//= require ./luca
+//= require ./luca-src

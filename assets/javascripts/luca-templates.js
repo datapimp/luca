@@ -1,1 +1,1 @@
-//= require_tree ./luca/templates
+//= require_tree ./luca-src/templates

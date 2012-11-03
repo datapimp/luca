@@ -6,4 +6,4 @@
 #= require ./dependencies/codemirror-css.js
 #= require ./dependencies/codemirror-less.js
 #= require ./dependencies/codemirror-vim.js
-#= require_tree ./luca/tools
+#= require_tree ./luca-src/tools
