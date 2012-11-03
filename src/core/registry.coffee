@@ -12,6 +12,16 @@ component_cache =
 # then we will pick this one when using
 Luca.defaultComponentType = 'view'
 
+Luca.registry.aliases = 
+  grid:       "grid_view"
+  form:       "form_view"
+  text:       "text_field"
+  button:     "button_field"
+  select:     "select_field"
+  card:       "card_view"
+  paged:      "card_view"
+  wizard:     "card_view"
+  collection: "collection_view"
 
 # When you use _.def to define a component, you say
 # which class it extends() from, and with() which enhancements.
@@ -23,7 +33,7 @@ Luca.register = (component, prototypeName, componentType="view")->
     when "model"
       registry.model_classes[ component ] = prototypeName
     when "collection"
-      registry.model_classes[ component ] = prototypeName
+      registry.collection_classes[ component ] = prototypeName
     else
       registry.classes[ component ] = prototypeName
 
@@ -61,16 +71,7 @@ Luca.registry.namespaces = (resolve=true)->
   _( registry.namespaces ).map (namespace)->
     if resolve then Luca.util.resolve( namespace ) else namespace
 
-Luca.registry.aliases = 
-  grid:       "grid_view"
-  form:       "form_view"
-  text:       "text_field"
-  button:     "button_field"
-  select:     "select_field"
-  card:       "card_view"
-  paged:      "card_view"
-  wizard:     "card_view"
-  collection: "collection_view"
+
 
 # Lookup a component in the Luca component registry
 # by it's ctype identifier.  If it doesn't exist,
@@ -87,8 +88,9 @@ Luca.registry.lookup = (ctype)->
 
   parents = Luca.registry.namespaces()
 
-  fullPath = _( parents ).chain().map((parent)->
-    parent[className]).compact().value()?[0]
+  fullPath = _( parents ).chain().map (parent)->
+    parent[className]
+  .compact().value()?[0]
 
 Luca.registry.instances = ()->
   _( component_cache.cid_index ).values()
@@ -113,10 +115,8 @@ Luca.cache = (needle, component)->
 
   # optionally, cache it by tying its name to its cid for easier lookups
   if component?.component_name?
-    Luca.trigger "component:created:#{ component.component_name }", component
     component_cache.name_index[ component.component_name ] = component.cid
   else if component?.name?
-    Luca.trigger "component:created:#{ component.component_name }", component
     component_cache.name_index[ component.name ] = component.cid
 
   return component if component?

@@ -1,2 +1,2 @@
-#= require ./luca-ui
+#= require ./luca
 #= require_tree ./spec

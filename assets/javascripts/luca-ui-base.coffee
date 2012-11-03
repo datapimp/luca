@@ -1,1 +1,1 @@
-#= require ./luca-ui/luca
+#= require ./luca

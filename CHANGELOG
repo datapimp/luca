@@ -137,3 +137,6 @@
   - Luca.Application triggers page:change and sub:page:change events  
   - Luca.Viewport gets enable / disable method for fluid and fullscreen mode
   - Add configurability to fullscreen behavior on viewport
+
+0.9.41
+  - Changed asset pipeline payload so that luca-ui uses the index convention

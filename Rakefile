@@ -74,6 +74,10 @@ namespace :release do
       fh.puts(App.sprockets["luca-ui.css"].to_s)
     end
 
+    File.open( File.join(App.root,'vendor','assets','javascripts','luca-ui-templates.js'), 'w+' ) do |fh|
+      fh.puts(App.sprockets["luca-templates.js"].to_s)
+    end
+
     File.open( File.join(App.root,'vendor','assets','javascripts','luca-ui.js'), 'w+' ) do |fh|
       fh.puts(App.sprockets["luca-ui.js"].to_s)
     end

@@ -102,235 +102,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 !function(a){a(function(){a.support.transition=function(){var a=function(){var a=document.createElement("bootstrap"),b={WebkitTransition:"webkitTransitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd",msTransition:"MSTransitionEnd",transition:"transitionend"},c;for(c in b)if(a.style[c]!==undefined)return b[c]}();return a&&{end:a}}()})}(window.jQuery),!function(a){function c(){var b=this,c=setTimeout(function(){b.$element.off(a.support.transition.end),d.call(b)},500);this.$element.one(a.support.transition.end,function(){clearTimeout(c),d.call(b)})}function d(a){this.$element.hide().trigger("hidden"),e.call(this)}function e(b){var c=this,d=this.$element.hasClass("fade")?"fade":"";if(this.isShown&&this.options.backdrop){var e=a.support.transition&&d;this.$backdrop=a('<div class="modal-backdrop '+d+'" />').appendTo(document.body),this.options.backdrop!="static"&&this.$backdrop.click(a.proxy(this.hide,this)),e&&this.$backdrop[0].offsetWidth,this.$backdrop.addClass("in"),e?this.$backdrop.one(a.support.transition.end,b):b()}else!this.isShown&&this.$backdrop?(this.$backdrop.removeClass("in"),a.support.transition&&this.$element.hasClass("fade")?this.$backdrop.one(a.support.transition.end,a.proxy(f,this)):f.call(this)):b&&b()}function f(){this.$backdrop.remove(),this.$backdrop=null}function g(){var b=this;this.isShown&&this.options.keyboard?a(document).on("keyup.dismiss.modal",function(a){a.which==27&&b.hide()}):this.isShown||a(document).off("keyup.dismiss.modal")}var b=function(b,c){this.options=c,this.$element=a(b).delegate('[data-dismiss="modal"]',"click.dismiss.modal",a.proxy(this.hide,this))};b.prototype={constructor:b,toggle:function(){return this[this.isShown?"hide":"show"]()},show:function(){var b=this,c=a.Event("show");this.$element.trigger(c);if(this.isShown||c.isDefaultPrevented())return;a("body").addClass("modal-open"),this.isShown=!0,g.call(this),e.call(this,function(){var c=a.support.transition&&b.$element.hasClass("fade");b.$element.parent().length||b.$element.appendTo(document.body),b.$element.show(),c&&b.$element[0].offsetWidth,b.$element.addClass("in"),c?b.$element.one(a.support.transition.end,function(){b.$element.trigger("shown")}):b.$element.trigger("shown")})},hide:function(b){b&&b.preventDefault();var e=this;b=a.Event("hide"),this.$element.trigger(b);if(!this.isShown||b.isDefaultPrevented())return;this.isShown=!1,a("body").removeClass("modal-open"),g.call(this),this.$element.removeClass("in"),a.support.transition&&this.$element.hasClass("fade")?c.call(this):d.call(this)}},a.fn.modal=function(c){return this.each(function(){var d=a(this),e=d.data("modal"),f=a.extend({},a.fn.modal.defaults,d.data(),typeof c=="object"&&c);e||d.data("modal",e=new b(this,f)),typeof c=="string"?e[c]():f.show&&e.show()})},a.fn.modal.defaults={backdrop:!0,keyboard:!0,show:!0},a.fn.modal.Constructor=b,a(function(){a("body").on("click.modal.data-api",'[data-toggle="modal"]',function(b){var c=a(this),d,e=a(c.attr("data-target")||(d=c.attr("href"))&&d.replace(/.*(?=#[^\s]+$)/,"")),f=e.data("modal")?"toggle":a.extend({},e.data(),c.data());b.preventDefault(),e.modal(f)})})}(window.jQuery),!function(a){function d(){a(b).parent().removeClass("open")}var b='[data-toggle="dropdown"]',c=function(b){var c=a(b).on("click.dropdown.data-api",this.toggle);a("html").on("click.dropdown.data-api",function(){c.parent().removeClass("open")})};c.prototype={constructor:c,toggle:function(b){var c=a(this),e,f,g;if(c.is(".disabled, :disabled"))return;return f=c.attr("data-target"),f||(f=c.attr("href"),f=f&&f.replace(/.*(?=#[^\s]*$)/,"")),e=a(f),e.length||(e=c.parent()),g=e.hasClass("open"),d(),g||e.toggleClass("open"),!1}},a.fn.dropdown=function(b){return this.each(function(){var d=a(this),e=d.data("dropdown");e||d.data("dropdown",e=new c(this)),typeof b=="string"&&e[b].call(d)})},a.fn.dropdown.Constructor=c,a(function(){a("html").on("click.dropdown.data-api",d),a("body").on("click.dropdown",".dropdown form",function(a){a.stopPropagation()}).on("click.dropdown.data-api",b,c.prototype.toggle)})}(window.jQuery),!function(a){var b=function(a,b){this.init("tooltip",a,b)};b.prototype={constructor:b,init:function(b,c,d){var e,f;this.type=b,this.$element=a(c),this.options=this.getOptions(d),this.enabled=!0,this.options.trigger!="manual"&&(e=this.options.trigger=="hover"?"mouseenter":"focus",f=this.options.trigger=="hover"?"mouseleave":"blur",this.$element.on(e,this.options.selector,a.proxy(this.enter,this)),this.$element.on(f,this.options.selector,a.proxy(this.leave,this))),this.options.selector?this._options=a.extend({},this.options,{trigger:"manual",selector:""}):this.fixTitle()},getOptions:function(b){return b=a.extend({},a.fn[this.type].defaults,b,this.$element.data()),b.delay&&typeof b.delay=="number"&&(b.delay={show:b.delay,hide:b.delay}),b},enter:function(b){var c=a(b.currentTarget)[this.type](this._options).data(this.type);if(!c.options.delay||!c.options.delay.show)return c.show();clearTimeout(this.timeout),c.hoverState="in",this.timeout=setTimeout(function(){c.hoverState=="in"&&c.show()},c.options.delay.show)},leave:function(b){var c=a(b.currentTarget)[this.type](this._options).data(this.type);if(!c.options.delay||!c.options.delay.hide)return c.hide();clearTimeout(this.timeout),c.hoverState="out",this.timeout=setTimeout(function(){c.hoverState=="out"&&c.hide()},c.options.delay.hide)},show:function(){var a,b,c,d,e,f,g;if(this.hasContent()&&this.enabled){a=this.tip(),this.setContent(),this.options.animation&&a.addClass("fade"),f=typeof this.options.placement=="function"?this.options.placement.call(this,a[0],this.$element[0]):this.options.placement,b=/in/.test(f),a.remove().css({top:0,left:0,display:"block"}).appendTo(b?this.$element:document.body),c=this.getPosition(b),d=a[0].offsetWidth,e=a[0].offsetHeight;switch(b?f.split(" ")[1]:f){case"bottom":g={top:c.top+c.height,left:c.left+c.width/2-d/2};break;case"top":g={top:c.top-e,left:c.left+c.width/2-d/2};break;case"left":g={top:c.top+c.height/2-e/2,left:c.left-d};break;case"right":g={top:c.top+c.height/2-e/2,left:c.left+c.width}}a.css(g).addClass(f).addClass("in")}},isHTML:function(a){return typeof a!="string"||a.charAt(0)==="<"&&a.charAt(a.length-1)===">"&&a.length>=3||/^(?:[^<]*<[\w\W]+>[^>]*$)/.exec(a)},setContent:function(){var a=this.tip(),b=this.getTitle();a.find(".tooltip-inner")[this.isHTML(b)?"html":"text"](b),a.removeClass("fade in top bottom left right")},hide:function(){function d(){var b=setTimeout(function(){c.off(a.support.transition.end).remove()},500);c.one(a.support.transition.end,function(){clearTimeout(b),c.remove()})}var b=this,c=this.tip();c.removeClass("in"),a.support.transition&&this.$tip.hasClass("fade")?d():c.remove()},fixTitle:function(){var a=this.$element;(a.attr("title")||typeof a.attr("data-original-title")!="string")&&a.attr("data-original-title",a.attr("title")||"").removeAttr("title")},hasContent:function(){return this.getTitle()},getPosition:function(b){return a.extend({},b?{top:0,left:0}:this.$element.offset(),{width:this.$element[0].offsetWidth,height:this.$element[0].offsetHeight})},getTitle:function(){var a,b=this.$element,c=this.options;return a=b.attr("data-original-title")||(typeof c.title=="function"?c.title.call(b[0]):c.title),a},tip:function(){return this.$tip=this.$tip||a(this.options.template)},validate:function(){this.$element[0].parentNode||(this.hide(),this.$element=null,this.options=null)},enable:function(){this.enabled=!0},disable:function(){this.enabled=!1},toggleEnabled:function(){this.enabled=!this.enabled},toggle:function(){this[this.tip().hasClass("in")?"hide":"show"]()}},a.fn.tooltip=function(c){return this.each(function(){var d=a(this),e=d.data("tooltip"),f=typeof c=="object"&&c;e||d.data("tooltip",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.tooltip.Constructor=b,a.fn.tooltip.defaults={animation:!0,placement:"top",selector:!1,template:'<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',trigger:"hover",title:"",delay:0}}(window.jQuery),!function(a){var b=function(a,b){this.init("popover",a,b)};b.prototype=a.extend({},a.fn.tooltip.Constructor.prototype,{constructor:b,setContent:function(){var a=this.tip(),b=this.getTitle(),c=this.getContent();a.find(".popover-title")[this.isHTML(b)?"html":"text"](b),a.find(".popover-content > *")[this.isHTML(c)?"html":"text"](c),a.removeClass("fade top bottom left right in")},hasContent:function(){return this.getTitle()||this.getContent()},getContent:function(){var a,b=this.$element,c=this.options;return a=b.attr("data-content")||(typeof c.content=="function"?c.content.call(b[0]):c.content),a},tip:function(){return this.$tip||(this.$tip=a(this.options.template)),this.$tip}}),a.fn.popover=function(c){return this.each(function(){var d=a(this),e=d.data("popover"),f=typeof c=="object"&&c;e||d.data("popover",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.popover.Constructor=b,a.fn.popover.defaults=a.extend({},a.fn.tooltip.defaults,{placement:"right",content:"",template:'<div class="popover"><div class="arrow"></div><div class="popover-inner"><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'})}(window.jQuery),!function(a){var b='[data-dismiss="alert"]',c=function(c){a(c).on("click",b,this.close)};c.prototype.close=function(b){function f(){e.trigger("closed").remove()}var c=a(this),d=c.attr("data-target"),e;d||(d=c.attr("href"),d=d&&d.replace(/.*(?=#[^\s]*$)/,"")),e=a(d),b&&b.preventDefault(),e.length||(e=c.hasClass("alert")?c:c.parent()),e.trigger(b=a.Event("close"));if(b.isDefaultPrevented())return;e.removeClass("in"),a.support.transition&&e.hasClass("fade")?e.on(a.support.transition.end,f):f()},a.fn.alert=function(b){return this.each(function(){var d=a(this),e=d.data("alert");e||d.data("alert",e=new c(this)),typeof b=="string"&&e[b].call(d)})},a.fn.alert.Constructor=c,a(function(){a("body").on("click.alert.data-api",b,c.prototype.close)})}(window.jQuery),!function(a){var b=function(b,c){this.$element=a(b),this.options=a.extend({},a.fn.button.defaults,c)};b.prototype.setState=function(a){var b="disabled",c=this.$element,d=c.data(),e=c.is("input")?"val":"html";a+="Text",d.resetText||c.data("resetText",c[e]()),c[e](d[a]||this.options[a]),setTimeout(function(){a=="loadingText"?c.addClass(b).attr(b,b):c.removeClass(b).removeAttr(b)},0)},b.prototype.toggle=function(){var a=this.$element.parent('[data-toggle="buttons-radio"]');a&&a.find(".active").removeClass("active"),this.$element.toggleClass("active")},a.fn.button=function(c){return this.each(function(){var d=a(this),e=d.data("button"),f=typeof c=="object"&&c;e||d.data("button",e=new b(this,f)),c=="toggle"?e.toggle():c&&e.setState(c)})},a.fn.button.defaults={loadingText:"loading..."},a.fn.button.Constructor=b,a(function(){a("body").on("click.button.data-api","[data-toggle^=button]",function(b){var c=a(b.target);c.hasClass("btn")||(c=c.closest(".btn")),c.button("toggle")})})}(window.jQuery),!function(a){var b=function(b,c){this.$element=a(b),this.options=a.extend({},a.fn.collapse.defaults,c),this.options.parent&&(this.$parent=a(this.options.parent)),this.options.toggle&&this.toggle()};b.prototype={constructor:b,dimension:function(){var a=this.$element.hasClass("width");return a?"width":"height"},show:function(){var b,c,d,e;if(this.transitioning)return;b=this.dimension(),c=a.camelCase(["scroll",b].join("-")),d=this.$parent&&this.$parent.find("> .accordion-group > .in");if(d&&d.length){e=d.data("collapse");if(e&&e.transitioning)return;d.collapse("hide"),e||d.data("collapse",null)}this.$element[b](0),this.transition("addClass",a.Event("show"),"shown"),this.$element[b](this.$element[0][c])},hide:function(){var b;if(this.transitioning)return;b=this.dimension(),this.reset(this.$element[b]()),this.transition("removeClass",a.Event("hide"),"hidden"),this.$element[b](0)},reset:function(a){var b=this.dimension();return this.$element.removeClass("collapse")[b](a||"auto")[0].offsetWidth,this.$element[a!==null?"addClass":"removeClass"]("collapse"),this},transition:function(b,c,d){var e=this,f=function(){c.type=="show"&&e.reset(),e.transitioning=0,e.$element.trigger(d)};this.$element.trigger(c);if(c.isDefaultPrevented())return;this.transitioning=1,this.$element[b]("in"),a.support.transition&&this.$element.hasClass("collapse")?this.$element.one(a.support.transition.end,f):f()},toggle:function(){this[this.$element.hasClass("in")?"hide":"show"]()}},a.fn.collapse=function(c){return this.each(function(){var d=a(this),e=d.data("collapse"),f=typeof c=="object"&&c;e||d.data("collapse",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.collapse.defaults={toggle:!0},a.fn.collapse.Constructor=b,a(function(){a("body").on("click.collapse.data-api","[data-toggle=collapse]",function(b){var c=a(this),d,e=c.attr("data-target")||b.preventDefault()||(d=c.attr("href"))&&d.replace(/.*(?=#[^\s]+$)/,""),f=a(e).data("collapse")?"toggle":c.data();a(e).collapse(f)})})}(window.jQuery),!function(a){var b=function(b,c){this.$element=a(b),this.options=a.extend({},a.fn.typeahead.defaults,c),this.matcher=this.options.matcher||this.matcher,this.sorter=this.options.sorter||this.sorter,this.highlighter=this.options.highlighter||this.highlighter,this.updater=this.options.updater||this.updater,this.$menu=a(this.options.menu).appendTo("body"),this.source=this.options.source,this.shown=!1,this.listen()};b.prototype={constructor:b,select:function(){var a=this.$menu.find(".active").attr("data-value");return this.$element.val(this.updater(a)).change(),this.hide()},updater:function(a){return a},show:function(){var b=a.extend({},this.$element.offset(),{height:this.$element[0].offsetHeight});return this.$menu.css({top:b.top+b.height,left:b.left}),this.$menu.show(),this.shown=!0,this},hide:function(){return this.$menu.hide(),this.shown=!1,this},lookup:function(b){var c=this,d,e;return this.query=this.$element.val(),this.query?(d=a.grep(this.source,function(a){return c.matcher(a)}),d=this.sorter(d),d.length?this.render(d.slice(0,this.options.items)).show():this.shown?this.hide():this):this.shown?this.hide():this},matcher:function(a){return~a.toLowerCase().indexOf(this.query.toLowerCase())},sorter:function(a){var b=[],c=[],d=[],e;while(e=a.shift())e.toLowerCase().indexOf(this.query.toLowerCase())?~e.indexOf(this.query)?c.push(e):d.push(e):b.push(e);return b.concat(c,d)},highlighter:function(a){var b=this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&");return a.replace(new RegExp("("+b+")","ig"),function(a,b){return"<strong>"+b+"</strong>"})},render:function(b){var c=this;return b=a(b).map(function(b,d){return b=a(c.options.item).attr("data-value",d),b.find("a").html(c.highlighter(d)),b[0]}),b.first().addClass("active"),this.$menu.html(b),this},next:function(b){var c=this.$menu.find(".active").removeClass("active"),d=c.next();d.length||(d=a(this.$menu.find("li")[0])),d.addClass("active")},prev:function(a){var b=this.$menu.find(".active").removeClass("active"),c=b.prev();c.length||(c=this.$menu.find("li").last()),c.addClass("active")},listen:function(){this.$element.on("blur",a.proxy(this.blur,this)).on("keypress",a.proxy(this.keypress,this)).on("keyup",a.proxy(this.keyup,this)),(a.browser.webkit||a.browser.msie)&&this.$element.on("keydown",a.proxy(this.keypress,this)),this.$menu.on("click",a.proxy(this.click,this)).on("mouseenter","li",a.proxy(this.mouseenter,this))},keyup:function(a){switch(a.keyCode){case 40:case 38:break;case 9:case 13:if(!this.shown)return;this.select();break;case 27:if(!this.shown)return;this.hide();break;default:this.lookup()}a.stopPropagation(),a.preventDefault()},keypress:function(a){if(!this.shown)return;switch(a.keyCode){case 9:case 13:case 27:a.preventDefault();break;case 38:if(a.type!="keydown")break;a.preventDefault(),this.prev();break;case 40:if(a.type!="keydown")break;a.preventDefault(),this.next()}a.stopPropagation()},blur:function(a){var b=this;setTimeout(function(){b.hide()},150)},click:function(a){a.stopPropagation(),a.preventDefault(),this.select()},mouseenter:function(b){this.$menu.find(".active").removeClass("active"),a(b.currentTarget).addClass("active")}},a.fn.typeahead=function(c){return this.each(function(){var d=a(this),e=d.data("typeahead"),f=typeof c=="object"&&c;e||d.data("typeahead",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.typeahead.defaults={source:[],items:8,menu:'<ul class="typeahead dropdown-menu"></ul>',item:'<li><a href="#"></a></li>'},a.fn.typeahead.Constructor=b,a(function(){a("body").on("focus.typeahead.data-api",'[data-provide="typeahead"]',function(b){var c=a(this);if(c.data("typeahead"))return;b.preventDefault(),c.typeahead(c.data())})})}(window.jQuery)
 ;
 (function() {
-  var UnderscoreExtensions,
-    __slice = Array.prototype.slice;
-
-  (window || global).Luca = function() {
-    var args, definition, fallback, inheritsFrom, payload, result;
-    payload = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    if (_.isString(payload) && (result = Luca.cache(payload))) return result;
-    if (_.isString(payload) && (result = Luca.find(payload))) return result;
-    if (_.isObject(payload) && (payload.ctype != null)) {
-      return Luca.util.lazyComponent(payload);
-    }
-    if (_.isObject(payload) && payload.defines && payload["extends"]) {
-      definition = payload.defines;
-      inheritsFrom = payload["extends"];
-    }
-    if (_.isFunction(fallback = _(args).last())) return fallback();
-  };
-
-  _.extend(Luca, {
-    VERSION: "0.9.4",
-    core: {},
-    containers: {},
-    components: {},
-    modules: {},
-    util: {},
-    fields: {},
-    registry: {},
-    options: {}
-  });
-
-  _.extend(Luca, Backbone.Events);
-
-  Luca.autoRegister = true;
-
-  Luca.developmentMode = false;
-
-  Luca.enableGlobalObserver = false;
-
-  Luca.enableBootstrap = true;
-
-  Luca.keys = {
-    ENTER: 13,
-    ESCAPE: 27,
-    KEYLEFT: 37,
-    KEYUP: 38,
-    KEYRIGHT: 39,
-    KEYDOWN: 40,
-    SPACEBAR: 32,
-    FORWARDSLASH: 191
-  };
-
-  Luca.keyMap = _(Luca.keys).inject(function(memo, value, symbol) {
-    memo[value] = symbol.toLowerCase();
-    return memo;
-  }, {});
-
-  Luca.find = function() {
-    return;
-  };
-
-  Luca.supportsEvents = Luca.supportsBackboneEvents = function(obj) {
-    return Luca.isComponent(obj) || (_.isFunction(obj != null ? obj.trigger : void 0) || _.isFunction(obj != null ? obj.bind : void 0));
-  };
-
-  Luca.isComponent = function(obj) {
-    return Luca.isBackboneModel(obj) || Luca.isBackboneView(obj) || Luca.isBackboneCollection(obj);
-  };
-
-  Luca.isComponentPrototype = function(obj) {
-    return Luca.isViewPrototype(obj) || Luca.isModelPrototype(obj) || Luca.isCollectionPrototype(obj);
-  };
-
-  Luca.isBackboneModel = function(obj) {
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    return _.isFunction(obj != null ? obj.set : void 0) && _.isFunction(obj != null ? obj.get : void 0) && _.isObject(obj != null ? obj.attributes : void 0);
-  };
-
-  Luca.isBackboneView = function(obj) {
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    return _.isFunction(obj != null ? obj.render : void 0) && !_.isUndefined(obj != null ? obj.el : void 0);
-  };
-
-  Luca.isBackboneCollection = function(obj) {
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    return _.isFunction(obj != null ? obj.fetch : void 0) && _.isFunction(obj != null ? obj.reset : void 0);
-  };
-
-  Luca.isViewPrototype = function(obj) {
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    return (obj != null) && (obj.prototype != null) && (obj.prototype.make != null) && (obj.prototype.$ != null) && (obj.prototype.render != null);
-  };
-
-  Luca.isModelPrototype = function(obj) {
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    return (obj != null) && (typeof obj.prototype === "function" ? obj.prototype((obj.prototype.save != null) && (obj.prototype.changedAttributes != null)) : void 0);
-  };
-
-  Luca.isCollectionPrototype = function(obj) {
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    return (obj != null) && (obj.prototype != null) && !Luca.isModelPrototype(obj) && (obj.prototype.reset != null) && (obj.prototype.select != null) && (obj.prototype.reject != null);
-  };
-
-  Luca.inheritanceChain = function(obj) {
-    return _(Luca.parentClasses(obj)).map(function(className) {
-      return Luca.util.resolve(className);
-    });
-  };
-
-  Luca.parentClasses = function(obj) {
-    var classes, list, _ref;
-    list = [];
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    list.push(obj.displayName || ((_ref = obj.prototype) != null ? _ref.displayName : void 0) || Luca.parentClass(obj));
-    classes = (function() {
-      var _results;
-      _results = [];
-      while (!!(Luca.parentClass(obj) != null)) {
-        _results.push(obj = Luca.parentClass(obj));
-      }
-      return _results;
-    })();
-    list = list.concat(classes);
-    return _.uniq(list);
-  };
-
-  Luca.parentClass = function(obj) {
-    var list, _base, _ref;
-    list = [];
-    if (_.isString(obj)) obj = Luca.util.resolve(obj);
-    if (Luca.isComponent(obj)) {
-      return obj.displayName;
-    } else if (Luca.isComponentPrototype(obj)) {
-      return typeof (_base = obj.prototype)._superClass === "function" ? (_ref = _base._superClass()) != null ? _ref.displayName : void 0 : void 0;
-    }
-  };
-
-  Luca.template = function(template_name, variables) {
-    var jst, luca, needle, template, _ref;
-    window.JST || (window.JST = {});
-    if (_.isFunction(template_name)) return template_name(variables);
-    luca = (_ref = Luca.templates) != null ? _ref[template_name] : void 0;
-    jst = typeof JST !== "undefined" && JST !== null ? JST[template_name] : void 0;
-    if (!((luca != null) || (jst != null))) {
-      needle = new RegExp("" + template_name + "$");
-      luca = _(Luca.templates).detect(function(fn, template_id) {
-        return needle.exec(template_id);
-      });
-      jst = _(JST).detect(function(fn, template_id) {
-        return needle.exec(template_id);
-      });
-    }
-    if (!(luca || jst)) throw "Could not find template named " + template_name;
-    template = luca || jst;
-    if (variables != null) return template(variables);
-    return template;
-  };
-
-  Luca.available_templates = function(filter) {
-    var available;
-    if (filter == null) filter = "";
-    available = _(Luca.templates).keys();
-    if (filter.length > 0) {
-      return _(available).select(function(tmpl) {
-        return tmpl.match(filter);
-      });
-    } else {
-      return available;
-    }
-  };
-
-  UnderscoreExtensions = {
-    module: function(base, module) {
-      _.extend(base, module);
-      if (base.included && _(base.included).isFunction()) {
-        return base.included.apply(base);
-      }
-    },
-    "delete": function(object, key) {
-      var value;
-      value = object[key];
-      delete object[key];
-      return value;
-    },
-    idle: function(code, delay) {
-      var handle;
-      if (delay == null) delay = 1000;
-      if (window.DISABLE_IDLE) delay = 0;
-      handle = void 0;
-      return function() {
-        if (handle) window.clearTimeout(handle);
-        return handle = window.setTimeout(_.bind(code, this), delay);
-      };
-    },
-    idleShort: function(code, delay) {
-      var handle;
-      if (delay == null) delay = 100;
-      if (window.DISABLE_IDLE) delay = 0;
-      handle = void 0;
-      return function() {
-        if (handle) window.clearTimeout(handle);
-        return handle = window.setTimeout(_.bind(code, this), delay);
-      };
-    },
-    idleMedium: function(code, delay) {
-      var handle;
-      if (delay == null) delay = 2000;
-      if (window.DISABLE_IDLE) delay = 0;
-      handle = void 0;
-      return function() {
-        if (handle) window.clearTimeout(handle);
-        return handle = window.setTimeout(_.bind(code, this), delay);
-      };
-    },
-    idleLong: function(code, delay) {
-      var handle;
-      if (delay == null) delay = 5000;
-      if (window.DISABLE_IDLE) delay = 0;
-      handle = void 0;
-      return function() {
-        if (handle) window.clearTimeout(handle);
-        return handle = window.setTimeout(_.bind(code, this), delay);
-      };
-    }
-  };
-
-  _.mixin(UnderscoreExtensions);
-
-}).call(this);
-(function() {
   var currentNamespace;
 
   Luca.util.resolve = function(accessor, source_object) {
@@ -652,29 +423,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   });
 
 }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <a class=\'btn btn-primary submit-button\'>\n    <i class=\'icon-ok icon-white\'></i>\n    Save Changes\n  </a>\n  <a class=\'btn reset-button cancel-button\'>\n    <i class=\'icon-remove\'></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/collection_loader_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'modal\' id=\'progress-model\' style=\'display: none;\'>\n  <div class=\'progress progress-info progress-striped active\'>\n    <div class=\'bar\' style=\'width: 0%;\'></div>\n  </div>\n  <div class=\'message\'>\n    Initializing...\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', className ,'\'>\n  <a class=\'close\' data-dismiss=\'alert\' href=\'#\'>x</a>\n  ', message ,'\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'></div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view_empty_text"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'empty-text-wrapper\'>\n  <p>\n    ', text ,'\n  </p>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'load-mask\'>\n  <div class=\'progress progress-striped active\'>\n    <div class=\'bar\' style=\'width:1%\'></div>\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'navbar-inner\'>\n  <div class=\'luca-ui-navbar-body container\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/basic"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', classes ,'\' id=\'', id ,'\' style=\'', style ,'\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-selector-container\' id=\'', cid ,'-tab-selector\'>\n  <ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-nav\'>\n    '); for(var i = 0; i < components.length; i++ ) { __p.push('\n    '); var component = components[i];__p.push('\n    <li class=\'tab-selector\' data-target=\'', i ,'\'>\n      <a data-target=\'', i ,'\'>\n        ', component.title ,'\n      </a>\n    </li>\n    '); } __p.push('\n  </ul>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav ', navClass ,'\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/toolbar_wrapper"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-toolbar-wrapper\' id=\'', id ,'\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'btn ', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class=\'btn ', input_class ,'\'>\n  '); if(icon_class.length) { __p.push('\n  <i class=\'', icon_class ,'\'></i>\n  '); } __p.push('\n  ', input_value ,'\n</a>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'control-group\'>\n  <label for=\'', input_id ,'\'>\n    ', label ,'\n  </label>\n  <div class=\'controls\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array_item"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  <input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'checkbox\' value=\'', value ,'\' />\n  ', label ,'\n</label>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n  <input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n</label>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'file\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/hidden_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'hidden\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<div class=\'controls\'>\n  <select id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></select>\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></textarea>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); } __p.push('\n<div class=\'controls\'>\n  '); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class=\'add-on\'>\n    ', addOn ,'\n  </span>\n  '); } __p.push('\n  <input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/contents"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<p>Sample Contents</p>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/welcome"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('welcome.luca\n');}return __p.join('');}; }).call(this);
 (function() {
 
   Luca.modules.Deferrable = {
@@ -853,6 +601,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   Luca.defaultComponentType = 'view';
 
+  Luca.registry.aliases = {
+    grid: "grid_view",
+    form: "form_view",
+    text: "text_field",
+    button: "button_field",
+    select: "select_field",
+    card: "card_view",
+    paged: "card_view",
+    wizard: "card_view",
+    collection: "collection_view"
+  };
+
   Luca.register = function(component, prototypeName, componentType) {
     if (componentType == null) componentType = "view";
     Luca.trigger("component:registered", component, prototypeName);
@@ -860,7 +620,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       case "model":
         return registry.model_classes[component] = prototypeName;
       case "collection":
-        return registry.model_classes[component] = prototypeName;
+        return registry.collection_classes[component] = prototypeName;
       default:
         return registry.classes[component] = prototypeName;
     }
@@ -894,18 +654,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         return namespace;
       }
     });
-  };
-
-  Luca.registry.aliases = {
-    grid: "grid_view",
-    form: "form_view",
-    text: "text_field",
-    button: "button_field",
-    select: "select_field",
-    card: "card_view",
-    paged: "card_view",
-    wizard: "card_view",
-    collection: "collection_view"
   };
 
   Luca.registry.lookup = function(ctype) {
@@ -952,10 +700,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     if (component != null) component_cache.cid_index[needle] = component;
     component = component_cache.cid_index[needle];
     if ((component != null ? component.component_name : void 0) != null) {
-      Luca.trigger("component:created:" + component.component_name, component);
       component_cache.name_index[component.component_name] = component.cid;
     } else if ((component != null ? component.name : void 0) != null) {
-      Luca.trigger("component:created:" + component.component_name, component);
       component_cache.name_index[component.name] = component.cid;
     }
     if (component != null) return component;
@@ -1006,28 +752,25 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, customizeRender, originalExtend, registerApplicationEvents, registerCollectionEvents;
+  var bindAllEventHandlers, customizeRender, originalExtend, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
     include: ['Luca.Events'],
     additionalClassNames: [],
-    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
+    hooks: ["before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var additional, module, template, templateVars, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4;
+      var additional, module, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4,
+        _this = this;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
-      if (this.name != null) this.cid = _.uniqueId(this.name);
-      templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
-      if (template = this.bodyTemplate) {
-        this.$el.empty();
-        Luca.View.prototype.$html.call(this, Luca.template(template, templateVars));
-      }
-      Luca.cache(this.cid, this);
-      this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
       if (this.autoBindEventHandlers === true || this.bindAllEvents === true) {
         bindAllEventHandlers.call(this);
       }
+      setupBodyTemplate.call(this);
+      if (this.name != null) this.cid = _.uniqueId(this.name);
+      Luca.cache(this.cid, this);
+      this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
       if (this.additionalClassNames) {
         if (_.isString(this.additionalClassNames)) {
           this.additionalClassNames = this.additionalClassNames.split(" ");
@@ -1053,8 +796,14 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (this.stateful === true && !(this.state != null)) {
         this.state = new Backbone.Model(this.defaultState || {});
         if (this.set == null) {
-          this.set = _.bind(this, this.state.set);
-          this.get = _.bind(this, this.state.get);
+          this.set = function() {
+            return _this.state.set.apply(_this.state, argumuments);
+          };
+        }
+        if (this.get == null) {
+          this.get = function() {
+            return _this.state.get.apply(_this.state, argumuments);
+          };
         }
       }
       if (((_ref3 = this.mixins) != null ? _ref3.length : void 0) > 0) {
@@ -1249,6 +998,15 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
     }
     return _results;
+  };
+
+  setupBodyTemplate = function() {
+    var template, templateVars;
+    templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
+    if (template = this.bodyTemplate) {
+      this.$el.empty();
+      return Luca.View.prototype.$html.call(this, Luca.template(template, templateVars));
+    }
   };
 
   Luca.View.extend = function(definition) {
@@ -2814,10 +2572,20 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (this.fullscreen === true) return this.enableFullscreen();
     },
     enableFluid: function() {
-      return this.$el.parent().addClass(this.wrapperClass);
+      return this.enableWrapper();
     },
     disableFluid: function() {
-      return this.$el.parent().removeClass(this.wrapperClass);
+      return this.disableWrapper();
+    },
+    enableWrapper: function() {
+      if (this.wrapperClass != null) {
+        return this.$el.parent().addClass(this.wrapperClass);
+      }
+    },
+    disableWrapper: function() {
+      if (this.wrapperClass != null) {
+        return this.$el.parent().removeClass(this.wrapperClass);
+      }
     },
     enableFullscreen: function() {
       $('html,body').addClass('luca-ui-fullscreen');
@@ -2871,16 +2639,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   Luca.containers.Viewport.defaultWrapperClass = 'row';
 
   Luca.containers.Viewport.fluidWrapperClass = 'row-fluid';
-
-}).call(this);
-(function() {
-
-
-
-}).call(this);
-(function() {
-
-
 
 }).call(this);
 (function() {

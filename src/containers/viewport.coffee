@@ -19,11 +19,17 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
 
     @enableFullscreen() if @fullscreen is true
 
-  enableFluid: ()->
-    @$el.parent().addClass( @wrapperClass ) 
+  enableFluid: ()-> @enableWrapper()
 
-  disableFluid: ()->
-    @$el.parent().removeClass( @wrapperClass ) 
+  disableFluid: ()-> @disableWrapper()
+   
+  enableWrapper: ()->
+    if @wrapperClass?
+      @$el.parent().addClass( @wrapperClass ) 
+
+  disableWrapper: ()->
+    if @wrapperClass?
+      @$el.parent().removeClass( @wrapperClass ) 
 
   enableFullscreen: ()->
     $('html,body').addClass('luca-ui-fullscreen')

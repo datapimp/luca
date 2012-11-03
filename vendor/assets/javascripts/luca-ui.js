@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.4",
+    VERSION: "0.9.41",
     core: {},
     containers: {},
     components: {},
@@ -227,6 +227,29 @@
   _.mixin(UnderscoreExtensions);
 
 }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <a class=\'btn btn-primary submit-button\'>\n    <i class=\'icon-ok icon-white\'></i>\n    Save Changes\n  </a>\n  <a class=\'btn reset-button cancel-button\'>\n    <i class=\'icon-remove\'></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/collection_loader_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'modal\' id=\'progress-model\' style=\'display: none;\'>\n  <div class=\'progress progress-info progress-striped active\'>\n    <div class=\'bar\' style=\'width: 0%;\'></div>\n  </div>\n  <div class=\'message\'>\n    Initializing...\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', className ,'\'>\n  <a class=\'close\' data-dismiss=\'alert\' href=\'#\'>x</a>\n  ', message ,'\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'></div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view_empty_text"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'empty-text-wrapper\'>\n  <p>\n    ', text ,'\n  </p>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'load-mask\'>\n  <div class=\'progress progress-striped active\'>\n    <div class=\'bar\' style=\'width:1%\'></div>\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'navbar-inner\'>\n  <div class=\'luca-ui-navbar-body container\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/basic"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', classes ,'\' id=\'', id ,'\' style=\'', style ,'\'></div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-selector-container\' id=\'', cid ,'-tab-selector\'>\n  <ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-nav\'>\n    '); for(var i = 0; i < components.length; i++ ) { __p.push('\n    '); var component = components[i];__p.push('\n    <li class=\'tab-selector\' data-target=\'', i ,'\'>\n      <a data-target=\'', i ,'\'>\n        ', component.title ,'\n      </a>\n    </li>\n    '); } __p.push('\n  </ul>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav ', navClass ,'\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/toolbar_wrapper"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-toolbar-wrapper\' id=\'', id ,'\'></div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'btn ', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class=\'btn ', input_class ,'\'>\n  '); if(icon_class.length) { __p.push('\n  <i class=\'', icon_class ,'\'></i>\n  '); } __p.push('\n  ', input_value ,'\n</a>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'control-group\'>\n  <label for=\'', input_id ,'\'>\n    ', label ,'\n  </label>\n  <div class=\'controls\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array_item"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  <input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'checkbox\' value=\'', value ,'\' />\n  ', label ,'\n</label>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n  <input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n</label>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'file\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/hidden_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'hidden\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<div class=\'controls\'>\n  <select id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></select>\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></textarea>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); } __p.push('\n<div class=\'controls\'>\n  '); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class=\'add-on\'>\n    ', addOn ,'\n  </span>\n  '); } __p.push('\n  <input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/contents"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<p>Sample Contents</p>\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/welcome"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('welcome.luca\n');}return __p.join('');}; }).call(this);
 (function() {
   var currentNamespace;
 
@@ -549,29 +572,6 @@
   });
 
 }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <a class=\'btn btn-primary submit-button\'>\n    <i class=\'icon-ok icon-white\'></i>\n    Save Changes\n  </a>\n  <a class=\'btn reset-button cancel-button\'>\n    <i class=\'icon-remove\'></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/collection_loader_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'modal\' id=\'progress-model\' style=\'display: none;\'>\n  <div class=\'progress progress-info progress-striped active\'>\n    <div class=\'bar\' style=\'width: 0%;\'></div>\n  </div>\n  <div class=\'message\'>\n    Initializing...\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', className ,'\'>\n  <a class=\'close\' data-dismiss=\'alert\' href=\'#\'>x</a>\n  ', message ,'\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'></div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view_empty_text"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'empty-text-wrapper\'>\n  <p>\n    ', text ,'\n  </p>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'load-mask\'>\n  <div class=\'progress progress-striped active\'>\n    <div class=\'bar\' style=\'width:1%\'></div>\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'navbar-inner\'>\n  <div class=\'luca-ui-navbar-body container\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/basic"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', classes ,'\' id=\'', id ,'\' style=\'', style ,'\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-selector-container\' id=\'', cid ,'-tab-selector\'>\n  <ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-nav\'>\n    '); for(var i = 0; i < components.length; i++ ) { __p.push('\n    '); var component = components[i];__p.push('\n    <li class=\'tab-selector\' data-target=\'', i ,'\'>\n      <a data-target=\'', i ,'\'>\n        ', component.title ,'\n      </a>\n    </li>\n    '); } __p.push('\n  </ul>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav ', navClass ,'\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/toolbar_wrapper"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-toolbar-wrapper\' id=\'', id ,'\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'btn ', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class=\'btn ', input_class ,'\'>\n  '); if(icon_class.length) { __p.push('\n  <i class=\'', icon_class ,'\'></i>\n  '); } __p.push('\n  ', input_value ,'\n</a>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'control-group\'>\n  <label for=\'', input_id ,'\'>\n    ', label ,'\n  </label>\n  <div class=\'controls\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array_item"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  <input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'checkbox\' value=\'', value ,'\' />\n  ', label ,'\n</label>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n  <input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n</label>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'file\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/hidden_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'hidden\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<div class=\'controls\'>\n  <select id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></select>\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></textarea>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); } __p.push('\n<div class=\'controls\'>\n  '); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class=\'add-on\'>\n    ', addOn ,'\n  </span>\n  '); } __p.push('\n  <input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/contents"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<p>Sample Contents</p>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/welcome"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('welcome.luca\n');}return __p.join('');}; }).call(this);
 (function() {
 
   Luca.modules.Deferrable = {
@@ -750,6 +750,18 @@
 
   Luca.defaultComponentType = 'view';
 
+  Luca.registry.aliases = {
+    grid: "grid_view",
+    form: "form_view",
+    text: "text_field",
+    button: "button_field",
+    select: "select_field",
+    card: "card_view",
+    paged: "card_view",
+    wizard: "card_view",
+    collection: "collection_view"
+  };
+
   Luca.register = function(component, prototypeName, componentType) {
     if (componentType == null) componentType = "view";
     Luca.trigger("component:registered", component, prototypeName);
@@ -757,7 +769,7 @@
       case "model":
         return registry.model_classes[component] = prototypeName;
       case "collection":
-        return registry.model_classes[component] = prototypeName;
+        return registry.collection_classes[component] = prototypeName;
       default:
         return registry.classes[component] = prototypeName;
     }
@@ -791,18 +803,6 @@
         return namespace;
       }
     });
-  };
-
-  Luca.registry.aliases = {
-    grid: "grid_view",
-    form: "form_view",
-    text: "text_field",
-    button: "button_field",
-    select: "select_field",
-    card: "card_view",
-    paged: "card_view",
-    wizard: "card_view",
-    collection: "collection_view"
   };
 
   Luca.registry.lookup = function(ctype) {
@@ -849,10 +849,8 @@
     if (component != null) component_cache.cid_index[needle] = component;
     component = component_cache.cid_index[needle];
     if ((component != null ? component.component_name : void 0) != null) {
-      Luca.trigger("component:created:" + component.component_name, component);
       component_cache.name_index[component.component_name] = component.cid;
     } else if ((component != null ? component.name : void 0) != null) {
-      Luca.trigger("component:created:" + component.component_name, component);
       component_cache.name_index[component.name] = component.cid;
     }
     if (component != null) return component;
@@ -903,28 +901,25 @@
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, customizeRender, originalExtend, registerApplicationEvents, registerCollectionEvents;
+  var bindAllEventHandlers, customizeRender, originalExtend, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
     include: ['Luca.Events'],
     additionalClassNames: [],
-    hooks: ["after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
+    hooks: ["before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var additional, module, template, templateVars, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4;
+      var additional, module, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4,
+        _this = this;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
-      if (this.name != null) this.cid = _.uniqueId(this.name);
-      templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
-      if (template = this.bodyTemplate) {
-        this.$el.empty();
-        Luca.View.prototype.$html.call(this, Luca.template(template, templateVars));
-      }
-      Luca.cache(this.cid, this);
-      this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
       if (this.autoBindEventHandlers === true || this.bindAllEvents === true) {
         bindAllEventHandlers.call(this);
       }
+      setupBodyTemplate.call(this);
+      if (this.name != null) this.cid = _.uniqueId(this.name);
+      Luca.cache(this.cid, this);
+      this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
       if (this.additionalClassNames) {
         if (_.isString(this.additionalClassNames)) {
           this.additionalClassNames = this.additionalClassNames.split(" ");
@@ -950,8 +945,14 @@
       if (this.stateful === true && !(this.state != null)) {
         this.state = new Backbone.Model(this.defaultState || {});
         if (this.set == null) {
-          this.set = _.bind(this, this.state.set);
-          this.get = _.bind(this, this.state.get);
+          this.set = function() {
+            return _this.state.set.apply(_this.state, argumuments);
+          };
+        }
+        if (this.get == null) {
+          this.get = function() {
+            return _this.state.get.apply(_this.state, argumuments);
+          };
         }
       }
       if (((_ref3 = this.mixins) != null ? _ref3.length : void 0) > 0) {
@@ -1146,6 +1147,15 @@
       }
     }
     return _results;
+  };
+
+  setupBodyTemplate = function() {
+    var template, templateVars;
+    templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
+    if (template = this.bodyTemplate) {
+      this.$el.empty();
+      return Luca.View.prototype.$html.call(this, Luca.template(template, templateVars));
+    }
   };
 
   Luca.View.extend = function(definition) {
@@ -2711,10 +2721,20 @@
       if (this.fullscreen === true) return this.enableFullscreen();
     },
     enableFluid: function() {
-      return this.$el.parent().addClass(this.wrapperClass);
+      return this.enableWrapper();
     },
     disableFluid: function() {
-      return this.$el.parent().removeClass(this.wrapperClass);
+      return this.disableWrapper();
+    },
+    enableWrapper: function() {
+      if (this.wrapperClass != null) {
+        return this.$el.parent().addClass(this.wrapperClass);
+      }
+    },
+    disableWrapper: function() {
+      if (this.wrapperClass != null) {
+        return this.$el.parent().removeClass(this.wrapperClass);
+      }
     },
     enableFullscreen: function() {
       $('html,body').addClass('luca-ui-fullscreen');
@@ -2768,16 +2788,6 @@
   Luca.containers.Viewport.defaultWrapperClass = 'row';
 
   Luca.containers.Viewport.fluidWrapperClass = 'row-fluid';
-
-}).call(this);
-(function() {
-
-
-
-}).call(this);
-(function() {
-
-
 
 }).call(this);
 (function() {
@@ -4572,3 +4582,6 @@
 
 
 }).call(this);
+
+
+

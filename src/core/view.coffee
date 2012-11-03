@@ -4,6 +4,7 @@ _.def("Luca.View").extends("Backbone.View").with
   additionalClassNames:[]
 
   hooks:[
+    "before:initialize"
     "after:initialize"
     "before:render"
     "after:render"
@@ -17,22 +18,18 @@ _.def("Luca.View").extends("Backbone.View").with
 
     _.extend @, @options
 
+    bindAllEventHandlers.call(@) if @autoBindEventHandlers is true or @bindAllEvents is true
+
+    setupBodyTemplate.call(@)
+
     @cid = _.uniqueId(@name) if @name?
 
-    templateVars = if @bodyTemplateVars
-      @bodyTemplateVars.call(@)
-    else
-      @
 
-    if template = @bodyTemplate
-      @$el.empty()
-      Luca.View::$html.call(@, Luca.template(template, templateVars ) )
 
     Luca.cache( @cid, @ )
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 
-    bindAllEventHandlers.call(@) if @autoBindEventHandlers is true or @bindAllEvents is true
 
     if @additionalClassNames
       @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
@@ -62,8 +59,10 @@ _.def("Luca.View").extends("Backbone.View").with
     if @stateful is true and not @state?
       @state = new Backbone.Model(@defaultState || {})
       unless @set?
-        @set = _.bind @, @state.set
-        @get = _.bind @, @state.get
+        @set = ()=> @state.set.apply(@state, argumuments)
+
+      unless @get?
+        @get = ()=> @state.get.apply(@state, argumuments)
 
     if @mixins?.length > 0
       for module in @mixins
@@ -246,7 +245,16 @@ registerCollectionEvents = ()->
       console.log "Error Binding To Collection in registerCollectionEvents", @
       throw e
 
+setupBodyTemplate = ()->
+  templateVars = if @bodyTemplateVars
+    @bodyTemplateVars.call(@)
+  else
+    @
 
+  if template = @bodyTemplate
+    @$el.empty()
+    Luca.View::$html.call(@, Luca.template(template, templateVars ) )
+      
 Luca.View.extend = (definition)->
   definition = customizeRender( definition )
 
