@@ -595,6 +595,13 @@
 }).call(this);
 (function() {
 
+  Luca.modules.GridLayout = {
+    _included: function(view, module) {}
+  };
+
+}).call(this);
+(function() {
+
   Luca.modules.LoadMaskable = {
     _included: function(self, module) {
       var _this = this;

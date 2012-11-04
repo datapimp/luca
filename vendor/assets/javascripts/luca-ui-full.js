@@ -698,6 +698,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
 
+  Luca.modules.GridLayout = {
+    _included: function(view, module) {}
+  };
+
+}).call(this);
+(function() {
+
   Luca.modules.LoadMaskable = {
     _included: function(self, module) {
       var _this = this;
