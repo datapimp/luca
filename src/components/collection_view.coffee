@@ -55,14 +55,18 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
       @collection.bind "add", @refresh
       @collection.bind "remove", @refresh
+
+      if @observeChanges is true
+        setupChangeObserver.call(@)
+
     else
       throw "Collection Views must have a valid backbone collection"
 
     if @collection.length > 0
       @refresh()
 
-  attributesForItem: (item)->
-    _.extend {}, class: @itemClassName, "data-index": item.index
+  attributesForItem: (item, model)->
+    _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
 
   contentForItem: (item={})->
     if @itemTemplate? and templateFn = Luca.template(@itemTemplate)
@@ -80,13 +84,21 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
-    make(@itemTagName, @attributesForItem(item), @contentForItem(item))
+    make(@itemTagName, @attributesForItem(item, model), @contentForItem(item))
 
   getModels: ()->
     if @collection?.query and (@filter || @filterOptions)
       @collection.query(@filter, @filterOptions)
     else
       @collection.models
+
+
+  locateItemElement: (id)->
+    @$(".#{ @itemClassName }[data-model-id='#{ id }']")
+
+  refreshModel: (model)->
+    index = @collection.indexOf( model )
+    @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
 
   refresh: ()->
     @$bodyEl().empty()
@@ -113,3 +125,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 # Private Helpers
 
 make = Luca.View::make
+
+setupChangeObserver = ()->
+  @collection.on "change", (model)=> 
+    @refreshModel(model)

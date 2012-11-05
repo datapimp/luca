@@ -28,12 +28,12 @@ setupComputedProperties = ()->
         
       @trigger "change:#{attr}" if @has(dep) 
 
-
 _.def('Luca.Model').extends('Backbone.Model').with
+
   include: ['Luca.Events']
 
   initialize: ()->
-    Backbone.Model::initialize @, arguments
+    Backbone.Model::initialize(@, arguments)
     setupComputedProperties.call(@)
 
   get: (attr)->
