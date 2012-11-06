@@ -50,4 +50,8 @@ Luca.components.TableView.rowRenderer = (item, model, index)->
 
 Luca.components.TableView.renderColumn = (column, item, model, index)->
   cellValue = model.read( column.reader )
+
+  if _.isFunction( column.renderer )
+    cellValue = column.renderer.call @, cellValue, model, column 
+
   make("td", {}, cellValue)
