@@ -366,6 +366,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   Luca.util.nestedValue = Luca.util.resolve;
 
+  Luca.util.argumentsLogger = function(prompt) {
+    return function() {
+      return console.log(prompt, arguments);
+    };
+  };
+
   Luca.util.classify = function(string) {
     if (string == null) string = "";
     return _.string.camelize(_.string.capitalize(string));

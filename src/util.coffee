@@ -11,6 +11,10 @@ Luca.util.resolve = (accessor, source_object)->
 # A better name for Luca.util.nestedValue
 Luca.util.nestedValue = Luca.util.resolve
 
+Luca.util.argumentsLogger = (prompt)->
+  ()-> console.log prompt, arguments
+
+
 # turns a word like form_view into FormView
 Luca.util.classify = (string="")->
   _.string.camelize( _.string.capitalize( string ) )
