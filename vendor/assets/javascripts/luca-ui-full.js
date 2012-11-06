@@ -2429,7 +2429,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     initialize: function(options) {
       this.options = options;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
-      return this.setupHooks(this.hooks);
+      this.setupHooks(this.hooks);
+      return this.components || (this.components = this.pages || (this.pages = this.cards));
     },
     prepareComponents: function() {
       var _ref,
@@ -3927,6 +3928,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.enableBootstrap;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
+      this.components || (this.components = this.fields);
       _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars", "applyLoadMask");
       this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
