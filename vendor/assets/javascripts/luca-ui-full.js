@@ -121,7 +121,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.41",
+    VERSION: "0.9.42",
     core: {},
     containers: {},
     components: {},
@@ -353,6 +353,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 (function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); } __p.push('\n<div class=\'controls\'>\n  '); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class=\'add-on\'>\n    ', addOn ,'\n  </span>\n  '); } __p.push('\n  <input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
 (function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/contents"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<p>Sample Contents</p>\n');}return __p.join('');}; }).call(this);
 (function() {Luca.templates || (Luca.templates = {}); Luca.templates["sample/welcome"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('welcome.luca\n');}return __p.join('');}; }).call(this);
+(function() {Luca.templates || (Luca.templates = {}); Luca.templates["table_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<thead></thead>\n<tbody class=\'table-body\'></tbody>\n<tfoot></tfoot>\n<caption></caption>\n');}return __p.join('');}; }).call(this);
 (function() {
   var currentNamespace;
 
@@ -3192,7 +3193,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var make;
+  var make, setupChangeObserver;
 
   _.def("Luca.components.CollectionView")["extends"]("Luca.components.Panel")["with"]({
     tagName: "div",
@@ -3228,15 +3229,17 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         });
         this.collection.bind("add", this.refresh);
         this.collection.bind("remove", this.refresh);
+        if (this.observeChanges === true) setupChangeObserver.call(this);
       } else {
         throw "Collection Views must have a valid backbone collection";
       }
       if (this.collection.length > 0) return this.refresh();
     },
-    attributesForItem: function(item) {
+    attributesForItem: function(item, model) {
       return _.extend({}, {
         "class": this.itemClassName,
-        "data-index": item.index
+        "data-index": item.index,
+        "data-model-id": item.model.get('id')
       });
     },
     contentForItem: function(item) {
@@ -3260,7 +3263,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         model: model,
         index: index
       };
-      return make(this.itemTagName, this.attributesForItem(item), this.contentForItem(item));
+      return make(this.itemTagName, this.attributesForItem(item, model), this.contentForItem(item));
     },
     getModels: function() {
       var _ref;
@@ -3269,6 +3272,17 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       } else {
         return this.collection.models;
       }
+    },
+    locateItemElement: function(id) {
+      return this.$("." + this.itemClassName + "[data-model-id='" + id + "']");
+    },
+    refreshModel: function(model) {
+      var index;
+      index = this.collection.indexOf(model);
+      return this.locateItemElement(model.get('id')).empty().append(this.contentForItem({
+        model: model,
+        index: index
+      }, model));
     },
     refresh: function() {
       var _this = this;
@@ -3295,6 +3309,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   });
 
   make = Luca.View.prototype.make;
+
+  setupChangeObserver = function() {
+    var _this = this;
+    return this.collection.on("change", function(model) {
+      return _this.refreshModel(model);
+    });
+  };
 
 }).call(this);
 (function() {
@@ -4654,6 +4675,81 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       });
     }
   });
+
+}).call(this);
+(function() {
+  var make;
+
+  _.def("Luca.components.TableView")["extends"]("Luca.components.CollectionView")["with"]({
+    additionalClassNames: "table",
+    tagName: "table",
+    bodyTemplate: "table_view",
+    bodyTagName: "tbody",
+    bodyClassName: "table-body",
+    itemTagName: "tr",
+    stateful: true,
+    observeChanges: true,
+    columns: [],
+    emptyText: "There are no results to display",
+    itemRenderer: function(item, model) {
+      return Luca.components.TableView.rowRenderer.call(this, item, model);
+    },
+    emptyResults: function() {
+      return this.$('tbody').append("<tr><td colspan=" + this.columns.length + ">" + this.emptyText + "</td></tr>");
+    },
+    initialize: function(options) {
+      var _this = this;
+      this.options = options != null ? options : {};
+      Luca.components.CollectionView.prototype.initialize.apply(this, arguments);
+      return this.defer(function() {
+        Luca.components.TableView.renderHeader.call(_this, _this.columns, _this.$('thead'));
+        return _this.$el.removeClass('row-fluid');
+      }).until("before:render");
+    }
+  });
+
+  make = Backbone.View.prototype.make;
+
+  Luca.components.TableView.renderHeader = function(columns, targetElement) {
+    var column, content, index, _i, _len, _results;
+    index = 0;
+    content = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = columns.length; _i < _len; _i++) {
+        column = columns[_i];
+        _results.push("<th data-col-index='" + index + "'>" + column.header + "</th>");
+      }
+      return _results;
+    })();
+    $(targetElement).append(make("tr", {}, content));
+    index = 0;
+    _results = [];
+    for (_i = 0, _len = columns.length; _i < _len; _i++) {
+      column = columns[_i];
+      if (column.width != null) {
+        _results.push(this.$("th[data-col-index='" + index + "']", targetElement).css('width', column.width));
+      }
+    }
+    return _results;
+  };
+
+  Luca.components.TableView.rowRenderer = function(item, model, index) {
+    var columnConfig, _i, _len, _ref, _results;
+    _ref = this.columns;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      columnConfig = _ref[_i];
+      _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, index));
+    }
+    return _results;
+  };
+
+  Luca.components.TableView.renderColumn = function(column, item, model, index) {
+    var cellValue;
+    cellValue = model.read(column.reader);
+    return make("td", {}, cellValue);
+  };
 
 }).call(this);
 (function() {

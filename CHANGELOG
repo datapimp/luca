@@ -140,4 +140,6 @@
 
 0.9.41
   - Changed asset pipeline payload so that luca-ui uses the index convention
+
+0.9.42 
   - Added TableView component, which inherits from Luca.components.CollectionView
