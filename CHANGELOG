@@ -1,4 +1,4 @@
-G0.7.3:
+0.7.3:
   - Models being loaded by the FormView will now call
     beforeFormLoad methods if they exist on those models
 
@@ -145,3 +145,6 @@ G0.7.3:
   - Added TableView component, which inherits from Luca.components.CollectionView
   - Expose ways of customizing Luca.View internals.
   - Added support for @template property on Luca.View. Behaves the same as @bodyTemplate
+
+Unreleased
+  - Added Rails generator to generate a Luca application skeleton
