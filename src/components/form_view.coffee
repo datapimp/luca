@@ -54,6 +54,8 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
     Luca.core.Container::initialize.apply @, arguments
 
+    @components ||= @fields
+
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars", "applyLoadMask"
 
     @state ||= new Backbone.Model

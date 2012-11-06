@@ -18,6 +18,7 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
   initialize: (@options)->
     Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
+    @components ||= @pages ||= @cards 
 
   prepareComponents: ()->
     Luca.core.Container::prepareComponents?.apply(@, arguments)
