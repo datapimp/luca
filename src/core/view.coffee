@@ -24,49 +24,25 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @cid = _.uniqueId(@name) if @name?
 
-
-
     Luca.cache( @cid, @ )
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 
-
-    if @additionalClassNames
-      @additionalClassNames = @additionalClassNames.split(" ") if _.isString(@additionalClassNames)
-
-    if @gridSpan
-      @additionalClassNames.push "span#{ @gridSpan }"
-
-    if @gridOffset
-      @additionalClassNames.push "offset#{ @gridOffset }"
-
-    if @gridRowFluid
-      @additionalClassNames.push "row-fluid"
-
-    if @gridRow
-      @additionalClassNames.push "row"
-
-    if @additionalClassNames?.length > 0
-      @$el.addClass( additional ) for additional in @additionalClassNames
-
-    @$wrap( @wrapperClass ) if @wrapperClass?
+    setupClassHelpers.call(@)
+    setupStateMachine.call(@) if @stateful is true and not @state?
 
     registerCollectionEvents.call(@)
     registerApplicationEvents.call( @)
 
-    @delegateEvents()
-
-    if @stateful is true and not @state?
-      @state = new Backbone.Model(@defaultState || {})
-      unless @set?
-        @set = ()=> @state.set.apply(@state, argumuments)
-
-      unless @get?
-        @get = ()=> @state.get.apply(@state, argumuments)
-
     if @mixins?.length > 0
       for module in @mixins
         Luca.modules[ module ]._included.call(@, @, module)
+
+    @delegateEvents()
+
+    setupTemplate.call(@) if @template and not @isField
+
+
 
     @trigger "after:initialize", @
 
@@ -145,9 +121,9 @@ _.def("Luca.View").extends("Backbone.View").with
     Backbone.View.prototype.trigger.apply @, arguments
 
 
-originalExtend = Backbone.View.extend
+Luca.View._originalExtend = Backbone.View.extend
 
-customizeRender = (definition)->
+Luca.View.renderWrapper = (definition)->
   _base = definition.render
 
   _base ||= Luca.View::$attach
@@ -163,7 +139,7 @@ customizeRender = (definition)->
         @deferrable = @collection
 
       target ||= @deferrable
-      trigger = if @deferrable_event then @deferrable_event else "reset"
+      trigger = if @deferrable_event then @deferrable_event else Luca.View.deferrableEvent 
 
       deferred = ()->
         _base.call(view)
@@ -245,6 +221,37 @@ registerCollectionEvents = ()->
       console.log "Error Binding To Collection in registerCollectionEvents", @
       throw e
 
+setupClassHelpers = ()->
+  additionalClasses = _( @additionalClassNames || [] ).clone()
+
+  @$wrap( @wrapperClass ) if @wrapperClass?
+
+  if _.isString additionalClasses
+    additionalClasses = additionalClasses.split(" ")
+
+  if @gridSpan
+    additionalClasses.push "span#{ @gridSpan }"
+
+  if @gridOffset
+    additionalClasses.push "offset#{ @gridOffset }"
+
+  if @gridRowFluid
+    additionalClasses.push "row-fluid"
+
+  if @gridRow
+    additionalClasses.push "row"
+
+  return unless additionalClasses?
+
+  for additional in additionalClasses
+    @$el.addClass( additional ) 
+
+
+setupStateMachine = ()->
+  @state = new Backbone.Model(@defaultState || {})
+  @set ||= ()=> @state.set.apply(@state, argumuments)
+  @get ||= ()=> @state.get.apply(@state, argumuments)  
+
 setupBodyTemplate = ()->
   templateVars = if @bodyTemplateVars
     @bodyTemplateVars.call(@)
@@ -254,11 +261,19 @@ setupBodyTemplate = ()->
   if template = @bodyTemplate
     @$el.empty()
     Luca.View::$html.call(@, Luca.template(template, templateVars ) )
-      
+
+setupTemplate = ()->
+  if @template?
+    @defer ()=>
+      @$template(@template, @)
+    .until("before:render")      
+
 Luca.View.extend = (definition)->
-  definition = customizeRender( definition )
+  definition = Luca.View.renderWrapper( definition )
 
   if definition.mixins? and _.isArray( definition.mixins )
     _.extend(definition, Luca.modules[module]) for module in definition.mixins
 
-  originalExtend.call(@, definition)
+  Luca.View._originalExtend.call(@, definition)
+
+Luca.View.deferrableEvent = "reset"

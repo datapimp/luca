@@ -9,7 +9,7 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
   name: "console"
   history: []
   historyIndex: 0
-
+  width: 1000
   componentEvents:
     "code_input key:keyup" : "historyUp"
     "code_input key:keydown" : "historyDown"
@@ -19,7 +19,8 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
     bare: true
 
   components:[
-    ctype: "code_mirror_field"
+    type: "code_mirror_field"
+    getter: "getCodeMirror"
     additionalClassNames: "clearfix"
     name: "code_output"
     readOnly: true
@@ -28,8 +29,9 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
     lineWrapping: true
     gutter: false
   ,
-    ctype: "text_field"
+    type: "text_field"
     name: "code_input"
+    getter: "getInput"
     lineNumbers: false
     height: '30px'
     maxHeight: '30px'
@@ -57,7 +59,10 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
 
   afterRender: ()->
     @$container().modal(backdrop: false)
-    @$container.css
+
+    if @width?
+      marginLeft = parseInt(@width) * 0.5 * -1
+      @$container().css("width", @width).css('margin-left', parseInt(marginLeft) )
 
   show: (options={})->
     @$container().modal('show')
@@ -78,19 +83,19 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
     @historyIndex -= 1
     @historyIndex = 0 if @historyIndex < 0
 
-    currentValue = Luca("code_input").getValue()
-    Luca("code_input").setValue( @history[ @historyIndex ] || currentValue )
+    currentValue = @getInput().getValue()
+    @getInput().setValue( @history[ @historyIndex ] || currentValue )
 
   historyDown: ()->
     @historyIndex += 1
     @historyIndex = @history.length - 1 if @historyIndex > @history.length - 1
 
-    currentValue = Luca("code_input").getValue()
+    currentValue = @getInput().getValue()
 
-    Luca("code_input").setValue( @history[ @historyIndex ] || currentValue)
+    @getInput().setValue( @history[ @historyIndex ] || currentValue)
 
   append: (code, result, skipFormatting=false)->
-    output = Luca("code_output")
+    output = @getCodeMirror()
     current = output.getValue()
 
     source = "// #{ code }" if code?
@@ -117,7 +122,7 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
     return unless code?.length > 0
 
     raw = _.string.strip(raw)
-    output = Luca("code_output")
+    output = @getCodeMirror()
     dev = @
 
     evaluator = ()->
@@ -149,7 +154,7 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
   runCommand: ()->
     dev     = @
     compile = _.bind(Luca.tools.CoffeeEditor::compile, @)
-    raw = Luca("code_input").getValue()
+    raw = @getInput().getValue()
     compiled = compile raw, (compiled)->
       dev.evaluateCode(compiled, raw)
 

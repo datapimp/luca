@@ -909,15 +909,14 @@
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, customizeRender, originalExtend, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate;
+  var bindAllEventHandlers, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate, setupClassHelpers, setupStateMachine, setupTemplate;
 
   _.def("Luca.View")["extends"]("Backbone.View")["with"]({
     include: ['Luca.Events'],
     additionalClassNames: [],
     hooks: ["before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var additional, module, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4,
-        _this = this;
+      var module, _i, _len, _ref, _ref2;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
@@ -928,48 +927,21 @@
       if (this.name != null) this.cid = _.uniqueId(this.name);
       Luca.cache(this.cid, this);
       this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
-      if (this.additionalClassNames) {
-        if (_.isString(this.additionalClassNames)) {
-          this.additionalClassNames = this.additionalClassNames.split(" ");
-        }
+      setupClassHelpers.call(this);
+      if (this.stateful === true && !(this.state != null)) {
+        setupStateMachine.call(this);
       }
-      if (this.gridSpan) this.additionalClassNames.push("span" + this.gridSpan);
-      if (this.gridOffset) {
-        this.additionalClassNames.push("offset" + this.gridOffset);
-      }
-      if (this.gridRowFluid) this.additionalClassNames.push("row-fluid");
-      if (this.gridRow) this.additionalClassNames.push("row");
-      if (((_ref = this.additionalClassNames) != null ? _ref.length : void 0) > 0) {
-        _ref2 = this.additionalClassNames;
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          additional = _ref2[_i];
-          this.$el.addClass(additional);
-        }
-      }
-      if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
       registerCollectionEvents.call(this);
       registerApplicationEvents.call(this);
-      this.delegateEvents();
-      if (this.stateful === true && !(this.state != null)) {
-        this.state = new Backbone.Model(this.defaultState || {});
-        if (this.set == null) {
-          this.set = function() {
-            return _this.state.set.apply(_this.state, argumuments);
-          };
-        }
-        if (this.get == null) {
-          this.get = function() {
-            return _this.state.get.apply(_this.state, argumuments);
-          };
-        }
-      }
-      if (((_ref3 = this.mixins) != null ? _ref3.length : void 0) > 0) {
-        _ref4 = this.mixins;
-        for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
-          module = _ref4[_j];
+      if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
+        _ref2 = this.mixins;
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          module = _ref2[_i];
           Luca.modules[module]._included.call(this, this, module);
         }
       }
+      this.delegateEvents();
+      if (this.template && !this.isField) setupTemplate.call(this);
       return this.trigger("after:initialize", this);
     },
     $wrap: function(wrapper) {
@@ -1056,9 +1028,9 @@
     }
   });
 
-  originalExtend = Backbone.View.extend;
+  Luca.View._originalExtend = Backbone.View.extend;
 
-  customizeRender = function(definition) {
+  Luca.View.renderWrapper = function(definition) {
     var _base;
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
@@ -1072,7 +1044,7 @@
           this.deferrable = this.collection;
         }
         target || (target = this.deferrable);
-        trigger = this.deferrable_event ? this.deferrable_event : "reset";
+        trigger = this.deferrable_event ? this.deferrable_event : Luca.View.deferrableEvent;
         deferred = function() {
           _base.call(view);
           return view.trigger("after:render", view);
@@ -1157,6 +1129,37 @@
     return _results;
   };
 
+  setupClassHelpers = function() {
+    var additional, additionalClasses, _i, _len, _results;
+    additionalClasses = _(this.additionalClassNames || []).clone();
+    if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
+    if (_.isString(additionalClasses)) {
+      additionalClasses = additionalClasses.split(" ");
+    }
+    if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
+    if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
+    if (this.gridRowFluid) additionalClasses.push("row-fluid");
+    if (this.gridRow) additionalClasses.push("row");
+    if (additionalClasses == null) return;
+    _results = [];
+    for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
+      additional = additionalClasses[_i];
+      _results.push(this.$el.addClass(additional));
+    }
+    return _results;
+  };
+
+  setupStateMachine = function() {
+    var _this = this;
+    this.state = new Backbone.Model(this.defaultState || {});
+    this.set || (this.set = function() {
+      return _this.state.set.apply(_this.state, argumuments);
+    });
+    return this.get || (this.get = function() {
+      return _this.state.get.apply(_this.state, argumuments);
+    });
+  };
+
   setupBodyTemplate = function() {
     var template, templateVars;
     templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
@@ -1166,9 +1169,18 @@
     }
   };
 
+  setupTemplate = function() {
+    var _this = this;
+    if (this.template != null) {
+      return this.defer(function() {
+        return _this.$template(_this.template, _this);
+      }).until("before:render");
+    }
+  };
+
   Luca.View.extend = function(definition) {
     var module, _i, _len, _ref;
-    definition = customizeRender(definition);
+    definition = Luca.View.renderWrapper(definition);
     if ((definition.mixins != null) && _.isArray(definition.mixins)) {
       _ref = definition.mixins;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -1176,8 +1188,10 @@
         _.extend(definition, Luca.modules[module]);
       }
     }
-    return originalExtend.call(this, definition);
+    return Luca.View._originalExtend.call(this, definition);
   };
+
+  Luca.View.deferrableEvent = "reset";
 
 }).call(this);
 (function() {
@@ -1700,7 +1714,7 @@
     beforeRender: function() {
       if (Luca.enableBootstrap) this.$el.addClass('control-group');
       if (this.required) this.$el.addClass('required');
-      this.$el.html(Luca.template(this.template, this));
+      this.$template(this.template, this);
       return this.input = $('input', this.el);
     },
     change_handler: function(e) {
@@ -2848,7 +2862,7 @@
       Luca.Application.instances[appName] = app;
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       this.state = new Luca.Model(this.defaultState);
-      this.setupMainController();
+      if (this.useController === true) this.setupMainController();
       this.setupCollectionManager();
       this.defer(function() {
         return app.render();
@@ -4600,7 +4614,7 @@
       return Luca.components.TableView.rowRenderer.call(this, item, model);
     },
     emptyResults: function() {
-      return this.$('tbody').append("<tr><td colspan=" + this.columns.length + ">" + this.emptyText + "</td></tr>");
+      return this.$bodyEl().empty().append("<tr><td colspan=" + this.columns.length + ">" + this.emptyText + "</td></tr>");
     },
     initialize: function(options) {
       var _this = this;
@@ -4653,6 +4667,9 @@
   Luca.components.TableView.renderColumn = function(column, item, model, index) {
     var cellValue;
     cellValue = model.read(column.reader);
+    if (_.isFunction(column.renderer)) {
+      cellValue = column.renderer.call(this, cellValue, model, column);
+    }
     return make("td", {}, cellValue);
   };
 

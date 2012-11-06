@@ -1,3 +1,4 @@
+# Public: TableView renders collection data into an HTML table.
 _.def("Luca.components.TableView").extends("Luca.components.CollectionView").with
   additionalClassNames: "table"
   tagName: "table"
@@ -16,7 +17,7 @@ _.def("Luca.components.TableView").extends("Luca.components.CollectionView").wit
     Luca.components.TableView.rowRenderer.call(@, item, model)
 
   emptyResults: ()->
-    @$('tbody').append("<tr><td colspan=#{ @columns.length }>#{ @emptyText }</td></tr>")
+    @$bodyEl().empty().append("<tr><td colspan=#{ @columns.length }>#{ @emptyText }</td></tr>")
 
   initialize: (@options={})->
     Luca.components.CollectionView::initialize.apply(@, arguments)

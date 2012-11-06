@@ -113,7 +113,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # method which delegates to the controller, and allows you to navigate
     # to a given page, or component, by its name.  The controller integrates
     # with the state machine of the application
-    @setupMainController()
+    @setupMainController() if @useController is true
 
     # The Collection Manager is responsible 
     @setupCollectionManager()

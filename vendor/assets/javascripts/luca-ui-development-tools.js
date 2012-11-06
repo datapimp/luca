@@ -18309,6 +18309,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     name: "console",
     history: [],
     historyIndex: 0,
+    width: 1000,
     componentEvents: {
       "code_input key:keyup": "historyUp",
       "code_input key:keydown": "historyDown",
@@ -18319,7 +18320,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     },
     components: [
       {
-        ctype: "code_mirror_field",
+        type: "code_mirror_field",
+        getter: "getCodeMirror",
         additionalClassNames: "clearfix",
         name: "code_output",
         readOnly: true,
@@ -18328,8 +18330,9 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
         lineWrapping: true,
         gutter: false
       }, {
-        ctype: "text_field",
+        type: "text_field",
         name: "code_input",
+        getter: "getInput",
         lineNumbers: false,
         height: '30px',
         maxHeight: '30px',
@@ -18358,10 +18361,14 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       }
     ],
     afterRender: function() {
+      var marginLeft;
       this.$container().modal({
         backdrop: false
       });
-      return this.$container.css;
+      if (this.width != null) {
+        marginLeft = parseInt(this.width) * 0.5 * -1;
+        return this.$container().css("width", this.width).css('margin-left', parseInt(marginLeft));
+      }
     },
     show: function(options) {
       if (options == null) options = {};
@@ -18385,8 +18392,8 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       var currentValue;
       this.historyIndex -= 1;
       if (this.historyIndex < 0) this.historyIndex = 0;
-      currentValue = Luca("code_input").getValue();
-      return Luca("code_input").setValue(this.history[this.historyIndex] || currentValue);
+      currentValue = this.getInput().getValue();
+      return this.getInput().setValue(this.history[this.historyIndex] || currentValue);
     },
     historyDown: function() {
       var currentValue;
@@ -18394,13 +18401,13 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       if (this.historyIndex > this.history.length - 1) {
         this.historyIndex = this.history.length - 1;
       }
-      currentValue = Luca("code_input").getValue();
-      return Luca("code_input").setValue(this.history[this.historyIndex] || currentValue);
+      currentValue = this.getInput().getValue();
+      return this.getInput().setValue(this.history[this.historyIndex] || currentValue);
     },
     append: function(code, result, skipFormatting) {
       var current, output, payload, source;
       if (skipFormatting == null) skipFormatting = false;
-      output = Luca("code_output");
+      output = this.getCodeMirror();
       current = output.getValue();
       if (code != null) source = "// " + code;
       payload = skipFormatting || code.match(/^console\.log/) ? [current, result] : [current, source, result];
@@ -18421,7 +18428,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       var dev, evaluator, output, result;
       if (!((code != null ? code.length : void 0) > 0)) return;
       raw = _.string.strip(raw);
-      output = Luca("code_output");
+      output = this.getCodeMirror();
       dev = this;
       evaluator = function() {
         var console, log, old_console, result;
@@ -18458,7 +18465,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       var compile, compiled, dev, raw;
       dev = this;
       compile = _.bind(Luca.tools.CoffeeEditor.prototype.compile, this);
-      raw = Luca("code_input").getValue();
+      raw = this.getInput().getValue();
       return compiled = compile(raw, function(compiled) {
         return dev.evaluateCode(compiled, raw);
       });

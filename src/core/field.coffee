@@ -36,6 +36,10 @@ _.def('Luca.core.Field').extends('Luca.View').with
     @updateState( @state )
     @placeHolder ||= ""
 
+    # In order to support using Luca.View template properties everywhere.
+
+    # Will need to work around how the field classes
+    # apply templates to themselves.
     Luca.View::initialize.apply(@, arguments)
 
   beforeRender: ()->
@@ -44,7 +48,7 @@ _.def('Luca.core.Field').extends('Luca.View').with
 
     @$el.addClass('required') if @required
 
-    @$el.html Luca.template(@template, @)
+    @$template(@template, @)
     @input = $('input', @el)
 
   change_handler: (e)->
