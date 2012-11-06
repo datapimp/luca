@@ -85,7 +85,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
     attributes = @attributesForItem(item, model) 
-    content = @contentForItem(content)
+    content = @contentForItem(item)
     # TEMP
     # Figure out why calls to make are failing with an unexpected string error
     try

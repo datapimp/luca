@@ -3264,7 +3264,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         index: index
       };
       attributes = this.attributesForItem(item, model);
-      content = this.contentForItem(content);
+      content = this.contentForItem(item);
       try {
         return make(this.itemTagName, attributes, content);
       } catch (e) {
