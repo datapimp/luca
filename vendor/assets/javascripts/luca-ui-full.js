@@ -3258,12 +3258,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return content;
     },
     makeItem: function(model, index) {
-      var item;
+      var attributes, content, item;
       item = this.prepareItem != null ? this.prepareItem.call(this, model, index) : {
         model: model,
         index: index
       };
-      return make(this.itemTagName, this.attributesForItem(item, model), this.contentForItem(item));
+      attributes = this.attributesForItem(item, model);
+      content = this.contentForItem(content);
+      try {
+        return make(this.itemTagName, attributes, content);
+      } catch (e) {
+        return console.log("Error generating DOM element for CollectionView", e.message, item, content, attributes);
+      }
     },
     getModels: function() {
       var _ref;

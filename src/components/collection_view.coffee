@@ -84,7 +84,15 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
-    make(@itemTagName, @attributesForItem(item, model), @contentForItem(item))
+    attributes = @attributesForItem(item, model) 
+    content = @contentForItem(content)
+    # TEMP
+    # Figure out why calls to make are failing with an unexpected string error
+    try
+      make(@itemTagName, attributes, content)
+    catch e
+      console.log "Error generating DOM element for CollectionView", e.message, item, content, attributes
+      #no op
 
   getModels: ()->
     if @collection?.query and (@filter || @filterOptions)
