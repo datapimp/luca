@@ -110,6 +110,8 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
 
   refresh: (query,options)->
+    @trigger "before:refresh"
+    
     @$bodyEl().empty()
     models = @getModels(query, options)
 
@@ -119,6 +121,8 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     index = 0
     for model in models
       @$append @makeItem(model, index++)
+
+    @trigger "after:refresh"
 
     @
 

@@ -646,6 +646,9 @@
         return (_ref = _this.onFilterChange) != null ? _ref.call(_this, model.toQuery(), model.toOptions()) : void 0;
       });
     },
+    getModels: function() {
+      return this.collection.query(this.filterState.toQuery(), this.filterState.toOptions());
+    },
     applyFilter: function(query, options) {
       var silent;
       if (query == null) query = {};
@@ -1031,7 +1034,7 @@
       registerCollectionEvents.call(this);
       registerApplicationEvents.call(this);
       if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
-        _ref2 = this.mixins;
+        _ref2 = _.uniq(this.mixins);
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           module = _ref2[_i];
           if ((_ref3 = Luca.mixin(module)) != null) {
@@ -1252,10 +1255,10 @@
     var _this = this;
     this.state = new Backbone.Model(this.defaultState || {});
     this.set || (this.set = function() {
-      return _this.state.set.apply(_this.state, argumuments);
+      return _this.state.set.apply(_this.state, arguments);
     });
     return this.get || (this.get = function() {
-      return _this.state.get.apply(_this.state, argumuments);
+      return _this.state.get.apply(_this.state, arguments);
     });
   };
 
@@ -3306,6 +3309,7 @@
     },
     refresh: function(query, options) {
       var index, model, models, _i, _len;
+      this.trigger("before:refresh");
       this.$bodyEl().empty();
       models = this.getModels(query, options);
       if (models.length === 0) this.trigger("empty:results");
@@ -3314,6 +3318,7 @@
         model = models[_i];
         this.$append(this.makeItem(model, index++));
       }
+      this.trigger("after:refresh");
       return this;
     },
     registerEvent: function(domEvent, selector, handler) {

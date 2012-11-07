@@ -35,7 +35,7 @@ _.def("Luca.View").extends("Backbone.View").with
     registerApplicationEvents.call( @)
 
     if @mixins?.length > 0
-      for module in @mixins
+      for module in _.uniq(@mixins)
         Luca.mixin(module)?._initializer.call(@, @, module)
 
     @delegateEvents()
@@ -247,8 +247,8 @@ setupClassHelpers = ()->
 
 setupStateMachine = ()->
   @state = new Backbone.Model(@defaultState || {})
-  @set ||= ()=> @state.set.apply(@state, argumuments)
-  @get ||= ()=> @state.get.apply(@state, argumuments)  
+  @set ||= ()=> @state.set.apply(@state, arguments)
+  @get ||= ()=> @state.get.apply(@state, arguments)  
 
 setupBodyTemplate = ()->
   templateVars = if @bodyTemplateVars
