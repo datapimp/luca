@@ -64,8 +64,10 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     else
       throw "Collection Views must have a valid backbone collection"
 
-    if @collection.length > 0
-      @refresh()
+    @defer ()=>
+      if @collection.length > 0
+        @refresh()
+    .until("after:render")
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')

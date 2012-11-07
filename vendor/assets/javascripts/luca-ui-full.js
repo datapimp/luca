@@ -3351,7 +3351,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       } else {
         throw "Collection Views must have a valid backbone collection";
       }
-      if (this.collection.length > 0) return this.refresh();
+      return this.defer(function() {
+        if (_this.collection.length > 0) return _this.refresh();
+      }).until("after:render");
     },
     attributesForItem: function(item, model) {
       return _.extend({}, {
