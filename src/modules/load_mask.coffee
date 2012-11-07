@@ -1,6 +1,5 @@
 Luca.modules.LoadMaskable = 
-  _included: (self, module)->
-    _.bindAll self, "applyLoadMask", "disableLoadMask"
+  _initializer: ()->
 
     if @loadMask is true
       @defer ()=>
@@ -13,6 +12,12 @@ Luca.modules.LoadMaskable =
 
       @on (@loadmaskEnableEvent || "enable:loadmask"), @applyLoadMask
       @on (@loadmaskDisableEvent || "disable:loadmask"), @applyLoadMask
+
+  showLoadMask: ()->
+    @trigger("enable:loadmask")
+
+  hideLoadMask: ()->
+    @trigger("disable:loadmask")
 
   loadMaskTarget: ()->
     if @loadMaskEl? then @$(@loadMaskEl) else @$bodyEl()

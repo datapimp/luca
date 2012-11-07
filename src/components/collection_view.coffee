@@ -9,6 +9,8 @@
 #
 
 _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
+  mixins: ["LoadMaskable", "FilterableView"]
+
   tagName: "div"
 
   className: "luca-ui-collection-view"
@@ -94,12 +96,11 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
       console.log "Error generating DOM element for CollectionView", e.message, item, content, attributes
       #no op
 
-  getModels: ()->
-    if @collection?.query and (@filter || @filterOptions)
-      @collection.query(@filter, @filterOptions)
+  getModels: (query=@filter, options=@filterOptions)->
+    if @collection?.query
+      @collection.query(query || {}, options || {})
     else
       @collection.models
-
 
   locateItemElement: (id)->
     @$(".#{ @itemClassName }[data-model-id='#{ id }']")
@@ -110,12 +111,16 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   refresh: ()->
     @$bodyEl().empty()
+    models = @getModels()
 
-    if @getModels().length is 0
+    if models.length is 0
       @trigger("empty:results")
 
-    _( @getModels() ).each (model, index)=>
-      @$append( @makeItem(model, index) )
+    index = 0
+    for model in models
+      @$append @makeItem(model, index++)
+
+    @
 
   registerEvent: (domEvent, selector, handler)->
     if !handler? and _.isFunction(selector)

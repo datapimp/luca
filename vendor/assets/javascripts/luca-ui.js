@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.42",
+    VERSION: "0.9.45",
     core: {},
     containers: {},
     components: {},
@@ -547,7 +547,7 @@
   })();
 
   Luca.extend = function(superClassName, childName, properties) {
-    var definition, mixin, superClass, _i, _len, _ref;
+    var definition, include, superClass, _i, _len, _ref;
     if (properties == null) properties = {};
     superClass = Luca.util.resolve(superClassName, window || global);
     if (!_.isFunction(superClass != null ? superClass.extend : void 0)) {
@@ -566,12 +566,42 @@
     if (_.isArray(properties != null ? properties.include : void 0)) {
       _ref = properties.include;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        mixin = _ref[_i];
-        if (_.isString(mixin)) mixin = Luca.util.resolve(mixin);
-        _.extend(definition.prototype, mixin);
+        include = _ref[_i];
+        if (_.isString(include)) include = Luca.util.resolve(include);
+        _.extend(definition.prototype, include);
       }
     }
     return definition;
+  };
+
+  Luca.mixin = function(mixinName) {
+    var namespace;
+    namespace = _(Luca.mixin.namespaces).detect(function(space) {
+      return Luca.util.resolve(space)[mixinName] != null;
+    });
+    return Luca.util.resolve(namespace)[mixinName];
+  };
+
+  Luca.mixin.namespaces = ["Luca.modules"];
+
+  Luca.mixin.namespace = function(namespace) {
+    Luca.mixin.namespaces.push(namespace);
+    return Luca.mixin.namespaces = _(Luca.mixin.namespaces).uniq();
+  };
+
+  Luca.decorate = function(componentPrototype) {
+    if (_.isString(componentPrototype)) {
+      componentPrototype = Luca.util.resolve(componentPrototype).prototype;
+    }
+    return {
+      "with": function(mixin) {
+        _.extend(componentPrototype, Luca.mixin(mixin));
+        componentPrototype.mixins || (componentPrototype.mixins = []);
+        componentPrototype.mixins.push(mixin);
+        componentPrototype.mixins = _(componentPrototype.mixins).uniq();
+        return componentPrototype;
+      }
+    };
   };
 
   _.mixin({
@@ -601,18 +631,71 @@
 
 }).call(this);
 (function() {
+  var FilterModel,
+    __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+  Luca.modules.FilterableView = {
+    _initializer: function() {
+      var _this = this;
+      this.filterState = new FilterModel(this.filterableOptions);
+      this.filterState.on("change", function(model) {
+        return _this.trigger("change:filter", model.toQuery(), model.toOptions());
+      });
+      return this.on("change:filter", function(query, options) {});
+    },
+    applyFilter: function(query, options) {
+      var silent;
+      if (query == null) query = {};
+      if (options == null) options = {};
+      silent = _(options)["delete"]('silent') === true;
+      return this.filterState.set({
+        query: query,
+        options: options
+      }, {
+        silent: silent
+      });
+    }
+  };
+
+  FilterModel = (function(_super) {
+
+    __extends(FilterModel, _super);
+
+    function FilterModel() {
+      FilterModel.__super__.constructor.apply(this, arguments);
+    }
+
+    FilterModel.prototype.toQuery = function() {
+      return this.get("query");
+    };
+
+    FilterModel.prototype.toOptions = function() {
+      return this.get("options");
+    };
+
+    return FilterModel;
+
+  })(Backbone.Model);
+
+}).call(this);
+(function() {
 
   Luca.modules.GridLayout = {
-    _included: function(view, module) {}
+    _initializer: function() {
+      if (this.gridSpan) this.$el.addClass("span" + this.gridSpan);
+      if (this.gridOffset) this.$el.addClass("offset" + this.gridOffset);
+      if (this.gridRowFluid) this.$el.addClass("row-fluid");
+      if (this.gridRow) return this.$el.addClass("row");
+    }
   };
 
 }).call(this);
 (function() {
 
   Luca.modules.LoadMaskable = {
-    _included: function(self, module) {
+    _initializer: function() {
       var _this = this;
-      _.bindAll(self, "applyLoadMask", "disableLoadMask");
       if (this.loadMask === true) {
         this.defer(function() {
           _this.$el.addClass('with-mask');
@@ -624,6 +707,12 @@
         this.on(this.loadmaskEnableEvent || "enable:loadmask", this.applyLoadMask);
         return this.on(this.loadmaskDisableEvent || "disable:loadmask", this.applyLoadMask);
       }
+    },
+    showLoadMask: function() {
+      return this.trigger("enable:loadmask");
+    },
+    hideLoadMask: function() {
+      return this.trigger("disable:loadmask");
     },
     loadMaskTarget: function() {
       if (this.loadMaskEl != null) {
@@ -803,7 +892,7 @@
     return Luca.register(component, prototypeName);
   };
 
-  Luca.registry.addNamespace = function(identifier) {
+  Luca.registry.addNamespace = Luca.registry.namespace = function(identifier) {
     registry.namespaces.push(identifier);
     return registry.namespaces = _(registry.namespaces).uniq();
   };
@@ -922,7 +1011,7 @@
     additionalClassNames: [],
     hooks: ["before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
     initialize: function(options) {
-      var module, _i, _len, _ref, _ref2;
+      var module, _i, _len, _ref, _ref2, _ref3;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
@@ -943,7 +1032,9 @@
         _ref2 = this.mixins;
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           module = _ref2[_i];
-          Luca.modules[module]._included.call(this, this, module);
+          if ((_ref3 = Luca.mixin(module)) != null) {
+            _ref3._initializer.call(this, this, module);
+          }
         }
       }
       this.delegateEvents();
@@ -1191,7 +1282,7 @@
       _ref = definition.mixins;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         module = _ref[_i];
-        _.extend(definition, Luca.modules[module]);
+        Luca.decorate(definition)["with"](module);
       }
     }
     return Luca.View._originalExtend.call(this, definition);
@@ -3114,6 +3205,7 @@
   var make, setupChangeObserver;
 
   _.def("Luca.components.CollectionView")["extends"]("Luca.components.Panel")["with"]({
+    mixins: ["LoadMaskable", "FilterableView"],
     tagName: "div",
     className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
@@ -3189,10 +3281,12 @@
         return console.log("Error generating DOM element for CollectionView", e.message, item, content, attributes);
       }
     },
-    getModels: function() {
+    getModels: function(query, options) {
       var _ref;
-      if (((_ref = this.collection) != null ? _ref.query : void 0) && (this.filter || this.filterOptions)) {
-        return this.collection.query(this.filter, this.filterOptions);
+      if (query == null) query = this.filter;
+      if (options == null) options = this.filterOptions;
+      if ((_ref = this.collection) != null ? _ref.query : void 0) {
+        return this.collection.query(query || {}, options || {});
       } else {
         return this.collection.models;
       }
@@ -3209,12 +3303,16 @@
       }, model));
     },
     refresh: function() {
-      var _this = this;
+      var index, model, models, _i, _len;
       this.$bodyEl().empty();
-      if (this.getModels().length === 0) this.trigger("empty:results");
-      return _(this.getModels()).each(function(model, index) {
-        return _this.$append(_this.makeItem(model, index));
-      });
+      models = this.getModels();
+      if (models.length === 0) this.trigger("empty:results");
+      index = 0;
+      for (_i = 0, _len = models.length; _i < _len; _i++) {
+        model = models[_i];
+        this.$append(this.makeItem(model, index++));
+      }
+      return this;
     },
     registerEvent: function(domEvent, selector, handler) {
       var eventTrigger;

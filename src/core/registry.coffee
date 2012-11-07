@@ -56,7 +56,7 @@ Luca.development_mode_register = (component, prototypeName)->
 # If you use a custom namespace like MyApp.views.ListView,
 # then we will register MyApp.views as a namespace.  You can
 # do this yourself too.
-Luca.registry.addNamespace = (identifier)->
+Luca.registry.addNamespace = Luca.registry.namespace = (identifier)->
   registry.namespaces.push( identifier )
   registry.namespaces = _( registry.namespaces ).uniq()
 

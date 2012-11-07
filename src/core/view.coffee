@@ -36,13 +36,11 @@ _.def("Luca.View").extends("Backbone.View").with
 
     if @mixins?.length > 0
       for module in @mixins
-        Luca.modules[ module ]._included.call(@, @, module)
+        Luca.mixin(module)?._initializer.call(@, @, module)
 
     @delegateEvents()
 
     setupTemplate.call(@) if @template and not @isField
-
-
 
     @trigger "after:initialize", @
 
@@ -272,7 +270,7 @@ Luca.View.extend = (definition)->
   definition = Luca.View.renderWrapper( definition )
 
   if definition.mixins? and _.isArray( definition.mixins )
-    _.extend(definition, Luca.modules[module]) for module in definition.mixins
+    Luca.decorate(definition).with(module) for module in definition.mixins
 
   Luca.View._originalExtend.call(@, definition)
 

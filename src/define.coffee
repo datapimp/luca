@@ -100,11 +100,38 @@ Luca.extend = (superClassName, childName, properties={})->
   # _.def("MyView").extends("View").with
   #   include: ['Luca.Events']
   if _.isArray( properties?.include )
-    for mixin in properties.include
-      mixin = Luca.util.resolve(mixin) if _.isString(mixin)
-      _.extend(definition::, mixin)
+    for include in properties.include
+      include = Luca.util.resolve(include) if _.isString(include)
+      _.extend(definition::, include)
 
   definition
+
+
+Luca.mixin = (mixinName)->
+  namespace = _( Luca.mixin.namespaces ).detect (space)->
+    Luca.util.resolve(space)[ mixinName ]?
+
+  Luca.util.resolve(namespace)[ mixinName ]
+
+Luca.mixin.namespaces = [
+  "Luca.modules"
+]
+
+Luca.mixin.namespace = (namespace)->
+  Luca.mixin.namespaces.push(namespace)
+  Luca.mixin.namespaces = _( Luca.mixin.namespaces ).uniq()
+
+# Luca.decorate('Luca.View')
+Luca.decorate = (componentPrototype)->
+  componentPrototype = Luca.util.resolve(componentPrototype).prototype if _.isString(componentPrototype)
+  
+  return with: (mixin)->
+    _.extend(componentPrototype, Luca.mixin(mixin) )
+
+    componentPrototype.mixins ||= []
+    componentPrototype.mixins.push( mixin )
+    componentPrototype.mixins = _( componentPrototype.mixins ).uniq()
+    componentPrototype
 
 _.mixin
   def: Luca.define

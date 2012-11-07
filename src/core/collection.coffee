@@ -325,6 +325,7 @@ _.def("Luca.Collection").extends( source ).with
           collection.bind "change:#{dependency}", ()->
             collection.clearMethodCache(method: method)
 
+
   # make sure the querying interface from backbone.query is present
   # in the case backbone-query isn't loaded.  without it, it will
   # just return the models

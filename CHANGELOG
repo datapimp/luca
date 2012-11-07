@@ -145,3 +145,8 @@ G0.7.3:
   - Added TableView component, which inherits from Luca.components.CollectionView
   - Expose ways of customizing Luca.View internals.
   - Added support for @template property on Luca.View. Behaves the same as @bodyTemplate
+
+0.9.45
+  - Luca.decorate( componentPrototype ).with( mixinName ), Luca.mixin( mixinName )
+  - View mixins use _initializer methods
+  - FilterableView mixin for CollectionView classes
