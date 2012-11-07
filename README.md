@@ -70,6 +70,11 @@ Or you can just use the dependencies we rely on.  Latest backbone.js, underscore
   </html>
 ```
 
+## Rails Generator
+To generate Luca application skeleton run:   
+`rails generate luca:application <app_name>`  
+This will generate a controller, view, route, and the Luca application structure under assets/javascripts/<app_name>
+
 ## Interactive Documentation and Examples
 
 [View the Sandbox](http://datapimp.com/luca)
