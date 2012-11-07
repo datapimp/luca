@@ -639,6 +639,7 @@
     _initializer: function() {
       var _this = this;
       this.filterState = new FilterModel(this.filterableOptions);
+      this.onFilterChange || (this.onFilterChange = this.refresh);
       return this.filterState.on("change", function(model) {
         var _ref;
         _this.trigger("change:filter", model.toQuery(), model.toOptions());
