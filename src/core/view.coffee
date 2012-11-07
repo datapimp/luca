@@ -199,7 +199,6 @@ registerCollectionEvents = ()->
     manager = Luca.CollectionManager.get( manager )
 
   for signature, handler of @collectionEvents
-    console.log "Sig", signature, "Handler", handler
     [key,eventTrigger] = signature.split(" ")
 
     collection = manager.getOrCreate( key )

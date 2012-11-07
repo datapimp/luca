@@ -1318,7 +1318,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     _results = [];
     for (signature in _ref) {
       handler = _ref[signature];
-      console.log("Sig", signature, "Handler", handler);
       _ref2 = signature.split(" "), key = _ref2[0], eventTrigger = _ref2[1];
       collection = manager.getOrCreate(key);
       if (!collection) throw "Could not find collection specified by " + key;
@@ -2061,18 +2060,19 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       });
     },
     createComponents: function() {
-      var map,
+      var container, map,
         _this = this;
       if (this.componentsCreated === true) return;
       map = this.componentIndex = {
         name_index: {},
         cid_index: {}
       };
+      container = this;
       this.components = _(this.components).map(function(object, index) {
-        var component;
-        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, Luca.util.lazyComponent(object));
+        var component, created;
+        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object = _.defaults(object, container.defaults || {}), created = Luca.util.lazyComponent(object));
         if (_.isString(component.getter)) {
-          _this[component.getter] = (function() {
+          container[component.getter] = (function() {
             return component;
           });
         }
@@ -2086,6 +2086,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         return component;
       });
       this.componentsCreated = true;
+      if (this.defaults != null) {
+        console.log("Created With Defaults", _(this.components).map(function(c) {
+          return c.defaultProperty;
+        }));
+      }
       if (!_.isEmpty(this.componentEvents)) this.registerComponentEvents();
       return map;
     },
@@ -2886,7 +2891,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       tabView = this;
       return this.each(function(component, index) {
         var icon, link, selector, _ref;
-        if (component.tabIcon) icon = "<i class='icon-" + component.tabIcon;
+        if (component.tabIcon) {
+          icon = "<i class='icon-" + component.tabIcon + "'></i>";
+        }
         link = "<a href='#'>" + (icon || '') + " " + component.title + "</a>";
         selector = tabView.make("li", {
           "class": "tab-selector",

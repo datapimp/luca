@@ -1215,7 +1215,6 @@
     _results = [];
     for (signature in _ref) {
       handler = _ref[signature];
-      console.log("Sig", signature, "Handler", handler);
       _ref2 = signature.split(" "), key = _ref2[0], eventTrigger = _ref2[1];
       collection = manager.getOrCreate(key);
       if (!collection) throw "Could not find collection specified by " + key;
@@ -1958,18 +1957,19 @@
       });
     },
     createComponents: function() {
-      var map,
+      var container, map,
         _this = this;
       if (this.componentsCreated === true) return;
       map = this.componentIndex = {
         name_index: {},
         cid_index: {}
       };
+      container = this;
       this.components = _(this.components).map(function(object, index) {
-        var component;
-        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, Luca.util.lazyComponent(object));
+        var component, created;
+        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object = _.defaults(object, container.defaults || {}), created = Luca.util.lazyComponent(object));
         if (_.isString(component.getter)) {
-          _this[component.getter] = (function() {
+          container[component.getter] = (function() {
             return component;
           });
         }
@@ -1983,6 +1983,11 @@
         return component;
       });
       this.componentsCreated = true;
+      if (this.defaults != null) {
+        console.log("Created With Defaults", _(this.components).map(function(c) {
+          return c.defaultProperty;
+        }));
+      }
       if (!_.isEmpty(this.componentEvents)) this.registerComponentEvents();
       return map;
     },
@@ -2783,7 +2788,9 @@
       tabView = this;
       return this.each(function(component, index) {
         var icon, link, selector, _ref;
-        if (component.tabIcon) icon = "<i class='icon-" + component.tabIcon;
+        if (component.tabIcon) {
+          icon = "<i class='icon-" + component.tabIcon + "'></i>";
+        }
         link = "<a href='#'>" + (icon || '') + " " + component.title + "</a>";
         selector = tabView.make("li", {
           "class": "tab-selector",
@@ -5458,16 +5465,22 @@
 
   describe('The Luca Container', function() {
     beforeEach(function() {
-      return this.container = new Luca.core.Container({
+      var c;
+      return c = this.container = new Luca.core.Container({
+        defaults: {
+          defaultProperty: 'it_works'
+        },
         components: [
           {
             name: "component_one",
             ctype: "view",
+            defaultProperty: "oh_yeah",
             bodyTemplate: function() {
               return "markup for component one";
             },
             id: "c1",
             value: 1,
+            getter: "getOne",
             spy: sinon.spy()
           }, {
             name: "component_two",
@@ -5519,7 +5532,7 @@
     });
     it("should select all components matching a key/value combo", function() {
       var components;
-      components = this.container.select("value", 1);
+      components = this.container.selectByAttribute("value", 1);
       return expect(components.length).toEqual(2);
     });
     it("should run a function on each component", function() {

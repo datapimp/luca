@@ -184,6 +184,8 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       name_index: {}
       cid_index: {}
 
+    container   = @
+
     @components = _( @components ).map (object, index)=>
 
       # you can include normal backbone views as components
@@ -202,13 +204,16 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
           else
             object.type = object.ctype = Luca.defaultComponentType
 
-        Luca.util.lazyComponent( object )
+        object = _.defaults(object, (container.defaults || {}))
+
+        created = Luca.util.lazyComponent( object )
+
 
       # if you define a @getter property as a string on your component
       # we will create a function with that name on this container that
       # allows you to access this component
       if _.isString( component.getter )
-        @[ component.getter ] = (()-> component) 
+        container[ component.getter ] = (()-> component) 
 
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround to get them to
@@ -225,6 +230,9 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       component
 
     @componentsCreated = true
+
+    if @defaults?
+      console.log "Created With Defaults", _( @components ).map (c)-> c.defaultProperty
 
     @registerComponentEvents() unless _.isEmpty(@componentEvents)
 

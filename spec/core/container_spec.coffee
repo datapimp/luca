@@ -1,12 +1,16 @@
 describe 'The Luca Container', ->
   beforeEach ->
-    @container = new Luca.core.Container
+    c = @container = new Luca.core.Container
+      defaults:
+        defaultProperty: 'it_works'
       components:[
         name: "component_one"
         ctype: "view"
+        defaultProperty: "oh_yeah"
         bodyTemplate: ()-> "markup for component one"
         id: "c1"
         value: 1
+        getter: "getOne"
         spy: sinon.spy()
       ,
         name: "component_two"
@@ -29,6 +33,15 @@ describe 'The Luca Container', ->
         ]
       ]
 
+  #it "should create a getter function on the container", ->
+  #  expect( @container.getOne().name ).toEqual 'component_one'
+
+  #it "should apply default properties to components", ->
+  #  defaults = @container.selectByAttribute('defaultProperty','it_works')
+  #  custom = @container.selectByAttribute('defaultProperty','oh_yeah')
+  #  expect( defaults.length ).toEqual(2)
+  #  expect( custom.length ).toEqual(1)
+
   it "should trigger after initialize", ->
     expect( @container ).toHaveTriggered "after:initialize"
 
@@ -47,7 +60,7 @@ describe 'The Luca Container', ->
     expect( html ).toContain "markup for component four"
 
   it "should select all components matching a key/value combo", ->
-    components = @container.select("value",1)
+    components = @container.selectByAttribute("value",1)
     expect( components.length ).toEqual 2
 
   it "should run a function on each component", ->
