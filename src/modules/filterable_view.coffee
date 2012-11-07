@@ -2,10 +2,11 @@ Luca.modules.FilterableView =
   _initializer: ()->
     @filterState = new FilterModel(@filterableOptions) 
 
+    @onFilterChange ||= @refresh
+    
     @filterState.on "change", (model)=>
       @trigger("change:filter", model.toQuery(), model.toOptions() )
-
-    @on "change:filter", (query, options)->
+      @onFilterChange?.call(@, model.toQuery(), model.toOptions() )
 
   applyFilter: (query={}, options={})->
     silent = _( options ).delete('silent') is true

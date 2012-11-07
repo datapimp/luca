@@ -742,10 +742,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     _initializer: function() {
       var _this = this;
       this.filterState = new FilterModel(this.filterableOptions);
-      this.filterState.on("change", function(model) {
-        return _this.trigger("change:filter", model.toQuery(), model.toOptions());
+      return this.filterState.on("change", function(model) {
+        var _ref;
+        _this.trigger("change:filter", model.toQuery(), model.toOptions());
+        return (_ref = _this.onFilterChange) != null ? _ref.call(_this, model.toQuery(), model.toOptions()) : void 0;
       });
-      return this.on("change:filter", function(query, options) {});
     },
     applyFilter: function(query, options) {
       var silent;
@@ -3405,10 +3406,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         index: index
       }, model));
     },
-    refresh: function() {
+    refresh: function(query, options) {
       var index, model, models, _i, _len;
       this.$bodyEl().empty();
-      models = this.getModels();
+      models = this.getModels(query, options);
       if (models.length === 0) this.trigger("empty:results");
       index = 0;
       for (_i = 0, _len = models.length; _i < _len; _i++) {

@@ -9,7 +9,7 @@
 #
 
 _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
-  mixins: ["LoadMaskable", "FilterableView"]
+  mixins: ["LoadMaskable","FilterableView"]
 
   tagName: "div"
 
@@ -109,9 +109,9 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     index = @collection.indexOf( model )
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
 
-  refresh: ()->
+  refresh: (query,options)->
     @$bodyEl().empty()
-    models = @getModels()
+    models = @getModels(query, options)
 
     if models.length is 0
       @trigger("empty:results")
@@ -136,6 +136,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     @
 
 # Private Helpers
+
 
 make = Luca.View::make
 
