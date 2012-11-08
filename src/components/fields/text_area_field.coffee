@@ -19,6 +19,7 @@ _.def('Luca.fields.TextAreaField').extends('Luca.core.Field').with
     @input_name ||= @name
     @label ||= @name
     @input_class ||= @class
+    @input_value ||= ""
     @inputStyles ||= "height:#{ @height };width:#{ @width }"
 
   setValue: (value)->

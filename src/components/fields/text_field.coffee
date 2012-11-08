@@ -21,6 +21,7 @@ _.def('Luca.fields.TextField').extends('Luca.core.Field').with
     @input_name ||= @name
     @label ||= @name
     @input_class ||= @class
+    @input_value ||= @value = "" 
 
     if @prepend
       @$el.addClass('input-prepend')

@@ -341,27 +341,62 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   this.JST || (this.JST = {});
   this.JST["luca-src/templates/containers/basic"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div id="', id ,'" class="', classes ,'" style="', style ,'"></div>\n');}return __p.join('');};
 }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'tab-selector-container\' id=\'', cid ,'-tab-selector\'>\n  <ul class=\'nav nav-tabs\' id=\'', cid ,'-tabs-nav\'>\n    '); for(var i = 0; i < components.length; i++ ) { __p.push('\n    '); var component = components[i];__p.push('\n    <li class=\'tab-selector\' data-target=\'', i ,'\'>\n      <a data-target=\'', i ,'\'>\n        ', component.title ,'\n      </a>\n    </li>\n    '); } __p.push('\n  </ul>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul class=\'nav ', navClass ,'\' id=\'', cid ,'-tabs-selector\'></ul>\n<div class=\'tab-content\' id=\'', cid ,'-tab-view-content\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["containers/toolbar_wrapper"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-toolbar-wrapper\' id=\'', id ,'\'></div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp</label>\n<input class=\'btn ', input_class ,'\' id=\'', input_id ,'\' style=\'', inputStyles ,'\' type=\'', input_type ,'\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class=\'btn ', input_class ,'\'>\n  '); if(icon_class.length) { __p.push('\n  <i class=\'', icon_class ,'\'></i>\n  '); } __p.push('\n  ', input_value ,'\n</a>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'control-group\'>\n  <label for=\'', input_id ,'\'>\n    ', label ,'\n  </label>\n  <div class=\'controls\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_array_item"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  <input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'checkbox\' value=\'', value ,'\' />\n  ', label ,'\n</label>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n  <input name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'checkbox\' value=\'', input_value ,'\' />\n</label>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<input id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\' type=\'file\' />\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/hidden_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<input id=\'', input_id ,'\' name=\'', input_name ,'\' type=\'hidden\' value=\'', input_value ,'\' />\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<div class=\'controls\'>\n  <select id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></select>\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n<textarea class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' style=\'', inputStyles ,'\'></textarea>\n'); if(helperText) { __p.push('\n<p class=\'helper-text help-block\'>\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class=\'control-label\' for=\'', input_id ,'\'>\n  ', label ,'\n</label>\n'); } __p.push('\n<div class=\'controls\'>\n  '); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class=\'add-on\'>\n    ', addOn ,'\n  </span>\n  '); } __p.push('\n  <input class=\'', input_class ,'\' id=\'', input_id ,'\' name=\'', input_name ,'\' placeholder=\'', placeHolder ,'\' style=\'', inputStyles ,'\' type=\'text\' />\n  '); if(helperText) { __p.push('\n  <p class=\'helper-text help-block\'>\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');}; }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-src/templates/table_view"] = %thead
-  %tbody.table-body  
-  %tfoot
-  %caption;
+  this.JST["luca-src/templates/containers/tab_selector_container"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div id="', cid ,'-tab-selector" class="tab-selector-container">\n  <ul id="', cid ,'-tabs-nav" class="nav nav-tabs">\n    '); for(var i = 0; i < components.length; i++ ) { __p.push('\n    '); var component = components[i];__p.push('\n    <li class="tab-selector" data-target="', i ,'">\n      <a data-target="', i ,'">\n        ', component.title ,'\n      </a>\n    </li>\n    '); } __p.push('\n  </ul>\n</div>\n');}return __p.join('');};
 }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["table_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<thead></thead>\n<tbody class="table-body"></tbody>\n<tfoot></tfoot>\n<caption></caption>\n');}return __p.join('');}; }).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/containers/tab_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<ul id="', cid ,'-tabs-selector" class="nav ', navClass ,'"></ul>\n<div id="', cid ,'-tab-view-content" class="tab-content"></div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/containers/toolbar_wrapper"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="luca-ui-toolbar-wrapper" id="', id ,'"></div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/button_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label>&nbsp;</label>\n<input style="', inputStyles ,'" class="btn ', input_class ,'" value="', input_value ,'" type="', input_type ,'" id="<%= input_id" />\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/button_field_link"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<a class="btn ', input_class ,'">\n  '); if(icon_class.length) { __p.push('\n  <i class="', icon_class ,'"></i>\n  ', input_value ,'\n  '); } __p.push('\n</a>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/checkbox_array"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="control-group">\n  <label for="', input_id ,'"><%= label =>\n  <div class="controls"><div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/checkbox_array_item"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  <input id="', input_id ,'" type="checkbox" name="', input_name ,'" value="', value ,'" />\n</label>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/checkbox_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n  <input type="checkbox" name="', input_name ,'" value="', input_value ,'" style="', inputStyles ,'" />\n</label>\n\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/file_upload_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n  <input type="file" name="', input_name ,'" value="', input_value ,'" style="', inputStyles ,'" />\n</label>\n\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/hidden_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(' <input type="hidden" name="', input_name ,'" value="', input_value ,'" style="', inputStyles ,'" />\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/select_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n</label>\n<div class="controls">\n <select name="', input_name ,'" value="', input_value ,'" style="', inputStyles ,'" ></select>\n  '); if(helperText) { __p.push('\n  <p class="helper-text help-block">\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n</label>\n<div class="controls">\n <textarea name="', input_name ,'" style="', inputStyles ,'" >', input_value ,'</textarea>\n  '); if(helperText) { __p.push('\n  <p class="helper-text help-block">\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class="control-label" for="', input_id ,'">', label ,'</label>\n'); } __p.push('\n\n<div class="controls">\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class="add-on">', addOn ,'</span>\n'); } __p.push('\n<input type="text" name="', input_name ,'" style="', inputStyles ,'" value="', input_value ,'" />\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/table_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<thead></thead>\n<tbody class="table-body"></tbody>\n<tfoot></tfoot>\n<caption></caption>\n');}return __p.join('');};
+}).call(this);
 (function() {
   var currentNamespace;
 
@@ -3991,6 +4026,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
+      this.input_value || (this.input_value = "");
       return this.inputStyles || (this.inputStyles = "height:" + this.height + ";width:" + this.width);
     },
     setValue: function(value) {
@@ -4036,6 +4072,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
+      this.input_value || (this.input_value = this.value = "");
       if (this.prepend) {
         this.$el.addClass('input-prepend');
         this.addOn = this.prepend;
