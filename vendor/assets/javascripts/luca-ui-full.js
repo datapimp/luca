@@ -2954,11 +2954,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return (_ref = Luca.containers.CardView.prototype.beforeLayout) != null ? _ref.apply(this, arguments) : void 0;
     },
     afterRender: function() {
-      var _ref;
+      var tabContainerId, _ref;
       if ((_ref = Luca.containers.CardView.prototype.afterRender) != null) {
         _ref.apply(this, arguments);
       }
-      this.registerEvent("click #" + this.cid + "-tabs-selector li a", "select");
+      tabContainerId = this.tabContainer().attr("id");
+      this.registerEvent("click #" + tabContainerId + " li a", "select");
       if (Luca.enableBootstrap && (this.tab_position === "left" || this.tab_position === "right")) {
         this.tabContainerWrapper().addClass("span2");
         return this.tabContentWrapper().addClass("span9");
