@@ -55,8 +55,8 @@
     return memo;
   }, {});
 
-  Luca.find = function() {
-    return;
+  Luca.find = function(el) {
+    return Luca($(el).data('luca-id'));
   };
 
   Luca.supportsEvents = Luca.supportsBackboneEvents = function(obj) {
@@ -415,13 +415,13 @@
 
 }).call(this);
 (function() {
-  var DeferredBindingProxy;
+  var DeferredBindingProxy,
+    __slice = Array.prototype.slice;
 
   DeferredBindingProxy = (function() {
 
     function DeferredBindingProxy(object, operation, wrapWithUnderscore) {
-      var fn,
-        _this = this;
+      var fn;
       this.object = object;
       if (wrapWithUnderscore == null) wrapWithUnderscore = true;
       if (_.isFunction(operation)) {
@@ -433,11 +433,11 @@
         throw "Must pass a function or a string representing one";
       }
       if (wrapWithUnderscore === true) {
-        this.fn = function() {
+        this.fn = _.bind(function() {
           return _.defer(fn);
-        };
+        }, this.object);
       } else {
-        this.fn = fn;
+        this.fn = _.bind(fn, this.object);
       }
       this;
     }
@@ -468,6 +468,67 @@
         return this.unbind(trigger, onceFn);
       };
       return this.bind(trigger, onceFn);
+    }
+  };
+
+  Luca.EventsExt = {
+    waitUntil: function(trigger, context) {
+      return this.waitFor.call(this, trigger, context);
+    },
+    waitFor: function(trigger, context) {
+      var proxy, self;
+      self = this;
+      return proxy = {
+        on: function(target) {
+          return target.waitFor.call(target, trigger);
+        },
+        andThen: function() {
+          var fn, runList, _i, _len, _results;
+          runList = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          _results = [];
+          for (_i = 0, _len = runList.length; _i < _len; _i++) {
+            fn = runList[_i];
+            fn = _.isFunction(fn) ? fn : self[fn];
+            _results.push(self.once(trigger, fn, context));
+          }
+          return _results;
+        }
+      };
+    },
+    relayEvent: function(trigger) {
+      var _this = this;
+      return {
+        on: function() {
+          var components;
+          components = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          return {
+            to: function() {
+              var component, target, targets, _i, _len, _results;
+              targets = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+              _results = [];
+              for (_i = 0, _len = targets.length; _i < _len; _i++) {
+                target = targets[_i];
+                _results.push((function() {
+                  var _j, _len2, _results2,
+                    _this = this;
+                  _results2 = [];
+                  for (_j = 0, _len2 = components.length; _j < _len2; _j++) {
+                    component = components[_j];
+                    _results2.push(component.on(trigger, function() {
+                      var args;
+                      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+                      args.unshift(trigger);
+                      return target.trigger.apply(target, args);
+                    }));
+                  }
+                  return _results2;
+                }).call(_this));
+              }
+              return _results;
+            }
+          };
+        }
+      };
     }
   };
 
@@ -575,11 +636,17 @@
   };
 
   Luca.mixin = function(mixinName) {
-    var namespace;
+    var namespace, resolved;
     namespace = _(Luca.mixin.namespaces).detect(function(space) {
-      return Luca.util.resolve(space)[mixinName] != null;
+      var _ref;
+      return ((_ref = Luca.util.resolve(space)) != null ? _ref[mixinName] : void 0) != null;
     });
-    return Luca.util.resolve(namespace)[mixinName];
+    namespace || (namespace = "Luca.modules");
+    resolved = Luca.util.resolve(namespace)[mixinName];
+    if (resolved == null) {
+      console.log("Could not find " + mixinName + " in ", Luca.mixin.namespaces);
+    }
+    return resolved;
   };
 
   Luca.mixin.namespaces = ["Luca.modules"];
@@ -638,8 +705,12 @@
   Luca.modules.FilterableView = {
     _initializer: function() {
       var _this = this;
+      this.filterableOptions || (this.filterableOptions = {});
       this.filterState = new FilterModel(this.filterableOptions);
       this.onFilterChange || (this.onFilterChange = this.refresh);
+      if (this.onFilterChange == null) {
+        console.log("Trying to use FilterableView without an onFilterChange method", this, this.name);
+      }
       return this.filterState.on("change", function(model) {
         var _ref;
         _this.trigger("change:filter", model.toQuery(), model.toOptions());
@@ -653,6 +724,12 @@
       var silent;
       if (query == null) query = {};
       if (options == null) options = {};
+      if (_.isEmpty(options)) {
+        options = _.defaults(options, this.filterableOptions.options);
+      }
+      if (_.isEmpty(query)) {
+        query = _.defaults(query, this.filterableOptions.query);
+      }
       silent = _(options)["delete"]('silent') === true;
       return this.filterState.set({
         query: query,
@@ -1025,6 +1102,7 @@
       }
       setupBodyTemplate.call(this);
       if (this.name != null) this.cid = _.uniqueId(this.name);
+      this.$el.attr("data-luca-id", this.name || this.cid);
       Luca.cache(this.cid, this);
       this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
       setupClassHelpers.call(this);
@@ -1881,7 +1959,7 @@
       "class": (panel != null ? panel.classes : void 0) || this.componentClass,
       id: "" + this.cid + "-" + panelIndex,
       style: style_declarations.join(';'),
-      "data-luca-owner": this.name || this.cid
+      "data-luca-parent": this.name || this.cid
     };
     if (this.customizeContainerEl != null) {
       config = this.customizeContainerEl(config, panel, panelIndex);
@@ -1910,6 +1988,7 @@
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       this.setupHooks(["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"]);
+      this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards)));
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
     beforeRender: function() {
@@ -1983,11 +2062,6 @@
         return component;
       });
       this.componentsCreated = true;
-      if (this.defaults != null) {
-        console.log("Created With Defaults", _(this.components).map(function(c) {
-          return c.defaultProperty;
-        }));
-      }
       if (!_.isEmpty(this.componentEvents)) this.registerComponentEvents();
       return map;
     },
@@ -2097,20 +2171,16 @@
       return this.components[this.activeItem];
     },
     componentElements: function() {
-      return this.$(">." + this.componentClass, this.$bodyEl());
+      return this.$("[data-luca-parent='" + (this.name || this.cid) + "']");
     },
     getComponent: function(needle) {
       return this.components[needle];
-    },
-    rootComponent: function() {
-      console.log("Calling rootComponent will be deprecated.  use isRootComponent instead");
-      return !(this.getParent != null);
     },
     isRootComponent: function() {
       return !(this.getParent != null);
     },
     getRootComponent: function() {
-      if (this.rootComponent()) {
+      if (this.isRootComponent()) {
         return this;
       } else {
         return this.getParent().getRootComponent();
@@ -2451,18 +2521,12 @@
       return this.components || (this.components = this.pages || (this.pages = this.cards));
     },
     prepareComponents: function() {
-      var _ref,
-        _this = this;
+      var _ref;
       if ((_ref = Luca.core.Container.prototype.prepareComponents) != null) {
         _ref.apply(this, arguments);
       }
-      return _(this.components).each(function(component, index) {
-        if (index === _this.activeCard) {
-          return $(component.container).show();
-        } else {
-          return $(component.container).hide();
-        }
-      });
+      this.componentElements().hide();
+      return this.activeComponentElement().show();
     },
     activeComponentElement: function() {
       return this.componentElements().eq(this.activeCard);
@@ -2474,13 +2538,27 @@
       containerEl.style += panelIndex === this.activeCard ? "display:block;" : "display:none;";
       return containerEl;
     },
+    atFirst: function() {
+      return this.activeCard === 0;
+    },
+    atLast: function() {
+      return this.activeCard === this.components.length - 1;
+    },
+    next: function() {
+      if (this.atLast()) return;
+      return this.activate(this.activeCard + 1);
+    },
+    previous: function() {
+      if (this.atFirst()) return;
+      return this.activate(this.activeCard - 1);
+    },
     cycle: function() {
       var nextIndex;
-      nextIndex = this.activeCard < this.components.length - 1 ? this.activeCard + 1 : 0;
+      nextIndex = this.atLast() ? 0 : this.activeCard + 1;
       return this.activate(nextIndex);
     },
     find: function(name) {
-      return this.findComponentByName(name, true);
+      return Luca(name);
     },
     firstActivation: function() {
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
@@ -3225,7 +3303,7 @@
     itemRenderer: void 0,
     itemTagName: 'li',
     itemClassName: 'collection-item',
-    hooks: ["empty:results"],
+    hooks: ["before:refresh", "empty:results", "after:refresh"],
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -3249,15 +3327,19 @@
           if (_this.loadMask === true) _this.trigger("disable:loadmask");
           return _this.refresh();
         });
-        this.collection.bind("add", this.refresh);
-        this.collection.bind("remove", this.refresh);
+        this.collection.bind("remove", function() {
+          return _this.refresh();
+        });
+        this.collection.bind("add", function() {
+          return _this.refresh();
+        });
         if (this.observeChanges === true) setupChangeObserver.call(this);
       } else {
         throw "Collection Views must have a valid backbone collection";
       }
-      return this.defer(function() {
+      return this.waitFor("after:render").andThen(function() {
         if (_this.collection.length > 0) return _this.refresh();
-      }).until("after:render");
+      });
     },
     attributesForItem: function(item, model) {
       return _.extend({}, {
@@ -3318,16 +3400,16 @@
     },
     refresh: function(query, options) {
       var index, model, models, _i, _len;
-      this.trigger("before:refresh");
       this.$bodyEl().empty();
       models = this.getModels(query, options);
+      this.trigger("before:refresh", models, query, options);
       if (models.length === 0) this.trigger("empty:results");
       index = 0;
       for (_i = 0, _len = models.length; _i < _len; _i++) {
         model = models[_i];
         this.$append(this.makeItem(model, index++));
       }
-      this.trigger("after:refresh");
+      this.trigger("after:refresh", models, query, options);
       return this;
     },
     registerEvent: function(domEvent, selector, handler) {
@@ -4733,16 +4815,12 @@
     itemRenderer: function(item, model) {
       return Luca.components.TableView.rowRenderer.call(this, item, model);
     },
-    emptyResults: function() {
-      return this.$bodyEl().empty().append("<tr><td colspan=" + this.columns.length + ">" + this.emptyText + "</td></tr>");
-    },
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
       Luca.components.CollectionView.prototype.initialize.apply(this, arguments);
       return this.defer(function() {
-        Luca.components.TableView.renderHeader.call(_this, _this.columns, _this.$('thead'));
-        return _this.$el.removeClass('row-fluid');
+        return Luca.components.TableView.renderHeader.call(_this, _this.columns, _this.$('thead'));
       }).until("before:render");
     }
   });
@@ -4757,7 +4835,7 @@
       _results = [];
       for (_i = 0, _len = columns.length; _i < _len; _i++) {
         column = columns[_i];
-        _results.push("<th data-col-index='" + index + "'>" + column.header + "</th>");
+        _results.push("<th data-col-index='" + (index++) + "'>" + column.header + "</th>");
       }
       return _results;
     })();
@@ -4767,19 +4845,20 @@
     for (_i = 0, _len = columns.length; _i < _len; _i++) {
       column = columns[_i];
       if (column.width != null) {
-        _results.push(this.$("th[data-col-index='" + index + "']", targetElement).css('width', column.width));
+        _results.push(this.$("th[data-col-index='" + (index++) + "']", targetElement).css('width', column.width));
       }
     }
     return _results;
   };
 
   Luca.components.TableView.rowRenderer = function(item, model, index) {
-    var columnConfig, _i, _len, _ref, _results;
+    var colIndex, columnConfig, _i, _len, _ref, _results;
+    colIndex = 0;
     _ref = this.columns;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       columnConfig = _ref[_i];
-      _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, index));
+      _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, colIndex++));
     }
     return _results;
   };
@@ -4790,7 +4869,9 @@
     if (_.isFunction(column.renderer)) {
       cellValue = column.renderer.call(this, cellValue, model, column);
     }
-    return make("td", {}, cellValue);
+    return make("td", {
+      "data-col-index": index
+    }, cellValue);
   };
 
 }).call(this);

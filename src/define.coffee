@@ -109,9 +109,15 @@ Luca.extend = (superClassName, childName, properties={})->
 
 Luca.mixin = (mixinName)->
   namespace = _( Luca.mixin.namespaces ).detect (space)->
-    Luca.util.resolve(space)[ mixinName ]?
+    Luca.util.resolve(space)?[ mixinName ]?
 
-  Luca.util.resolve(namespace)[ mixinName ]
+  namespace ||= "Luca.modules"
+
+  resolved = Luca.util.resolve(namespace)[ mixinName ]
+
+  console.log "Could not find #{ mixinName } in ", Luca.mixin.namespaces unless resolved?
+
+  resolved
 
 Luca.mixin.namespaces = [
   "Luca.modules"

@@ -66,9 +66,8 @@ Luca.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo
 , {}
 
-Luca.find = ()->
-  # TODO Implement
-  undefined
+Luca.find = (el)->
+  Luca( $(el).data('luca-id') )
 
 Luca.supportsEvents = Luca.supportsBackboneEvents = (obj)->
   Luca.isComponent(obj) or (_.isFunction( obj?.trigger ) or _.isFunction(obj?.bind))

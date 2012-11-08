@@ -21,10 +21,11 @@ class DeferredBindingProxy
       throw "Must pass a function or a string representing one"
 
     if wrapWithUnderscore is true
-      @fn = ()=>
+      @fn = _.bind ()->
         _.defer(fn)
+      , @object
     else
-      @fn = fn
+      @fn = _.bind(fn,@object)
 
     @
 
@@ -41,6 +42,7 @@ class DeferredBindingProxy
     @object
 
 Luca.Events =
+
   defer: (operation, wrapWithUnderscore=true)->
     new DeferredBindingProxy(@, operation, wrapWithUnderscore)
 
@@ -52,3 +54,27 @@ Luca.Events =
       @unbind(trigger, onceFn)
 
     @bind trigger, onceFn
+
+
+Luca.EventsExt = 
+  waitUntil:(trigger, context)->
+    @waitFor.call(@, trigger, context )
+    
+  waitFor: (trigger, context)->
+    self = @
+    proxy = 
+      on:(target)-> 
+        target.waitFor.call(target,trigger)
+      andThen:(runList...)->
+        for fn in runList
+          fn = if _.isFunction(fn) then fn else self[fn]
+          self.once(trigger, fn, context)
+
+  relayEvent: (trigger)->
+    on: (components...)=>
+      to: (targets...)=>
+        for target in targets
+          for component in components
+            component.on trigger, (args...)=>
+              args.unshift(trigger)
+              target.trigger.apply(target,args)

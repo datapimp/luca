@@ -154,3 +154,7 @@ G0.7.3:
   - Adds ability to pass a function reference as a component.  The container will call the function, in 
     the context of the container, and use the returned object as the component definition template
   - Adds a defaults property to containers.  This will apply the values as defaults to each component.
+  - Adds Luca.EventsExt an optional core extension which provides additional event binding sugar
+  - Fixes to CollectionView
+  - Improved container / component bindings via html data attributes
+  - bugfixes in CardView

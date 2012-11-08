@@ -24,6 +24,8 @@ _.def("Luca.View").extends("Backbone.View").with
 
     @cid = _.uniqueId(@name) if @name?
 
+    @$el.attr("data-luca-id", @name || @cid)
+    
     Luca.cache( @cid, @ )
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()

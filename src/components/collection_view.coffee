@@ -28,7 +28,9 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
   itemClassName: 'collection-item'
 
   hooks:[
+    "before:refresh"
     "empty:results"
+    "after:refresh"
   ]
   
   initialize: (@options={})->
@@ -55,8 +57,12 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
         @trigger "disable:loadmask" if @loadMask is true
         @refresh()
 
-      @collection.bind "add", @refresh
-      @collection.bind "remove", @refresh
+      @collection.bind "remove", ()=>
+        @refresh()
+
+      @collection.bind "add", ()=>
+        @refresh()
+
 
       if @observeChanges is true
         setupChangeObserver.call(@)
@@ -64,10 +70,7 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     else
       throw "Collection Views must have a valid backbone collection"
 
-    @defer ()=>
-      if @collection.length > 0
-        @refresh()
-    .until("after:render")
+    @waitFor("after:render").andThen ()=> @refresh() if @collection.length > 0
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
@@ -112,19 +115,20 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
 
   refresh: (query,options)->
-    @trigger "before:refresh"
-    
     @$bodyEl().empty()
     models = @getModels(query, options)
+
+    @trigger("before:refresh", models, query, options)
 
     if models.length is 0
       @trigger("empty:results")
 
     index = 0
+
     for model in models
       @$append @makeItem(model, index++)
 
-    @trigger "after:refresh"
+    @trigger("after:refresh", models, query, options)
 
     @
 

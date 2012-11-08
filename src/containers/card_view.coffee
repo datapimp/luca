@@ -22,12 +22,8 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
 
   prepareComponents: ()->
     Luca.core.Container::prepareComponents?.apply(@, arguments)
-
-    _( @components ).each (component,index)=>
-      if index is @activeCard
-        $( component.container ).show()
-      else
-        $( component.container ).hide()
+    @componentElements().hide()
+    @activeComponentElement().show()
 
   activeComponentElement: ()->
     @componentElements().eq( @activeCard )
@@ -40,12 +36,25 @@ _.def("Luca.containers.CardView").extends("Luca.core.Container").with
 
     containerEl
 
+  atFirst: ()->
+    @activeCard is 0
+
+  atLast: ()->
+    @activeCard is @components.length - 1
+
+  next: ()->
+    return if @atLast()
+    @activate( @activeCard + 1)
+
+  previous: ()->   
+    return if @atFirst()
+    @activate( @activeCard - 1)
+
   cycle: ()->
-    nextIndex = if @activeCard < @components.length - 1 then @activeCard + 1 else 0
+    nextIndex = if @atLast() then 0 else @activeCard + 1
     @activate( nextIndex )
 
-  find: (name)->
-    @findComponentByName(name,true)
+  find: (name)-> Luca(name)
 
   firstActivation: ()->
     @activeComponent().trigger "first:activation", @, @activeComponent()

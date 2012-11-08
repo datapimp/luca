@@ -27,7 +27,7 @@ applyDOMConfig = (panel, panelIndex)->
     class: panel?.classes || @componentClass
     id: "#{ @cid }-#{ panelIndex }"
     style: style_declarations.join(';')
-    "data-luca-owner" : @name || @cid
+    "data-luca-parent" : @name || @cid
 
   if @customizeContainerEl?
    config = @customizeContainerEl( config, panel, panelIndex )
@@ -85,6 +85,10 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       "after:layout"
       "first:activation"
     ]
+
+    # aliases for the components property
+    @components ||= @fields ||= @pages ||= @cards
+
 
     Luca.View::initialize.apply @, arguments
 
@@ -231,9 +235,6 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
     @componentsCreated = true
 
-    if @defaults?
-      console.log "Created With Defaults", _( @components ).map (c)-> c.defaultProperty
-
     @registerComponentEvents() unless _.isEmpty(@componentEvents)
 
     map
@@ -341,20 +342,16 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     return @components[ @activeItem ]
 
   componentElements: ()->
-    @$(">.#{ @componentClass }", @$bodyEl())
+    @$("[data-luca-parent='#{ @name || @cid }']")
 
   getComponent: (needle)->
     @components[ needle ]
-
-  rootComponent: ()->
-    console.log "Calling rootComponent will be deprecated.  use isRootComponent instead"
-    !@getParent?
 
   isRootComponent:()->
     !@getParent?
 
   getRootComponent: ()->
-    if @rootComponent() then @ else @getParent().getRootComponent()
+    if @isRootComponent() then @ else @getParent().getRootComponent()
     
   selectByAttribute: (attribute, value, deep=false)->
     components = _( @components ).map (component)->
