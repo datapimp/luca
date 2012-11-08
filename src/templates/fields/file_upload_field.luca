@@ -1,8 +1,0 @@
-%label{:for=>"<%= input_id %>"}
-  <%= label %>
-%input{:style=>"<%= inputStyles %>",:id=>"<%= input_id %>",:type=>"file",:name=>"<%= input_name %>"}
-<% if(helperText) { %>
-%p.helper-text.help-block
-  <%= helperText %>
-<% } %>
-

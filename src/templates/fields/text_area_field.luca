@@ -1,8 +1,0 @@
-%label{:for=>"<%= input_id %>"}
-  <%= label %>
-%textarea{:id=>"<%= input_id %>",:name=>"<%= input_name %>",:class=>"<%= input_class %>",:style=>"<%= inputStyles %>"}
-<% if(helperText) { %>
-%p.helper-text.help-block
-  <%= helperText %>
-<% } %>
-

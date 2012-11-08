@@ -1,9 +1,0 @@
-%label{:for=>"<%= input_id %>"}
-  <%= label %>
-  %input{:style=>"<%= inputStyles %>",:type=>"checkbox",:name=>"<%= input_name %>",:value=>"<%= input_value %>"}
-  
-<% if(helperText) { %>
-%p.helper-text.help-block
-  <%= helperText %>
-<% } %>
-

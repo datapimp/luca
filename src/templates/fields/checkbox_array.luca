@@ -1,4 +1,0 @@
-.control-group
-  %label{:for=>"<%= input_id %>"}
-    <%= label %>
-  .controls

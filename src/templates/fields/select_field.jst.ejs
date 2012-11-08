@@ -1,0 +1,11 @@
+<label for="<%= input_id %>">
+  <%= label %>
+</label>
+<div class="controls">
+ <select name="<%= input_name %>" value="<%= input_value %>" style="<%= inputStyles %>" ></select>
+  <% if(helperText) { %>
+  <p class="helper-text help-block">
+    <%= helperText %>
+  </p>
+  <% } %>
+</div>

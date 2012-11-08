@@ -1,2 +1,0 @@
-%ul{:id=>"<%= cid %>-tabs-selector",:class=>"nav <%= navClass %>"}
-%div{:id=>"<%= cid %>-tab-view-content",:class=>"tab-content"}
