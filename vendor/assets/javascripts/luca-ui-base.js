@@ -3969,7 +3969,7 @@
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
-      this.input_value || (this.input_value = "");
+      this.input_value || (this.input_value = this.value = "");
       if (this.prepend) {
         this.$el.addClass('input-prepend');
         this.addOn = this.prepend;
