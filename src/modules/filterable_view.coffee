@@ -1,5 +1,5 @@
 Luca.modules.FilterableView = 
-  _initializer: ()->
+  _initializer: (component, module)->
     @filterableOptions ||= {}
 
     @filterState = new FilterModel(@filterableOptions) 
@@ -29,6 +29,9 @@ Luca.modules.FilterableView =
     @filterState.set({query,options}, silent: silent)
 
 class FilterModel extends Backbone.Model
+  setPage: (page)->
+    @set 'options', _.extend(@toOptions(), page: page)
+
   toQuery: ()->
     @get("query")
 

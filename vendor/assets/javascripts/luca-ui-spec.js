@@ -1928,6 +1928,7 @@
         this.label || (this.label = "*" + this.label);
       }
       this.inputStyles || (this.inputStyles = "");
+      this.input_value || (this.input_value = this.value || "");
       if (this.disabled) this.disable();
       this.updateState(this.state);
       this.placeHolder || (this.placeHolder = "");

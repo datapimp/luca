@@ -30,6 +30,7 @@ _.def('Luca.core.Field').extends('Luca.View').with
     @helperText ||= ""
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     @inputStyles ||= ""
+    @input_value ||= @value || ""
 
     @disable() if @disabled
 

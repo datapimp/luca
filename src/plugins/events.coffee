@@ -64,11 +64,13 @@ Luca.EventsExt =
     self = @
     proxy = 
       on:(target)-> 
-        target.waitFor.call(target,trigger)
-      andThen:(runList...)->
+        target.waitFor.call(target,trigger,context)
+      and:(runList...)->
         for fn in runList
           fn = if _.isFunction(fn) then fn else self[fn]
           self.once(trigger, fn, context)
+      andThen: ()->
+        self.and.apply(self, arguments)
 
   relayEvent: (trigger)->
     on: (components...)=>

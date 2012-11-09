@@ -102,6 +102,9 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
       console.log "Error generating DOM element for CollectionView", e.message, item, content, attributes
       #no op
 
+  getCollection: ()->
+    @collection
+    
   getModels: (query=@filter, options=@filterOptions)->
     if @collection?.query
       @collection.query(query || {}, options || {})

@@ -626,9 +626,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       self = this;
       return proxy = {
         on: function(target) {
-          return target.waitFor.call(target, trigger);
+          return target.waitFor.call(target, trigger, context);
         },
-        andThen: function() {
+        and: function() {
           var fn, runList, _i, _len, _results;
           runList = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           _results = [];
@@ -638,6 +638,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
             _results.push(self.once(trigger, fn, context));
           }
           return _results;
+        },
+        andThen: function() {
+          return self.and.apply(self, arguments);
         }
       };
     },
@@ -849,7 +852,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   Luca.modules.FilterableView = {
-    _initializer: function() {
+    _initializer: function(component, module) {
       var _this = this;
       this.filterableOptions || (this.filterableOptions = {});
       this.filterState = new FilterModel(this.filterableOptions);
@@ -893,6 +896,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     function FilterModel() {
       FilterModel.__super__.constructor.apply(this, arguments);
     }
+
+    FilterModel.prototype.setPage = function(page) {
+      return this.set('options', _.extend(this.toOptions(), {
+        page: page
+      }));
+    };
 
     FilterModel.prototype.toQuery = function() {
       return this.get("query");
@@ -2031,6 +2040,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         this.label || (this.label = "*" + this.label);
       }
       this.inputStyles || (this.inputStyles = "");
+      this.input_value || (this.input_value = this.value || "");
       if (this.disabled) this.disable();
       this.updateState(this.state);
       this.placeHolder || (this.placeHolder = "");
@@ -3526,6 +3536,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         return console.log("Error generating DOM element for CollectionView", e.message, item, content, attributes);
       }
     },
+    getCollection: function() {
+      return this.collection;
+    },
     getModels: function(query, options) {
       var _ref;
       if (query == null) query = this.filter;
@@ -4072,7 +4085,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
-      this.input_value || (this.input_value = this.value = "");
+      this.input_value || (this.input_value = this.value || "");
       if (this.prepend) {
         this.$el.addClass('input-prepend');
         this.addOn = this.prepend;
