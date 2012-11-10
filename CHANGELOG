@@ -158,3 +158,11 @@ G0.7.3:
   - Fixes to CollectionView
   - Improved container / component bindings via html data attributes
   - bugfixes in CardView
+
+0.9.5
+  - CollectionView is modifiable through several mixins:
+    - Filterable
+    - Paginatable
+    - Loadmaskable
+  - These are taking advantage of a Luca.mixin system.
+  - Experimenting with a cleaner component definition style

@@ -683,7 +683,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var DefineProxy;
+  var DefineProxy,
+    __slice = Array.prototype.slice;
 
   Luca.define = function(componentName) {
     return new DefineProxy(componentName);
@@ -731,14 +732,44 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this;
     };
 
+    DefineProxy.prototype.defaultsTo = function(properties) {
+      if (properties != null) return this["with"](properties);
+      return this;
+    };
+
+    DefineProxy.prototype.defaults = function(properties) {
+      if (properties != null) return this["with"](properties);
+      return this;
+    };
+
+    DefineProxy.prototype.hasDefaultProperties = function(properties) {
+      if (properties != null) return this["with"](properties);
+      return this;
+    };
+
+    DefineProxy.prototype.behavesAs = function() {
+      var mixin, mixins, _i, _len;
+      mixins = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties || (this.properties = {}), {
+        mixins: []
+      });
+      for (_i = 0, _len = mixins.length; _i < _len; _i++) {
+        mixin = mixins[_i];
+        this.properties.mixins.push(mixin);
+      }
+      return this;
+    };
+
     DefineProxy.prototype["with"] = function(properties) {
       var at, componentType, _base;
+      if (properties == null) properties = {};
+      _.defaults((this.properties || (this.properties = {})), properties);
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
       if (this.namespaced && !(at != null)) {
         eval("(window||global)." + this.namespace + " = {}");
         at = Luca.util.resolve(this.namespace, window || global);
       }
-      at[this.componentId] = Luca.extend(this.superClassName, this.componentName, properties);
+      at[this.componentId] = Luca.extend(this.superClassName, this.componentName, this.properties);
       if (Luca.autoRegister === true) {
         if (Luca.isViewPrototype(at[this.componentId])) componentType = "view";
         if (Luca.isCollectionPrototype(at[this.componentId])) {
@@ -851,34 +882,46 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  Luca.modules.FilterableView = {
+  Luca.modules.Filterable = {
     _initializer: function(component, module) {
-      var _this = this;
-      this.filterableOptions || (this.filterableOptions = {});
-      this.filterState = new FilterModel(this.filterableOptions);
-      this.onFilterChange || (this.onFilterChange = this.refresh);
-      if (this.onFilterChange == null) {
-        console.log("Trying to use FilterableView without an onFilterChange method", this, this.name);
+      var oldOptions, oldQuery, sortBy, _ref, _ref2,
+        _this = this;
+      if (this.filterable === false) return;
+      this.filterState = this.getFilterModel();
+      if (oldQuery = this.getQuery) {
+        this.getQuery = function() {
+          return _.extend(oldQuery.call(_this), _this.filterState.toQuery());
+        };
       }
-      return this.filterState.on("change", function(model) {
-        var _ref;
-        _this.trigger("change:filter", model.toQuery(), model.toOptions());
-        return (_ref = _this.onFilterChange) != null ? _ref.call(_this, model.toQuery(), model.toOptions()) : void 0;
-      });
+      if (oldOptions = this.getQueryOptions) {
+        this.getQueryOptions = function() {
+          return _.extend(oldOptions.call(_this), _this.filterState.toOptions());
+        };
+      }
+      if (sortBy = (_ref = this.filterable) != null ? (_ref2 = _ref.options) != null ? _ref2.sortBy : void 0 : void 0) {
+        return this.setSortBy(sortBy);
+      }
     },
-    getModels: function() {
-      return this.collection.query(this.filterState.toQuery(), this.filterState.toOptions());
+    setSortBy: function(sortBy, options) {
+      if (options == null) options = {};
+      return this.filterState.setOption('sortBy', sortBy, options);
+    },
+    getFilterModel: function() {
+      if (this.filterState != null) return this.filterState;
+      this.filterState = new FilterModel(this.filterable || (this.filterable = {}));
+      this.filterState.on("change", function() {
+        return this.trigger("collection:change");
+      }, this);
+      return this.filterState;
     },
     applyFilter: function(query, options) {
       var silent;
       if (query == null) query = {};
       if (options == null) options = {};
       if (_.isEmpty(options)) {
-        options = _.defaults(options, this.filterableOptions.options);
+        options = _.defaults(options, this.getQueryOptions());
       }
-      if (_.isEmpty(query)) {
-        query = _.defaults(query, this.filterableOptions.query);
-      }
+      if (_.isEmpty(query)) query = _.defaults(query, this.getQuery());
       silent = _(options)["delete"]('silent') === true;
       return this.filterState.set({
         query: query,
@@ -897,18 +940,26 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       FilterModel.__super__.constructor.apply(this, arguments);
     }
 
-    FilterModel.prototype.setPage = function(page) {
-      return this.set('options', _.extend(this.toOptions(), {
-        page: page
-      }));
+    FilterModel.prototype.setOption = function(option, value, options) {
+      var payload;
+      payload = {};
+      payload[option] = value;
+      return this.set('options', _.extend(this.toOptions(), payload), options);
     };
 
-    FilterModel.prototype.toQuery = function() {
-      return this.get("query");
+    FilterModel.prototype.setQueryOption = function(option, value, options) {
+      var payload;
+      payload = {};
+      payload[option] = value;
+      return this.set('query', _.extend(this.toQuery(), payload), options);
     };
 
     FilterModel.prototype.toOptions = function() {
       return this.get("options");
+    };
+
+    FilterModel.prototype.toQuery = function() {
+      return this.get("query");
     };
 
     return FilterModel;
@@ -933,6 +984,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   Luca.modules.LoadMaskable = {
     _initializer: function() {
       var _this = this;
+      if (this.loadMask !== true) return;
       if (this.loadMask === true) {
         this.defer(function() {
           _this.$el.addClass('with-mask');
@@ -941,8 +993,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
             return _this.$('.load-mask').hide();
           }
         }).until("after:render");
-        this.on(this.loadmaskEnableEvent || "enable:loadmask", this.applyLoadMask);
-        return this.on(this.loadmaskDisableEvent || "disable:loadmask", this.applyLoadMask);
+        this.on(this.loadmaskEnableEvent || "enable:loadmask", this.applyLoadMask, this);
+        return this.on(this.loadmaskDisableEvent || "disable:loadmask", this.applyLoadMask, this);
       }
     },
     showLoadMask: function() {
@@ -1069,6 +1121,91 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return options.success(resp);
     } else {
       return options.error("Record not found");
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.Paginatable = {
+    paginatorViewClass: 'Luca.components.PaginationControl',
+    _initializer: function() {
+      var old,
+        _this = this;
+      if (this.paginatable === false) return;
+      _.bindAll(this, "paginationControl");
+      this.getCollection || (this.getCollection = function() {
+        return this.collection;
+      });
+      if (old = this.getQueryOptions) {
+        this.getQueryOptions = function() {
+          var filtered, p;
+          p = _this.paginationControl();
+          filtered = _.extend(old.call(_this), {
+            limit: p.limit(),
+            page: p.page()
+          });
+          return filtered;
+        };
+      }
+      if (this.paginationContainer().length === 0) {
+        return this.$bodyEl().after(this.make("div", {
+          "class": "toolbar bottom"
+        }));
+      }
+    },
+    paginationContainer: function() {
+      return this.$('.toolbar.bottom');
+    },
+    setCurrentPage: function(page, options) {
+      if (page == null) page = 1;
+      if (options == null) options = {};
+      return this.paginationControl().state.set('page', page, options);
+    },
+    setLimit: function(limit, options) {
+      if (limit == null) limit = 0;
+      if (options == null) options = {};
+      return this.paginationControl().state.set('limit', limit, options);
+    },
+    updatePagination: function(models, query, options) {
+      var itemCount, paginator, totalCount, _ref;
+      if (models == null) models = [];
+      if (query == null) query = {};
+      if (options == null) options = {};
+      _.defaults(options, this.getQueryOptions(), {
+        limit: 0
+      });
+      paginator = this.paginationControl();
+      itemCount = (models != null ? models.length : void 0) || 0;
+      totalCount = (_ref = this.getCollection()) != null ? _ref.length : void 0;
+      if (itemCount === 0 || totalCount <= options.limit) {
+        paginator.$el.hide();
+      } else {
+        paginator.$el.show();
+      }
+      return paginator.state.set({
+        page: options.page,
+        limit: options.limit
+      });
+    },
+    paginationControl: function() {
+      if (this.paginator != null) return this.paginator;
+      _.defaults(this.paginatable || (this.paginatable = {}), {
+        page: 1,
+        limit: 20
+      });
+      this.paginator = new Luca.util.resolve(this.paginatorViewClass)({
+        collection: this.getCollection(),
+        parent: this
+      });
+      this.paginator.setPage(this.paginatable.page);
+      this.paginator.setLimit(this.paginatable.limit);
+      this.paginator.state.on("change", function() {
+        return this.trigger("collection:change");
+      }, this);
+      this.on("after:refresh", this.updatePagination, this);
+      this.paginationContainer().append(this.paginator.render().$el);
+      return this.paginator;
     }
   };
 
@@ -2661,9 +2798,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
+  var component;
 
-  _.def("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
-    componentType: 'card_view',
+  component = Luca.define("Luca.containers.CardView");
+
+  component["extends"]("Luca.core.Container");
+
+  component.defaults({
     className: 'luca-ui-card-view-wrapper',
     activeCard: 0,
     components: [],
@@ -3449,11 +3590,16 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var make, setupChangeObserver;
+  var collectionView, make, setupChangeObserver;
 
-  _.def("Luca.components.CollectionView")["extends"]("Luca.components.Panel")["with"]({
-    mixins: ["LoadMaskable", "FilterableView"],
-    tagName: "div",
+  collectionView = Luca.define("Luca.components.CollectionView");
+
+  collectionView["extends"]("Luca.components.Panel");
+
+  collectionView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
+
+  collectionView.defaultsTo({
+    tagName: "ol",
     className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
     itemTemplate: void 0,
@@ -3476,29 +3622,29 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (_.isString(this.collection) && Luca.CollectionManager.get()) {
         this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
       }
-      if (Luca.isBackboneCollection(this.collection)) {
+      if (!Luca.isBackboneCollection(this.collection)) {
+        throw "Collection Views must have a valid backbone collection";
         this.collection.on("before:fetch", function() {
           if (_this.loadMask === true) return _this.trigger("enable:loadmask");
         });
         this.collection.bind("reset", function() {
-          if (_this.loadMask === true) _this.trigger("disable:loadmask");
-          return _this.refresh();
+          _this.trigger("collection:change");
+          if (_this.loadMask === true) return _this.trigger("disable:loadmask");
         });
         this.collection.bind("remove", function() {
-          return _this.refresh();
+          return _this.trigger("collection:change");
         });
         this.collection.bind("add", function() {
-          return _this.refresh();
+          return _this.trigger("collection:change");
         });
         if (this.observeChanges === true) setupChangeObserver.call(this);
-      } else {
-        throw "Collection Views must have a valid backbone collection";
       }
       if (this.autoRefreshOnModelsPresent !== false) {
-        return this.waitFor("after:render").andThen(function() {
+        this.waitFor("before:render").and(function() {
           if (_this.collection.length > 0) return _this.refresh();
         });
       }
+      return this.on("collection:change", this.refresh, this);
     },
     attributesForItem: function(item, model) {
       return _.extend({}, {
@@ -3539,12 +3685,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     getCollection: function() {
       return this.collection;
     },
+    getQuery: function() {
+      return {};
+    },
+    getQueryOptions: function() {
+      return {};
+    },
     getModels: function(query, options) {
       var _ref;
-      if (query == null) query = this.filter;
-      if (options == null) options = this.filterOptions;
       if ((_ref = this.collection) != null ? _ref.query : void 0) {
-        return this.collection.query(query || {}, options || {});
+        query || (query = this.getQuery());
+        options || (options = this.getQueryOptions());
+        return this.collection.query(query, options);
       } else {
         return this.collection.models;
       }
@@ -4716,6 +4868,112 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   _.def("Luca.PageController")["extends"]("Luca.components.Controller")["with"]({
     version: 2
+  });
+
+}).call(this);
+(function() {
+
+  _.def("Luca.components.PaginationControl")["extends"]("Luca.View")["with"]({
+    template: "shared/pagination",
+    stateful: true,
+    autoBindEventHandlers: true,
+    events: {
+      "click a[data-page-number]": "selectPage",
+      "click a.next": "nextPage",
+      "click a.prev": "previousPage"
+    },
+    afterInitialize: function() {
+      return this.state.on("change", this.refresh, this);
+    },
+    limit: function() {
+      var _ref;
+      return parseInt(this.state.get('limit') || ((_ref = this.collection) != null ? _ref.length : void 0));
+    },
+    page: function() {
+      return parseInt(this.state.get('page') || 1);
+    },
+    nextPage: function() {
+      if (!this.nextEnabled()) return;
+      return this.state.set('page', this.page() + 1);
+    },
+    previousPage: function() {
+      if (!this.previousEnabled()) return;
+      return this.state.set('page', this.page() - 1);
+    },
+    selectPage: function(e) {
+      var me, my;
+      me = my = this.$(e.target);
+      if (!me.is('a.page')) me = my = my.closest('a.page');
+      my.siblings().removeClass('is-selected');
+      me.addClass('is-selected');
+      return this.setPage(my.data('page-number'));
+    },
+    setPage: function(page, options) {
+      if (page == null) page = 1;
+      if (options == null) options = {};
+      return this.state.set('page', page, options);
+    },
+    setLimit: function(limit, options) {
+      if (limit == null) limit = 1;
+      if (options == null) options = {};
+      return this.state.set('limit', limit, options);
+    },
+    pageButtonContainer: function() {
+      return this.$('.group');
+    },
+    previousEnabled: function() {
+      return this.page() > 1;
+    },
+    nextEnabled: function() {
+      return this.page() < this.totalPages();
+    },
+    previousButton: function() {
+      return this.$('a.page.prev');
+    },
+    nextButton: function() {
+      return this.$('a.page.next');
+    },
+    pageButtons: function() {
+      return this.$('a[data-page-number]', this.pageButtonContainer());
+    },
+    refresh: function() {
+      var button, page, _ref;
+      this.pageButtonContainer().empty();
+      for (page = 1, _ref = this.totalPages(); 1 <= _ref ? page <= _ref : page >= _ref; 1 <= _ref ? page++ : page--) {
+        button = this.make("a", {
+          "data-page-number": page,
+          "class": "page"
+        }, page);
+        this.pageButtonContainer().append(button);
+      }
+      this.toggleNavigationButtons();
+      return this.selectActivePageButton();
+    },
+    toggleNavigationButtons: function() {
+      this.$('a.next, a.prev').addClass('disabled');
+      if (this.nextEnabled()) this.nextButton().removeClass('disabled');
+      if (this.previousEnabled()) {
+        return this.previousButton().removeClass('disabled');
+      }
+    },
+    selectActivePageButton: function() {
+      return this.activePageButton().addClass('is-selected');
+    },
+    activePageButton: function() {
+      return this.pageButtons().filter("[data-page-number='" + (this.page()) + "']");
+    },
+    totalPages: function() {
+      return parseInt(Math.ceil(this.totalItems() / this.itemsPerPage()));
+    },
+    totalItems: function() {
+      var _ref;
+      return parseInt(((_ref = this.collection) != null ? _ref.length : void 0) || 0);
+    },
+    itemsPerPage: function(value, options) {
+      if (options == null) options = {};
+      if (value != null) this.set("limit", value, options);
+      return parseInt(this.get("limit"));
+    }
   });
 
 }).call(this);

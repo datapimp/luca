@@ -41,12 +41,33 @@ class DefineProxy
   extend: (@superClassName)-> @
 
   # an alias for with, or a readability helper in multi-line definitions
+  enhance: (properties)->
+    return @with(properties) if properties?
+    @
+
+  defaultsTo: (properties)->
+    return @with(properties) if properties?
+    @
+  # an alias for with, or a readability helper in multi-line definitions
   defaults: (properties)->
     return @with(properties) if properties?
     @
 
+  # another alias
+  hasDefaultProperties: (properties)->
+    return @with(properties) if properties?
+    @
+
+  behavesAs: (mixins...)->
+    _.defaults(@properties ||= {}, mixins: []) 
+    for mixin in mixins
+      @properties.mixins.push(mixin) 
+    @
+
   # which properties, methods, etc will you be extending the base class with?
-  with: (properties)->
+  with: (properties={})->
+    _.defaults((@properties||={}), properties)
+
     at = if @namespaced
       Luca.util.resolve(@namespace, (window || global))
     else
@@ -57,7 +78,7 @@ class DefineProxy
       eval("(window||global).#{ @namespace } = {}")
       at = Luca.util.resolve(@namespace,(window || global))
 
-    at[@componentId] = Luca.extend(@superClassName,@componentName, properties)
+    at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
 
     if Luca.autoRegister is true 
       componentType = "view" if Luca.isViewPrototype( at[@componentId] )

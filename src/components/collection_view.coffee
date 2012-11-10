@@ -1,4 +1,4 @@
-component = Luca.define      "Luca.components.CollectionView"
+collectionView = Luca.define      "Luca.components.CollectionView"
 # The CollectionView facilitates the rendering of a Collection
 # of models into a group of many rendered templates
 # 
@@ -14,15 +14,13 @@ component = Luca.define      "Luca.components.CollectionView"
 #       query:
 #         default: 'value'     
 #
-component.extends            "Luca.components.Panel"
+collectionView.extends            "Luca.components.Panel"
 
-component.enhance                        
+collectionView.behavesAs          "LoadMaskable", 
+                                  "Filterable", 
+                                  "Paginatable"
 
-  mixins:[
-                             "LoadMaskable"
-                             "Filterable"
-                             "Paginatable"
-  ]
+collectionView.defaultsTo
 
   tagName: "ol"
 
