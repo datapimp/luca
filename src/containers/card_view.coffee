@@ -1,5 +1,28 @@
-_.def("Luca.containers.CardView").extends("Luca.core.Container").with
-  componentType: 'card_view'
+component = Luca.define         "Luca.containers.CardView"
+component.extends               "Luca.core.Container"
+#
+# The CardView is a type of Container which has many sub-views
+# which are only going to be visible one at a time.  A CardView
+# allows you to @activate() its cards, navigate through them using
+# @next(), @previous(), @cycle()
+#
+# Example:
+#   cardView = new Luca.containers.CardView
+#     cards:[
+#       getter: "getCardOne"
+#       type: "my_component"
+#       name: "one"
+#     ,
+#       getter: "getCardTwo"
+#       type: "my_component"
+#       name: "two"
+#     ]
+#
+#   cardView.activeComponent().name # => "one"
+#   cardView.activate('two')
+#   cardView.activeComponent().name # => "two"
+#
+component.defaults
 
   className: 'luca-ui-card-view-wrapper'
 

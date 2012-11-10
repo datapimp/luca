@@ -41,7 +41,7 @@ class DefineProxy
   extend: (@superClassName)-> @
 
   # an alias for with, or a readability helper in multi-line definitions
-  enhance: (properties)->
+  defaults: (properties)->
     return @with(properties) if properties?
     @
 

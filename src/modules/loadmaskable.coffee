@@ -1,5 +1,6 @@
 Luca.modules.LoadMaskable = 
   _initializer: ()->
+    return unless @loadMask is true
 
     if @loadMask is true
       @defer ()=>
@@ -10,8 +11,8 @@ Luca.modules.LoadMaskable =
           @$('.load-mask').hide()
       .until("after:render")
 
-      @on (@loadmaskEnableEvent || "enable:loadmask"), @applyLoadMask
-      @on (@loadmaskDisableEvent || "disable:loadmask"), @applyLoadMask
+      @on (@loadmaskEnableEvent || "enable:loadmask"), @applyLoadMask, @
+      @on (@loadmaskDisableEvent || "disable:loadmask"), @applyLoadMask, @
 
   showLoadMask: ()->
     @trigger("enable:loadmask")

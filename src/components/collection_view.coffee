@@ -1,17 +1,30 @@
-# Public: The CollectionView renders a collection of models into a list of items.
+component = Luca.define      "Luca.components.CollectionView"
+# The CollectionView facilitates the rendering of a Collection
+# of models into a group of many rendered templates
 # 
-# Examples
+# Example:
 #
-#   _.def('App.ListView').extends('Luca.components.CollectionView').with
-#     collection: new App.SampleCollection()
-#     itemTemplate: "list_view_item"
-#     loadMask: true
+#   new Luca.components.CollectionView 
+#     itemTemplate: "template_name"
+#     collection:   "collection_class_name"
+#     pagination:
+#       page: 1
+#       limit: 15
+#     filterable:
+#       query:
+#         default: 'value'     
 #
+component.extends            "Luca.components.Panel"
 
-_.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
-  mixins: ["LoadMaskable","FilterableView"]
+component.enhance                        
 
-  tagName: "div"
+  mixins:[
+                             "LoadMaskable"
+                             "Filterable"
+                             "Paginatable"
+  ]
+
+  tagName: "ol"
 
   className: "luca-ui-collection-view"
 
@@ -49,29 +62,30 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
     if _.isString(@collection) and Luca.CollectionManager.get()
       @collection = Luca.CollectionManager.get().getOrCreate(@collection)
 
-    if Luca.isBackboneCollection(@collection)
+    unless Luca.isBackboneCollection(@collection)
+      throw "Collection Views must have a valid backbone collection"
+
       @collection.on "before:fetch", ()=>
         @trigger "enable:loadmask" if @loadMask is true
         
       @collection.bind "reset", ()=>
+        @trigger "collection:change"
         @trigger "disable:loadmask" if @loadMask is true
-        @refresh()
 
       @collection.bind "remove", ()=>
-        @refresh()
+        @trigger "collection:change"
 
       @collection.bind "add", ()=>
-        @refresh()
-
+        @trigger "collection:change"
 
       if @observeChanges is true
         setupChangeObserver.call(@)
 
-    else
-      throw "Collection Views must have a valid backbone collection"
-
     unless @autoRefreshOnModelsPresent is false
-      @waitFor("after:render").andThen ()=> @refresh() if @collection.length > 0
+      @waitFor("before:render").and ()=> 
+        @refresh() if @collection.length > 0
+
+    @on "collection:change", @refresh, @
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
@@ -104,10 +118,25 @@ _.def("Luca.components.CollectionView").extends("Luca.components.Panel").with
 
   getCollection: ()->
     @collection
-    
-  getModels: (query=@filter, options=@filterOptions)->
+
+  # Private: returns the query that is applied to the underlying collection.
+  # accepts the same options as Luca.Collection.query's initial query option.
+  getQuery: ()-> 
+    {}
+
+  # Private: returns the query that is applied to the underlying collection.
+  # accepts the same options as Luca.Collection.query's initial query option.
+  getQueryOptions: ()-> 
+    {}
+
+  # Private: returns the models to be rendered.  If the underlying collection
+  # responds to @query() then it will use that interface. 
+  getModels: (query,options)->
     if @collection?.query
-      @collection.query(query || {}, options || {})
+      query ||= @getQuery()
+      options ||= @getQueryOptions()
+      
+      @collection.query(query, options)
     else
       @collection.models
 
