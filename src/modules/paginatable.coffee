@@ -9,7 +9,7 @@ Luca.modules.Paginatable =
     @getCollection ||= ()-> @collection
 
     if old = @getQueryOptions 
-      @getQueryOptions = ()=>
+      @getQueryOptions = ()->
         p = @paginationControl()
         filtered = _.extend(old.call(@), limit: p.limit(), page: p.page())
         filtered
@@ -46,7 +46,8 @@ Luca.modules.Paginatable =
 
     _.defaults(@paginatable ||= {}, page: 1, limit: 20)
 
-    @paginator = new Luca.util.resolve(@paginatorViewClass)
+    @paginator = Luca.util.lazyComponent
+      type: "pagination_control" 
       collection: @getCollection() 
       parent: @
 

@@ -80,8 +80,9 @@ collectionView.defaultsTo
         setupChangeObserver.call(@)
 
     unless @autoRefreshOnModelsPresent is false
-      @waitFor("before:render").and ()=> 
+      @defer ()=> 
         @refresh() if @collection.length > 0
+      .until("after:render")
 
     @on "collection:change", @refresh, @
 

@@ -5,11 +5,11 @@ Luca.modules.Filterable =
     @filterState = @getFilterModel() 
 
     if oldQuery = @getQuery 
-      @getQuery = ()=> 
+      @getQuery = ()-> 
         _.extend(oldQuery.call(@), @filterState.toQuery())
 
     if oldOptions = @getQueryOptions 
-      @getQueryOptions = ()=> 
+      @getQueryOptions = ()-> 
         return {}
         _.extend(oldOptions.call(@), @filterState.toOptions())
 

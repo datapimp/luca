@@ -1,4 +1,9 @@
-component = 
+paginationControl = Luca.define   "Luca.components.PaginationControl"
+
+paginationControl.extends         "Luca.View"
+
+paginationControl.defaultsTo
+
   template: "components/pagination"
 
   stateful: true
