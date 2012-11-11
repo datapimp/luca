@@ -90,17 +90,15 @@ collectionView.defaultsTo
 
   contentForItem: (item={})->
     if @itemTemplate? and templateFn = Luca.template(@itemTemplate)
-      # this is the model
-      content = templateFn.call(@, item)
+      return content = templateFn.call(@, item)
 
     if @itemRenderer? and _.isFunction( @itemRenderer )
-      content = @itemRenderer.call(@, item, item.model, item.index)
+      return content = @itemRenderer.call(@, item, item.model, item.index)
 
-    if @itemProperty
-      content = item.model.get(@itemProperty) || item.model[ @itemProperty ]
-      content = content() if _.isFunction(content)
+    if @itemProperty and item.model?
+      return content = item.model.read( @itemProperty )
 
-    content
+    ""
 
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
@@ -111,7 +109,7 @@ collectionView.defaultsTo
     try
       make(@itemTagName, attributes, content)
     catch e
-      console.log "Error generating DOM element for CollectionView", e.message, item, content, attributes
+      console.log "Error generating DOM element for CollectionView", @, model, index
       #no op
 
   getCollection: ()->

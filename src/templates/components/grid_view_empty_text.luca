@@ -1,3 +1,0 @@
-.empty-text-wrapper
-  %p
-    <%= text %>

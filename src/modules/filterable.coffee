@@ -10,6 +10,7 @@ Luca.modules.Filterable =
 
     if oldOptions = @getQueryOptions 
       @getQueryOptions = ()=> 
+        return {}
         _.extend(oldOptions.call(@), @filterState.toOptions())
 
     if sortBy = @filterable?.options?.sortBy 

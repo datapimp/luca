@@ -1,5 +1,5 @@
-_.def("Luca.components.PaginationControl").extends("Luca.View").with
-  template: "shared/pagination"
+component = 
+  template: "components/pagination"
 
   stateful: true
 
