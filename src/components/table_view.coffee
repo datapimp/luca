@@ -19,10 +19,18 @@ _.def("Luca.components.TableView").extends("Luca.components.CollectionView").wit
   initialize: (@options={})->
     Luca.components.CollectionView::initialize.apply(@, arguments)
 
+    @columns = for column in @columns
+      if _.isString(column)
+        column = reader: column
+
+      if !column.header?
+        column.header = _.str.titleize(_.str.humanize(column.reader))
+
+      column
+
     @defer ()=> 
       Luca.components.TableView.renderHeader.call(@, @columns, @$('thead') )
-    .until("before:render")
-
+    .until("after:render")
 
 make = Backbone.View::make
 
@@ -32,7 +40,7 @@ Luca.components.TableView.renderHeader = (columns, targetElement)->
   content = for column in columns
     "<th data-col-index='#{ index++ }'>#{ column.header }</th>"
 
-  $( targetElement ).append(make "tr",{}, content)
+  @$( targetElement ).append("<tr>#{ content.join('') }</tr>")
 
   index = 0
 

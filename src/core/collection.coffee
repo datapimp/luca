@@ -1,8 +1,14 @@
-source = 'Backbone.Collection'
-source = 'Backbone.QueryCollection' if Backbone.QueryCollection?
+collection = Luca.define            'Luca.Collection'
 
-_.def("Luca.Collection").extends( source ).with
-  include: ['Luca.Events']
+if Backbone.QueryCollection?
+  collection.extends                'Backbone.QueryCollection'
+else
+  collection.extends                'Backbone.Collection'
+
+collection.includes                 'Luca.Events'
+
+collection.defines    
+  model: Luca.Model
   # cachedMethods refers to a list of methods on the collection
   # whose value gets cached once it is ran.  the collection then
   # binds to change, add, remove, and reset events and then expires

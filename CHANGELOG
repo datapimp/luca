@@ -160,6 +160,8 @@ G0.7.3:
   - bugfixes in CardView
 
 0.9.5
+  - Luca.Model gets a 'read' method which will a getter function, or get an attribute
+    for the given property you are trying to 'read'
   - CollectionView is modifiable through several mixins:
     - Filterable
     - Paginatable

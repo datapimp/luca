@@ -40,32 +40,19 @@ class DefineProxy
   extends: (@superClassName)-> @
   extend: (@superClassName)-> @
 
-  # an alias for with, or a readability helper in multi-line definitions
-  enhance: (properties)->
-    return @with(properties) if properties?
+  includes: (includes...)->
+    _.defaults(@properties ||= {}, include: []) 
+    for include in includes
+      @properties.include.push(include) 
     @
 
-  defaultsTo: (properties)->
-    return @with(properties) if properties?
-    @
-  # an alias for with, or a readability helper in multi-line definitions
-  defaults: (properties)->
-    return @with(properties) if properties?
-    @
-
-  # another alias
-  hasDefaultProperties: (properties)->
-    return @with(properties) if properties?
-    @
-
-  behavesAs: (mixins...)->
+  mixesIn: (mixins...)->
     _.defaults(@properties ||= {}, mixins: []) 
     for mixin in mixins
       @properties.mixins.push(mixin) 
     @
 
-  # which properties, methods, etc will you be extending the base class with?
-  with: (properties={})->
+  defaultProperties: (properties={})->
     _.defaults((@properties||={}), properties)
 
     at = if @namespaced
@@ -94,6 +81,13 @@ class DefineProxy
       Luca.register( _.string.underscored(@componentId), @componentName, componentType)
 
     at[@componentId]
+
+# Aliases for the mixin definition
+DefineProxy::behavesAs = DefineProxy::uses = DefineProxy::mixesIn 
+
+# Aliases for the final call on the define proxy
+DefineProxy::defines = DefineProxy::defaults = DefineProxy::defaultProperties 
+DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy::defaultProperties
 
 # The last method of the DefineProxy chain is always going to result in
 # a call to Luca.extend.  Luca.extend wraps the call to Luca.View.extend,

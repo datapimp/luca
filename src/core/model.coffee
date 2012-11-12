@@ -1,16 +1,26 @@
-# Computed Properties Support
-# ###
-#
-# Luca.Model supports computed properties, which are 
-# object methods which are composed of model attributes or
-# of calculations which are dependent on these attributes.
+model = Luca.define       'Luca.Model'
 
-# When these model attributes change, the computed property
-# needs to be re-evaluated.  
-#
-# The configuration API for computed properties expects a hash
-# whose keys are the name of the method, and whose value is
-# an array of the attribute dependencies for that method.  
+model.extends             'Backbone.Model'
+
+model.includes            'Luca.Events'
+
+model.defines
+  initialize: ()->
+    Backbone.Model::initialize(@, arguments)
+    setupComputedProperties.call(@)
+
+  read: (attr)->
+    if _.isFunction(@[attr])
+      @[attr].call(@)
+    else
+      @get(attr)
+
+  get: (attr)->
+    if @computed?.hasOwnProperty(attr)
+      @_computed[attr]
+    else
+      Backbone.Model::get.call @, attr
+
 setupComputedProperties = ()->
   return if _.isUndefined(@computed)
 
@@ -27,17 +37,3 @@ setupComputedProperties = ()->
         @trigger "change:#{attr}"
         
       @trigger "change:#{attr}" if @has(dep) 
-
-_.def('Luca.Model').extends('Backbone.Model').with
-
-  include: ['Luca.Events']
-
-  initialize: ()->
-    Backbone.Model::initialize(@, arguments)
-    setupComputedProperties.call(@)
-
-  get: (attr)->
-    if @computed?.hasOwnProperty(attr)
-      @_computed[attr]
-    else
-      Backbone.Model::get.call @, attr

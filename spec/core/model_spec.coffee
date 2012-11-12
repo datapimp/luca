@@ -14,15 +14,15 @@ describe "Luca.Model with computed attribute", ->
     computed:
       fullName: ['firstName', 'lastName']
 
-  it "should have it undefined if dependences are not set", ->
+  it "should be undefined if dependences are not set", ->
     model = new App.models.Sample
     expect(model.get("fullName")).toEqual(undefined)
 
-  it "should have it undefined if callback function is not present", ->
+  it "should be undefined if callback function is not present", ->
     model = new App.models.SampleWithoutCallback
     expect(model.get("fullName")).toEqual(undefined)
 
-  it "should not call it's callback if dependences are not set", ->
+  it "should not call the callback if dependences are not set", ->
     model = new App.models.Sample
     spy   = sinon.spy(model, "fullName")
     expect( spy.called ).toEqual(false)
@@ -48,3 +48,21 @@ describe "Luca.Model with computed attribute", ->
   it "should have it set on constructor if dependencies are supplied", ->
     model = new App.models.Sample({firstName:"Nickolay", lastName: "Schwarz"})
     expect(model.get("fullName")).toEqual('Nickolay Schwarz')
+
+
+describe 'The Read Method', ->
+
+  ModelClass = Luca.Model.extend
+    defaults:
+      attribute: "attribute"
+    reader: ()-> 
+      "reader"
+
+  it "should read an attribute", ->
+    model = new ModelClass()
+    expect( model.read('attribute') ).toEqual "attribute"
+
+  it "should read functions", ->
+    model = new ModelClass()
+    expect( model.read('attribute') ).toEqual "attribute"
+    expect( model.read('reader') ).toEqual 'reader'

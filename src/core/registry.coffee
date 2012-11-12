@@ -13,15 +13,19 @@ component_cache =
 Luca.defaultComponentType = 'view'
 
 Luca.registry.aliases = 
-  grid:       "grid_view"
-  form:       "form_view"
-  text:       "text_field"
-  button:     "button_field"
-  select:     "select_field"
-  card:       "card_view"
-  paged:      "card_view"
-  wizard:     "card_view"
-  collection: "collection_view"
+  grid:         "grid_view"
+  form:         "form_view"
+  text:         "text_field"
+  button:       "button_field"
+  select:       "select_field"
+  card:         "card_view"
+  paged:        "card_view"
+  wizard:       "card_view"
+  collection:   "collection_view"
+  list:         "collection_view"
+  multi:        "collection_multi_view"
+  table:        "table_view"
+
 
 # When you use _.def to define a component, you say
 # which class it extends() from, and with() which enhancements.

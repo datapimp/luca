@@ -1,57 +1,3 @@
-# The Component Container
-#
-# The Component Container is a nestable component
-# which are responsible for handling communication between multiple
-# nested views.
-#
-# One: Layout
-#
-# a container is responsible for laying out the nested views
-# and rendering them in a special DOM element
-doLayout = ()->
-  @trigger "before:layout", @
-  @prepareLayout()
-  @trigger "after:layout", @
-
-# and displaying those elements in a way that is
-# optimal for the desired user experience of that view
-# ( i.e seeing only one of them at a time, seeing them side by side )
-applyDOMConfig = (panel, panelIndex)->
-  style_declarations = []
-
-  style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
-  style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width?
-  style_declarations.push "float: #{ panel.float }" if panel.float
-
-  config =
-    class: panel?.classes || @componentClass
-    id: "#{ @cid }-#{ panelIndex }"
-    style: style_declarations.join(';')
-    "data-luca-parent" : @name || @cid
-
-  if @customizeContainerEl?
-   config = @customizeContainerEl( config, panel, panelIndex )
-
-  config
-
-# Two: Component Creation
-#
-# A container is responsible for creating and storing references to the nested
-# views that are required for its functioning.
-doComponents = ()->
-
-  @trigger "before:components", @, @components
-  @prepareComponents()
-  @createComponents()
-  @trigger "before:render:components", @, @components
-  @renderComponents()
-  @trigger "after:components", @, @components
-
-
-# Containers are central to Luca.  They are what make it easy to structure
-# your application in a logical way and to specify much of the behavior of
-# complex / composite views at define time using JSON syntax combined with
-# the meta data contained in the Luca component registry.
 _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
   className: 'luca-ui-container'
@@ -87,8 +33,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     ]
 
     # aliases for the components property
-    @components ||= @fields ||= @pages ||= @cards
-
+    @components ||= @fields ||= @pages ||= @cards ||= @views
 
     Luca.View::initialize.apply @, arguments
 
@@ -377,3 +322,38 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 Luca.core.Container.componentRenderer = (container, component)->
   attachMethod = $( component.container )[ component.attachWith || "append" ]
   attachMethod( component.render().el )
+
+
+#### Private Helpers
+
+doLayout = ()->
+  @trigger "before:layout", @
+  @prepareLayout()
+  @trigger "after:layout", @
+
+applyDOMConfig = (panel={}, panelIndex)->
+  style_declarations = []
+
+  style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
+  style_declarations.push "width: #{ (if _.isNumber(panel.width) then panel.width + 'px' else panel.width ) }" if panel.width?
+  style_declarations.push "float: #{ panel.float }" if panel.float
+
+  config =
+    class: panel?.classes || @componentClass
+    id: "#{ @cid }-#{ panelIndex }"
+    style: style_declarations.join(';')
+    "data-luca-parent" : @name || @cid
+
+  if @customizeContainerEl?
+   config = @customizeContainerEl( config, panel, panelIndex )
+
+  config
+
+doComponents = ()->
+  @trigger "before:components", @, @components
+  @prepareComponents()
+  @createComponents()
+  @trigger "before:render:components", @, @components
+  @renderComponents()
+  @trigger "after:components", @, @components
+  

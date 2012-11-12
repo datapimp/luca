@@ -227,13 +227,38 @@
   _.mixin(UnderscoreExtensions);
 
 }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'form-actions\'>\n  <a class=\'btn btn-primary submit-button\'>\n    <i class=\'icon-ok icon-white\'></i>\n    Save Changes\n  </a>\n  <a class=\'btn reset-button cancel-button\'>\n    <i class=\'icon-remove\'></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/collection_loader_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'modal\' id=\'progress-model\' style=\'display: none;\'>\n  <div class=\'progress progress-info progress-striped active\'>\n    <div class=\'bar\' style=\'width: 0%;\'></div>\n  </div>\n  <div class=\'message\'>\n    Initializing...\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'', className ,'\'>\n  <a class=\'close\' data-dismiss=\'alert\' href=\'#\'>x</a>\n  ', message ,'\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'luca-ui-g-view-wrapper\'>\n  <div class=\'g-view-header\'></div>\n  <div class=\'luca-ui-g-view-body\'>\n    <table cellpadding=\'0\' cellspacing=\'0\' class=\'luca-ui-g-view scrollable-table\' width=\'100%\'>\n      <thead class=\'fixed\'></thead>\n      <tbody class=\'scrollable\'></tbody>\n    </table>\n  </div>\n  <div class=\'luca-ui-g-view-footer\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/grid_view_empty_text"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'empty-text-wrapper\'>\n  <p>\n    ', text ,'\n  </p>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'load-mask\'>\n  <div class=\'progress progress-striped active\'>\n    <div class=\'bar\' style=\'width:1%\'></div>\n  </div>\n</div>\n');}return __p.join('');}; }).call(this);
-(function() {Luca.templates || (Luca.templates = {}); Luca.templates["components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class=\'navbar-inner\'>\n  <div class=\'luca-ui-navbar-body container\'></div>\n</div>\n');}return __p.join('');}; }).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/bootstrap_form_controls"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="btn-group form-actions">\n  <a class="btn btn-primary submit-button">\n    <i class="icon icon-ok icon-white"></i>\n    Save Changes\n  </a>\n  <a class="btn reset-button cancel-button">\n    <i class="icon icon-remove"></i>\n    Cancel\n  </a>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/collection_loader_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div id="progress-modal" class="modal" style="display: none">\n  <div class="progress progress-info progress-striped active">\n    <div class="bar" style="width:0%;"></div>\n  </div>\n  <div class="message">Initializing...</div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/form_alert"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="', className ,'">\n  <a class="close" href="#" data-dismiss="alert">x</a>\n  ', message ,'\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/grid_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="luca-ui-g-view-wrapper">\n  <div class="g-view-header"></div>\n  <div class="luca-ui-g-view-body">\n    <table class="luca-ui-g-view scrollable-table" width="100%" cellpadding=0 cellspacing=0>\n      <thead class="fixed"></thead>\n      <tbody class="scrollable"></tbody>\n      <tfoot></tfoot>\n    </table>\n  </div>\n  <div class="luca-ui-g-view-header"></div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/grid_view_empty_text"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="empty-text empty-text-wrapper">\n  <p>', text ,'</p>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/load_mask"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="load-mask">\n  <div class="progress progress-striped active">\n    <div class="bar" style="width:0%"></div>\n  </div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/nav_bar"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="navbar-inner">\n  <div class="luca-ui-navbar-body container">\n  </div>\n</div>\n');}return __p.join('');};
+}).call(this);
+(function() {
+  this.JST || (this.JST = {});
+  this.JST["luca-src/templates/components/pagination"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="pagination">\n  <a class="btn previous">\n    <i class="icon icon-chevron-left"></i>\n  </a>\n  <div class="pagination-group">\n  </div>\n  <a class="btn next">\n    <i class="icon icon-chevron-right"></i>\n  </a>\n</div>\n');}return __p.join('');};
+}).call(this);
 (function() {
   this.JST || (this.JST = {});
   this.JST["luca-src/templates/containers/basic"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div id="', id ,'" class="', classes ,'" style="', style ,'"></div>\n');}return __p.join('');};
@@ -523,9 +548,9 @@
       self = this;
       return proxy = {
         on: function(target) {
-          return target.waitFor.call(target, trigger);
+          return target.waitFor.call(target, trigger, context);
         },
-        andThen: function() {
+        and: function() {
           var fn, runList, _i, _len, _results;
           runList = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           _results = [];
@@ -535,6 +560,9 @@
             _results.push(self.once(trigger, fn, context));
           }
           return _results;
+        },
+        andThen: function() {
+          return self.and.apply(self, arguments);
         }
       };
     },
@@ -577,7 +605,8 @@
 
 }).call(this);
 (function() {
-  var DefineProxy;
+  var DefineProxy,
+    __slice = Array.prototype.slice;
 
   Luca.define = function(componentName) {
     return new DefineProxy(componentName);
@@ -625,14 +654,44 @@
       return this;
     };
 
+    DefineProxy.prototype.defaultsTo = function(properties) {
+      if (properties != null) return this["with"](properties);
+      return this;
+    };
+
+    DefineProxy.prototype.defaults = function(properties) {
+      if (properties != null) return this["with"](properties);
+      return this;
+    };
+
+    DefineProxy.prototype.hasDefaultProperties = function(properties) {
+      if (properties != null) return this["with"](properties);
+      return this;
+    };
+
+    DefineProxy.prototype.behavesAs = function() {
+      var mixin, mixins, _i, _len;
+      mixins = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties || (this.properties = {}), {
+        mixins: []
+      });
+      for (_i = 0, _len = mixins.length; _i < _len; _i++) {
+        mixin = mixins[_i];
+        this.properties.mixins.push(mixin);
+      }
+      return this;
+    };
+
     DefineProxy.prototype["with"] = function(properties) {
       var at, componentType, _base;
+      if (properties == null) properties = {};
+      _.defaults((this.properties || (this.properties = {})), properties);
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
       if (this.namespaced && !(at != null)) {
         eval("(window||global)." + this.namespace + " = {}");
         at = Luca.util.resolve(this.namespace, window || global);
       }
-      at[this.componentId] = Luca.extend(this.superClassName, this.componentName, properties);
+      at[this.componentId] = Luca.extend(this.superClassName, this.componentName, this.properties);
       if (Luca.autoRegister === true) {
         if (Luca.isViewPrototype(at[this.componentId])) componentType = "view";
         if (Luca.isCollectionPrototype(at[this.componentId])) {
@@ -745,34 +804,46 @@
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  Luca.modules.FilterableView = {
-    _initializer: function() {
-      var _this = this;
-      this.filterableOptions || (this.filterableOptions = {});
-      this.filterState = new FilterModel(this.filterableOptions);
-      this.onFilterChange || (this.onFilterChange = this.refresh);
-      if (this.onFilterChange == null) {
-        console.log("Trying to use FilterableView without an onFilterChange method", this, this.name);
+  Luca.modules.Filterable = {
+    _initializer: function(component, module) {
+      var oldOptions, oldQuery, sortBy, _ref, _ref2;
+      if (this.filterable === false) return;
+      this.filterState = this.getFilterModel();
+      if (oldQuery = this.getQuery) {
+        this.getQuery = function() {
+          return _.extend(oldQuery.call(this), this.filterState.toQuery());
+        };
       }
-      return this.filterState.on("change", function(model) {
-        var _ref;
-        _this.trigger("change:filter", model.toQuery(), model.toOptions());
-        return (_ref = _this.onFilterChange) != null ? _ref.call(_this, model.toQuery(), model.toOptions()) : void 0;
-      });
+      if (oldOptions = this.getQueryOptions) {
+        this.getQueryOptions = function() {
+          return {};
+          return _.extend(oldOptions.call(this), this.filterState.toOptions());
+        };
+      }
+      if (sortBy = (_ref = this.filterable) != null ? (_ref2 = _ref.options) != null ? _ref2.sortBy : void 0 : void 0) {
+        return this.setSortBy(sortBy);
+      }
     },
-    getModels: function() {
-      return this.collection.query(this.filterState.toQuery(), this.filterState.toOptions());
+    setSortBy: function(sortBy, options) {
+      if (options == null) options = {};
+      return this.filterState.setOption('sortBy', sortBy, options);
+    },
+    getFilterModel: function() {
+      if (this.filterState != null) return this.filterState;
+      this.filterState = new FilterModel(this.filterable || (this.filterable = {}));
+      this.filterState.on("change", function() {
+        return this.trigger("collection:change");
+      }, this);
+      return this.filterState;
     },
     applyFilter: function(query, options) {
       var silent;
       if (query == null) query = {};
       if (options == null) options = {};
       if (_.isEmpty(options)) {
-        options = _.defaults(options, this.filterableOptions.options);
+        options = _.defaults(options, this.getQueryOptions());
       }
-      if (_.isEmpty(query)) {
-        query = _.defaults(query, this.filterableOptions.query);
-      }
+      if (_.isEmpty(query)) query = _.defaults(query, this.getQuery());
       silent = _(options)["delete"]('silent') === true;
       return this.filterState.set({
         query: query,
@@ -791,12 +862,26 @@
       FilterModel.__super__.constructor.apply(this, arguments);
     }
 
-    FilterModel.prototype.toQuery = function() {
-      return this.get("query");
+    FilterModel.prototype.setOption = function(option, value, options) {
+      var payload;
+      payload = {};
+      payload[option] = value;
+      return this.set('options', _.extend(this.toOptions(), payload), options);
+    };
+
+    FilterModel.prototype.setQueryOption = function(option, value, options) {
+      var payload;
+      payload = {};
+      payload[option] = value;
+      return this.set('query', _.extend(this.toQuery(), payload), options);
     };
 
     FilterModel.prototype.toOptions = function() {
       return this.get("options");
+    };
+
+    FilterModel.prototype.toQuery = function() {
+      return this.get("query");
     };
 
     return FilterModel;
@@ -821,6 +906,7 @@
   Luca.modules.LoadMaskable = {
     _initializer: function() {
       var _this = this;
+      if (this.loadMask !== true) return;
       if (this.loadMask === true) {
         this.defer(function() {
           _this.$el.addClass('with-mask');
@@ -829,8 +915,8 @@
             return _this.$('.load-mask').hide();
           }
         }).until("after:render");
-        this.on(this.loadmaskEnableEvent || "enable:loadmask", this.applyLoadMask);
-        return this.on(this.loadmaskDisableEvent || "disable:loadmask", this.applyLoadMask);
+        this.on(this.loadmaskEnableEvent || "enable:loadmask", this.applyLoadMask, this);
+        return this.on(this.loadmaskDisableEvent || "disable:loadmask", this.applyLoadMask, this);
       }
     },
     showLoadMask: function() {
@@ -962,6 +1048,91 @@
 
 }).call(this);
 (function() {
+
+  Luca.modules.Paginatable = {
+    paginatorViewClass: 'Luca.components.PaginationControl',
+    _initializer: function() {
+      var old;
+      if (this.paginatable === false) return;
+      _.bindAll(this, "paginationControl");
+      this.getCollection || (this.getCollection = function() {
+        return this.collection;
+      });
+      if (old = this.getQueryOptions) {
+        this.getQueryOptions = function() {
+          var filtered, p;
+          p = this.paginationControl();
+          filtered = _.extend(old.call(this), {
+            limit: p.limit(),
+            page: p.page()
+          });
+          return filtered;
+        };
+      }
+      if (this.paginationContainer().length === 0) {
+        return this.$bodyEl().after(this.make("div", {
+          "class": "toolbar bottom"
+        }));
+      }
+    },
+    paginationContainer: function() {
+      return this.$('.toolbar.bottom');
+    },
+    setCurrentPage: function(page, options) {
+      if (page == null) page = 1;
+      if (options == null) options = {};
+      return this.paginationControl().state.set('page', page, options);
+    },
+    setLimit: function(limit, options) {
+      if (limit == null) limit = 0;
+      if (options == null) options = {};
+      return this.paginationControl().state.set('limit', limit, options);
+    },
+    updatePagination: function(models, query, options) {
+      var itemCount, paginator, totalCount, _ref;
+      if (models == null) models = [];
+      if (query == null) query = {};
+      if (options == null) options = {};
+      _.defaults(options, this.getQueryOptions(), {
+        limit: 0
+      });
+      paginator = this.paginationControl();
+      itemCount = (models != null ? models.length : void 0) || 0;
+      totalCount = (_ref = this.getCollection()) != null ? _ref.length : void 0;
+      if (itemCount === 0 || totalCount <= options.limit) {
+        paginator.$el.hide();
+      } else {
+        paginator.$el.show();
+      }
+      return paginator.state.set({
+        page: options.page,
+        limit: options.limit
+      });
+    },
+    paginationControl: function() {
+      if (this.paginator != null) return this.paginator;
+      _.defaults(this.paginatable || (this.paginatable = {}), {
+        page: 1,
+        limit: 20
+      });
+      this.paginator = Luca.util.lazyComponent({
+        type: "pagination_control",
+        collection: this.getCollection(),
+        parent: this
+      });
+      this.paginator.setPage(this.paginatable.page);
+      this.paginator.setLimit(this.paginatable.limit);
+      this.paginator.state.on("change", function() {
+        return this.trigger("collection:change");
+      }, this);
+      this.on("after:refresh", this.updatePagination, this);
+      this.paginationContainer().append(this.paginator.render().$el);
+      return this.paginator;
+    }
+  };
+
+}).call(this);
+(function() {
   var component_cache, registry;
 
   registry = {
@@ -987,7 +1158,10 @@
     card: "card_view",
     paged: "card_view",
     wizard: "card_view",
-    collection: "collection_view"
+    collection: "collection_view",
+    list: "collection_view",
+    multi: "collection_multi_view",
+    table: "table_view"
   };
 
   Luca.register = function(component, prototypeName, componentType) {
@@ -2549,9 +2723,13 @@
 
 }).call(this);
 (function() {
+  var component;
 
-  _.def("Luca.containers.CardView")["extends"]("Luca.core.Container")["with"]({
-    componentType: 'card_view',
+  component = Luca.define("Luca.containers.CardView");
+
+  component["extends"]("Luca.core.Container");
+
+  component.defaults({
     className: 'luca-ui-card-view-wrapper',
     activeCard: 0,
     components: [],
@@ -3337,11 +3515,16 @@
 
 }).call(this);
 (function() {
-  var make, setupChangeObserver;
+  var collectionView, make, setupChangeObserver;
 
-  _.def("Luca.components.CollectionView")["extends"]("Luca.components.Panel")["with"]({
-    mixins: ["LoadMaskable", "FilterableView"],
-    tagName: "div",
+  collectionView = Luca.define("Luca.components.CollectionView");
+
+  collectionView["extends"]("Luca.components.Panel");
+
+  collectionView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
+
+  collectionView.defaultsTo({
+    tagName: "ol",
     className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
     itemTemplate: void 0,
@@ -3364,29 +3547,29 @@
       if (_.isString(this.collection) && Luca.CollectionManager.get()) {
         this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
       }
-      if (Luca.isBackboneCollection(this.collection)) {
+      if (!Luca.isBackboneCollection(this.collection)) {
+        throw "Collection Views must have a valid backbone collection";
         this.collection.on("before:fetch", function() {
           if (_this.loadMask === true) return _this.trigger("enable:loadmask");
         });
         this.collection.bind("reset", function() {
-          if (_this.loadMask === true) _this.trigger("disable:loadmask");
-          return _this.refresh();
+          _this.trigger("collection:change");
+          if (_this.loadMask === true) return _this.trigger("disable:loadmask");
         });
         this.collection.bind("remove", function() {
-          return _this.refresh();
+          return _this.trigger("collection:change");
         });
         this.collection.bind("add", function() {
-          return _this.refresh();
+          return _this.trigger("collection:change");
         });
         if (this.observeChanges === true) setupChangeObserver.call(this);
-      } else {
-        throw "Collection Views must have a valid backbone collection";
       }
       if (this.autoRefreshOnModelsPresent !== false) {
-        return this.waitFor("after:render").andThen(function() {
+        this.defer(function() {
           if (_this.collection.length > 0) return _this.refresh();
-        });
+        }).until("after:render");
       }
+      return this.on("collection:change", this.refresh, this);
     },
     attributesForItem: function(item, model) {
       return _.extend({}, {
@@ -3399,16 +3582,15 @@
       var content, templateFn;
       if (item == null) item = {};
       if ((this.itemTemplate != null) && (templateFn = Luca.template(this.itemTemplate))) {
-        content = templateFn.call(this, item);
+        return content = templateFn.call(this, item);
       }
       if ((this.itemRenderer != null) && _.isFunction(this.itemRenderer)) {
-        content = this.itemRenderer.call(this, item, item.model, item.index);
+        return content = this.itemRenderer.call(this, item, item.model, item.index);
       }
-      if (this.itemProperty) {
-        content = item.model.get(this.itemProperty) || item.model[this.itemProperty];
-        if (_.isFunction(content)) content = content();
+      if (this.itemProperty && (item.model != null)) {
+        return content = item.model.read(this.itemProperty);
       }
-      return content;
+      return "";
     },
     makeItem: function(model, index) {
       var attributes, content, item;
@@ -3421,15 +3603,24 @@
       try {
         return make(this.itemTagName, attributes, content);
       } catch (e) {
-        return console.log("Error generating DOM element for CollectionView", e.message, item, content, attributes);
+        return console.log("Error generating DOM element for CollectionView", this, model, index);
       }
+    },
+    getCollection: function() {
+      return this.collection;
+    },
+    getQuery: function() {
+      return {};
+    },
+    getQueryOptions: function() {
+      return {};
     },
     getModels: function(query, options) {
       var _ref;
-      if (query == null) query = this.filter;
-      if (options == null) options = this.filterOptions;
       if ((_ref = this.collection) != null ? _ref.query : void 0) {
-        return this.collection.query(query || {}, options || {});
+        query || (query = this.getQuery());
+        options || (options = this.getQueryOptions());
+        return this.collection.query(query, options);
       } else {
         return this.collection.models;
       }
@@ -4605,6 +4796,117 @@
 
 }).call(this);
 (function() {
+  var paginationControl;
+
+  paginationControl = Luca.define("Luca.components.PaginationControl");
+
+  paginationControl["extends"]("Luca.View");
+
+  paginationControl.defaultsTo({
+    template: "components/pagination",
+    stateful: true,
+    autoBindEventHandlers: true,
+    events: {
+      "click a[data-page-number]": "selectPage",
+      "click a.next": "nextPage",
+      "click a.prev": "previousPage"
+    },
+    afterInitialize: function() {
+      return this.state.on("change", this.refresh, this);
+    },
+    limit: function() {
+      var _ref;
+      return parseInt(this.state.get('limit') || ((_ref = this.collection) != null ? _ref.length : void 0));
+    },
+    page: function() {
+      return parseInt(this.state.get('page') || 1);
+    },
+    nextPage: function() {
+      if (!this.nextEnabled()) return;
+      return this.state.set('page', this.page() + 1);
+    },
+    previousPage: function() {
+      if (!this.previousEnabled()) return;
+      return this.state.set('page', this.page() - 1);
+    },
+    selectPage: function(e) {
+      var me, my;
+      me = my = this.$(e.target);
+      if (!me.is('a.page')) me = my = my.closest('a.page');
+      my.siblings().removeClass('is-selected');
+      me.addClass('is-selected');
+      return this.setPage(my.data('page-number'));
+    },
+    setPage: function(page, options) {
+      if (page == null) page = 1;
+      if (options == null) options = {};
+      return this.state.set('page', page, options);
+    },
+    setLimit: function(limit, options) {
+      if (limit == null) limit = 1;
+      if (options == null) options = {};
+      return this.state.set('limit', limit, options);
+    },
+    pageButtonContainer: function() {
+      return this.$('.group');
+    },
+    previousEnabled: function() {
+      return this.page() > 1;
+    },
+    nextEnabled: function() {
+      return this.page() < this.totalPages();
+    },
+    previousButton: function() {
+      return this.$('a.page.prev');
+    },
+    nextButton: function() {
+      return this.$('a.page.next');
+    },
+    pageButtons: function() {
+      return this.$('a[data-page-number]', this.pageButtonContainer());
+    },
+    refresh: function() {
+      var button, page, _ref;
+      this.pageButtonContainer().empty();
+      for (page = 1, _ref = this.totalPages(); 1 <= _ref ? page <= _ref : page >= _ref; 1 <= _ref ? page++ : page--) {
+        button = this.make("a", {
+          "data-page-number": page,
+          "class": "page"
+        }, page);
+        this.pageButtonContainer().append(button);
+      }
+      this.toggleNavigationButtons();
+      return this.selectActivePageButton();
+    },
+    toggleNavigationButtons: function() {
+      this.$('a.next, a.prev').addClass('disabled');
+      if (this.nextEnabled()) this.nextButton().removeClass('disabled');
+      if (this.previousEnabled()) {
+        return this.previousButton().removeClass('disabled');
+      }
+    },
+    selectActivePageButton: function() {
+      return this.activePageButton().addClass('is-selected');
+    },
+    activePageButton: function() {
+      return this.pageButtons().filter("[data-page-number='" + (this.page()) + "']");
+    },
+    totalPages: function() {
+      return parseInt(Math.ceil(this.totalItems() / this.itemsPerPage()));
+    },
+    totalItems: function() {
+      var _ref;
+      return parseInt(((_ref = this.collection) != null ? _ref.length : void 0) || 0);
+    },
+    itemsPerPage: function(value, options) {
+      if (options == null) options = {};
+      if (value != null) this.set("limit", value, options);
+      return parseInt(this.get("limit"));
+    }
+  });
+
+}).call(this);
+(function() {
 
   _.def('Luca.components.RecordManager')["extends"]('Luca.containers.CardView')["with"]({
     events: {
@@ -4865,12 +5167,31 @@
       return Luca.components.TableView.rowRenderer.call(this, item, model);
     },
     initialize: function(options) {
-      var _this = this;
+      var column,
+        _this = this;
       this.options = options != null ? options : {};
       Luca.components.CollectionView.prototype.initialize.apply(this, arguments);
+      this.columns = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.columns;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          column = _ref[_i];
+          if (_.isString(column)) {
+            column = {
+              reader: column
+            };
+          }
+          if (!(column.header != null)) {
+            column.header = _.str.titleize(_.str.humanize(column.reader));
+          }
+          _results.push(column);
+        }
+        return _results;
+      }).call(this);
       return this.defer(function() {
         return Luca.components.TableView.renderHeader.call(_this, _this.columns, _this.$('thead'));
-      }).until("before:render");
+      }).until("after:render");
     }
   });
 
@@ -4888,8 +5209,11 @@
       }
       return _results;
     })();
-    $(targetElement).append(make("tr", {}, content));
+    console.log("one");
+    this.$(targetElement).append(make("tr", {}, content));
+    console.log("two");
     index = 0;
+    console.log("three");
     _results = [];
     for (_i = 0, _len = columns.length; _i < _len; _i++) {
       column = columns[_i];
