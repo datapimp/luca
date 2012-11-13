@@ -3,10 +3,16 @@
 # references on objects which don't yet exist, as strings, which get
 # evaluated at runtime when such references will be available
 Luca.util.resolve = (accessor, source_object)->
-  source_object ||= (window || global)
-  _( accessor.split(/\./) ).inject (obj,key)->
-    obj = obj?[key]
-  , source_object
+  try
+    source_object ||= (window || global)
+    resolved = _( accessor.split(/\./) ).inject (obj,key)->
+      obj = obj?[key]
+    , source_object
+  catch e
+    console.log "Error resolving", accessor, source_object
+    throw e
+    
+  resolved
 
 # A better name for Luca.util.nestedValue
 Luca.util.nestedValue = Luca.util.resolve
@@ -109,3 +115,11 @@ Luca.util.badge = (contents="", type, baseClass="badge")->
   cssClass = baseClass
   cssClass += " #{ baseClass }-#{ type }" if type?
   Luca.util.make("span",{class:cssClass},contents)
+
+Luca.util.inspectComponent = (component)->
+  {
+    name:         component.name  
+    instanceOf:   component.displayName 
+    subclassOf:   component._superClass()::displayName
+    inheritsFrom: Luca.parentClasses( component )
+  }

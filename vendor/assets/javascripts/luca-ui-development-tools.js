@@ -18417,7 +18417,10 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     onSuccess: function(result, js, coffee) {
       var dump;
       this.saveHistory(coffee);
-      dump = JSON.stringify(result, null, "\t");
+      dump = "";
+      if (_.isArray(result) || _.isObject(result) || _.isString(result) || _.isNumber(result)) {
+        dump = JSON.stringify(result, null, "\t");
+      }
       dump || (dump = typeof result.toString === "function" ? result.toString() : void 0);
       return this.append(js, dump || "undefined");
     },
@@ -18456,6 +18459,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       };
       try {
         result = evaluator.call(this.getContext());
+        if (Luca.isComponent(result)) result = Luca.util.inspectComponent(result);
         if (!raw.match(/^console\.log/)) return this.onSuccess(result, code, raw);
       } catch (error) {
         return this.onError(error, code, raw);
@@ -18481,13 +18485,14 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       var console;
       _this.$el.append(Backbone.View.prototype.make("div", {
         id: "" + name + "-wrapper",
-        "class": "modal fade"
+        "class": "modal fade large"
       }));
       console = new Luca.tools.DevelopmentConsole({
         name: name,
         container: "#" + name + "-wrapper"
       });
-      return console.render();
+      console.render();
+      return console.getCodeMirror().setHeight(602);
     });
     return this._lucaDevConsole.show();
   };

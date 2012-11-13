@@ -110,7 +110,12 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
 
   onSuccess: (result, js, coffee)->
     @saveHistory(coffee)
-    dump = JSON.stringify(result, null, "\t")
+
+    dump = ""
+
+    if _.isArray( result ) or _.isObject( result ) or _.isString( result ) or _.isNumber(result)
+      dump = JSON.stringify(result, null, "\t")
+
     dump ||= result.toString?()
 
     @append(js, dump || "undefined")
@@ -147,6 +152,8 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
 
     try
       result = evaluator.call( @getContext() )
+      if Luca.isComponent( result )
+        result = Luca.util.inspectComponent( result )
       @onSuccess(result, code, raw) unless raw.match(/^console\.log/)
     catch error
       @onError(error, code, raw)
@@ -162,12 +169,13 @@ Luca.util.launchers ||= {}
 
 Luca.util.launchers.developmentConsole = (name="luca-development-console")->
   @_lucaDevConsole = Luca name, ()=>
-    @$el.append Backbone.View::make("div", id: "#{ name }-wrapper", class: "modal fade")
+    @$el.append Backbone.View::make("div", id: "#{ name }-wrapper", class: "modal fade large")
 
     console = new Luca.tools.DevelopmentConsole
       name: name
       container: "##{ name }-wrapper"
 
     console.render()
+    console.getCodeMirror().setHeight(602)
 
   @_lucaDevConsole.show()

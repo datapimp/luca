@@ -11,17 +11,15 @@
 
 # _.def("Luca.View").extends("Backbone.View").with the_good:"shit"
 # _.def("MyView").extends("Luca.View").with the_custom:"shit"
-
-Luca.define = (componentName)->
-  new DefineProxy(componentName)
-
-Luca.component = Luca.define
+_.mixin
+  def: Luca.component = Luca.define = Luca.register = (componentName)-> new DefineProxy(componentName)
 
 # The define proxy chain sets up a call to Luca.extend, which is a wrapper around Luca and Backbone component class' extend function.
 class DefineProxy
   constructor:(componentName)->
     @namespace = Luca.util.namespace()
     @componentId = @componentName = componentName
+    @superClassName = 'Luca.View' 
 
     if componentName.match(/\./)
       @namespaced = true
@@ -40,16 +38,25 @@ class DefineProxy
   extends: (@superClassName)-> @
   extend: (@superClassName)-> @
 
+  triggers: (hooks...)->
+    _.defaults(@properties ||= {}, hooks: []) 
+    for hook in hooks
+      @properties.hooks.push(hook) 
+    @properties.hooks = _.uniq(@properties.hooks)
+    @
+
   includes: (includes...)->
     _.defaults(@properties ||= {}, include: []) 
     for include in includes
       @properties.include.push(include) 
+    @properties.include = _.uniq(@properties.include)
     @
 
   mixesIn: (mixins...)->
     _.defaults(@properties ||= {}, mixins: []) 
     for mixin in mixins
       @properties.mixins.push(mixin) 
+    @properties.mixins = _.uniq(@properties.mixins)
     @
 
   defaultProperties: (properties={})->
@@ -78,7 +85,7 @@ class DefineProxy
       componentType = "model" if Luca.isModelPrototype( at[@componentId] )
 
       # automatically register this with the component registry
-      Luca.register( _.string.underscored(@componentId), @componentName, componentType)
+      Luca.registerComponent( _.string.underscored(@componentId), @componentName, componentType)
 
     at[@componentId]
 
@@ -86,7 +93,7 @@ class DefineProxy
 DefineProxy::behavesAs = DefineProxy::uses = DefineProxy::mixesIn 
 
 # Aliases for the final call on the define proxy
-DefineProxy::defines = DefineProxy::defaults = DefineProxy::defaultProperties 
+DefineProxy::defines = DefineProxy::defaults = DefineProxy::exports = DefineProxy::defaultProperties 
 DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy::defaultProperties
 
 # The last method of the DefineProxy chain is always going to result in
@@ -107,7 +114,7 @@ Luca.extend = (superClassName, childName, properties={})->
     superClass.displayName ||= superClassName
     superClass
 
-  properties._super = (method, context, args)->
+  properties._super = (method, context=@, args=[])->
     @_superClass().prototype[method]?.apply(context, args)
 
   definition = superClass.extend(properties)
@@ -142,17 +149,20 @@ Luca.mixin.namespace = (namespace)->
   Luca.mixin.namespaces.push(namespace)
   Luca.mixin.namespaces = _( Luca.mixin.namespaces ).uniq()
 
-# Luca.decorate('Luca.View')
+# Luca.decorate('Luca.View').with('Luca.modules.MyCustomMixin')
 Luca.decorate = (componentPrototype)->
   componentPrototype = Luca.util.resolve(componentPrototype).prototype if _.isString(componentPrototype)
   
   return with: (mixin)->
-    _.extend(componentPrototype, Luca.mixin(mixin) )
+    mixinDefinition = Luca.mixin(mixin)
+    mixinPrivates   = _( mixinDefinition ).chain().keys().reject (key)-> 
+      "#{ key }".match(/^__/)
+
+    mixinPrivates   = _( mixinDefinition ).omit( _( mixinPrivates ) )
+
+    _.extend(componentPrototype, mixinDefinition)
 
     componentPrototype.mixins ||= []
     componentPrototype.mixins.push( mixin )
     componentPrototype.mixins = _( componentPrototype.mixins ).uniq()
     componentPrototype
-
-_.mixin
-  def: Luca.define

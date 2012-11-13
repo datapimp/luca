@@ -20,7 +20,12 @@ collectionView.behavesAs          "LoadMaskable",
                                   "Filterable", 
                                   "Paginatable"
 
-collectionView.defaultsTo
+collectionView.triggers           "before:refresh",
+                                  "empty:results",
+                                  "after:refresh"
+
+
+collectionView.defaults
 
   tagName: "ol"
 
@@ -38,12 +43,6 @@ collectionView.defaultsTo
 
   itemClassName: 'collection-item'
 
-  hooks:[
-    "before:refresh"
-    "empty:results"
-    "after:refresh"
-  ]
-  
   initialize: (@options={})->
     _.extend(@, @options)
 
@@ -77,7 +76,7 @@ collectionView.defaultsTo
         @trigger "collection:change"
 
       if @observeChanges is true
-        setupChangeObserver.call(@)
+        @collection.on "change", @refreshModel, @
 
     unless @autoRefreshOnModelsPresent is false
       @defer ()=> 
@@ -143,6 +142,7 @@ collectionView.defaultsTo
   refreshModel: (model)->
     index = @collection.indexOf( model )
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
+    @trigger("model:refreshed", index, model)
 
   refresh: (query,options)->
     @$bodyEl().empty()
@@ -179,7 +179,3 @@ collectionView.defaultsTo
 
 
 make = Luca.View::make
-
-setupChangeObserver = ()->
-  @collection.on "change", (model)=> 
-    @refreshModel(model)

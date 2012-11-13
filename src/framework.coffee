@@ -28,27 +28,30 @@ _.extend Luca,
   fields: {}
   registry:{}
   options: {}
+  config: {}
 
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events
 
 # When using Luca.define() should we automatically register
 # the component with the registry?
-Luca.autoRegister = true
+Luca.autoRegister = Luca.config.autoRegister = true
 
 # if developmentMode is true, you have access to some neat development tools
-Luca.developmentMode = false
+Luca.developmentMode = Luca.config.developmentMode = false
 
 # The Global Observer is very helpful in development
 # it observes every event triggered on every view, collection, model
 # and allows you to inspect / respond to them.  Use in production
 # may have performance impacts which has not been tested
-Luca.enableGlobalObserver = false
+Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false
 
 # let's use the Twitter 2.0 Bootstrap Framework
 # for what it is best at, and not try to solve this
 # problem on our own!
-Luca.enableBootstrap = true
+Luca.enableBootstrap = Luca.config.enableBootstrap = true
+
+Luca.config.enhancedViewProperties = true
 
 Luca.keys =
   ENTER: 13

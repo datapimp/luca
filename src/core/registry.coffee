@@ -10,7 +10,8 @@ component_cache =
 
 # For container views, if a component is defined with no ctype
 # then we will pick this one when using
-Luca.defaultComponentType = 'view'
+Luca.config.defaultComponentClass = Luca.defaultComponentClass  = 'Luca.View'
+Luca.config.defaultComponentType  = Luca.defaultComponentType   = 'view'
 
 Luca.registry.aliases = 
   grid:         "grid_view"
@@ -30,7 +31,7 @@ Luca.registry.aliases =
 # When you use _.def to define a component, you say
 # which class it extends() from, and with() which enhancements.
 # We register that component class for you:
-Luca.register = (component, prototypeName, componentType="view")->
+Luca.registerComponent = (component, prototypeName, componentType="view")->
   Luca.trigger "component:registered", component, prototypeName
 
   switch componentType
@@ -52,7 +53,7 @@ Luca.development_mode_register = (component, prototypeName)->
     _( liveInstances ).each (instance)->
       instance?.refreshCode?.call(instance, prototypeDefinition)
 
-  Luca.register( component, prototypeName )
+  Luca.registerComponent( component, prototypeName )
 
 # We create a @ctype alias for this component definition, and register
 # the class in a registry.

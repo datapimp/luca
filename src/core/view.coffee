@@ -1,24 +1,26 @@
-_.def("Luca.View").extends("Backbone.View").with
-  include: ['Luca.Events']
+view = Luca.define      "Luca.View"
 
-  additionalClassNames:[]
+view.extends            "Backbone.View"
 
-  hooks:[
-    "before:initialize"
-    "after:initialize"
-    "before:render"
-    "after:render"
-    "first:activation"
-    "activation"
-    "deactivation"
-  ]
+view.includes           "Luca.Events",
+                        "Luca.modules.DomHelpers"
 
+view.triggers           "before:initialize",
+                        "after:initialize",
+                        "before:render",
+                        "after:render",
+                        "first:activation",
+                        "activation",
+                        "deactivation"
+                        
+view.defines
   initialize: (@options={})->
     @trigger "before:initialize", @, @options
 
     _.extend @, @options
 
-    bindAllEventHandlers.call(@) if @autoBindEventHandlers is true or @bindAllEvents is true
+    if @autoBindEventHandlers is true or @bindAllEvents is true
+      bindAllEventHandlers.call(@) 
 
     setupBodyTemplate.call(@)
 
@@ -28,47 +30,29 @@ _.def("Luca.View").extends("Backbone.View").with
     
     Luca.cache( @cid, @ )
 
+    # FIXME:
+    # Does this prevent inheritance of hooks all the way up the chain?
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 
-    setupClassHelpers.call(@)
+    @setupClassHelpers()
+
     setupStateMachine.call(@) if @stateful is true and not @state?
 
     registerCollectionEvents.call(@)
     registerApplicationEvents.call( @)
 
+    setupTemplate.call(@) if @template and not @isField
+
+    if Luca.config.enhancedViewProperties is true and not @isField
+      Luca.View.handleEnhancedProperties.call(@)
+
     if @mixins?.length > 0
       for module in _.uniq(@mixins)
-        Luca.mixin(module)?._initializer.call(@, @, module)
+        Luca.mixin(module)?._initializer?.call(@, @, module)
 
     @delegateEvents()
 
-    setupTemplate.call(@) if @template and not @isField
-
     @trigger "after:initialize", @
-
-  $wrap: (wrapper)->
-    if _.isString(wrapper) and not wrapper.match(/[<>]/)
-      wrapper = @make("div",class:wrapper)
-
-    @$el.wrap( wrapper )
-
-  $template: (template, variables={})->
-    @$el.html( Luca.template(template,variables) )
-
-  $html: (content)->
-    @$el.html( content )
-
-  $append: (content)->
-    @$el.append( content )
-
-  $attach: ()->
-    @$container().append( @el )
-
-  $bodyEl: ()->
-    @$el
-    
-  $container: ()->
-    $(@container)
 
   #### Hooks or Auto Event Binding
   #
@@ -220,32 +204,6 @@ registerCollectionEvents = ()->
       console.log "Error Binding To Collection in registerCollectionEvents", @
       throw e
 
-setupClassHelpers = ()->
-  additionalClasses = _( @additionalClassNames || [] ).clone()
-
-  @$wrap( @wrapperClass ) if @wrapperClass?
-
-  if _.isString additionalClasses
-    additionalClasses = additionalClasses.split(" ")
-
-  if @gridSpan
-    additionalClasses.push "span#{ @gridSpan }"
-
-  if @gridOffset
-    additionalClasses.push "offset#{ @gridOffset }"
-
-  if @gridRowFluid
-    additionalClasses.push "row-fluid"
-
-  if @gridRow
-    additionalClasses.push "row"
-
-  return unless additionalClasses?
-
-  for additional in additionalClasses
-    @$el.addClass( additional ) 
-
-
 setupStateMachine = ()->
   @state = new Backbone.Model(@defaultState || {})
   @set ||= ()=> @state.set.apply(@state, arguments)
@@ -271,8 +229,14 @@ Luca.View.extend = (definition)->
   definition = Luca.View.renderWrapper( definition )
 
   if definition.mixins? and _.isArray( definition.mixins )
-    Luca.decorate(definition).with(module) for module in definition.mixins
+    for module in definition.mixins
+      Luca.decorate(definition).with( module )
 
   Luca.View._originalExtend.call(@, definition)
 
+
 Luca.View.deferrableEvent = "reset"
+
+Luca.View.handleEnhancedProperties = ()->
+  if _.isString(@collection) and Luca.CollectionManager.get()
+    @collection = Luca.CollectionManager.get().getOrCreate(@collection)  

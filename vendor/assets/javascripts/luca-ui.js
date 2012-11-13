@@ -26,18 +26,21 @@
     util: {},
     fields: {},
     registry: {},
-    options: {}
+    options: {},
+    config: {}
   });
 
   _.extend(Luca, Backbone.Events);
 
-  Luca.autoRegister = true;
+  Luca.autoRegister = Luca.config.autoRegister = true;
 
-  Luca.developmentMode = false;
+  Luca.developmentMode = Luca.config.developmentMode = false;
 
-  Luca.enableGlobalObserver = false;
+  Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false;
 
-  Luca.enableBootstrap = true;
+  Luca.enableBootstrap = Luca.config.enableBootstrap = true;
+
+  Luca.config.enhancedViewProperties = true;
 
   Luca.keys = {
     ENTER: 13,
@@ -323,10 +326,17 @@
   var currentNamespace;
 
   Luca.util.resolve = function(accessor, source_object) {
-    source_object || (source_object = window || global);
-    return _(accessor.split(/\./)).inject(function(obj, key) {
-      return obj = obj != null ? obj[key] : void 0;
-    }, source_object);
+    var resolved;
+    try {
+      source_object || (source_object = window || global);
+      resolved = _(accessor.split(/\./)).inject(function(obj, key) {
+        return obj = obj != null ? obj[key] : void 0;
+      }, source_object);
+    } catch (e) {
+      console.log("Error resolving", accessor, source_object);
+      throw e;
+    }
+    return resolved;
   };
 
   Luca.util.nestedValue = Luca.util.resolve;
@@ -445,6 +455,15 @@
     return Luca.util.make("span", {
       "class": cssClass
     }, contents);
+  };
+
+  Luca.util.inspectComponent = function(component) {
+    return {
+      name: component.name,
+      instanceOf: component.displayName,
+      subclassOf: component._superClass().prototype.displayName,
+      inheritsFrom: Luca.parentClasses(component)
+    };
   };
 
 }).call(this);
@@ -608,11 +627,11 @@
   var DefineProxy,
     __slice = Array.prototype.slice;
 
-  Luca.define = function(componentName) {
-    return new DefineProxy(componentName);
-  };
-
-  Luca.component = Luca.define;
+  _.mixin({
+    def: Luca.component = Luca.define = Luca.register = function(componentName) {
+      return new DefineProxy(componentName);
+    }
+  });
 
   DefineProxy = (function() {
 
@@ -620,6 +639,7 @@
       var parts;
       this.namespace = Luca.util.namespace();
       this.componentId = this.componentName = componentName;
+      this.superClassName = 'Luca.View';
       if (componentName.match(/\./)) {
         this.namespaced = true;
         parts = componentName.split('.');
@@ -649,27 +669,35 @@
       return this;
     };
 
-    DefineProxy.prototype.enhance = function(properties) {
-      if (properties != null) return this["with"](properties);
+    DefineProxy.prototype.triggers = function() {
+      var hook, hooks, _i, _len;
+      hooks = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties || (this.properties = {}), {
+        hooks: []
+      });
+      for (_i = 0, _len = hooks.length; _i < _len; _i++) {
+        hook = hooks[_i];
+        this.properties.hooks.push(hook);
+      }
+      this.properties.hooks = _.uniq(this.properties.hooks);
       return this;
     };
 
-    DefineProxy.prototype.defaultsTo = function(properties) {
-      if (properties != null) return this["with"](properties);
+    DefineProxy.prototype.includes = function() {
+      var include, includes, _i, _len;
+      includes = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties || (this.properties = {}), {
+        include: []
+      });
+      for (_i = 0, _len = includes.length; _i < _len; _i++) {
+        include = includes[_i];
+        this.properties.include.push(include);
+      }
+      this.properties.include = _.uniq(this.properties.include);
       return this;
     };
 
-    DefineProxy.prototype.defaults = function(properties) {
-      if (properties != null) return this["with"](properties);
-      return this;
-    };
-
-    DefineProxy.prototype.hasDefaultProperties = function(properties) {
-      if (properties != null) return this["with"](properties);
-      return this;
-    };
-
-    DefineProxy.prototype.behavesAs = function() {
+    DefineProxy.prototype.mixesIn = function() {
       var mixin, mixins, _i, _len;
       mixins = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       _.defaults(this.properties || (this.properties = {}), {
@@ -679,10 +707,11 @@
         mixin = mixins[_i];
         this.properties.mixins.push(mixin);
       }
+      this.properties.mixins = _.uniq(this.properties.mixins);
       return this;
     };
 
-    DefineProxy.prototype["with"] = function(properties) {
+    DefineProxy.prototype.defaultProperties = function(properties) {
       var at, componentType, _base;
       if (properties == null) properties = {};
       _.defaults((this.properties || (this.properties = {})), properties);
@@ -700,7 +729,7 @@
           componentType = "collection";
         }
         if (Luca.isModelPrototype(at[this.componentId])) componentType = "model";
-        Luca.register(_.string.underscored(this.componentId), this.componentName, componentType);
+        Luca.registerComponent(_.string.underscored(this.componentId), this.componentName, componentType);
       }
       return at[this.componentId];
     };
@@ -708,6 +737,12 @@
     return DefineProxy;
 
   })();
+
+  DefineProxy.prototype.behavesAs = DefineProxy.prototype.uses = DefineProxy.prototype.mixesIn;
+
+  DefineProxy.prototype.defines = DefineProxy.prototype.defaults = DefineProxy.prototype.exports = DefineProxy.prototype.defaultProperties;
+
+  DefineProxy.prototype.defaultsTo = DefineProxy.prototype.enhance = DefineProxy.prototype["with"] = DefineProxy.prototype.defaultProperties;
 
   Luca.extend = function(superClassName, childName, properties) {
     var definition, include, superClass, _i, _len, _ref;
@@ -723,6 +758,8 @@
     };
     properties._super = function(method, context, args) {
       var _ref;
+      if (context == null) context = this;
+      if (args == null) args = [];
       return (_ref = this._superClass().prototype[method]) != null ? _ref.apply(context, args) : void 0;
     };
     definition = superClass.extend(properties);
@@ -764,7 +801,13 @@
     }
     return {
       "with": function(mixin) {
-        _.extend(componentPrototype, Luca.mixin(mixin));
+        var mixinDefinition, mixinPrivates;
+        mixinDefinition = Luca.mixin(mixin);
+        mixinPrivates = _(mixinDefinition).chain().keys().reject(function(key) {
+          return ("" + key).match(/^__/);
+        });
+        mixinPrivates = _(mixinDefinition).omit(_(mixinPrivates));
+        _.extend(componentPrototype, mixinDefinition);
         componentPrototype.mixins || (componentPrototype.mixins = []);
         componentPrototype.mixins.push(mixin);
         componentPrototype.mixins = _(componentPrototype.mixins).uniq();
@@ -772,10 +815,6 @@
       }
     };
   };
-
-  _.mixin({
-    def: Luca.define
-  });
 
 }).call(this);
 (function() {
@@ -795,6 +834,58 @@
         this.deferrable_trigger = this.collection.deferrable_trigger;
       }
       if (setAsDeferrable) return this.deferrable = this.collection;
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.DomHelpers = {
+    setupClassHelpers: function() {
+      var additional, additionalClasses, _i, _len, _results;
+      additionalClasses = _(this.additionalClassNames || []).clone();
+      if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
+      if (_.isString(additionalClasses)) {
+        additionalClasses = additionalClasses.split(" ");
+      }
+      if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
+      if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
+      if (this.gridRowFluid) additionalClasses.push("row-fluid");
+      if (this.gridRow) additionalClasses.push("row");
+      if (additionalClasses == null) return;
+      _results = [];
+      for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
+        additional = additionalClasses[_i];
+        _results.push(this.$el.addClass(additional));
+      }
+      return _results;
+    },
+    $wrap: function(wrapper) {
+      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
+        wrapper = this.make("div", {
+          "class": wrapper
+        });
+      }
+      return this.$el.wrap(wrapper);
+    },
+    $template: function(template, variables) {
+      if (variables == null) variables = {};
+      return this.$el.html(Luca.template(template, variables));
+    },
+    $html: function(content) {
+      return this.$el.html(content);
+    },
+    $append: function(content) {
+      return this.$el.append(content);
+    },
+    $attach: function() {
+      return this.$container().append(this.el);
+    },
+    $bodyEl: function() {
+      return this.$el;
+    },
+    $container: function() {
+      return $(this.container);
     }
   };
 
@@ -1052,28 +1143,11 @@
   Luca.modules.Paginatable = {
     paginatorViewClass: 'Luca.components.PaginationControl',
     _initializer: function() {
-      var old;
       if (this.paginatable === false) return;
       _.bindAll(this, "paginationControl");
-      this.getCollection || (this.getCollection = function() {
+      return this.getCollection || (this.getCollection = function() {
         return this.collection;
       });
-      if (old = this.getQueryOptions) {
-        this.getQueryOptions = function() {
-          var filtered, p;
-          p = this.paginationControl();
-          filtered = _.extend(old.call(this), {
-            limit: p.limit(),
-            page: p.page()
-          });
-          return filtered;
-        };
-      }
-      if (this.paginationContainer().length === 0) {
-        return this.$bodyEl().after(this.make("div", {
-          "class": "toolbar bottom"
-        }));
-      }
     },
     paginationContainer: function() {
       return this.$('.toolbar.bottom');
@@ -1147,7 +1221,9 @@
     name_index: {}
   };
 
-  Luca.defaultComponentType = 'view';
+  Luca.config.defaultComponentClass = Luca.defaultComponentClass = 'Luca.View';
+
+  Luca.config.defaultComponentType = Luca.defaultComponentType = 'view';
 
   Luca.registry.aliases = {
     grid: "grid_view",
@@ -1164,7 +1240,7 @@
     table: "table_view"
   };
 
-  Luca.register = function(component, prototypeName, componentType) {
+  Luca.registerComponent = function(component, prototypeName, componentType) {
     if (componentType == null) componentType = "view";
     Luca.trigger("component:registered", component, prototypeName);
     switch (componentType) {
@@ -1188,7 +1264,7 @@
         return instance != null ? (_ref = instance.refreshCode) != null ? _ref.call(instance, prototypeDefinition) : void 0 : void 0;
       });
     }
-    return Luca.register(component, prototypeName);
+    return Luca.registerComponent(component, prototypeName);
   };
 
   Luca.registry.addNamespace = Luca.registry.namespace = function(identifier) {
@@ -1303,14 +1379,19 @@
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate, setupClassHelpers, setupStateMachine, setupTemplate;
+  var bindAllEventHandlers, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate, setupStateMachine, setupTemplate, view;
 
-  _.def("Luca.View")["extends"]("Backbone.View")["with"]({
-    include: ['Luca.Events'],
-    additionalClassNames: [],
-    hooks: ["before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
+  view = Luca.define("Luca.View");
+
+  view["extends"]("Backbone.View");
+
+  view.includes("Luca.Events", "Luca.modules.DomHelpers");
+
+  view.triggers("before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation");
+
+  view.defines({
     initialize: function(options) {
-      var module, _i, _len, _ref, _ref2, _ref3;
+      var module, _i, _len, _ref, _ref2, _ref3, _ref4;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
@@ -1322,51 +1403,29 @@
       this.$el.attr("data-luca-id", this.name || this.cid);
       Luca.cache(this.cid, this);
       this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
-      setupClassHelpers.call(this);
+      this.setupClassHelpers();
       if (this.stateful === true && !(this.state != null)) {
         setupStateMachine.call(this);
       }
       registerCollectionEvents.call(this);
       registerApplicationEvents.call(this);
+      if (this.template && !this.isField) setupTemplate.call(this);
+      if (Luca.config.enhancedViewProperties === true && !this.isField) {
+        Luca.View.handleEnhancedProperties.call(this);
+      }
       if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
         _ref2 = _.uniq(this.mixins);
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           module = _ref2[_i];
           if ((_ref3 = Luca.mixin(module)) != null) {
-            _ref3._initializer.call(this, this, module);
+            if ((_ref4 = _ref3._initializer) != null) {
+              _ref4.call(this, this, module);
+            }
           }
         }
       }
       this.delegateEvents();
-      if (this.template && !this.isField) setupTemplate.call(this);
       return this.trigger("after:initialize", this);
-    },
-    $wrap: function(wrapper) {
-      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
-        wrapper = this.make("div", {
-          "class": wrapper
-        });
-      }
-      return this.$el.wrap(wrapper);
-    },
-    $template: function(template, variables) {
-      if (variables == null) variables = {};
-      return this.$el.html(Luca.template(template, variables));
-    },
-    $html: function(content) {
-      return this.$el.html(content);
-    },
-    $append: function(content) {
-      return this.$el.append(content);
-    },
-    $attach: function() {
-      return this.$container().append(this.el);
-    },
-    $bodyEl: function() {
-      return this.$el;
-    },
-    $container: function() {
-      return $(this.container);
     },
     setupHooks: function(set) {
       var _this = this;
@@ -1432,7 +1491,7 @@
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
     definition.render = function() {
-      var autoTrigger, deferred, fn, target, trigger, view,
+      var autoTrigger, deferred, fn, target, trigger,
         _this = this;
       view = this;
       if (this.deferrable) {
@@ -1525,26 +1584,6 @@
     return _results;
   };
 
-  setupClassHelpers = function() {
-    var additional, additionalClasses, _i, _len, _results;
-    additionalClasses = _(this.additionalClassNames || []).clone();
-    if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
-    if (_.isString(additionalClasses)) {
-      additionalClasses = additionalClasses.split(" ");
-    }
-    if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
-    if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
-    if (this.gridRowFluid) additionalClasses.push("row-fluid");
-    if (this.gridRow) additionalClasses.push("row");
-    if (additionalClasses == null) return;
-    _results = [];
-    for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
-      additional = additionalClasses[_i];
-      _results.push(this.$el.addClass(additional));
-    }
-    return _results;
-  };
-
   setupStateMachine = function() {
     var _this = this;
     this.state = new Backbone.Model(this.defaultState || {});
@@ -1589,9 +1628,43 @@
 
   Luca.View.deferrableEvent = "reset";
 
+  Luca.View.handleEnhancedProperties = function() {
+    if (_.isString(this.collection) && Luca.CollectionManager.get()) {
+      return this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
+    }
+  };
+
 }).call(this);
 (function() {
-  var setupComputedProperties;
+  var model, setupComputedProperties;
+
+  model = Luca.define('Luca.Model');
+
+  model["extends"]('Backbone.Model');
+
+  model.includes('Luca.Events');
+
+  model.defines({
+    initialize: function() {
+      Backbone.Model.prototype.initialize(this, arguments);
+      return setupComputedProperties.call(this);
+    },
+    read: function(attr) {
+      if (_.isFunction(this[attr])) {
+        return this[attr].call(this);
+      } else {
+        return this.get(attr);
+      }
+    },
+    get: function(attr) {
+      var _ref;
+      if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
+        return this._computed[attr];
+      } else {
+        return Backbone.Model.prototype.get.call(this, attr);
+      }
+    }
+  });
 
   setupComputedProperties = function() {
     var attr, dependencies, _ref, _results,
@@ -1616,32 +1689,22 @@
     return _results;
   };
 
-  _.def('Luca.Model')["extends"]('Backbone.Model')["with"]({
-    include: ['Luca.Events'],
-    initialize: function() {
-      Backbone.Model.prototype.initialize(this, arguments);
-      return setupComputedProperties.call(this);
-    },
-    get: function(attr) {
-      var _ref;
-      if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
-        return this._computed[attr];
-      } else {
-        return Backbone.Model.prototype.get.call(this, attr);
-      }
-    }
-  });
-
 }).call(this);
 (function() {
-  var source;
+  var collection;
 
-  source = 'Backbone.Collection';
+  collection = Luca.define('Luca.Collection');
 
-  if (Backbone.QueryCollection != null) source = 'Backbone.QueryCollection';
+  if (Backbone.QueryCollection != null) {
+    collection["extends"]('Backbone.QueryCollection');
+  } else {
+    collection["extends"]('Backbone.Collection');
+  }
 
-  _.def("Luca.Collection")["extends"](source)["with"]({
-    include: ['Luca.Events'],
+  collection.includes('Luca.Events');
+
+  collection.defines({
+    model: Luca.Model,
     cachedMethods: [],
     remoteFilter: false,
     initialize: function(models, options) {
@@ -1874,7 +1937,7 @@
       return _results;
     },
     setupMethodCaching: function() {
-      var cache, collection, membershipEvents;
+      var cache, membershipEvents;
       collection = this;
       membershipEvents = ["reset", "add", "remove"];
       cache = this._methodCache = {};
@@ -2155,45 +2218,7 @@
 
 }).call(this);
 (function() {
-  var applyDOMConfig, doComponents, doLayout;
-
-  doLayout = function() {
-    this.trigger("before:layout", this);
-    this.prepareLayout();
-    return this.trigger("after:layout", this);
-  };
-
-  applyDOMConfig = function(panel, panelIndex) {
-    var config, style_declarations;
-    if (panel == null) panel = {};
-    style_declarations = [];
-    if (panel.height != null) {
-      style_declarations.push("height: " + (_.isNumber(panel.height) ? panel.height + 'px' : panel.height));
-    }
-    if (panel.width != null) {
-      style_declarations.push("width: " + (_.isNumber(panel.width) ? panel.width + 'px' : panel.width));
-    }
-    if (panel.float) style_declarations.push("float: " + panel.float);
-    config = {
-      "class": (panel != null ? panel.classes : void 0) || this.componentClass,
-      id: "" + this.cid + "-" + panelIndex,
-      style: style_declarations.join(';'),
-      "data-luca-parent": this.name || this.cid
-    };
-    if (this.customizeContainerEl != null) {
-      config = this.customizeContainerEl(config, panel, panelIndex);
-    }
-    return config;
-  };
-
-  doComponents = function() {
-    this.trigger("before:components", this, this.components);
-    this.prepareComponents();
-    this.createComponents();
-    this.trigger("before:render:components", this, this.components);
-    this.renderComponents();
-    return this.trigger("after:components", this, this.components);
-  };
+  var applyDOMConfig, doComponents, doLayout, validateContainerConfiguration;
 
   _.def('Luca.core.Container')["extends"]('Luca.components.Panel')["with"]({
     className: 'luca-ui-container',
@@ -2208,6 +2233,7 @@
       _.extend(this, this.options);
       this.setupHooks(["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"]);
       this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
+      validateContainerConfiguration(this);
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
     beforeRender: function() {
@@ -2432,6 +2458,45 @@
     attachMethod = $(component.container)[component.attachWith || "append"];
     return attachMethod(component.render().el);
   };
+
+  doLayout = function() {
+    this.trigger("before:layout", this);
+    this.prepareLayout();
+    return this.trigger("after:layout", this);
+  };
+
+  applyDOMConfig = function(panel, panelIndex) {
+    var config, style_declarations;
+    style_declarations = [];
+    if (panel.height != null) {
+      style_declarations.push("height: " + (_.isNumber(panel.height) ? panel.height + 'px' : panel.height));
+    }
+    if (panel.width != null) {
+      style_declarations.push("width: " + (_.isNumber(panel.width) ? panel.width + 'px' : panel.width));
+    }
+    if (panel.float) style_declarations.push("float: " + panel.float);
+    config = {
+      "class": (panel != null ? panel.classes : void 0) || this.componentClass,
+      id: "" + this.cid + "-" + panelIndex,
+      style: style_declarations.join(';'),
+      "data-luca-parent": this.name || this.cid
+    };
+    if (this.customizeContainerEl != null) {
+      config = this.customizeContainerEl(config, panel, panelIndex);
+    }
+    return config;
+  };
+
+  doComponents = function() {
+    this.trigger("before:components", this, this.components);
+    this.prepareComponents();
+    this.createComponents();
+    this.trigger("before:render:components", this, this.components);
+    this.renderComponents();
+    return this.trigger("after:components", this, this.components);
+  };
+
+  validateContainerConfiguration = function() {};
 
 }).call(this);
 (function() {
@@ -3516,7 +3581,7 @@
 
 }).call(this);
 (function() {
-  var collectionView, make, setupChangeObserver;
+  var collectionView, make;
 
   collectionView = Luca.define("Luca.components.CollectionView");
 
@@ -3524,7 +3589,9 @@
 
   collectionView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
 
-  collectionView.defaultsTo({
+  collectionView.triggers("before:refresh", "empty:results", "after:refresh");
+
+  collectionView.defaults({
     tagName: "ol",
     className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
@@ -3532,7 +3599,6 @@
     itemRenderer: void 0,
     itemTagName: 'li',
     itemClassName: 'collection-item',
-    hooks: ["before:refresh", "empty:results", "after:refresh"],
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -3563,7 +3629,9 @@
         this.collection.bind("add", function() {
           return _this.trigger("collection:change");
         });
-        if (this.observeChanges === true) setupChangeObserver.call(this);
+        if (this.observeChanges === true) {
+          this.collection.on("change", this.refreshModel, this);
+        }
       }
       if (this.autoRefreshOnModelsPresent !== false) {
         this.defer(function() {
@@ -3632,10 +3700,11 @@
     refreshModel: function(model) {
       var index;
       index = this.collection.indexOf(model);
-      return this.locateItemElement(model.get('id')).empty().append(this.contentForItem({
+      this.locateItemElement(model.get('id')).empty().append(this.contentForItem({
         model: model,
         index: index
       }, model));
+      return this.trigger("model:refreshed", index, model);
     },
     refresh: function(query, options) {
       var index, model, models, _i, _len;
@@ -3668,13 +3737,6 @@
   });
 
   make = Luca.View.prototype.make;
-
-  setupChangeObserver = function() {
-    var _this = this;
-    return this.collection.on("change", function(model) {
-      return _this.refreshModel(model);
-    });
-  };
 
 }).call(this);
 (function() {
@@ -4760,6 +4822,72 @@
     className: "luca-ui-load-mask",
     bodyTemplate: "components/load_mask"
   });
+
+}).call(this);
+(function() {
+  var multiView, propagateCollectionComponents, validateComponent;
+
+  multiView = Luca.define("Luca.components.MultiCollectionView");
+
+  multiView["extends"]("Luca.containers.CardView");
+
+  multiView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
+
+  multiView.defaultsTo({
+    version: 1,
+    stateful: true,
+    defaultState: {
+      activeView: 0
+    },
+    viewContainerClass: "luca-ui-multi-view-container",
+    initialize: function(options) {
+      var view, _i, _len, _ref;
+      this.options = options != null ? options : {};
+      this.components || (this.components = this.views);
+      Luca.containers.CardView.prototype.initialize.apply(this, arguments);
+      _ref = this.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        view = _ref[_i];
+        validateComponent(view);
+      }
+      this.on("collection:change", this.refresh, this);
+      this.on("after:card:switch", this.refresh, this);
+      return this.on("before:components", propagateCollectionComponents, this);
+    },
+    refresh: function() {
+      var _ref;
+      return (_ref = this.activeComponent()) != null ? _ref.trigger("collection:change") : void 0;
+    },
+    getQuery: Luca.components.CollectionView.prototype.getQuery,
+    getQueryOptions: Luca.components.CollectionView.prototype.getQueryOptions
+  });
+
+  propagateCollectionComponents = function() {
+    var component, container, _i, _len, _ref, _results;
+    container = this;
+    _ref = this.components;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      component = _ref[_i];
+      _results.push(_.extend(component, {
+        collection: this.collection,
+        getQuery: container.getQuery,
+        getQueryOptions: container.getQueryOptions
+      }));
+    }
+    return _results;
+  };
+
+  validateComponent = function(component) {
+    var type;
+    type = component.type || component.ctype;
+    if (type === "collection" || type === "collection_view" || type === "table" || type === "table_view") {
+      return;
+    }
+    throw "The MultiCollectionView expects to contain multiple collection views";
+  };
+
+  Luca.components.MultiCollectionView.acceptableComponentTypes;
 
 }).call(this);
 (function() {

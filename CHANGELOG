@@ -168,3 +168,5 @@ G0.7.3:
     - Loadmaskable
   - These are taking advantage of a Luca.mixin system.
   - Experimenting with a cleaner component definition style
+  - Introduces component definition helpers: extends, behavesAs, triggers, defaultsTo
+    which allow for a more "literate" component definiton style

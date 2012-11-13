@@ -35,6 +35,8 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     # aliases for the components property
     @components ||= @fields ||= @pages ||= @cards ||= @views
 
+    validateContainerConfiguration(@)
+
     Luca.View::initialize.apply @, arguments
 
   # Rendering Pipeline
@@ -331,7 +333,7 @@ doLayout = ()->
   @prepareLayout()
   @trigger "after:layout", @
 
-applyDOMConfig = (panel={}, panelIndex)->
+applyDOMConfig = (panel, panelIndex)->
   style_declarations = []
 
   style_declarations.push "height: #{ (if _.isNumber(panel.height) then panel.height + 'px' else panel.height ) }" if panel.height?
@@ -356,4 +358,6 @@ doComponents = ()->
   @trigger "before:render:components", @, @components
   @renderComponents()
   @trigger "after:components", @, @components
+
+validateContainerConfiguration = ()->
   

@@ -6,16 +6,8 @@ Luca.modules.Paginatable =
     
     _.bindAll @, "paginationControl"
 
-    @getCollection ||= ()-> @collection
-
-    if old = @getQueryOptions 
-      @getQueryOptions = ()->
-        p = @paginationControl()
-        filtered = _.extend(old.call(@), limit: p.limit(), page: p.page())
-        filtered
-
-    if @paginationContainer().length is 0
-      @$bodyEl().after @make("div",class:"toolbar bottom")
+    @getCollection ||= ()-> 
+      @collection
 
   paginationContainer: ()->
     @$('.toolbar.bottom')

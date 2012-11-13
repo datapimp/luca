@@ -1,4 +1,31 @@
 describe 'The Mixin System', ->
-  it 'Should not extend the prototype with the initializer', ->
-  it 'Should fire the intializer when an instance is created', ->
-  describe 'The Initializer on extended classes', ->
+  it "should omit the private methods defined on the mixin", ->
+    window.Luca ||= {}
+
+    Luca.mixin.namespace 'Luca.test_modules'
+
+    Luca.test_modules =
+      SampleMixin:
+        __privateMethod: ()->
+          true
+        publicMethod: ()-> 
+          true
+
+    sampleView = Luca.register('Luca.components.SampleView')
+
+    sampleView.mixesIn 'SampleMixin'
+
+    sampleView.defines
+      sampleMethod: ()->
+        "sample"
+
+    sampleView = new Luca.components.SampleView
+
+    expect( sampleView.privateMethod ).not.toBeDefined()
+    expect( sampleView.publicMethod ).toBeDefined()
+
+
+
+
+
+
