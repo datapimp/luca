@@ -10,8 +10,8 @@ Luca.modules.Filterable =
     filter = @getFilterState()
 
     filter.on "change", (state)=>
-      @trigger "collection:change", state, @getCollection()
       @trigger "collection:change:filter", state, @getCollection()
+      @refresh()
 
     if @getQuery?
       @getQuery = _.compose @getQuery, (query={})->
@@ -35,11 +35,8 @@ Luca.modules.Filterable =
    @getFilterState().setOption('sortBy', sortBy, options)
 
   applyFilter: (query={}, options={})->
-    if _.isEmpty( options )
-      options = _.defaults(options, @getQueryOptions())
-
-    if _.isEmpty( query )
-      query = _.defaults(query, @getQuery())
+    options = _.defaults(options, @getQueryOptions())
+    query = _.defaults(query, @getQuery())
 
     silent = _( options ).delete('silent') is true
 

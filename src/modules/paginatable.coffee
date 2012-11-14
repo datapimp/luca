@@ -16,8 +16,8 @@ Luca.modules.Paginatable =
     collection = @getCollection()
 
     pagination.on "change", (state)=>
-      @trigger "collection:change"
       @trigger "collection:change:pagination", state, collection
+      @trigger "refresh"
 
     @on "after:refresh", (models, query, options)=>
       _.defer ()=>

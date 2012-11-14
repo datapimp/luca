@@ -21,8 +21,9 @@ collectionView.behavesAs          "LoadMaskable",
                                   "Paginatable"
 
 collectionView.triggers           "before:refresh",
-                                  "empty:results",
-                                  "after:refresh"
+                                  "after:refresh",
+                                  "refresh",
+                                  "empty:results"
 
 collectionView.defaults
 
@@ -62,17 +63,17 @@ collectionView.defaults
       throw "Collection Views must have a valid backbone collection"
 
       @collection.on "before:fetch", ()=>
-        @trigger "enable:loadmask" if @loadMask is true
+        @trigger "enable:loadmask"
         
       @collection.bind "reset", ()=>
-        @trigger "collection:change"
-        @trigger "disable:loadmask" if @loadMask is true
+        @refresh()
+        @trigger "disable:loadmask"
 
       @collection.bind "remove", ()=>
-        @trigger "collection:change"
+        @refresh()
 
       @collection.bind "add", ()=>
-        @trigger "collection:change"
+        @refresh()
 
       if @observeChanges is true
         @collection.on "change", @refreshModel, @

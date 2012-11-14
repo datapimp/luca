@@ -27,6 +27,8 @@ multiView.behavesAs         "LoadMaskable",
                             "Filterable",
                             "Paginatable"
 
+multiView.triggers
+
 multiView.defaultsTo
   version: 1
 
@@ -47,14 +49,23 @@ multiView.defaultsTo
     @on "collection:change", @refresh, @
     @on "after:card:switch", @refresh, @
     @on "before:components", propagateCollectionComponents, @
+    @on "before:components", bubbleCollectionEvents, @
 
   refresh: ()->
-    @activeComponent()?.trigger("collection:change")
+    @activeComponent()?.trigger("refresh")
 
   getQuery: Luca.components.CollectionView::getQuery
   getQueryOptions: Luca.components.CollectionView::getQueryOptions
   getCollection: Luca.components.CollectionView::getCollection
 #### Private Helpers
+
+bubbleCollectionEvents = ()->
+  container = @
+    container.eachComponent (component)->
+      for eventId in ['refresh','before:refresh','after:refresh','empty:results']
+        component.on eventId, ()->
+          if component is container.activeComponent()
+            container.trigger(eventId)
 
 propagateCollectionComponents = ()->
   container = @
@@ -63,7 +74,7 @@ propagateCollectionComponents = ()->
   # collection, filter state, pagination options, etc
   for component in @components
     _.extend component, 
-      collection: @collection
+      collection: container.getCollection?() || @collection 
       getQuery: container.getQuery
       getQueryOptions: container.getQueryOptions
 

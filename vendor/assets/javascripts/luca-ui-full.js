@@ -997,8 +997,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       });
       filter = this.getFilterState();
       filter.on("change", function(state) {
-        _this.trigger("collection:change", state, _this.getCollection());
-        return _this.trigger("collection:change:filter", state, _this.getCollection());
+        _this.trigger("collection:change:filter", state, _this.getCollection());
+        return _this.refresh();
       });
       if (this.getQuery != null) {
         this.getQuery = _.compose(this.getQuery, function(query) {
@@ -1037,10 +1037,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       var silent;
       if (query == null) query = {};
       if (options == null) options = {};
-      if (_.isEmpty(options)) {
-        options = _.defaults(options, this.getQueryOptions());
-      }
-      if (_.isEmpty(query)) query = _.defaults(query, this.getQuery());
+      options = _.defaults(options, this.getQueryOptions());
+      query = _.defaults(query, this.getQuery());
       silent = _(options)["delete"]('silent') === true;
       return this.getFilterState().set({
         query: query,
@@ -1267,8 +1265,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       pagination = this.getPaginationState();
       collection = this.getCollection();
       pagination.on("change", function(state) {
-        _this.trigger("collection:change");
-        return _this.trigger("collection:change:pagination", state, collection);
+        _this.trigger("collection:change:pagination", state, collection);
+        return _this.trigger("refresh");
       });
       this.on("after:refresh", function(models, query, options) {
         return _.defer(function() {
@@ -3723,7 +3721,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   collectionView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
 
-  collectionView.triggers("before:refresh", "empty:results", "after:refresh");
+  collectionView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
 
   collectionView.defaults({
     tagName: "ol",
@@ -3751,17 +3749,17 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (!Luca.isBackboneCollection(this.collection)) {
         throw "Collection Views must have a valid backbone collection";
         this.collection.on("before:fetch", function() {
-          if (_this.loadMask === true) return _this.trigger("enable:loadmask");
+          return _this.trigger("enable:loadmask");
         });
         this.collection.bind("reset", function() {
-          _this.trigger("collection:change");
-          if (_this.loadMask === true) return _this.trigger("disable:loadmask");
+          _this.refresh();
+          return _this.trigger("disable:loadmask");
         });
         this.collection.bind("remove", function() {
-          return _this.trigger("collection:change");
+          return _this.refresh();
         });
         this.collection.bind("add", function() {
-          return _this.trigger("collection:change");
+          return _this.refresh();
         });
         if (this.observeChanges === true) {
           this.collection.on("change", this.refreshModel, this);
