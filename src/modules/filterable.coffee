@@ -1,34 +1,31 @@
 Luca.modules.Filterable = 
-  _initializer: (component, module)->
-    return if @filterable is false
-    
-    @filterState = @getFilterModel() 
+  __included: (component, module)->
+    _.extend(Luca.Collection::, __filters:{})
 
-    if oldQuery = @getQuery 
-      @getQuery = ()-> 
-        _.extend(oldQuery.call(@), @filterState.toQuery())
+  __initializer: (component, module)->
+    return if @filterable is false or not Luca.isBackboneCollection(@collection) 
 
-    if oldOptions = @getQueryOptions 
-      @getQueryOptions = ()-> 
-        return {}
-        _.extend(oldOptions.call(@), @filterState.toOptions())
+    filter = @getFilterState()
 
-    if sortBy = @filterable?.options?.sortBy 
-      @setSortBy(sortBy)
+    filter.on "change", (state)=>
+      @trigger "collection:change", state, @getCollection()
+      @trigger "collection:change:filter", state, @getCollection()
+
+    if @getQuery?
+      @getQuery = _.compose @getQuery, (query={})->
+        obj = _.clone(query)
+        _.extend(obj, filter.toQuery() )
+
+    if @getQueryOptions?
+      @getQueryOptions = _.compose @getQueryOptions, (options={})->
+        obj = _.clone(options)
+        _.extend(obj, filter.toOptions() )
+
+  getFilterState: ()->
+    @collection.__filters[ @cid ] ||= new FilterModel(@filterable)
 
   setSortBy: (sortBy, options={})->
-    @filterState.setOption('sortBy', sortBy, options)
-
-  getFilterModel: ()->
-    return @filterState if @filterState?
-
-    @filterState = new FilterModel(@filterable ||= {})     
-
-    @filterState.on "change", ()->
-      @trigger "collection:change"
-    , @
-
-    @filterState
+   @getFilterState().setOption('sortBy', sortBy, options)
 
   applyFilter: (query={}, options={})->
     if _.isEmpty( options )
@@ -39,7 +36,7 @@ Luca.modules.Filterable =
 
     silent = _( options ).delete('silent') is true
 
-    @filterState.set({query,options}, silent: silent)
+    @getFilterState().set({query,options}, silent: silent)
 
 class FilterModel extends Backbone.Model
   setOption: (option, value, options)->
@@ -53,7 +50,7 @@ class FilterModel extends Backbone.Model
     @set 'query', _.extend(@toQuery(), payload), options
 
   toOptions: ()->
-    @get("options")
+    @toJSON().options
 
   toQuery: ()->
-    @get("query")
+    @toJSON().query

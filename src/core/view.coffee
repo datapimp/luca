@@ -47,8 +47,8 @@ view.defines
       Luca.View.handleEnhancedProperties.call(@)
 
     if @mixins?.length > 0
-      for module in _.uniq(@mixins)
-        Luca.mixin(module)?._initializer?.call(@, @, module)
+      for module in @mixins 
+        Luca.mixin(module)?.__initializer?.call(@, @, module)
 
     @delegateEvents()
 
@@ -230,7 +230,7 @@ Luca.View.extend = (definition)->
 
   if definition.mixins? and _.isArray( definition.mixins )
     for module in definition.mixins
-      Luca.decorate(definition).with( module )
+      Luca.decorate( definition ).with( module )
 
   Luca.View._originalExtend.call(@, definition)
 

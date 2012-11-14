@@ -1,5 +1,5 @@
 Luca.modules.LoadMaskable = 
-  _initializer: ()->
+  __initializer: ()->
     return unless @loadMask is true
 
     if @loadMask is true

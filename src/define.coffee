@@ -105,8 +105,10 @@ DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy
 Luca.extend = (superClassName, childName, properties={})->
   superClass = Luca.util.resolve( superClassName, (window || global) )
 
+  superClass.__initializers ||= []
+
   unless _.isFunction(superClass?.extend)
-    throw "#{ superClassName } is not a valid component to extend from"
+    throw "Error defining #{ childName }. #{ superClassName } is not a valid component to extend from"
 
   properties.displayName = childName
 
@@ -115,6 +117,9 @@ Luca.extend = (superClassName, childName, properties={})->
     superClass
 
   properties._super = (method, context=@, args=[])->
+    # protect against a stack too deep error in weird cases
+    # TODO: debug this better
+    
     @_superClass().prototype[method]?.apply(context, args)
 
   definition = superClass.extend(properties)
@@ -155,14 +160,23 @@ Luca.decorate = (componentPrototype)->
   
   return with: (mixin)->
     mixinDefinition = Luca.mixin(mixin)
-    mixinPrivates   = _( mixinDefinition ).chain().keys().reject (key)-> 
+
+    mixinPrivates   = _( mixinDefinition ).chain().keys().select (key)-> 
       "#{ key }".match(/^__/)
 
-    mixinPrivates   = _( mixinDefinition ).omit( _( mixinPrivates ) )
+    sanitized   = _( mixinDefinition ).omit( mixinPrivates.value() )
 
-    _.extend(componentPrototype, mixinDefinition)
+    _.extend(componentPrototype, sanitized)
+
+    # When a mixin is included, we may want to do things 
+    mixinDefinition?.__included?.call(mixinDefinition, mixin) 
+
+    superclassMixins = componentPrototype._superClass()::mixins
 
     componentPrototype.mixins ||= []
     componentPrototype.mixins.push( mixin )
-    componentPrototype.mixins = _( componentPrototype.mixins ).uniq()
+    componentPrototype.mixins = componentPrototype.mixins.concat( superclassMixins )
+
+    componentPrototype.mixins = _( componentPrototype.mixins ).chain().uniq().compact().value()
+
     componentPrototype

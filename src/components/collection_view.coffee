@@ -118,12 +118,12 @@ collectionView.defaults
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
   getQuery: ()-> 
-    {}
+    @query ||= {}
 
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
   getQueryOptions: ()-> 
-    {}
+    @queryOptions ||= {}
 
   # Private: returns the models to be rendered.  If the underlying collection
   # responds to @query() then it will use that interface. 

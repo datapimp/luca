@@ -1,16 +1,32 @@
 Luca.modules.Paginatable = 
   paginatorViewClass: 'Luca.components.PaginationControl'
+  paginationSelector: ".toolbar.bottom"
 
-  _initializer:()->
-    return if @paginatable is false
+  __included: ()->
+    _.extend(Luca.Collection::, __paginators: {})
+
+  __initializer:()->
+    return if @paginatable is false or not Luca.isBackboneCollection(@collection)
     
     _.bindAll @, "paginationControl"
 
-    @getCollection ||= ()-> 
-      @collection
+    pagination = @getPaginationState()
+    collection = @getCollection()
+
+    pagination.on "change", (state)=>
+      @trigger "collection:change", state, collection
+      @trigger "collection:change:pagination", state, collection
+
+    if @getQueryOptions?
+      @getQueryOptions = _.compose @getQueryOptions, (options={})-> 
+        obj = _.clone( options )
+        _.extend obj, pagination.toJSON()
+
+  getPaginationState: ()->
+    @collection.__paginators[ @cid ] ||= new Backbone.Model(@paginatable)
 
   paginationContainer: ()->
-    @$('.toolbar.bottom')
+    @$(">#{ @paginationSelector }")
 
   setCurrentPage: (page=1, options={})->
     @paginationControl().state.set('page', page, options)
@@ -40,21 +56,8 @@ Luca.modules.Paginatable =
 
     @paginator = Luca.util.lazyComponent
       type: "pagination_control" 
-      collection: @getCollection() 
-      parent: @
-
-    @paginator.setPage( @paginatable.page )
-    @paginator.setLimit( @paginatable.limit )
-
-    @paginator.state.on "change", ()-> 
-      @trigger "collection:change"
-    , @
-
-    # FIXME
-    #
-    # This couples the pagination system too closely to the collectionview
-    # should write a more abstract interface for this
-    @on("after:refresh", @updatePagination, @)
+      collection: @getCollection()
+      state: @getPaginationState()
 
     @paginationContainer().append( @paginator.render().$el )
 
