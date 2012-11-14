@@ -59,34 +59,34 @@ multiView.defaultsTo
   getCollection: Luca.components.CollectionView::getCollection
 #### Private Helpers
 
-bubbleCollectionEvents = ()->
-  container = @
+  bubbleCollectionEvents = ()->
+    container = @
     container.eachComponent (component)->
       for eventId in ['refresh','before:refresh','after:refresh','empty:results']
         component.on eventId, ()->
           if component is container.activeComponent()
             container.trigger(eventId)
 
-propagateCollectionComponents = ()->
-  container = @
+  propagateCollectionComponents = ()->
+    container = @
 
-  # in the multi view will share the same
-  # collection, filter state, pagination options, etc
-  for component in @components
-    _.extend component, 
-      collection: container.getCollection?() || @collection 
-      getQuery: container.getQuery
-      getQueryOptions: container.getQueryOptions
+    # in the multi view will share the same
+    # collection, filter state, pagination options, etc
+    for component in @components
+      _.extend component, 
+        collection: container.getCollection?() || @collection 
+        getQuery: container.getQuery
+        getQueryOptions: container.getQueryOptions
 
-validateComponent = (component)->
-  type = (component.type || component.ctype)
+  validateComponent = (component)->
+    type = (component.type || component.ctype)
 
-  return if  type is "collection" or 
-             type is "collection_view" or
-             type is "table" or
-             type is "table_view" 
+    return if  type is "collection" or 
+               type is "collection_view" or
+               type is "table" or
+               type is "table_view" 
 
-  throw "The MultiCollectionView expects to contain multiple collection views" 
+    throw "The MultiCollectionView expects to contain multiple collection views" 
 
 
 Luca.components.MultiCollectionView.defaultTopToolbar = 
