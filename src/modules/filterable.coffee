@@ -5,6 +5,8 @@ Luca.modules.Filterable =
   __initializer: (component, module)->
     return if @filterable is false or not Luca.isBackboneCollection(@collection) 
 
+    @getCollection ||= ()-> @collection
+
     filter = @getFilterState()
 
     filter.on "change", (state)=>
@@ -15,11 +17,16 @@ Luca.modules.Filterable =
       @getQuery = _.compose @getQuery, (query={})->
         obj = _.clone(query)
         _.extend(obj, filter.toQuery() )
+    else
+      @getQuery = ()=>
+        filter.toQuery()
 
     if @getQueryOptions?
       @getQueryOptions = _.compose @getQueryOptions, (options={})->
         obj = _.clone(options)
         _.extend(obj, filter.toOptions() )
+    else
+      @getQueryOptions = ()-> filter.toOptions()
 
   getFilterState: ()->
     @collection.__filters[ @cid ] ||= new FilterModel(@filterable)

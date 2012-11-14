@@ -915,6 +915,9 @@
       if (this.filterable === false || !Luca.isBackboneCollection(this.collection)) {
         return;
       }
+      this.getCollection || (this.getCollection = function() {
+        return this.collection;
+      });
       filter = this.getFilterState();
       filter.on("change", function(state) {
         _this.trigger("collection:change", state, _this.getCollection());
@@ -927,6 +930,10 @@
           obj = _.clone(query);
           return _.extend(obj, filter.toQuery());
         });
+      } else {
+        this.getQuery = function() {
+          return filter.toQuery();
+        };
       }
       if (this.getQueryOptions != null) {
         return this.getQueryOptions = _.compose(this.getQueryOptions, function(options) {
@@ -935,6 +942,10 @@
           obj = _.clone(options);
           return _.extend(obj, filter.toOptions());
         });
+      } else {
+        return this.getQueryOptions = function() {
+          return filter.toOptions();
+        };
       }
     },
     getFilterState: function() {
@@ -1167,30 +1178,39 @@
       });
     },
     __initializer: function() {
-      var collection, pagination,
+      var collection, old, pagination,
         _this = this;
       if (this.paginatable === false || !Luca.isBackboneCollection(this.collection)) {
         return;
       }
       _.bindAll(this, "paginationControl");
+      this.getCollection || (this.getCollection = function() {
+        return this.collection;
+      });
       pagination = this.getPaginationState();
       collection = this.getCollection();
       pagination.on("change", function(state) {
-        _this.trigger("collection:change", state, collection);
+        _this.trigger("collection:change");
         return _this.trigger("collection:change:pagination", state, collection);
       });
-      if (this.getQueryOptions != null) {
-        return this.getQueryOptions = _.compose(this.getQueryOptions, function(options) {
-          var obj;
-          if (options == null) options = {};
-          obj = _.clone(options);
-          return _.extend(obj, pagination.toJSON());
+      this.on("after:refresh", function(models, query, options) {
+        return _.defer(function() {
+          return _this.updatePagination.call(_this, models, query, options);
         });
+      });
+      if (old = this.getQueryOptions) {
+        return this.getQueryOptions = function() {
+          return _.extend(old(), pagination.toJSON());
+        };
+      } else {
+        return this.getQueryOptions = function() {
+          return pagination.toJSON();
+        };
       }
     },
     getPaginationState: function() {
       var _base, _name;
-      return (_base = this.collection.__paginators)[_name = this.cid] || (_base[_name] = new Backbone.Model(this.paginatable));
+      return (_base = this.collection.__paginators)[_name = this.cid] || (_base[_name] = this.paginationControl().state);
     },
     paginationContainer: function() {
       return this.$(">" + this.paginationSelector);
@@ -1198,12 +1218,12 @@
     setCurrentPage: function(page, options) {
       if (page == null) page = 1;
       if (options == null) options = {};
-      return this.paginationControl().state.set('page', page, options);
+      return this.getPaginationState().set('page', page, options);
     },
     setLimit: function(limit, options) {
       if (limit == null) limit = 0;
       if (options == null) options = {};
-      return this.paginationControl().state.set('limit', limit, options);
+      return this.getPaginationState().set('limit', limit, options);
     },
     updatePagination: function(models, query, options) {
       var itemCount, paginator, totalCount, _ref;
@@ -1235,7 +1255,7 @@
       this.paginator = Luca.util.lazyComponent({
         type: "pagination_control",
         collection: this.getCollection(),
-        state: this.getPaginationState()
+        defaultState: this.paginatable
       });
       this.paginationContainer().append(this.paginator.render().$el);
       return this.paginator;
@@ -3745,6 +3765,8 @@
     },
     refresh: function(query, options) {
       var index, model, models, _i, _len;
+      query || (query = this.getQuery());
+      options || (options = this.getQueryOptions());
       this.$bodyEl().empty();
       models = this.getModels(query, options);
       this.trigger("before:refresh", models, query, options);
@@ -4896,7 +4918,8 @@
       return (_ref = this.activeComponent()) != null ? _ref.trigger("collection:change") : void 0;
     },
     getQuery: Luca.components.CollectionView.prototype.getQuery,
-    getQueryOptions: Luca.components.CollectionView.prototype.getQueryOptions
+    getQueryOptions: Luca.components.CollectionView.prototype.getQueryOptions,
+    getCollection: Luca.components.CollectionView.prototype.getCollection
   });
 
   propagateCollectionComponents = function() {
@@ -4924,7 +4947,21 @@
     throw "The MultiCollectionView expects to contain multiple collection views";
   };
 
-  Luca.components.MultiCollectionView.acceptableComponentTypes;
+  Luca.components.MultiCollectionView.defaultTopToolbar = {
+    group: true,
+    selectable: true,
+    buttons: [
+      {
+        icon: "list-alt",
+        label: "Table View",
+        eventId: "toggle:table:view"
+      }, {
+        icon: "th",
+        label: "Icon View",
+        eventId: "toggle:icon:view"
+      }
+    ]
+  };
 
 }).call(this);
 (function() {
@@ -4964,11 +5001,11 @@
 (function() {
   var paginationControl;
 
-  paginationControl = Luca.define("Luca.components.PaginationControl");
+  paginationControl = Luca.register("Luca.components.PaginationControl");
 
   paginationControl["extends"]("Luca.View");
 
-  paginationControl.defaultsTo({
+  paginationControl.defines({
     template: "components/pagination",
     stateful: true,
     autoBindEventHandlers: true,
@@ -5066,8 +5103,8 @@
     },
     itemsPerPage: function(value, options) {
       if (options == null) options = {};
-      if (value != null) this.set("limit", value, options);
-      return parseInt(this.get("limit"));
+      if (value != null) this.state.set("limit", value, options);
+      return parseInt(this.state.get("limit"));
     }
   });
 

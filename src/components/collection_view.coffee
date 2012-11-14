@@ -24,7 +24,6 @@ collectionView.triggers           "before:refresh",
                                   "empty:results",
                                   "after:refresh"
 
-
 collectionView.defaults
 
   tagName: "ol"
@@ -145,6 +144,9 @@ collectionView.defaults
     @trigger("model:refreshed", index, model)
 
   refresh: (query,options)->
+    query ||= @getQuery()
+    options ||= @getQueryOptions()
+
     @$bodyEl().empty()
     models = @getModels(query, options)
 

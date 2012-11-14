@@ -53,7 +53,7 @@ multiView.defaultsTo
 
   getQuery: Luca.components.CollectionView::getQuery
   getQueryOptions: Luca.components.CollectionView::getQueryOptions
-
+  getCollection: Luca.components.CollectionView::getCollection
 #### Private Helpers
 
 propagateCollectionComponents = ()->
@@ -78,4 +78,15 @@ validateComponent = (component)->
   throw "The MultiCollectionView expects to contain multiple collection views" 
 
 
-Luca.components.MultiCollectionView.acceptableComponentTypes
+Luca.components.MultiCollectionView.defaultTopToolbar = 
+  group: true
+  selectable: true
+  buttons:[
+    icon: "list-alt"
+    label: "Table View"
+    eventId: "toggle:table:view"
+  ,
+    icon: "th"
+    label: "Icon View"
+    eventId: "toggle:icon:view"
+  ]  

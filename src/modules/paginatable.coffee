@@ -10,29 +10,36 @@ Luca.modules.Paginatable =
     
     _.bindAll @, "paginationControl"
 
+    @getCollection ||= ()-> @collection
+
     pagination = @getPaginationState()
     collection = @getCollection()
 
     pagination.on "change", (state)=>
-      @trigger "collection:change", state, collection
+      @trigger "collection:change"
       @trigger "collection:change:pagination", state, collection
 
-    if @getQueryOptions?
-      @getQueryOptions = _.compose @getQueryOptions, (options={})-> 
-        obj = _.clone( options )
-        _.extend obj, pagination.toJSON()
+    @on "after:refresh", (models, query, options)=>
+      _.defer ()=>
+        @updatePagination.call(@, models, query, options)
+
+    if old = @getQueryOptions
+      @getQueryOptions = ()->
+        _.extend( old(), pagination.toJSON() ) 
+    else
+      @getQueryOptions = ()-> pagination.toJSON()
 
   getPaginationState: ()->
-    @collection.__paginators[ @cid ] ||= new Backbone.Model(@paginatable)
+    @collection.__paginators[ @cid ] ||= @paginationControl().state
 
   paginationContainer: ()->
     @$(">#{ @paginationSelector }")
 
   setCurrentPage: (page=1, options={})->
-    @paginationControl().state.set('page', page, options)
+    @getPaginationState().set('page', page, options)
 
   setLimit: (limit=0,options={})->
-    @paginationControl().state.set('limit', limit, options)
+    @getPaginationState().set('limit', limit, options)
 
   updatePagination: (models=[], query={}, options={})->
     _.defaults(options, @getQueryOptions(), limit: 0 )
@@ -57,7 +64,7 @@ Luca.modules.Paginatable =
     @paginator = Luca.util.lazyComponent
       type: "pagination_control" 
       collection: @getCollection()
-      state: @getPaginationState()
+      defaultState: @paginatable 
 
     @paginationContainer().append( @paginator.render().$el )
 

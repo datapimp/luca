@@ -1,8 +1,8 @@
-paginationControl = Luca.define   "Luca.components.PaginationControl"
+paginationControl = Luca.register   "Luca.components.PaginationControl"
 
 paginationControl.extends         "Luca.View"
 
-paginationControl.defaultsTo
+paginationControl.defines
 
   template: "components/pagination"
 
@@ -93,5 +93,5 @@ paginationControl.defaultsTo
     parseInt @collection?.length || 0
 
   itemsPerPage: (value, options={})-> 
-    @set("limit", value, options) if value?
-    parseInt @get("limit")
+    @state.set("limit", value, options) if value?
+    parseInt @state.get("limit")
