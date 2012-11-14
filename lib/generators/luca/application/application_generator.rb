@@ -34,7 +34,7 @@ module Luca
         template "javascripts/router.#{file_extension}", "app/assets/javascripts/#{application_name}/router.#{file_extension}"
         template "javascripts/main.#{file_extension}", "app/assets/javascripts/#{application_name}/views/main.#{file_extension}"
         template "javascripts/config.#{file_extension}", "app/assets/javascripts/#{application_name}/config.#{file_extension}"
-        template "javascripts/main.jst.ejs.haml", "app/assets/javascripts/#{application_name}/templates/main.jst.ejs.haml"
+        template "javascripts/main.jst.ejs", "app/assets/javascripts/#{application_name}/templates/main.jst.ejs"
         
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/models")
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/collections")
