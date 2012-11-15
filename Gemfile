@@ -15,4 +15,5 @@ group :test, :development do
   gem 'rb-fsevent', '>= 0.9.1'
   gem 'pry'
   gem 'guard-jasmine'
+  gem 'jasmine'
 end
