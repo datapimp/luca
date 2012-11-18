@@ -81,7 +81,6 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
     if @includeBlank
       @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
-
   populateOptions: ()->
     @resetOptions()
 

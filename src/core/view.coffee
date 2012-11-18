@@ -1,10 +1,25 @@
-view = Luca.define      "Luca.View"
+view = Luca.register    "Luca.View"
 
 view.extends            "Backbone.View"
 
+# includes are extensions to the prototype, and have no special behavior
 view.includes           "Luca.Events",
                         "Luca.modules.DomHelpers"
 
+# mixins are includes with special property / method conventions
+# which customize the components through the use of __initializer and
+# __included method names.  These will be called every time an instance
+# is created, and the first time the mixin is used to enhance a component.
+view.mixesIn            "EnhancedProperties",
+                        "CollectionEventBindings",
+                        "ApplicationEventBindings",
+                        "StateModel"
+
+# Luca.View classes have the concept of special events called hooks
+# which allow you to tap into the lifecycle events of your view to 
+# customize their behavior.  This is especially useful in subclasses.
+#
+# You can utilize a @hook method by camelcasing the triggers defined below: 
 view.triggers           "before:initialize",
                         "after:initialize",
                         "before:render",
@@ -12,7 +27,8 @@ view.triggers           "before:initialize",
                         "first:activation",
                         "activation",
                         "deactivation"
-                        
+
+# Luca.View decorates Backbone.View with some patterns and conventions.
 view.defines
   initialize: (@options={})->
     @trigger "before:initialize", @, @options
@@ -36,15 +52,11 @@ view.defines
 
     @setupClassHelpers()
 
-    setupStateMachine.call(@) if @stateful is true and not @state?
 
     registerCollectionEvents.call(@)
     registerApplicationEvents.call( @)
 
     setupTemplate.call(@) if @template and not @isField
-
-    if Luca.config.enhancedViewProperties is true and not @isField
-      Luca.View.handleEnhancedProperties.call(@)
 
     if @mixins?.length > 0
       for module in @mixins 
@@ -204,11 +216,6 @@ registerCollectionEvents = ()->
       console.log "Error Binding To Collection in registerCollectionEvents", @
       throw e
 
-setupStateMachine = ()->
-  @state = new Backbone.Model(@defaultState || {})
-  @set ||= ()=> @state.set.apply(@state, arguments)
-  @get ||= ()=> @state.get.apply(@state, arguments)  
-
 setupBodyTemplate = ()->
   templateVars = if @bodyTemplateVars
     @bodyTemplateVars.call(@)
@@ -238,5 +245,3 @@ Luca.View.extend = (definition)->
 Luca.View.deferrableEvent = "reset"
 
 Luca.View.handleEnhancedProperties = ()->
-  if _.isString(@collection) and Luca.CollectionManager.get()
-    @collection = Luca.CollectionManager.get().getOrCreate(@collection)  

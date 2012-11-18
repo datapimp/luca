@@ -921,7 +921,7 @@
       filter = this.getFilterState();
       filter.on("change", function(state) {
         _this.trigger("collection:change:filter", state, _this.getCollection());
-        return _this.refresh();
+        return _this.trigger("refresh");
       });
       if (this.getQuery != null) {
         this.getQuery = _.compose(this.getQuery, function(query) {
@@ -3004,7 +3004,70 @@
 
 }).call(this);
 (function() {
-  var buildButton, make, prepareButtons;
+  var buildButton, make, panelToolbar, prepareButtons;
+
+  panelToolbar = Luca.register("Luca.components.PanelToolbar");
+
+  panelToolbar["extends"]("Luca.View");
+
+  panelToolbar.defines({
+    buttons: [],
+    className: "luca-ui-toolbar btn-toolbar",
+    well: true,
+    orientation: 'top',
+    autoBindEventHandlers: true,
+    events: {
+      "click a.btn, click .dropdown-menu li": "clickHandler"
+    },
+    initialize: function(options) {
+      var _ref;
+      this.options = options != null ? options : {};
+      this._super("initialize", this, arguments);
+      if (this.group === true && ((_ref = this.buttons) != null ? _ref.length : void 0) >= 0) {
+        return this.buttons = [
+          {
+            group: true,
+            buttons: this.buttons
+          }
+        ];
+      }
+    },
+    clickHandler: function(e) {
+      var eventId, hook, me, my, source;
+      me = my = $(e.target);
+      if (me.is('i')) me = my = $(e.target).parent();
+      if (this.selectable === true) {
+        my.siblings().removeClass("is-selected");
+        me.addClass('is-selected');
+      }
+      if (!(eventId = my.data('eventid'))) return;
+      hook = Luca.util.hook(eventId);
+      source = this.parent || this;
+      if (_.isFunction(source[hook])) {
+        return source[hook].call(this, me, e);
+      } else {
+        return source.trigger(eventId, me, e);
+      }
+    },
+    beforeRender: function() {
+      this._super("beforeRender", this, arguments);
+      if (this.well === true) this.$el.addClass('well');
+      if (this.selectable === true) this.$el.addClass('btn-selectable');
+      this.$el.addClass("toolbar-" + this.orientation);
+      if (this.align === "right") this.$el.addClass("pull-right");
+      if (this.align === "left") return this.$el.addClass("pull-left");
+    },
+    render: function() {
+      var element, _i, _len, _ref;
+      this.$el.empty();
+      _ref = prepareButtons(this.buttons);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        element = _ref[_i];
+        this.$el.append(element);
+      }
+      return this;
+    }
+  });
 
   make = Backbone.View.prototype.make;
 
@@ -3012,14 +3075,11 @@
     var autoWrapClass, buttonAttributes, buttonEl, buttons, dropdownEl, dropdownItems, label, object, white, wrapper,
       _this = this;
     if (wrap == null) wrap = true;
-    if (config.ctype != null) {
+    if ((config.ctype != null) || (config.type != null)) {
       config.className || (config.className = "");
       config.className += 'toolbar-component';
       object = Luca(config).render();
-      if (Luca.isBackboneView(object)) {
-        console.log("Adding toolbar component", object);
-        return object.el;
-      }
+      if (Luca.isBackboneView(object)) return object.$el;
     }
     if (config.spacer) {
       return make("div", {
@@ -3032,8 +3092,11 @@
       }, config.text);
     }
     wrapper = 'btn-group';
-    if (config.wrapper != null) wrapper += " " + config.wrapper;
-    if (config.align != null) wrapper += " align-" + config.align;
+    if (config.wrapper != null) wrapper += "" + config.wrapper;
+    if (config.align != null) {
+      wrapper += "pull-" + config.align + " align-" + config.align;
+    }
+    if (config.selectable === true) wrapper += 'btn-selectable';
     if ((config.group != null) && (config.buttons != null)) {
       buttons = prepareButtons(config.buttons, false);
       return make("div", {
@@ -3055,6 +3118,7 @@
       if (config.color != null) {
         buttonAttributes["class"] += " btn-" + config.color;
       }
+      if (config.selected != null) buttonAttributes["class"] += " is-selected";
       if (config.dropdown) {
         label = "" + label + " <span class='caret'></span>";
         buttonAttributes["class"] += " dropdown-toggle";
@@ -3084,51 +3148,16 @@
   };
 
   prepareButtons = function(buttons, wrap) {
+    var button, _i, _len, _results;
+    if (buttons == null) buttons = [];
     if (wrap == null) wrap = true;
-    return _(buttons).map(function(button) {
-      return buildButton(button, wrap);
-    });
-  };
-
-  _.def("Luca.containers.PanelToolbar")["extends"]("Luca.View")["with"]({
-    className: "luca-ui-toolbar btn-toolbar",
-    buttons: [],
-    well: true,
-    orientation: 'top',
-    autoBindEventHandlers: true,
-    events: {
-      "click a.btn, click .dropdown-menu li": "clickHandler"
-    },
-    clickHandler: function(e) {
-      var eventId, hook, me, my, source;
-      me = my = $(e.target);
-      if (me.is('i')) me = my = $(e.target).parent();
-      eventId = my.data('eventid');
-      if (eventId == null) return;
-      hook = Luca.util.hook(eventId);
-      source = this.parent || this;
-      if (_.isFunction(source[hook])) {
-        return source[hook].call(this, me, e);
-      } else {
-        return source.trigger(eventId, me, e);
-      }
-    },
-    beforeRender: function() {
-      this._super("beforeRender", this, arguments);
-      if (this.well === true) this.$el.addClass('well');
-      this.$el.addClass("toolbar-" + this.orientation);
-      if (this.styles != null) return this.applyStyles(this.styles);
-    },
-    render: function() {
-      var elements,
-        _this = this;
-      this.$el.empty();
-      elements = prepareButtons(this.buttons);
-      return _(elements).each(function(element) {
-        return _this.$el.append(element);
-      });
+    _results = [];
+    for (_i = 0, _len = buttons.length; _i < _len; _i++) {
+      button = buttons[_i];
+      _results.push(buildButton(button, wrap));
     }
-  });
+    return _results;
+  };
 
 }).call(this);
 (function() {
@@ -4882,7 +4911,7 @@
 
 }).call(this);
 (function() {
-  var multiView, propagateCollectionComponents, validateComponent;
+  var bubbleCollectionEvents, multiView, propagateCollectionComponents, validateComponent;
 
   multiView = Luca.define("Luca.components.MultiCollectionView");
 
@@ -4909,16 +4938,36 @@
       }
       this.on("collection:change", this.refresh, this);
       this.on("after:card:switch", this.refresh, this);
-      return this.on("before:components", propagateCollectionComponents, this);
+      this.on("before:components", propagateCollectionComponents, this);
+      return this.on("after:components", bubbleCollectionEvents, this);
     },
     refresh: function() {
       var _ref;
-      return (_ref = this.activeComponent()) != null ? _ref.trigger("collection:change") : void 0;
+      return (_ref = this.activeComponent()) != null ? _ref.trigger("refresh") : void 0;
     },
     getQuery: Luca.components.CollectionView.prototype.getQuery,
     getQueryOptions: Luca.components.CollectionView.prototype.getQueryOptions,
     getCollection: Luca.components.CollectionView.prototype.getCollection
   });
+
+  bubbleCollectionEvents = function() {
+    var container;
+    container = this;
+    return container.eachComponent(function(component) {
+      var eventId, _i, _len, _ref, _results;
+      _ref = ['refresh', 'before:refresh', 'after:refresh', 'empty:results'];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        eventId = _ref[_i];
+        _results.push(component.on(eventId, function() {
+          if (component === container.activeComponent()) {
+            return container.trigger(eventId);
+          }
+        }));
+      }
+      return _results;
+    });
+  };
 
   propagateCollectionComponents = function() {
     var component, container, _i, _len, _ref, _results;
@@ -4928,7 +4977,7 @@
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       component = _ref[_i];
       _results.push(_.extend(component, {
-        collection: this.collection,
+        collection: (typeof container.getCollection === "function" ? container.getCollection() : void 0) || this.collection,
         getQuery: container.getQuery,
         getQueryOptions: container.getQueryOptions
       }));
@@ -4943,22 +4992,6 @@
       return;
     }
     throw "The MultiCollectionView expects to contain multiple collection views";
-  };
-
-  Luca.components.MultiCollectionView.defaultTopToolbar = {
-    group: true,
-    selectable: true,
-    buttons: [
-      {
-        icon: "list-alt",
-        label: "Table View",
-        eventId: "toggle:table:view"
-      }, {
-        icon: "th",
-        label: "Icon View",
-        eventId: "toggle:icon:view"
-      }
-    ]
   };
 
 }).call(this);

@@ -1,19 +1,19 @@
-codeMirrorOptions =
-  readOnly: true
-  autoFocus: false
-  theme: "monokai"
-  mode: "javascript"
+developmentConsole = Luca.register    "Luca.tools.DevelopmentConsole"
 
-Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
+developmentConsole.extends            "Luca.core.Container"
+
+
+developmentConsole.defines
   className: "luca-ui-console"
   name: "console"
   history: []
   historyIndex: 0
   width: 1000
+
   componentEvents:
-    "code_input key:keyup" : "historyUp"
-    "code_input key:keydown" : "historyDown"
-    "code_input key:enter" : "runCommand"
+    "code_input key:keyup"    : "historyUp"
+    "code_input key:keydown"  : "historyDown"
+    "code_input key:enter"    : "runCommand"
 
   compileOptions:
     bare: true

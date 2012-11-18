@@ -1,4 +1,5 @@
 multiView = Luca.define     "Luca.components.MultiCollectionView"
+
 # The CollectionMultiView is a collection view with multiple renderings
 # of the list.  ( e.g. Icons, Table, List ).  It works by maintaining
 # a current view, and rendering that view.  It refreshes the views
@@ -27,8 +28,6 @@ multiView.behavesAs         "LoadMaskable",
                             "Filterable",
                             "Paginatable"
 
-multiView.triggers
-
 multiView.defaultsTo
   version: 1
 
@@ -49,7 +48,7 @@ multiView.defaultsTo
     @on "collection:change", @refresh, @
     @on "after:card:switch", @refresh, @
     @on "before:components", propagateCollectionComponents, @
-    @on "before:components", bubbleCollectionEvents, @
+    @on "after:components", bubbleCollectionEvents, @
 
   refresh: ()->
     @activeComponent()?.trigger("refresh")
@@ -61,11 +60,11 @@ multiView.defaultsTo
 
 bubbleCollectionEvents = ()->
   container = @
-    container.eachComponent (component)->
-      for eventId in ['refresh','before:refresh','after:refresh','empty:results']
-        component.on eventId, ()->
-          if component is container.activeComponent()
-            container.trigger(eventId)
+  container.eachComponent (component)->
+    for eventId in ['refresh','before:refresh','after:refresh','empty:results']
+      component.on eventId, ()->
+        if component is container.activeComponent()
+          container.trigger(eventId)
 
 propagateCollectionComponents = ()->
   container = @
@@ -87,17 +86,3 @@ validateComponent = (component)->
              type is "table_view" 
 
   throw "The MultiCollectionView expects to contain multiple collection views" 
-
-
-Luca.components.MultiCollectionView.defaultTopToolbar = 
-  group: true
-  selectable: true
-  buttons:[
-    icon: "list-alt"
-    label: "Table View"
-    eventId: "toggle:table:view"
-  ,
-    icon: "th"
-    label: "Icon View"
-    eventId: "toggle:icon:view"
-  ]  

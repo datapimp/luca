@@ -11,7 +11,7 @@ Luca.modules.Filterable =
 
     filter.on "change", (state)=>
       @trigger "collection:change:filter", state, @getCollection()
-      @refresh()
+      @trigger "refresh" 
 
     if @getQuery?
       @getQuery = _.compose @getQuery, (query={})->
