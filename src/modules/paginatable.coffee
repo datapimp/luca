@@ -66,6 +66,10 @@ Luca.modules.Paginatable =
       collection: @getCollection()
       defaultState: @paginatable 
 
-    @paginationContainer().append( @paginator.render().$el )
-
     @paginator
+
+  renderPaginationControl: ()->
+    @paginationControl()
+    @paginationContainer().append @paginationControl().render().$el
+
+
