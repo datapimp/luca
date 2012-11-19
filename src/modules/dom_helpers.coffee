@@ -1,5 +1,5 @@
 Luca.modules.DomHelpers = 
-  setupClassHelpers: ()->
+  __initializer: ()->
     additionalClasses = _( @additionalClassNames || [] ).clone()
 
     @$wrap( @wrapperClass ) if @wrapperClass?

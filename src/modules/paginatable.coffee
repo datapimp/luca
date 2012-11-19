@@ -12,10 +12,9 @@ Luca.modules.Paginatable =
 
     @getCollection ||= ()-> @collection
 
-    pagination = @getPaginationState()
     collection = @getCollection()
 
-    pagination.on "change", (state)=>
+    @getPaginationState().on "change", (state)=>
       @trigger "collection:change:pagination", state, collection
       @trigger "refresh"
 
@@ -23,7 +22,9 @@ Luca.modules.Paginatable =
       _.defer ()=>
         @updatePagination.call(@, models, query, options)
 
-    @defer("refresh").until("after:render")
+    # refresh the pagination control once this component
+    # is rendered
+    @defer(()=>@paginationControl().refresh()).until("after:render")
 
     if old = @getQueryOptions
       @getQueryOptions = ()->

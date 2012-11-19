@@ -1,12 +1,26 @@
-# The Enhanced Properties module allows for certain conventions
-# in the definition of properties on Luca components.  For example,
-# any view which has a collection property with a string value
-# will automatically convert to an instance of the collection manager's
-# instance of whose name matches the value of @collection
 Luca.modules.EnhancedProperties = 
   __initializer: ()->
     return unless Luca.config.enhancedViewProperties is true 
     return if @isField is true
 
+    # The @collection property.
+    #
+    # If the @collection property is a string, then upon initialization
+    # of the view, that @collection property will be swapped out
+    # with the instance of the collection of that name in the main
+    # Luca.CollectionManager
     if _.isString(@collection) and Luca.CollectionManager.get()
       @collection = Luca.CollectionManager.get().getOrCreate(@collection)      
+
+    # The @template property.
+    #
+    # For simple views which only need a template, you can specify the
+    # template by its name, and we will render it for you.
+    if @template?
+      @defer ()=>
+        @$template(@template, @)
+      .until("before:render")  
+
+    # The @collectionManager property is also configurable by string
+    if _.isString( @collectionManager )
+      @collectionManager = Luca.CollectionManager.get( @collectionManager )    
