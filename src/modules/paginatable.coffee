@@ -23,6 +23,8 @@ Luca.modules.Paginatable =
       _.defer ()=>
         @updatePagination.call(@, models, query, options)
 
+    @defer("refresh").until("after:render")
+
     if old = @getQueryOptions
       @getQueryOptions = ()->
         _.extend( old(), pagination.toJSON() ) 
