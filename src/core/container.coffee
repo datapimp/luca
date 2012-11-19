@@ -382,6 +382,15 @@ createGetterMethods = ()->
 createMethodsToGetComponentsByRole = ()->
   container = @
 
+  @eachComponent (component)->
+    if component.role? and _.isString( component.role )
+      roleGetter = _.str.camelize( "get_" + component.role ) 
+
+      if container[ roleGetter ]?
+        console.log "Attempt to create role based getter #{ roleGetter } for a method which already exists on #{ container.cid }"
+      else
+        container[ roleGetter ] = ()-> component
+
   , true
 
 doComponents = ()->
@@ -397,6 +406,7 @@ doComponents = ()->
 
 validateContainerConfiguration = ()->
   true
+
 
 # Private Helpers
 #
