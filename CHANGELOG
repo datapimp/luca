@@ -176,3 +176,4 @@
     - ApplicationEventBindings  
   - Changed syntax for @componentEvents configuration on Luca.core.Container.
     - now accepts role, name, or getter method 
+    - now accepts * for component, to bind to the same event on all components

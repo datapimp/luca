@@ -146,6 +146,7 @@ container.defines
     map = @componentIndex =
       name_index: {}
       cid_index: {}
+      role_index: {}
 
     container   = @
 
@@ -180,11 +181,7 @@ container.defines
       if !component.container and component.options.container
         component.container = component.options.container
 
-      if map and component.cid?
-        map.cid_index[ component.cid ] = index
-
-      if map and component.name?
-        map.name_index[ component.name ] = index
+      indexComponent( component ).at(index).in( @componentIndex )
 
       component
 
@@ -263,16 +260,15 @@ container.defines
 
         component?.bind eventId, @[handler], container
 
-  findComponentForEventBinding: (nameRoleOrGetter)->
-    @findComponentByName(nameRoleOrGetter) || @findComponentByGetter( nameRoleOrGetter ) || @findComponentByRole( nameRoleOrGetter )
+  findComponentForEventBinding: (nameRoleOrGetter, deep=false)->
+    @findComponentByName(nameRoleOrGetter, deep) || @findComponentByGetter( nameRoleOrGetter, deep ) || @findComponentByRole( nameRoleOrGetter, deep )
 
-  findComponentByGetter: (nameRoleOrGetter)->
+  findComponentByGetter: (nameRoleOrGetter, deep=false)->
     if @[ nameRoleOrGetter ]? and _.isFunction( @[ nameRoleOrGetter ] )
       return @[ nameRoleOrGetter ].call(@)
 
-  findComponentByRole: (role)->
-    getter = _.str.camelize("get_" + role)
-    @[ getter ]?.call(@)
+  findComponentByRole: (role,deep=false)->
+    @findComponent(role, "role_index", deep)
 
   findComponentByName: (name, deep=false)->
     @findComponent(name, "name_index", deep)
@@ -284,12 +280,14 @@ container.defines
     @createComponents() unless @componentsCreated is true
 
     position = @componentIndex?[ haystack ][ needle ]
-    component = @components?[ position ]
+    component = @components[ position ]
 
     return component if component
 
     if deep is true
-      sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
+      sub_container = _( @components ).detect (component)-> 
+        component?.findComponent?(needle, haystack, true)
+
       sub_container?.findComponent?(needle, haystack, true)
 
   each: (fn)->
@@ -384,15 +382,6 @@ createGetterMethods = ()->
 createMethodsToGetComponentsByRole = ()->
   container = @
 
-  @eachComponent (component)->
-    if component.role? and _.isString( component.role )
-      roleGetter = _.str.camelize( "get_" + component.role ) 
-
-      if container[ roleGetter ]?
-        console.log "Attempt to create role based getter #{ roleGetter } for a method which already exists on #{ container.cid }"
-      else
-        container[ roleGetter ] = ()-> component
-
   , true
 
 doComponents = ()->
@@ -408,3 +397,16 @@ doComponents = ()->
 
 validateContainerConfiguration = ()->
   true
+
+# Private Helpers
+#
+# indexComponent( component ).at( index ).in( componentsInternalIndexMap )
+indexComponent = (component)->
+  at: (index)->
+    in: (map)->
+      if component.cid?
+        map.cid_index[ component.cid ] = index
+      if component.role?
+        map.role_index[ component.role ] = index
+      if component.name?
+        map.name_index[ component.name ] = index      
