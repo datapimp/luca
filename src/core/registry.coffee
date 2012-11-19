@@ -102,7 +102,7 @@ Luca.registry.instances = ()->
  
 Luca.registry.findInstancesByClass = (componentClass)->
   Luca.registry.findInstancesByClassName( componentClass.displayName )
-  
+
 Luca.registry.findInstancesByClassName = (className)->
   className = className.displayName if not _.isString( className )
   instances = Luca.registry.instances() 
@@ -119,7 +119,7 @@ Luca.registry.classes = (toString=false)->
       className: className
       ctype: ctype
 
-Luca.cache = Luca.instanceCache = (cacheKey, object)->
+Luca.cache = Luca.cacheInstance = (cacheKey, object)->
   return unless cacheKey?
   return object if object.doNotCache is true
 
