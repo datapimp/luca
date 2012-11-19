@@ -1,9 +1,8 @@
 paginationControl = Luca.register   "Luca.components.PaginationControl"
 
-paginationControl.extends         "Luca.View"
+paginationControl.extends           "Luca.View"
 
 paginationControl.defines
-
   template: "components/pagination"
 
   stateful: true
@@ -16,6 +15,8 @@ paginationControl.defines
     "click a.prev"              : "previousPage"  
 
   afterInitialize: ()->
+    _.bindAll @, "refresh"
+
     @state.on("change", @refresh, @)
 
   limit: ()->
@@ -74,6 +75,8 @@ paginationControl.defines
 
     @toggleNavigationButtons()
     @selectActivePageButton()
+
+    @
 
   toggleNavigationButtons: ()->
     @$('a.next, a.prev').addClass('disabled')
