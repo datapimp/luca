@@ -20,6 +20,8 @@ Luca.util.nestedValue = Luca.util.resolve
 Luca.util.argumentsLogger = (prompt)->
   ()-> console.log prompt, arguments
 
+Luca.util.read = (property, args...)->
+  if _.isFunction(property) then property.apply(@, args) else property
 
 # turns a word like form_view into FormView
 Luca.util.classify = (string="")->
@@ -116,10 +118,3 @@ Luca.util.badge = (contents="", type, baseClass="badge")->
   cssClass += " #{ baseClass }-#{ type }" if type?
   Luca.util.make("span",{class:cssClass},contents)
 
-Luca.util.inspectComponent = (component)->
-  {
-    name:         component.name  
-    instanceOf:   component.displayName 
-    subclassOf:   component._superClass()::displayName
-    inheritsFrom: Luca.parentClasses( component )
-  }
