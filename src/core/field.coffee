@@ -27,6 +27,7 @@ _.def('Luca.core.Field').extends('Luca.View').with
     @input_id ||= _.uniqueId('field')
     @input_name ||= @name
     @input_class ||= ""
+    @input_type ||= ""
     @helperText ||= ""
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     @inputStyles ||= ""
@@ -49,20 +50,17 @@ _.def('Luca.core.Field').extends('Luca.View').with
 
     @$el.addClass('required') if @required
 
-    @$template(@template, @)
-    @input = $('input', @el)
-
   change_handler: (e)->
     @trigger "on:change", @, e
 
   disable: ()->
-    $("input",@el).attr('disabled', true)
+    @getInputElement().attr('disabled', true)
 
   enable: ()->
-    $("input", @el).attr('disabled', false)
+    @getInputElement().attr('disabled', false)
 
   getValue: ()->
-    raw = @input.attr('value')
+    raw = @getInputElement()?.attr('value')
 
     return raw if _.str.isBlank( raw )
 
@@ -72,11 +70,11 @@ _.def('Luca.core.Field').extends('Luca.View').with
       when "float" then parseFloat(raw)
       else raw
 
-  render: ()->
-    $( @container ).append( @$el )
-
   setValue: (value)->
-    @input.attr('value', value)
+    @getInputElement()?.attr('value', value)
+
+  getInputElement: ()->
+    @input ||= @$('input').eq(0)
 
   updateState: (state)->
     _( @statuses ).each (cls)=>

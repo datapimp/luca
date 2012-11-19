@@ -12,6 +12,7 @@ describe 'The Luca Container', ->
         value: 1
         getter: "getOne"
         spy: sinon.spy()
+        role: "role_one"
       ,
         name: "component_two"
         ctype: "view"
@@ -19,6 +20,7 @@ describe 'The Luca Container', ->
         id: "c2"
         value: 0
         spy: sinon.spy()
+        role: "role_two"
       ,
         name: "component_three"
         ctype: "container"
@@ -33,14 +35,17 @@ describe 'The Luca Container', ->
         ]
       ]
 
-  #it "should create a getter function on the container", ->
-  #  expect( @container.getOne().name ).toEqual 'component_one'
+  it "should create getter methods on the for components with roles", ->
+    expect( @container.getRoleTwo().name ).toEqual 'component_two'
 
-  #it "should apply default properties to components", ->
-  #  defaults = @container.selectByAttribute('defaultProperty','it_works')
-  #  custom = @container.selectByAttribute('defaultProperty','oh_yeah')
-  #  expect( defaults.length ).toEqual(2)
-  #  expect( custom.length ).toEqual(1)
+  it "should create a getter function on the container", ->
+    expect( @container.getOne().name ).toEqual 'component_one'
+
+  it "should apply default properties to components", ->
+    defaults = @container.selectByAttribute('defaultProperty','it_works')
+    custom = @container.selectByAttribute('defaultProperty','oh_yeah')
+    expect( defaults.length ).toEqual(2)
+    expect( custom.length ).toEqual(1)
 
   it "should trigger after initialize", ->
     expect( @container ).toHaveTriggered "after:initialize"

@@ -400,7 +400,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   this.JST["luca-src/templates/table_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<thead></thead>\n<tbody class="table-body"></tbody>\n<tfoot></tfoot>\n<caption></caption>\n');}return __p.join('');};
 }).call(this);
 (function() {
-  var currentNamespace;
+  var currentNamespace,
+    __slice = Array.prototype.slice;
 
   Luca.util.resolve = function(accessor, source_object) {
     var resolved;
@@ -422,6 +423,16 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     return function() {
       return console.log(prompt, arguments);
     };
+  };
+
+  Luca.util.read = function() {
+    var args, property;
+    property = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (_.isFunction(property)) {
+      return property.apply(this, args);
+    } else {
+      return property;
+    }
   };
 
   Luca.util.classify = function(string) {
@@ -532,15 +543,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     return Luca.util.make("span", {
       "class": cssClass
     }, contents);
-  };
-
-  Luca.util.inspectComponent = function(component) {
-    return {
-      name: component.name,
-      instanceOf: component.displayName,
-      subclassOf: component._superClass().prototype.displayName,
-      inheritsFrom: Luca.parentClasses(component)
-    };
   };
 
 }).call(this);
@@ -904,6 +906,62 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
 
+  Luca.modules.ApplicationEventBindings = {
+    __initializer: function() {
+      var app, eventTrigger, handler, _len, _ref, _ref2, _results;
+      if (_.isEmpty(this.applicationEvents)) return;
+      app = this.app;
+      if (_.isString(app) || _.isUndefined(app)) {
+        app = (_ref = Luca.Application) != null ? typeof _ref.get === "function" ? _ref.get(app) : void 0 : void 0;
+      }
+      if (!Luca.supportsEvents(app)) {
+        throw "Error binding to the application object on " + (this.name || this.cid);
+      }
+      _ref2 = this.applicationEvents;
+      _results = [];
+      for (handler = 0, _len = _ref2.length; handler < _len; handler++) {
+        eventTrigger = _ref2[handler];
+        if (_.isString(handler)) handler = this[handler];
+        if (!_.isFunction(handler)) {
+          throw "Error registering application event " + eventTrigger + " on " + (this.name || this.cid);
+        }
+        _results.push(app.on(eventTrigger, handler));
+      }
+      return _results;
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.CollectionEventBindings = {
+    __initializer: function() {
+      var collection, eventTrigger, handler, key, manager, signature, _ref, _ref2, _results;
+      if (_.isEmpty(this.collectionEvents)) return;
+      manager = this.collectionManager;
+      _ref = this.collectionEvents;
+      _results = [];
+      for (signature in _ref) {
+        handler = _ref[signature];
+        _ref2 = signature.split(" "), key = _ref2[0], eventTrigger = _ref2[1];
+        collection = manager.getOrCreate(key);
+        if (!collection) throw "Could not find collection specified by " + key;
+        if (_.isString(handler)) handler = this[handler];
+        if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
+        try {
+          _results.push(collection.on(eventTrigger, handler, collection));
+        } catch (e) {
+          console.log("Error Binding To Collection in registerCollectionEvents", this);
+          throw e;
+        }
+      }
+      return _results;
+    }
+  };
+
+}).call(this);
+(function() {
+
   Luca.modules.Deferrable = {
     configure_collection: function(setAsDeferrable) {
       var collectionManager, _ref, _ref2;
@@ -926,7 +984,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 (function() {
 
   Luca.modules.DomHelpers = {
-    setupClassHelpers: function() {
+    __initializer: function() {
       var additional, additionalClasses, _i, _len, _results;
       additionalClasses = _(this.additionalClassNames || []).clone();
       if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
@@ -971,6 +1029,28 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     $container: function() {
       return $(this.container);
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.EnhancedProperties = {
+    __initializer: function() {
+      var _this = this;
+      if (Luca.config.enhancedViewProperties !== true) return;
+      if (this.isField === true) return;
+      if (_.isString(this.collection) && Luca.CollectionManager.get()) {
+        this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
+      }
+      if (this.template != null) {
+        this.defer(function() {
+          return _this.$template(_this.template, _this);
+        }).until("before:render");
+      }
+      if (_.isString(this.collectionManager) || _.isUndefined(this.collectionManager)) {
+        return this.collectionManager = Luca.CollectionManager.get(this.collectionManager);
+      }
     }
   };
 
@@ -1243,6 +1323,45 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
+  var applyModalConfig;
+
+  Luca.modules.ModalView = {
+    closeOnEscape: true,
+    showOnInitialize: false,
+    backdrop: false,
+    __initializer: function() {
+      this.$el.addClass("modal");
+      this.on("before:render", applyModalConfig, this);
+      return this;
+    },
+    container: function() {
+      return $('body');
+    },
+    toggle: function() {
+      return this.$el.modal('toggle');
+    },
+    show: function() {
+      return this.$el.modal('show');
+    },
+    hide: function() {
+      return this.$el.modal('hide');
+    }
+  };
+
+  applyModalConfig = function() {
+    this.$el.addClass('modal');
+    if (this.fade === true) this.$el.addClass('fade');
+    $('body').append(this.$el);
+    this.$el.modal({
+      backdrop: this.backdrop === true,
+      keyboard: this.closeOnEscape === true,
+      show: this.showOnInitialize === true
+    });
+    return this;
+  };
+
+}).call(this);
+(function() {
 
   Luca.modules.Paginatable = {
     paginatorViewClass: 'Luca.components.PaginationControl',
@@ -1253,7 +1372,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       });
     },
     __initializer: function() {
-      var collection, old, pagination,
+      var collection, old, paginationState,
         _this = this;
       if (this.paginatable === false || !Luca.isBackboneCollection(this.collection)) {
         return;
@@ -1262,9 +1381,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.getCollection || (this.getCollection = function() {
         return this.collection;
       });
-      pagination = this.getPaginationState();
       collection = this.getCollection();
-      pagination.on("change", function(state) {
+      paginationState = this.getPaginationState();
+      paginationState.on("change", function(state) {
         _this.trigger("collection:change:pagination", state, collection);
         return _this.trigger("refresh");
       });
@@ -1273,13 +1392,16 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           return _this.updatePagination.call(_this, models, query, options);
         });
       });
+      this.on("after:render", function() {
+        return _this.paginationControl().refresh();
+      });
       if (old = this.getQueryOptions) {
         return this.getQueryOptions = function() {
-          return _.extend(old(), pagination.toJSON());
+          return _.extend(old(), paginationState.toJSON());
         };
       } else {
         return this.getQueryOptions = function() {
-          return pagination.toJSON();
+          return paginationState.toJSON();
         };
       }
     },
@@ -1332,14 +1454,62 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         collection: this.getCollection(),
         defaultState: this.paginatable
       });
-      this.paginationContainer().append(this.paginator.render().$el);
       return this.paginator;
+    },
+    renderPaginationControl: function() {
+      this.paginationControl();
+      return this.paginationContainer().append(this.paginationControl().render().$el);
     }
   };
 
 }).call(this);
 (function() {
-  var component_cache, registry;
+
+  Luca.modules.StateModel = {
+    __initializer: function() {
+      var _this = this;
+      if (this.stateful !== true) return;
+      if ((this.state != null) && !Luca.isBackboneModel(this.state)) return;
+      this.state = new Backbone.Model(this.defaultState || {});
+      this.set || (this.set = function() {
+        return _this.state.set.apply(_this.state, arguments);
+      });
+      this.get || (this.get = function() {
+        return _this.state.get.apply(_this.state, arguments);
+      });
+      return this.state.on("change", function(state) {
+        var changed, previousValues, value, _len, _ref, _results;
+        _this.trigger("state:change", state);
+        previousValues = state.previousAttributes();
+        _ref = state.changedAttributes;
+        _results = [];
+        for (value = 0, _len = _ref.length; value < _len; value++) {
+          changed = _ref[value];
+          _results.push(_this.trigger("state:change:" + changed, value, state.previous(changed)));
+        }
+        return _results;
+      });
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.Templating = {
+    __initializer: function() {
+      var template, templateContent, templateVars;
+      templateVars = Luca.util.read.call(this, this.bodyTemplateVars) || {};
+      if (template = this.bodyTemplate) {
+        this.$el.empty();
+        templateContent = Luca.template(template, templateVars);
+        return Luca.View.prototype.$html.call(this, templateContent);
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+  var componentCacheStore, registry;
 
   registry = {
     classes: {},
@@ -1348,7 +1518,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     namespaces: ['Luca.containers', 'Luca.components']
   };
 
-  component_cache = {
+  componentCacheStore = {
     cid_index: {},
     name_index: {}
   };
@@ -1428,14 +1598,20 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   Luca.registry.instances = function() {
-    return _(component_cache.cid_index).values();
+    return _(componentCacheStore.cid_index).values();
+  };
+
+  Luca.registry.findInstancesByClass = function(componentClass) {
+    return Luca.registry.findInstancesByClassName(componentClass.displayName);
   };
 
   Luca.registry.findInstancesByClassName = function(className) {
     var instances;
+    if (!_.isString(className)) className = className.displayName;
     instances = Luca.registry.instances();
     return _(instances).select(function(instance) {
-      var _ref;
+      var isClass, _ref;
+      isClass = instance.displayName === className;
       return instance.displayName === className || (typeof instance._superClass === "function" ? (_ref = instance._superClass()) != null ? _ref.displayName : void 0 : void 0) === className;
     });
   };
@@ -1454,18 +1630,20 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     });
   };
 
-  Luca.cache = function(needle, component) {
+  Luca.cache = Luca.cacheInstance = function(cacheKey, object) {
     var lookup_id;
-    if (component != null) component_cache.cid_index[needle] = component;
-    component = component_cache.cid_index[needle];
-    if ((component != null ? component.component_name : void 0) != null) {
-      component_cache.name_index[component.component_name] = component.cid;
-    } else if ((component != null ? component.name : void 0) != null) {
-      component_cache.name_index[component.name] = component.cid;
+    if (cacheKey == null) return;
+    if ((object != null ? object.doNotCache : void 0) === true) return object;
+    if (object != null) componentCacheStore.cid_index[cacheKey] = object;
+    object = componentCacheStore.cid_index[cacheKey];
+    if ((object != null ? object.component_name : void 0) != null) {
+      componentCacheStore.name_index[object.component_name] = object.cid;
+    } else if ((object != null ? object.name : void 0) != null) {
+      componentCacheStore.name_index[object.name] = object.cid;
     }
-    if (component != null) return component;
-    lookup_id = component_cache.name_index[needle];
-    return component_cache.cid_index[lookup_id];
+    if (object != null) return object;
+    lookup_id = componentCacheStore.name_index[cacheKey];
+    return componentCacheStore.cid_index[lookup_id];
   };
 
 }).call(this);
@@ -1511,13 +1689,15 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate, setupStateMachine, setupTemplate, view;
+  var bindAllEventHandlers, view;
 
-  view = Luca.define("Luca.View");
+  view = Luca.register("Luca.View");
 
   view["extends"]("Backbone.View");
 
   view.includes("Luca.Events", "Luca.modules.DomHelpers");
+
+  view.mixesIn("DomHelpers", "Templating", "EnhancedProperties", "CollectionEventBindings", "ApplicationEventBindings", "StateModel");
 
   view.triggers("before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation");
 
@@ -1530,21 +1710,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (this.autoBindEventHandlers === true || this.bindAllEvents === true) {
         bindAllEventHandlers.call(this);
       }
-      setupBodyTemplate.call(this);
       if (this.name != null) this.cid = _.uniqueId(this.name);
       this.$el.attr("data-luca-id", this.name || this.cid);
-      Luca.cache(this.cid, this);
+      Luca.cacheInstance(this.cid, this);
       this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
-      this.setupClassHelpers();
-      if (this.stateful === true && !(this.state != null)) {
-        setupStateMachine.call(this);
-      }
-      registerCollectionEvents.call(this);
-      registerApplicationEvents.call(this);
-      if (this.template && !this.isField) setupTemplate.call(this);
-      if (Luca.config.enhancedViewProperties === true && !this.isField) {
-        Luca.View.handleEnhancedProperties.call(this);
-      }
       if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
         _ref2 = this.mixins;
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
@@ -1567,12 +1736,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         fn = Luca.util.hook(eventId);
         callback = function() {
           var _ref;
-          return (_ref = _this[fn]) != null ? _ref.apply(_this, arguments) : void 0;
+          return (_ref = this[fn]) != null ? _ref.apply(this, arguments) : void 0;
         };
         if (eventId != null ? eventId.match(/once:/) : void 0) {
           callback = _.once(callback);
         }
-        return _this.bind(eventId, callback);
+        return _this.on(eventId, callback, _this);
       });
     },
     registerEvent: function(selector, handler) {
@@ -1660,89 +1829,19 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     return definition;
   };
 
-  bindAllEventHandlers = function() {
-    var _this = this;
-    return _(this.events).each(function(handler, event) {
-      if (_.isString(handler)) return _.bindAll(_this, handler);
-    });
-  };
-
-  registerApplicationEvents = function() {
-    var app, eventTrigger, handler, _len, _ref, _ref2, _results;
-    if (_.isEmpty(this.applicationEvents)) return;
-    app = this.app;
-    if (_.isString(app) || _.isUndefined(app)) {
-      app = (_ref = Luca.Application) != null ? typeof _ref.get === "function" ? _ref.get(app) : void 0 : void 0;
-    }
-    if (!Luca.supportsEvents(app)) {
-      throw "Error binding to the application object on " + (this.name || this.cid);
-    }
-    _ref2 = this.applicationEvents;
+  bindAllEventHandlers = function(events) {
+    var eventSignature, handler, _results;
+    if (events == null) events = {};
     _results = [];
-    for (handler = 0, _len = _ref2.length; handler < _len; handler++) {
-      eventTrigger = _ref2[handler];
-      if (_.isString(handler)) handler = this[handler];
-      if (!_.isFunction(handler)) {
-        throw "Error registering application event " + eventTrigger + " on " + (this.name || this.cid);
-      }
-      _results.push(app.on(eventTrigger, handler));
-    }
-    return _results;
-  };
-
-  registerCollectionEvents = function() {
-    var collection, eventTrigger, handler, key, manager, signature, _ref, _ref2, _results;
-    if (_.isEmpty(this.collectionEvents)) return;
-    manager = this.collectionManager;
-    if (_.isString(manager) || _.isUndefined(manager)) {
-      manager = Luca.CollectionManager.get(manager);
-    }
-    _ref = this.collectionEvents;
-    _results = [];
-    for (signature in _ref) {
-      handler = _ref[signature];
-      _ref2 = signature.split(" "), key = _ref2[0], eventTrigger = _ref2[1];
-      collection = manager.getOrCreate(key);
-      if (!collection) throw "Could not find collection specified by " + key;
-      if (_.isString(handler)) handler = this[handler];
-      if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
-      try {
-        _results.push(collection.bind(eventTrigger, handler));
-      } catch (e) {
-        console.log("Error Binding To Collection in registerCollectionEvents", this);
-        throw e;
+    for (eventSignature in events) {
+      handler = events[eventSignature];
+      if (_.isString(handler)) {
+        _results.push(_.bindAll(this, handler));
+      } else {
+        _results.push(void 0);
       }
     }
     return _results;
-  };
-
-  setupStateMachine = function() {
-    var _this = this;
-    this.state = new Backbone.Model(this.defaultState || {});
-    this.set || (this.set = function() {
-      return _this.state.set.apply(_this.state, arguments);
-    });
-    return this.get || (this.get = function() {
-      return _this.state.get.apply(_this.state, arguments);
-    });
-  };
-
-  setupBodyTemplate = function() {
-    var template, templateVars;
-    templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
-    if (template = this.bodyTemplate) {
-      this.$el.empty();
-      return Luca.View.prototype.$html.call(this, Luca.template(template, templateVars));
-    }
-  };
-
-  setupTemplate = function() {
-    var _this = this;
-    if (this.template != null) {
-      return this.defer(function() {
-        return _this.$template(_this.template, _this);
-      }).until("before:render");
-    }
   };
 
   Luca.View.extend = function(definition) {
@@ -1759,12 +1858,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   Luca.View.deferrableEvent = "reset";
-
-  Luca.View.handleEnhancedProperties = function() {
-    if (_.isString(this.collection) && Luca.CollectionManager.get()) {
-      return this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
-    }
-  };
 
 }).call(this);
 (function() {
@@ -2366,12 +2459,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.setupHooks(["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"]);
       this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
       validateContainerConfiguration(this);
-      return Luca.View.prototype.initialize.apply(this, arguments);
+      Luca.View.prototype.initialize.apply(this, arguments);
+      doLayout.call(this);
+      return doComponents.call(this);
     },
     beforeRender: function() {
       var _ref;
-      doLayout.call(this);
-      doComponents.call(this);
       return (_ref = Luca.components.Panel.prototype.beforeRender) != null ? _ref.apply(this, arguments) : void 0;
     },
     customizeContainerEl: function(containerEl, panel, panelIndex) {
@@ -4996,6 +5089,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   multiView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
 
+  multiView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
+
   multiView.defaultsTo({
     version: 1,
     stateful: true,
@@ -5123,6 +5218,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       "click a.prev": "previousPage"
     },
     afterInitialize: function() {
+      _.bindAll(this, "refresh");
       return this.state.on("change", this.refresh, this);
     },
     limit: function() {
@@ -5187,7 +5283,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         this.pageButtonContainer().append(button);
       }
       this.toggleNavigationButtons();
-      return this.selectActivePageButton();
+      this.selectActivePageButton();
+      return this;
     },
     toggleNavigationButtons: function() {
       this.$('a.next, a.prev').addClass('disabled');

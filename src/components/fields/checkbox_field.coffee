@@ -31,7 +31,7 @@ _.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
     @label ||= @name
 
   setValue: (checked)->
-    @input.attr('checked', checked)
+    @getInputElement().attr('checked', checked)
 
   getValue:()->
-    @input.is(":checked")
+    @getInputElement().is(":checked")

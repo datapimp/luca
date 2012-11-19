@@ -39,6 +39,9 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
     Luca.View::initialize.apply @, arguments
 
+    doLayout.call(@)
+    doComponents.call(@)
+
   # Rendering Pipeline
   #
   # A container has nested components.  these components
@@ -86,8 +89,6 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   # firstActivation()
   #
   beforeRender: ()->
-    doLayout.call(@)
-    doComponents.call(@)
     Luca.components.Panel::beforeRender?.apply(@, arguments)
 
   # Components which inherit from Luca.core.Container can implement
@@ -355,9 +356,12 @@ doComponents = ()->
   @trigger "before:components", @, @components
   @prepareComponents()
   @createComponents()
+  renderComponents.call(@)
+
+renderComponents= ()->
   @trigger "before:render:components", @, @components
   @renderComponents()
   @trigger "after:components", @, @components
 
 validateContainerConfiguration = ()->
-  
+  true

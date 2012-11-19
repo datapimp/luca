@@ -75,12 +75,12 @@ view.defines
     _(set).each (eventId)=>
       fn = Luca.util.hook( eventId )
 
-      callback = ()=>
+      callback = ()->
         @[fn]?.apply @, arguments
 
       callback = _.once(callback) if eventId?.match(/once:/)
 
-      @bind eventId, callback
+      @on eventId, callback, @
 
   registerEvent: (selector, handler)->
     @events ||= {}
@@ -154,73 +154,10 @@ Luca.View.renderWrapper = (definition)->
 
   definition
 
-bindAllEventHandlers = ()->
-  _( @events ).each (handler,event)=>
+bindAllEventHandlers = (events={})->
+  for eventSignature, handler of events
     if _.isString(handler)
       _.bindAll @, handler
-
-registerApplicationEvents = ()->
-  return if _.isEmpty(@applicationEvents)
-
-  app = @app
-
-  if _.isString( app ) or _.isUndefined( app )
-    app = Luca.Application?.get?(app)
-
-  unless Luca.supportsEvents( app )
-    throw "Error binding to the application object on #{ @name || @cid }"
-
-  for eventTrigger, handler in @applicationEvents
-    handler = @[handler] if _.isString(handler) 
-
-    unless _.isFunction(handler)
-      throw "Error registering application event #{ eventTrigger } on #{ @name || @cid }"
-
-    app.on(eventTrigger, handler)
-
-registerCollectionEvents = ()->
-  return if _.isEmpty( @collectionEvents )
-
-  manager = @collectionManager
-
-  if _.isString( manager ) or _.isUndefined( manager )
-    manager = Luca.CollectionManager.get( manager )
-
-  for signature, handler of @collectionEvents
-    [key,eventTrigger] = signature.split(" ")
-
-    collection = manager.getOrCreate( key )
-
-    if !collection
-      throw "Could not find collection specified by #{ key }"
-
-    if _.isString(handler)
-      handler = @[handler]
-
-    unless _.isFunction(handler)
-      throw "invalid collectionEvents configuration"
-
-    try
-      collection.bind(eventTrigger, handler)
-    catch e
-      console.log "Error Binding To Collection in registerCollectionEvents", @
-      throw e
-
-setupBodyTemplate = ()->
-  templateVars = if @bodyTemplateVars
-    @bodyTemplateVars.call(@)
-  else
-    @
-
-  if template = @bodyTemplate
-    @$el.empty()
-    Luca.View::$html.call(@, Luca.template(template, templateVars ) )
-
-setupTemplate = ()->
-  if @template?
-    @defer ()=>
-      @$template(@template, @)
-    .until("before:render")      
 
 Luca.View.extend = (definition)->
   definition = Luca.View.renderWrapper( definition )
@@ -233,5 +170,3 @@ Luca.View.extend = (definition)->
 
 
 Luca.View.deferrableEvent = "reset"
-
-Luca.View.handleEnhancedProperties = ()->

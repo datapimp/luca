@@ -57,9 +57,10 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
 
       hash
 
-  afterRender: ()->
-    @input = $('select', @el)
+  getInputElement: ()->
+    @input ||= @$('select').eq(0)
 
+  afterRender: ()->
     if @collection?.models?.length > 0
       @populateOptions()
     else
@@ -76,10 +77,10 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
     @trigger "on:change", @, e
 
   resetOptions: ()->
-    @input.html('')
+    @getInputElement().html('')
 
     if @includeBlank
-      @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
+      @getInputElement().append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
   populateOptions: ()->
     @resetOptions()
@@ -90,7 +91,7 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
         display = model.get( @displayField )
         selected = "selected" if @selected and value is @selected
         option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
-        @input.append( option )
+        @getInputElement().append( option )
 
     @trigger "after:populate:options", @
     @setValue( @currentValue )

@@ -18295,16 +18295,13 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
 
 }).call(this);
 (function() {
-  var codeMirrorOptions, _base;
+  var developmentConsole, _base;
 
-  codeMirrorOptions = {
-    readOnly: true,
-    autoFocus: false,
-    theme: "monokai",
-    mode: "javascript"
-  };
+  developmentConsole = Luca.register("Luca.tools.DevelopmentConsole");
 
-  Luca.define("Luca.tools.DevelopmentConsole")["extends"]("Luca.core.Container")["with"]({
+  developmentConsole["extends"]("Luca.core.Container");
+
+  developmentConsole.defines({
     className: "luca-ui-console",
     name: "console",
     history: [],
@@ -18459,7 +18456,11 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       };
       try {
         result = evaluator.call(this.getContext());
-        if (Luca.isComponent(result)) result = Luca.util.inspectComponent(result);
+        if (Luca.isComponent(result)) {
+          result = Luca.util.inspectComponent(result);
+        } else if (Luca.isComponentPrototype(result)) {
+          result = Luca.util.inspectComponentPrototype(result);
+        }
         if (!raw.match(/^console\.log/)) return this.onSuccess(result, code, raw);
       } catch (error) {
         return this.onError(error, code, raw);
@@ -18477,6 +18478,21 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
   });
 
   (_base = Luca.util).launchers || (_base.launchers = {});
+
+  Luca.util.inspectComponentPrototype = function(componentPrototype) {
+    var liveInstances;
+    return liveInstances = Luca.registry.findInstancesByClass(componentPrototype);
+  };
+
+  Luca.util.inspectComponent = function(component) {
+    if (_.isString(component)) component = Luca(component);
+    return {
+      name: component.name,
+      instanceOf: component.displayName,
+      subclassOf: component._superClass().prototype.displayName,
+      inheritsFrom: Luca.parentClasses(component)
+    };
+  };
 
   Luca.util.launchers.developmentConsole = function(name) {
     var _this = this;
