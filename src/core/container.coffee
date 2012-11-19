@@ -365,11 +365,11 @@ doComponents = ()->
   @trigger "before:components", @, @components
   @prepareComponents()
   @createComponents()
-  createGetterMethods.call(@)
-  createMethodsToGetComponentsByRole.call(@)  
   @trigger "before:render:components", @, @components
   @renderComponents()
   @trigger "after:components", @, @components
+  createGetterMethods.call(@)
+  createMethodsToGetComponentsByRole.call(@)  
 
 validateContainerConfiguration = ()->
   true

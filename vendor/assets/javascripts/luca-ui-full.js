@@ -2736,11 +2736,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     this.trigger("before:components", this, this.components);
     this.prepareComponents();
     this.createComponents();
-    createGetterMethods.call(this);
-    createMethodsToGetComponentsByRole.call(this);
     this.trigger("before:render:components", this, this.components);
     this.renderComponents();
-    return this.trigger("after:components", this, this.components);
+    this.trigger("after:components", this, this.components);
+    createGetterMethods.call(this);
+    return createMethodsToGetComponentsByRole.call(this);
   };
 
   validateContainerConfiguration = function() {
