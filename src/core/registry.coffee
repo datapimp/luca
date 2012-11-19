@@ -4,7 +4,7 @@ registry =
   collection_classes: {}
   namespaces:['Luca.containers','Luca.components']
 
-component_cache =
+componentCacheStore =
   cid_index: {}
   name_index: {}
 
@@ -99,10 +99,16 @@ Luca.registry.lookup = (ctype)->
 
 Luca.registry.instances = ()->
   _( component_cache.cid_index ).values()
+ 
+Luca.registry.findInstancesByClass = (componentClass)->
+  Luca.registry.findInstancesByClassName( componentClass.displayName )
   
 Luca.registry.findInstancesByClassName = (className)->
+  className = className.displayName if not _.isString( className )
   instances = Luca.registry.instances() 
   _( instances ).select (instance)->
+    isClass = instance.displayName is className
+
     instance.displayName is className or instance._superClass?()?.displayName is className
 
 Luca.registry.classes = (toString=false)->
@@ -113,21 +119,25 @@ Luca.registry.classes = (toString=false)->
       className: className
       ctype: ctype
 
-Luca.cache = (needle, component)->
-  component_cache.cid_index[ needle ] = component if component?
+Luca.cache = Luca.instanceCache = (cacheKey, object)->
+  return unless cacheKey?
+  return object if object.doNotCache is true
 
-  component = component_cache.cid_index[ needle ]
+  if object?
+    componentCacheStore.cid_index[ cacheKey ] = object 
+
+  object = componentCacheStore.cid_index[ cacheKey ]
 
   # optionally, cache it by tying its name to its cid for easier lookups
-  if component?.component_name?
-    component_cache.name_index[ component.component_name ] = component.cid
-  else if component?.name?
-    component_cache.name_index[ component.name ] = component.cid
+  if object?.component_name?
+    componentCacheStore.name_index[ object.component_name ] = object.cid
+  else if object?.name?
+    componentCacheStore.name_index[ object.name ] = object.cid
 
-  return component if component?
+  return object if object?
 
-  # perform a lookup by name if the component_id didn't turn anything
-  lookup_id = component_cache.name_index[ needle ]
+  # perform a lookup by name if the cid lookup didn't turn anything
+  lookup_id = componentCacheStore.name_index[ cacheKey ]
 
   component_cache.cid_index[ lookup_id ]
 
