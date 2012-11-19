@@ -21,6 +21,7 @@ describe 'The Luca Container', ->
         value: 0
         spy: sinon.spy()
         role: "role_two"
+        getter: "getComponentTwo"
       ,
         name: "component_three"
         ctype: "container"
@@ -84,6 +85,55 @@ describe 'The Luca Container', ->
     @container.eachComponent (c)-> c.spy()
     expect( Luca.cache("component_four").spy ).toHaveBeenCalled()
 
-  it "should be able to find a component by name", ->
-    expect( @container.findComponentByName("component_one") ).toBeDefined()
-    expect( @container.findComponentByName("undefined") ).not.toBeDefined()
+
+describe 'Component Event Binding', ->
+  beforeEach ->
+    @container = new Luca.core.Container
+      componentEvents:
+        "component_alpha trigger:one"       : "one"
+        "alpha trigger:two"                 : "two"
+        "getAlphaComponent trigger:three"   : "three"
+
+      one: ()->
+        @trigger "one" 
+
+      two: ()->
+        @trigger "two" 
+
+      three: ()->
+        @trigger "three" 
+
+      components:[
+        name: "component_alpha"
+        role: "alpha"
+        getter: "getAlphaComponent"
+      ]
+
+    @container.render()
+
+  it "should define a role based getter", ->
+    expect( @container.getAlpha ).toBeDefined()
+
+  it "should define a getter", ->
+    expect( @container.getAlphaComponent ).toBeDefined()
+
+  it "should find the component by its role", ->
+    expect( @container.findComponentByRole("alpha") ).toBeDefined()
+
+  it "should find the component by its name", ->
+    expect( @container.findComponentByName('component_alpha') ).toBeDefined()
+
+  it "should find the component by its getter", ->
+    expect( @container.findComponentByGetter('getAlphaComponent') ).toBeDefined()
+
+  it "should accept component events with a component name", ->
+    @container.getAlphaComponent().trigger "trigger:one"
+    expect(@container).toHaveTriggered("one")
+
+  it "should accept component events with a component role", ->
+    @container.getAlphaComponent().trigger "trigger:two"
+    expect(@container).toHaveTriggered("two")
+
+  it "should accept component events with a component getter", ->
+    @container.getAlphaComponent().trigger "trigger:three"
+    expect(@container).toHaveTriggered("three")

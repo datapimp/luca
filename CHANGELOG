@@ -1,4 +1,4 @@
-G0.7.3:
+0.7.3:
   - Models being loaded by the FormView will now call
     beforeFormLoad methods if they exist on those models
 
@@ -174,3 +174,5 @@ G0.7.3:
     - EnhancedProperties
     - CollectionEventBindings
     - ApplicationEventBindings  
+  - Changed syntax for @componentEvents configuration on Luca.core.Container.
+    - now accepts role, name, or getter method 

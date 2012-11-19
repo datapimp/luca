@@ -1606,7 +1606,7 @@
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, view;
+  var bindAllEventHandlers, bindEventHandlers, view;
 
   view = Luca.register("Luca.View");
 
@@ -1746,7 +1746,18 @@
     return definition;
   };
 
-  bindAllEventHandlers = function(events) {
+  bindAllEventHandlers = function() {
+    var config, _i, _len, _ref, _results;
+    _ref = [this.events, this.componentEvents, this.collectionEvents, this.applicationEvents];
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      config = _ref[_i];
+      if (!_.isEmpty(config)) _results.push(bindEventHandlers.call(this, config));
+    }
+    return _results;
+  };
+
+  bindEventHandlers = function(events) {
     var eventSignature, handler, _results;
     if (events == null) events = {};
     _results = [];
@@ -2375,6 +2386,7 @@
     isContainer: true,
     rendered: false,
     components: [],
+    componentEvents: {},
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
@@ -2448,7 +2460,6 @@
         return component;
       });
       this.componentsCreated = true;
-      if (!_.isEmpty(this.componentEvents)) this.registerComponentEvents();
       return map;
     },
     renderComponents: function(debugMode) {
@@ -2496,18 +2507,35 @@
     map: function(fn) {
       return _(this.components).map(fn);
     },
-    componentEvents: {},
     registerComponentEvents: function() {
-      var component, componentName, handler, listener, trigger, _ref, _ref2, _results;
-      _ref = this.componentEvents;
+      var component, componentNameOrRole, handler, listener, trigger, _ref, _ref2, _results;
+      container = this;
+      _ref = this.componentEvents || {};
       _results = [];
       for (listener in _ref) {
         handler = _ref[listener];
-        _ref2 = listener.split(' '), componentName = _ref2[0], trigger = _ref2[1];
-        component = this.findComponentByName(componentName);
-        _results.push(component != null ? component.bind(trigger, this[handler]) : void 0);
+        _ref2 = listener.split(' '), componentNameOrRole = _ref2[0], trigger = _ref2[1];
+        component = this.findComponentForEventBinding(componentNameOrRole);
+        if (!((component != null) && Luca.isComponent(component))) {
+          console.log("Error registering component event", listener, componentNameOrRole, trigger);
+          throw "Invalid component event definition: " + componentNameOrRole;
+        }
+        _results.push(component != null ? component.bind(trigger, this[handler], container) : void 0);
       }
       return _results;
+    },
+    findComponentForEventBinding: function(nameRoleOrGetter) {
+      return this.findComponentByName(nameRoleOrGetter) || this.findComponentByGetter(nameRoleOrGetter) || this.findComponentByRole(nameRoleOrGetter);
+    },
+    findComponentByGetter: function(nameRoleOrGetter) {
+      if ((this[nameRoleOrGetter] != null) && _.isFunction(this[nameRoleOrGetter])) {
+        return this[nameRoleOrGetter].call(this);
+      }
+    },
+    findComponentByRole: function(role) {
+      var getter, _ref;
+      getter = _.str.camelize("get_" + role);
+      return (_ref = this[getter]) != null ? _ref.call(this) : void 0;
     },
     findComponentByName: function(name, deep) {
       if (deep == null) deep = false;
@@ -2663,7 +2691,8 @@
     this.renderComponents();
     this.trigger("after:components", this, this.components);
     createGetterMethods.call(this);
-    return createMethodsToGetComponentsByRole.call(this);
+    createMethodsToGetComponentsByRole.call(this);
+    return this.registerComponentEvents();
   };
 
   validateContainerConfiguration = function() {

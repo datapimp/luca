@@ -154,7 +154,11 @@ Luca.View.renderWrapper = (definition)->
 
   definition
 
-bindAllEventHandlers = (events={})->
+bindAllEventHandlers = ()->
+  for config in [@events, @componentEvents, @collectionEvents, @applicationEvents] when not _.isEmpty(config)
+    bindEventHandlers.call(@, config)    
+
+bindEventHandlers = (events={})->
   for eventSignature, handler of events
     if _.isString(handler)
       _.bindAll @, handler

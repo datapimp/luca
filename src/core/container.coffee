@@ -9,14 +9,35 @@ container.triggers                "before:components",
                                   "after:layout",
                                   "first:activation"
 
-
 container.defines                                  
   className: 'luca-ui-container'
+
   componentTag: 'div'
+
   componentClass: 'luca-ui-panel'
+
   isContainer: true
+
   rendered: false
+
   components: []
+
+  # @componentEvents provides declarative syntax for responding to events on
+  # the components in this container.  the format of the syntax is very similar
+  # to the other event binding helpers:
+  # 
+  #   component_accessor component:trigger
+  #
+  # where component_accessor is either the name of the role, or a method on the container
+  # which will find the component in question.
+  #
+  # myContainer = new Luca.core.Container
+  #   componentEvents:
+  #     "name component:trigger"    : "handler"
+  #     "role component:trigger"    : "handler"
+  #     "getter component:trigger"  : "handler"
+  #
+  componentEvents: {}
 
   initialize: (@options={})->
     _.extend @, @options
@@ -29,8 +50,6 @@ container.defines
     validateContainerConfiguration(@)
 
     Luca.View::initialize.apply @, arguments
-
-
 
   # Rendering Pipeline
   #
@@ -171,8 +190,6 @@ container.defines
 
     @componentsCreated = true
 
-    @registerComponentEvents() unless _.isEmpty(@componentEvents)
-
     map
 
   # Trigger the Rendering Pipeline process on all of the nested
@@ -224,21 +241,30 @@ container.defines
 
   map: (fn)->
     _( @components ).map(fn)
-    
-  # event binding sugar for nested components
-  #
-  # you can define events like:
-
-  # _.def("MyContainer").extends("Luca.View").with
-  #   componentEvents:
-  #     "component_name before:load" : "mySpecialHandler"
-  componentEvents: {}
 
   registerComponentEvents: ()->
-    for listener, handler of @componentEvents
-      [componentName,trigger] = listener.split(' ')
-      component = @findComponentByName(componentName)
-      component?.bind trigger, @[handler]
+    container = @
+
+    for listener, handler of (@componentEvents||{})
+      [componentNameOrRole,trigger] = listener.split(' ')
+      component = @findComponentForEventBinding( componentNameOrRole )
+
+      unless component? and Luca.isComponent(component)
+        console.log "Error registering component event", listener, componentNameOrRole, trigger
+        throw "Invalid component event definition: #{ componentNameOrRole }"
+
+      component?.bind trigger, @[handler], container
+
+  findComponentForEventBinding: (nameRoleOrGetter)->
+    @findComponentByName(nameRoleOrGetter) || @findComponentByGetter( nameRoleOrGetter ) || @findComponentByRole( nameRoleOrGetter )
+
+  findComponentByGetter: (nameRoleOrGetter)->
+    if @[ nameRoleOrGetter ]? and _.isFunction( @[ nameRoleOrGetter ] )
+      return @[ nameRoleOrGetter ].call(@)
+
+  findComponentByRole: (role)->
+    getter = _.str.camelize("get_" + role)
+    @[ getter ]?.call(@)
 
   findComponentByName: (name, deep=false)->
     @findComponent(name, "name_index", deep)
@@ -370,6 +396,7 @@ doComponents = ()->
   @trigger "after:components", @, @components
   createGetterMethods.call(@)
   createMethodsToGetComponentsByRole.call(@)  
+  @registerComponentEvents()
 
 validateContainerConfiguration = ()->
   true
