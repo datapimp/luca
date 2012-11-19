@@ -121,7 +121,7 @@ Luca.registry.classes = (toString=false)->
 
 Luca.cache = Luca.cacheInstance = (cacheKey, object)->
   return unless cacheKey?
-  return object if object.doNotCache is true
+  return object if object?.doNotCache is true
 
   if object?
     componentCacheStore.cid_index[ cacheKey ] = object 
@@ -140,5 +140,3 @@ Luca.cache = Luca.cacheInstance = (cacheKey, object)->
   lookup_id = componentCacheStore.name_index[ cacheKey ]
 
   component_cache.cid_index[ lookup_id ]
-
-
