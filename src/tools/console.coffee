@@ -2,7 +2,6 @@ developmentConsole = Luca.register    "Luca.tools.DevelopmentConsole"
 
 developmentConsole.extends            "Luca.core.Container"
 
-
 developmentConsole.defines
   className: "luca-ui-console"
   name: "console"
@@ -152,8 +151,13 @@ developmentConsole.defines
 
     try
       result = evaluator.call( @getContext() )
+
+      # capture luca objects for special inspection 
       if Luca.isComponent( result )
         result = Luca.util.inspectComponent( result )
+      else if Luca.isComponentPrototype( result )
+        result = Luca.util.inspectComponentPrototype( result )
+
       @onSuccess(result, code, raw) unless raw.match(/^console\.log/)
     catch error
       @onError(error, code, raw)
@@ -166,6 +170,19 @@ developmentConsole.defines
       dev.evaluateCode(compiled, raw)
 
 Luca.util.launchers ||= {}
+
+Luca.util.inspectComponentPrototype = (componentPrototype)->
+  liveInstances = Luca.registry.findInstancesByClass( componentPrototype )
+
+Luca.util.inspectComponent = (component)->
+  component = Luca(component) if _.isString(component)
+
+  {
+    name:         component.name  
+    instanceOf:   component.displayName 
+    subclassOf:   component._superClass()::displayName
+    inheritsFrom: Luca.parentClasses( component )
+  }
 
 Luca.util.launchers.developmentConsole = (name="luca-development-console")->
   @_lucaDevConsole = Luca name, ()=>
