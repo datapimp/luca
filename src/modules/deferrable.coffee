@@ -1,4 +1,6 @@
-# TODO THis module is going to be deprecated as it has been gradually gut over time
+# TODO
+# 
+# This is horrendous code.  I need to replace it ASAP
 Luca.modules.Deferrable = 
   configure_collection: (setAsDeferrable=true)->
     return unless @collection
