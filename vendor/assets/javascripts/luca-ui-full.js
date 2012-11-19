@@ -2448,7 +2448,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var applyDOMConfig, container, createGetterMethods, createMethodsToGetComponentsByRole, doComponents, doLayout, validateContainerConfiguration;
+  var applyDOMConfig, container, createGetterMethods, createMethodsToGetComponentsByRole, doComponents, doLayout, indexComponent, validateContainerConfiguration;
 
   container = Luca.register("Luca.core.Container");
 
@@ -2521,7 +2521,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (this.componentsCreated === true) return;
       map = this.componentIndex = {
         name_index: {},
-        cid_index: {}
+        cid_index: {},
+        role_index: {}
       };
       container = this;
       this.components = _(this.components).map(function(object, index) {
@@ -2530,10 +2531,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (!component.container && component.options.container) {
           component.container = component.options.container;
         }
-        if (map && (component.cid != null)) map.cid_index[component.cid] = index;
-        if (map && (component.name != null)) {
-          map.name_index[component.name] = index;
-        }
+        indexComponent(component).at(index)["in"](_this.componentIndex);
         return component;
       });
       this.componentsCreated = true;
@@ -2612,18 +2610,19 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
       return _results;
     },
-    findComponentForEventBinding: function(nameRoleOrGetter) {
-      return this.findComponentByName(nameRoleOrGetter) || this.findComponentByGetter(nameRoleOrGetter) || this.findComponentByRole(nameRoleOrGetter);
+    findComponentForEventBinding: function(nameRoleOrGetter, deep) {
+      if (deep == null) deep = false;
+      return this.findComponentByName(nameRoleOrGetter, deep) || this.findComponentByGetter(nameRoleOrGetter, deep) || this.findComponentByRole(nameRoleOrGetter, deep);
     },
-    findComponentByGetter: function(nameRoleOrGetter) {
+    findComponentByGetter: function(nameRoleOrGetter, deep) {
+      if (deep == null) deep = false;
       if ((this[nameRoleOrGetter] != null) && _.isFunction(this[nameRoleOrGetter])) {
         return this[nameRoleOrGetter].call(this);
       }
     },
-    findComponentByRole: function(role) {
-      var getter, _ref;
-      getter = _.str.camelize("get_" + role);
-      return (_ref = this[getter]) != null ? _ref.call(this) : void 0;
+    findComponentByRole: function(role, deep) {
+      if (deep == null) deep = false;
+      return this.findComponent(role, "role_index", deep);
     },
     findComponentByName: function(name, deep) {
       if (deep == null) deep = false;
@@ -2634,12 +2633,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.findComponent(id, "cid_index", deep);
     },
     findComponent: function(needle, haystack, deep) {
-      var component, position, sub_container, _ref, _ref2;
+      var component, position, sub_container, _ref;
       if (haystack == null) haystack = "name";
       if (deep == null) deep = false;
       if (this.componentsCreated !== true) this.createComponents();
       position = (_ref = this.componentIndex) != null ? _ref[haystack][needle] : void 0;
-      component = (_ref2 = this.components) != null ? _ref2[position] : void 0;
+      component = this.components[position];
       if (component) return component;
       if (deep === true) {
         sub_container = _(this.components).detect(function(component) {
@@ -2785,6 +2784,22 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   validateContainerConfiguration = function() {
     return true;
+  };
+
+  indexComponent = function(component) {
+    return {
+      at: function(index) {
+        return {
+          "in": function(map) {
+            if (component.cid != null) map.cid_index[component.cid] = index;
+            if (component.role != null) map.role_index[component.role] = index;
+            if (component.name != null) {
+              return map.name_index[component.name] = index;
+            }
+          }
+        };
+      }
+    };
   };
 
 }).call(this);
