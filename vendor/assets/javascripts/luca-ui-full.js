@@ -938,7 +938,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     __initializer: function() {
       var collection, eventTrigger, handler, key, manager, signature, _ref, _ref2, _results;
       if (_.isEmpty(this.collectionEvents)) return;
-      manager = this.collectionManager;
+      manager = this.collectionManager || Luca.CollectionManager.get();
       _ref = this.collectionEvents;
       _results = [];
       for (signature in _ref) {
@@ -1037,18 +1037,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   Luca.modules.EnhancedProperties = {
     __initializer: function() {
-      var _this = this;
       if (Luca.config.enhancedViewProperties !== true) return;
-      if (this.isField === true) return;
       if (_.isString(this.collection) && Luca.CollectionManager.get()) {
         this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
       }
-      if (this.template != null) {
-        this.defer(function() {
-          return _this.$template(_this.template, _this);
-        }).until("before:render");
-      }
-      if (_.isString(this.collectionManager) || _.isUndefined(this.collectionManager)) {
+      if (this.template != null) this.$template(this.template, this);
+      if (_.isString(this.collectionManager)) {
         return this.collectionManager = Luca.CollectionManager.get(this.collectionManager);
       }
     }
@@ -2385,6 +2379,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.input_class || (this.input_class = "");
+      this.input_type || (this.input_type = "");
       this.helperText || (this.helperText = "");
       if (this.required && !((_ref = this.label) != null ? _ref.match(/^\*/) : void 0)) {
         this.label || (this.label = "*" + this.label);
@@ -2398,22 +2393,20 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     beforeRender: function() {
       if (Luca.enableBootstrap) this.$el.addClass('control-group');
-      if (this.required) this.$el.addClass('required');
-      this.$template(this.template, this);
-      return this.input = $('input', this.el);
+      if (this.required) return this.$el.addClass('required');
     },
     change_handler: function(e) {
       return this.trigger("on:change", this, e);
     },
     disable: function() {
-      return $("input", this.el).attr('disabled', true);
+      return this.getInputElement().attr('disabled', true);
     },
     enable: function() {
-      return $("input", this.el).attr('disabled', false);
+      return this.getInputElement().attr('disabled', false);
     },
     getValue: function() {
-      var raw;
-      raw = this.input.attr('value');
+      var raw, _ref;
+      raw = (_ref = this.getInputElement()) != null ? _ref.attr('value') : void 0;
       if (_.str.isBlank(raw)) return raw;
       switch (this.valueType) {
         case "integer":
@@ -2426,11 +2419,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           return raw;
       }
     },
-    render: function() {
-      return $(this.container).append(this.$el);
-    },
     setValue: function(value) {
-      return this.input.attr('value', value);
+      var _ref;
+      return (_ref = this.getInputElement()) != null ? _ref.attr('value', value) : void 0;
+    },
+    getInputElement: function() {
+      return this.input || (this.input = this.$('input').eq(0));
     },
     updateState: function(state) {
       var _this = this;
@@ -2443,35 +2437,39 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var applyDOMConfig, doComponents, doLayout, validateContainerConfiguration;
+  var applyDOMConfig, container, createGetterMethods, createMethodsToGetComponentsByRole, doComponents, doLayout, validateContainerConfiguration;
 
-  _.def('Luca.core.Container')["extends"]('Luca.components.Panel')["with"]({
+  container = Luca.register("Luca.core.Container");
+
+  container["extends"]("Luca.components.Panel");
+
+  container.triggers("before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation");
+
+  container.defines({
     className: 'luca-ui-container',
     componentTag: 'div',
     componentClass: 'luca-ui-panel',
     isContainer: true,
-    hooks: ["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"],
     rendered: false,
     components: [],
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
-      this.setupHooks(["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"]);
+      this.setupHooks(Luca.core.Container.prototype.hooks);
       this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
       validateContainerConfiguration(this);
-      Luca.View.prototype.initialize.apply(this, arguments);
-      doLayout.call(this);
-      return doComponents.call(this);
+      return Luca.View.prototype.initialize.apply(this, arguments);
     },
     beforeRender: function() {
       var _ref;
+      doLayout.call(this);
+      doComponents.call(this);
       return (_ref = Luca.components.Panel.prototype.beforeRender) != null ? _ref.apply(this, arguments) : void 0;
     },
     customizeContainerEl: function(containerEl, panel, panelIndex) {
       return containerEl;
     },
     prepareLayout: function() {
-      var container;
       container = this;
       return this.componentContainers = _(this.components).map(function(component, index) {
         return applyDOMConfig.call(container, component, index);
@@ -2506,7 +2504,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       });
     },
     createComponents: function() {
-      var container, map,
+      var map,
         _this = this;
       if (this.componentsCreated === true) return;
       map = this.componentIndex = {
@@ -2517,11 +2515,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.components = _(this.components).map(function(object, index) {
         var component, created;
         component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object = _.defaults(object, container.defaults || {}), created = Luca.util.lazyComponent(object));
-        if (_.isString(component.getter)) {
-          container[component.getter] = (function() {
-            return component;
-          });
-        }
         if (!component.container && component.options.container) {
           component.container = component.options.container;
         }
@@ -2536,7 +2529,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return map;
     },
     renderComponents: function(debugMode) {
-      var container;
       this.debugMode = debugMode != null ? debugMode : "";
       this.debug("container render components");
       container = this;
@@ -2712,16 +2704,48 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     return config;
   };
 
+  createGetterMethods = function() {
+    container = this;
+    return this.eachComponent(function(component) {
+      if ((component.getter != null) && _.isString(component.getter)) {
+        return container[component.getter] = function() {
+          return component;
+        };
+      }
+    }, true);
+  };
+
+  createMethodsToGetComponentsByRole = function() {
+    container = this;
+    return this.eachComponent(function(component) {
+      var roleGetter;
+      if ((component.role != null) && _.isString(component.role)) {
+        roleGetter = _.str.camelize("get_" + component.role);
+        if (container[roleGetter] != null) {
+          return console.log("Attempt to create role based getter " + roleGetter + " for a method which already exists on " + container.cid);
+        } else {
+          return container[roleGetter] = function() {
+            return component;
+          };
+        }
+      }
+    }, true);
+  };
+
   doComponents = function() {
     this.trigger("before:components", this, this.components);
     this.prepareComponents();
     this.createComponents();
+    createGetterMethods.call(this);
+    createMethodsToGetComponentsByRole.call(this);
     this.trigger("before:render:components", this, this.components);
     this.renderComponents();
     return this.trigger("after:components", this, this.components);
   };
 
-  validateContainerConfiguration = function() {};
+  validateContainerConfiguration = function() {
+    return true;
+  };
 
 }).call(this);
 (function() {
@@ -2847,8 +2871,26 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   })();
 
+  Luca.CollectionManager.isRunning = function() {
+    return _.isEmpty(Luca.CollectionManager.instances) !== true;
+  };
+
   Luca.CollectionManager.destroyAll = function() {
     return Luca.CollectionManager.instances = {};
+  };
+
+  Luca.CollectionManager.loadCollectionsByName = function(set, callback) {
+    var collection, name, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = set.length; _i < _len; _i++) {
+      name = set[_i];
+      collection = this.getOrCreate(name);
+      collection.once("reset", function() {
+        return callback(collection);
+      });
+      _results.push(collection.fetch());
+    }
+    return _results;
   };
 
   guessCollectionClass = function(key) {
@@ -2867,7 +2909,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   loadInitialCollections = function() {
-    var collectionDidLoad,
+    var collectionDidLoad, set,
       _this = this;
     collectionDidLoad = function(collection) {
       var current;
@@ -2876,14 +2918,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       _this.trigger("collection_loaded", collection.name);
       return collection.unbind("reset");
     };
-    return _(this.initialCollections).each(function(name) {
-      var collection;
-      collection = _this.getOrCreate(name);
-      collection.once("reset", function() {
-        return collectionDidLoad(collection);
-      });
-      return collection.fetch();
-    });
+    set = this.initialCollections;
+    return Luca.CollectionManager.loadCollectionsByName.call(this, set, collectionDidLoad);
   };
 
   handleInitialCollections = function() {
@@ -2902,6 +2938,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }));
     }
     loadInitialCollections.call(this);
+    this.initialCollectionsLoadedu;
     return this;
   };
 
@@ -3722,24 +3759,23 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     setupCollectionManager: function() {
       var collectionManagerOptions, _base, _ref, _ref2;
-      if (this.useCollectionManager === true) {
-        if (_.isString(this.collectionManagerClass)) {
-          this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
-        }
-        collectionManagerOptions = this.collectionManagerOptions;
-        if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
-          collectionManagerOptions = this.collectionManager;
-          this.collectionManager = void 0;
-        }
-        if (_.isString(this.collectionManager)) {
-          collectionManagerOptions = {
-            name: this.collectionManager
-          };
-        }
-        this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
-        if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
-          return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
-        }
+      if (this.useCollectionManager !== true) return;
+      if (_.isString(this.collectionManagerClass)) {
+        this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
+      }
+      collectionManagerOptions = this.collectionManagerOptions;
+      if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
+        collectionManagerOptions = this.collectionManager;
+        this.collectionManager = void 0;
+      }
+      if (_.isString(this.collectionManager)) {
+        collectionManagerOptions = {
+          name: this.collectionManager
+        };
+      }
+      this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
+      if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
+        return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
       }
     },
     setupRouter: function() {
@@ -3859,6 +3895,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       _.extend(this, this.options);
       _.bindAll(this, "refresh");
       if (!((this.collection != null) || this.options.collection)) {
+        console.log("Error on initialize of collection view", this);
         throw "Collection Views must specify a collection";
       }
       if (!((this.itemTemplate != null) || (this.itemRenderer != null) || (this.itemProperty != null))) {
@@ -4260,10 +4297,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.label || (this.label = this.name);
     },
     setValue: function(checked) {
-      return this.input.attr('checked', checked);
+      return this.getInputElement().attr('checked', checked);
     },
     getValue: function() {
-      return this.input.is(":checked");
+      return this.getInputElement().is(":checked");
     }
   });
 
@@ -4272,10 +4309,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   _.def('Luca.fields.FileUploadField')["extends"]('Luca.core.Field')["with"]({
     template: 'fields/file_upload_field',
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
-    },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
@@ -4289,10 +4322,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   _.def('Luca.fields.HiddenField')["extends"]('Luca.core.Field')["with"]({
     template: 'fields/hidden_field',
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
-    },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
@@ -4306,16 +4335,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   _.def("Luca.components.LabelField")["extends"]("Luca.core.Field")["with"]({
     className: "luca-ui-field luca-ui-label-field",
-    getValue: function() {
-      return this.$('input').attr('value');
-    },
     formatter: function(value) {
       value || (value = this.getValue());
       return _.str.titleize(value);
     },
     setValue: function(value) {
       this.trigger("change", value, this.getValue());
-      this.$('input').attr('value', value);
+      this.getInputElement().attr('value', value);
       return this.$('.value').html(this.formatter(value));
     }
   });
@@ -4370,9 +4396,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         return hash;
       });
     },
+    getInputElement: function() {
+      return this.input || (this.input = this.$('select').eq(0));
+    },
     afterRender: function() {
       var _ref, _ref2;
-      this.input = $('select', this.el);
       if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
         return this.populateOptions();
       } else {
@@ -4390,9 +4418,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.trigger("on:change", this, e);
     },
     resetOptions: function() {
-      this.input.html('');
+      this.getInputElement().html('');
       if (this.includeBlank) {
-        return this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
+        return this.getInputElement().append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
     },
     populateOptions: function() {
@@ -4406,7 +4434,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           display = model.get(_this.displayField);
           if (_this.selected && value === _this.selected) selected = "selected";
           option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-          return _this.input.append(option);
+          return _this.getInputElement().append(option);
         });
       }
       this.trigger("after:populate:options", this);
@@ -4511,19 +4539,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   _.def('Luca.fields.TypeAheadField')["extends"]('Luca.fields.TextField')["with"]({
     className: 'luca-ui-field',
     getSource: function() {
-      if (_.isFunction(this.source)) return this.source.call(this);
-      return this.source || [];
+      return Luca.util.read(this.source) || [];
     },
     matcher: function(item) {
       return true;
     },
     beforeRender: function() {
-      this._super("beforeRender", this, arguments);
-      return this.$('input').attr('data-provide', 'typeahead');
+      Luca.fields.TextField.prototype.beforeRender.apply(this, arguments);
+      return this.getInputElement().attr('data-provide', 'typeahead');
     },
     afterRender: function() {
-      this._super("afterRender", this, arguments);
-      return this.$('input').typeahead({
+      Luca.fields.TextField.prototype.afterRender.apply(this, arguments);
+      return this.getInputElement().typeahead({
         matcher: this.matcher,
         source: this.getSource()
       });
@@ -5102,7 +5129,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       var view, _i, _len, _ref;
       this.options = options != null ? options : {};
       this.components || (this.components = this.views);
-      Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       _ref = this.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         view = _ref[_i];
@@ -5111,7 +5137,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.on("collection:change", this.refresh, this);
       this.on("after:card:switch", this.refresh, this);
       this.on("before:components", propagateCollectionComponents, this);
-      return this.on("after:components", bubbleCollectionEvents, this);
+      this.on("after:components", bubbleCollectionEvents, this);
+      return Luca.containers.CardView.prototype.initialize.apply(this, arguments);
     },
     refresh: function() {
       var _ref;

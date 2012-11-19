@@ -49,6 +49,7 @@ collectionView.defaults
     _.bindAll @, "refresh"
 
     unless @collection? or @options.collection
+      console.log "Error on initialize of collection view", @
       throw "Collection Views must specify a collection"
 
     unless @itemTemplate? || @itemRenderer? || @itemProperty?

@@ -2,7 +2,7 @@ Luca.modules.CollectionEventBindings =
   __initializer: ()->
     return if _.isEmpty( @collectionEvents )
 
-    manager = @collectionManager
+    manager = @collectionManager || Luca.CollectionManager.get()
 
     for signature, handler of @collectionEvents
       [key,eventTrigger] = signature.split(" ")

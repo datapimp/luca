@@ -46,14 +46,14 @@ multiView.defaultsTo
   initialize: (@options={})->
     @components ||= @views
 
-    Luca.containers.CardView::initialize.apply(@, arguments) 
-
     validateComponent( view ) for view in @components    
 
     @on "collection:change", @refresh, @
     @on "after:card:switch", @refresh, @
     @on "before:components", propagateCollectionComponents, @
     @on "after:components", bubbleCollectionEvents, @
+
+    Luca.containers.CardView::initialize.apply(@, arguments) 
 
   refresh: ()->
     @activeComponent()?.trigger("refresh")

@@ -97,9 +97,23 @@ class Luca.CollectionManager
   private: (key, collectionOptions={}, initialModels=[])->
     @create(key,collectionOptions,initialModels,true)
 
+#### Helpers
+
+Luca.CollectionManager.isRunning = ()->
+  _.isEmpty( Luca.CollectionManager.instances ) isnt true
+
 Luca.CollectionManager.destroyAll = ()-> 
   Luca.CollectionManager.instances = {} 
 
+Luca.CollectionManager.loadCollectionsByName = (set, callback)->
+  for name in set 
+    collection = @getOrCreate(name)
+    collection.once "reset", ()->
+      callback(collection)
+    collection.fetch()  
+
+
+#### Private Methods
 guessCollectionClass = (key)->
   classified = Luca.util.classify( key )
   # support our naming convention of Books
@@ -120,16 +134,13 @@ guessCollectionClass = (key)->
 loadInitialCollections = ()->
   collectionDidLoad = (collection) =>
     current = @state.get("loaded_collections_count")
-
     @state.set("loaded_collections_count", current + 1)
     @trigger "collection_loaded", collection.name
     collection.unbind "reset"
 
-  _(@initialCollections).each (name) =>
-    collection = @getOrCreate(name)
-    collection.once "reset", ()->
-      collectionDidLoad(collection)
-    collection.fetch()
+  set = @initialCollections
+  Luca.CollectionManager.loadCollectionsByName.call(@, set, collectionDidLoad)
+
 
 handleInitialCollections = ()->
   @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
@@ -140,4 +151,5 @@ handleInitialCollections = ()->
 
   loadInitialCollections.call(@)
 
+  @initialCollectionsLoadedu
   @

@@ -35,6 +35,11 @@ describe 'The Luca Container', ->
         ]
       ]
 
+    @container.render()
+
+  it "should create getter methods on the for components with roles", ->
+    expect( @container.getRoleTwo ).toBeDefined()
+
   it "should create getter methods on the for components with roles", ->
     expect( @container.getRoleTwo().name ).toEqual 'component_two'
 

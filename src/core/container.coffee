@@ -1,36 +1,27 @@
-_.def('Luca.core.Container').extends('Luca.components.Panel').with
+container = Luca.register         "Luca.core.Container"
 
+container.extends                 "Luca.components.Panel"
+
+container.triggers                "before:components",
+                                  "before:render:components",
+                                  "before:layout",
+                                  "after:components",
+                                  "after:layout",
+                                  "first:activation"
+
+
+container.defines                                  
   className: 'luca-ui-container'
-
   componentTag: 'div'
   componentClass: 'luca-ui-panel'
-
   isContainer: true
-
-  hooks:[
-    "before:components"
-    "before:render:components"
-    "before:layout"
-    "after:components"
-    "after:layout"
-    "first:activation"
-  ]
-
   rendered: false
-
   components: []
 
   initialize: (@options={})->
     _.extend @, @options
 
-    @setupHooks [
-      "before:components"
-      "before:render:components"
-      "before:layout"
-      "after:components"
-      "after:layout"
-      "first:activation"
-    ]
+    @setupHooks( Luca.core.Container::hooks )
 
     # aliases for the components property
     @components ||= @fields ||= @pages ||= @cards ||= @views
@@ -39,8 +30,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
     Luca.View::initialize.apply @, arguments
 
-    doLayout.call(@)
-    doComponents.call(@)
+
 
   # Rendering Pipeline
   #
@@ -89,6 +79,8 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   # firstActivation()
   #
   beforeRender: ()->
+    doLayout.call(@)
+    doComponents.call(@)
     Luca.components.Panel::beforeRender?.apply(@, arguments)
 
   # Components which inherit from Luca.core.Container can implement
@@ -156,16 +148,12 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
           else
             object.type = object.ctype = Luca.defaultComponentType
 
+        # if the container defines a @defaults property
+        # then we should make sure our child components inherit
+        # these values unless specifically defined
         object = _.defaults(object, (container.defaults || {}))
 
         created = Luca.util.lazyComponent( object )
-
-
-      # if you define a @getter property as a string on your component
-      # we will create a function with that name on this container that
-      # allows you to access this component
-      if _.isString( component.getter )
-        container[ component.getter ] = (()-> component) 
 
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround to get them to
@@ -352,13 +340,33 @@ applyDOMConfig = (panel, panelIndex)->
 
   config
 
+createGetterMethods = ()->
+  container = @
+  @eachComponent (component)->
+    if component.getter? and _.isString( component.getter )
+      container[ component.getter ] = ()-> component 
+  , true
+
+createMethodsToGetComponentsByRole = ()->
+  container = @
+
+  @eachComponent (component)->
+    if component.role? and _.isString( component.role )
+      roleGetter = _.str.camelize( "get_" + component.role ) 
+
+      if container[ roleGetter ]?
+        console.log "Attempt to create role based getter #{ roleGetter } for a method which already exists on #{ container.cid }"
+      else
+        container[ roleGetter ] = ()-> component
+
+  , true
+
 doComponents = ()->
   @trigger "before:components", @, @components
   @prepareComponents()
   @createComponents()
-  renderComponents.call(@)
-
-renderComponents= ()->
+  createGetterMethods.call(@)
+  createMethodsToGetComponentsByRole.call(@)  
   @trigger "before:render:components", @, @components
   @renderComponents()
   @trigger "after:components", @, @components

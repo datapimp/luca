@@ -19,5 +19,5 @@ Luca.modules.EnhancedProperties =
       @$template(@template, @)
 
     # The @collectionManager property is also configurable by string
-    if _.isString( @collectionManager ) or _.isUndefined(@collectionManager)
-      @collectionManager = Luca.CollectionManager.get( @collectionManager )    
+    if _.isString( @collectionManager )
+      @collectionManager = Luca.CollectionManager.get( @collectionManager )

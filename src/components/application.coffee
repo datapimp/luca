@@ -271,23 +271,34 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
       @defer( @setupControllerBindings, false ).until("after:components")
 
   setupCollectionManager: ()->
-    if @useCollectionManager is true
-      @collectionManagerClass = Luca.util.resolve( @collectionManagerClass ) if _.isString( @collectionManagerClass )
+    return unless @useCollectionManager is true
+    
+    if _.isString( @collectionManagerClass )
+      @collectionManagerClass = Luca.util.resolve( @collectionManagerClass ) 
 
-      collectionManagerOptions = @collectionManagerOptions
+    collectionManagerOptions = @collectionManagerOptions
 
-      if _.isObject(@collectionManager) and not _.isFunction( @collectionManager?.get )
-        collectionManagerOptions = @collectionManager
-        @collectionManager = undefined
+    # if the collectionManager property is present, and it
+    # isn't a reference to a collection manager instance, then
+    # it is being used as a configuration hash for when we do create
+    # the collection manager. so let's stash it.
+    if _.isObject(@collectionManager) and not _.isFunction( @collectionManager?.get )
+      collectionManagerOptions = @collectionManager
+      @collectionManager = undefined
 
-      if _.isString(@collectionManager)
-        collectionManagerOptions = 
-          name: @collectionManager
+    # if the collection manager property is a string, then it is a
+    # reference to a name of a collection manager to use.  so let's
+    # stash it 
+    if _.isString(@collectionManager)
+      collectionManagerOptions = 
+        name: @collectionManager
 
-      @collectionManager = Luca.CollectionManager.get?( collectionManagerOptions.name )
+    # let's try and get the collection manager by name if we can
+    @collectionManager = Luca.CollectionManager.get?( collectionManagerOptions.name )
 
-      unless _.isFunction(@collectionManager?.get)
-        @collectionManager = new @collectionManagerClass( collectionManagerOptions )    
+    # if we can't, then we will have to create one ourselves
+    unless _.isFunction(@collectionManager?.get)
+      @collectionManager = new @collectionManagerClass( collectionManagerOptions )    
 
   setupRouter: ()->
     app = @
