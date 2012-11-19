@@ -246,14 +246,22 @@ container.defines
     container = @
 
     for listener, handler of (@componentEvents||{})
-      [componentNameOrRole,trigger] = listener.split(' ')
-      component = @findComponentForEventBinding( componentNameOrRole )
+      [componentNameOrRole,eventId] = listener.split(' ')
 
-      unless component? and Luca.isComponent(component)
-        console.log "Error registering component event", listener, componentNameOrRole, trigger
-        throw "Invalid component event definition: #{ componentNameOrRole }"
+      unless _.isFunction( @[handler] )
+        console.log "Error registering component event", listener, componentNameOrRole, eventId
+        throw "Invalid component event definition #{ listener }. Specified handler is not a method on the container"
 
-      component?.bind trigger, @[handler], container
+      if componentNameOrRole is "*"
+        @eachComponent (component)=> component.on(eventId, @[handler], container)
+      else 
+        component = @findComponentForEventBinding( componentNameOrRole )
+
+        unless component? and Luca.isComponent(component)
+          console.log "Error registering component event", listener, componentNameOrRole, eventId
+          throw "Invalid component event definition: #{ componentNameOrRole }"
+
+        component?.bind eventId, @[handler], container
 
   findComponentForEventBinding: (nameRoleOrGetter)->
     @findComponentByName(nameRoleOrGetter) || @findComponentByGetter( nameRoleOrGetter ) || @findComponentByRole( nameRoleOrGetter )

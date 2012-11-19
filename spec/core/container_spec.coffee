@@ -93,6 +93,10 @@ describe 'Component Event Binding', ->
         "component_alpha trigger:one"       : "one"
         "alpha trigger:two"                 : "two"
         "getAlphaComponent trigger:three"   : "three"
+        "* wildcard"                        : "wildcard"
+
+      wildcard: ()->
+        @trigger "wildcard:son"  
 
       one: ()->
         @trigger "one" 
@@ -125,6 +129,10 @@ describe 'Component Event Binding', ->
 
   it "should find the component by its getter", ->
     expect( @container.findComponentByGetter('getAlphaComponent') ).toBeDefined()
+
+  it "should accept wildcard for component", ->
+    @container.getAlphaComponent().trigger "wildcard"
+    expect( @container ).toHaveTriggered("wildcard:son")
 
   it "should accept component events with a component name", ->
     @container.getAlphaComponent().trigger "trigger:one"

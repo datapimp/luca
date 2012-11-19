@@ -2585,19 +2585,30 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return _(this.components).map(fn);
     },
     registerComponentEvents: function() {
-      var component, componentNameOrRole, handler, listener, trigger, _ref, _ref2, _results;
+      var component, componentNameOrRole, eventId, handler, listener, _ref, _ref2, _results,
+        _this = this;
       container = this;
       _ref = this.componentEvents || {};
       _results = [];
       for (listener in _ref) {
         handler = _ref[listener];
-        _ref2 = listener.split(' '), componentNameOrRole = _ref2[0], trigger = _ref2[1];
-        component = this.findComponentForEventBinding(componentNameOrRole);
-        if (!((component != null) && Luca.isComponent(component))) {
-          console.log("Error registering component event", listener, componentNameOrRole, trigger);
-          throw "Invalid component event definition: " + componentNameOrRole;
+        _ref2 = listener.split(' '), componentNameOrRole = _ref2[0], eventId = _ref2[1];
+        if (!_.isFunction(this[handler])) {
+          console.log("Error registering component event", listener, componentNameOrRole, eventId);
+          throw "Invalid component event definition " + listener + ". Specified handler is not a method on the container";
         }
-        _results.push(component != null ? component.bind(trigger, this[handler], container) : void 0);
+        if (componentNameOrRole === "*") {
+          _results.push(this.eachComponent(function(component) {
+            return component.on(eventId, _this[handler], container);
+          }));
+        } else {
+          component = this.findComponentForEventBinding(componentNameOrRole);
+          if (!((component != null) && Luca.isComponent(component))) {
+            console.log("Error registering component event", listener, componentNameOrRole, eventId);
+            throw "Invalid component event definition: " + componentNameOrRole;
+          }
+          _results.push(component != null ? component.bind(eventId, this[handler], container) : void 0);
+        }
       }
       return _results;
     },
