@@ -40,19 +40,13 @@ view.defines
     if @autoBindEventHandlers is true or @bindAllEvents is true
       bindAllEventHandlers.call(@) 
 
-    setupBodyTemplate.call(@)
-
     @cid = _.uniqueId(@name) if @name?
 
     @$el.attr("data-luca-id", @name || @cid)
     
-    Luca.cache( @cid, @ )
+    Luca.cacheInstance( @cid, @ )
 
-    # FIXME:
-    # Does this prevent inheritance of hooks all the way up the chain?
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
-
-    setupTemplate.call(@) if @template and not @isField
 
     if @mixins?.length > 0
       for module in @mixins 
