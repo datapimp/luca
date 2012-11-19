@@ -98,7 +98,7 @@ Luca.registry.lookup = (ctype)->
   .compact().value()?[0]
 
 Luca.registry.instances = ()->
-  _( component_cache.cid_index ).values()
+  _( componentCacheStore.cid_index ).values()
  
 Luca.registry.findInstancesByClass = (componentClass)->
   Luca.registry.findInstancesByClassName( componentClass.displayName )
@@ -139,4 +139,4 @@ Luca.cache = Luca.cacheInstance = (cacheKey, object)->
   # perform a lookup by name if the cid lookup didn't turn anything
   lookup_id = componentCacheStore.name_index[ cacheKey ]
 
-  component_cache.cid_index[ lookup_id ]
+  componentCacheStore.cid_index[ lookup_id ]

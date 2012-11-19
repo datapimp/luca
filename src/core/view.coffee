@@ -10,7 +10,9 @@ view.includes           "Luca.Events",
 # which customize the components through the use of __initializer and
 # __included method names.  These will be called every time an instance
 # is created, and the first time the mixin is used to enhance a component.
-view.mixesIn            "EnhancedProperties",
+view.mixesIn            "DomHelpers", 
+                        "Templating",
+                        "EnhancedProperties",
                         "CollectionEventBindings",
                         "ApplicationEventBindings",
                         "StateModel"
@@ -49,12 +51,6 @@ view.defines
     # FIXME:
     # Does this prevent inheritance of hooks all the way up the chain?
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
-
-    @setupClassHelpers()
-
-
-    registerCollectionEvents.call(@)
-    registerApplicationEvents.call( @)
 
     setupTemplate.call(@) if @template and not @isField
 

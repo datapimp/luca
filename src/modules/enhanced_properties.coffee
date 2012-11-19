@@ -22,5 +22,5 @@ Luca.modules.EnhancedProperties =
       .until("before:render")  
 
     # The @collectionManager property is also configurable by string
-    if _.isString( @collectionManager )
+    if _.isString( @collectionManager ) or _.isUndefined(@collectionManager)
       @collectionManager = Luca.CollectionManager.get( @collectionManager )    

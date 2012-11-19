@@ -14,7 +14,9 @@ Luca.modules.Paginatable =
 
     collection = @getCollection()
 
-    @getPaginationState().on "change", (state)=>
+    paginationState = @getPaginationState()
+
+    paginationState.on "change", (state)=>
       @trigger "collection:change:pagination", state, collection
       @trigger "refresh"
 
@@ -22,15 +24,11 @@ Luca.modules.Paginatable =
       _.defer ()=>
         @updatePagination.call(@, models, query, options)
 
-    # refresh the pagination control once this component
-    # is rendered
-    @defer(()=>@paginationControl().refresh()).until("after:render")
-
     if old = @getQueryOptions
       @getQueryOptions = ()->
-        _.extend( old(), pagination.toJSON() ) 
+        _.extend( old(), paginationState.toJSON() ) 
     else
-      @getQueryOptions = ()-> pagination.toJSON()
+      @getQueryOptions = ()-> paginationState.toJSON()
 
   getPaginationState: ()->
     @collection.__paginators[ @cid ] ||= @paginationControl().state
