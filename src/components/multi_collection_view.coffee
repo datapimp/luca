@@ -28,6 +28,14 @@ multiView.behavesAs         "LoadMaskable",
                             "Filterable",
                             "Paginatable"
 
+<<<<<<< HEAD
+=======
+multiView.triggers          "before:refresh",
+                            "after:refresh",
+                            "refresh",
+                            "empty:results"
+
+>>>>>>> master
 multiView.defaultsTo
   version: 1
 
