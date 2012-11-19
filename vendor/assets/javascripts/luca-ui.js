@@ -2720,7 +2720,12 @@
       CollectionClass = collectionOptions.base;
       CollectionClass || (CollectionClass = guessCollectionClass.call(this, key));
       if (collectionOptions.private) collectionOptions.name = "";
-      collection = new CollectionClass(initialModels, collectionOptions);
+      try {
+        collection = new CollectionClass(initialModels, collectionOptions);
+      } catch (e) {
+        console.log("Error creating collection", CollectionClass, collectionOptions, key);
+        throw e;
+      }
       this.add(key, collection);
       collectionManager = this;
       if (this.relayEvents === true) {
@@ -3681,13 +3686,16 @@
       }
     },
     setupCollectionManager: function() {
-      var collectionManagerOptions, _base, _ref, _ref2;
+      var collectionManagerOptions, _base, _ref, _ref2, _ref3;
       if (this.useCollectionManager !== true) return;
+      if ((this.collectionManager != null) && (((_ref = this.collectionManager) != null ? _ref.get : void 0) != null)) {
+        return;
+      }
       if (_.isString(this.collectionManagerClass)) {
         this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
       }
-      collectionManagerOptions = this.collectionManagerOptions;
-      if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
+      collectionManagerOptions = this.collectionManagerOptions || {};
+      if (_.isObject(this.collectionManager) && !_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
         collectionManagerOptions = this.collectionManager;
         this.collectionManager = void 0;
       }
@@ -3697,7 +3705,7 @@
         };
       }
       this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
-      if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
+      if (!_.isFunction((_ref3 = this.collectionManager) != null ? _ref3.get : void 0)) {
         return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
       }
     },

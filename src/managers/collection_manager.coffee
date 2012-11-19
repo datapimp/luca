@@ -45,7 +45,11 @@ class Luca.CollectionManager
     CollectionClass ||= guessCollectionClass.call(@, key)
     collectionOptions.name = "" if collectionOptions.private
 
-    collection = new CollectionClass(initialModels,collectionOptions)
+    try  
+      collection = new CollectionClass(initialModels,collectionOptions)
+    catch e
+      console.log "Error creating collection", CollectionClass, collectionOptions, key
+      throw(e)
 
     @add(key, collection)
 

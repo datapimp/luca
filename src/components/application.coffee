@@ -272,11 +272,13 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
   setupCollectionManager: ()->
     return unless @useCollectionManager is true
+
+    return if @collectionManager? and @collectionManager?.get?
     
     if _.isString( @collectionManagerClass )
       @collectionManagerClass = Luca.util.resolve( @collectionManagerClass ) 
 
-    collectionManagerOptions = @collectionManagerOptions
+    collectionManagerOptions = @collectionManagerOptions || {}
 
     # if the collectionManager property is present, and it
     # isn't a reference to a collection manager instance, then
