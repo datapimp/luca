@@ -95,7 +95,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.45",
+    VERSION: "0.9.6",
     core: {},
     containers: {},
     components: {},
@@ -2573,14 +2573,26 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         }
       });
     },
+    _: function() {
+      return _(this.components);
+    },
     pluck: function(attribute) {
-      return _(this.components).pluck(attribute);
+      return this._().pluck(attribute);
     },
     invoke: function(method) {
-      return _(this.components).invoke(method);
+      return this._().invoke(method);
+    },
+    select: function(fn) {
+      return this._().select(fn);
+    },
+    detect: function(fn) {
+      return this._().detect(attribute);
+    },
+    reject: function(fn) {
+      return this._().reject(fn);
     },
     map: function(fn) {
-      return _(this.components).map(fn);
+      return this._().map(fn);
     },
     registerComponentEvents: function() {
       var component, componentNameOrRole, eventId, handler, listener, _ref, _ref2, _results,
@@ -2610,23 +2622,41 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
       return _results;
     },
+    subContainers: function() {
+      return this.select(function(component) {
+        return component.isContainer === true;
+      });
+    },
+    roles: function() {
+      return _(this.allChildren()).pluck('role');
+    },
+    allChildren: function() {
+      var children, grandchildren;
+      children = this.components;
+      grandchildren = _(this.subContainers()).invoke('allChildren');
+      return this._allChildren || (this._allChildren = _([children, grandchildren]).chain().compact().flatten().uniq().value());
+    },
     findComponentForEventBinding: function(nameRoleOrGetter, deep) {
       if (deep == null) deep = false;
       return this.findComponentByName(nameRoleOrGetter, deep) || this.findComponentByGetter(nameRoleOrGetter, deep) || this.findComponentByRole(nameRoleOrGetter, deep);
     },
-    findComponentByGetter: function(nameRoleOrGetter, deep) {
+    findComponentByGetter: function(getter, deep) {
       if (deep == null) deep = false;
-      if ((this[nameRoleOrGetter] != null) && _.isFunction(this[nameRoleOrGetter])) {
-        return this[nameRoleOrGetter].call(this);
-      }
+      return _(this.allChildren()).detect(function(component) {
+        return component.getter === getter;
+      });
     },
     findComponentByRole: function(role, deep) {
       if (deep == null) deep = false;
-      return this.findComponent(role, "role_index", deep);
+      return _(this.allChildren()).detect(function(component) {
+        return component.role === role;
+      });
     },
     findComponentByName: function(name, deep) {
       if (deep == null) deep = false;
-      return this.findComponent(name, "name_index", deep);
+      return _(this.allChildren()).detect(function(component) {
+        return component.name === name;
+      });
     },
     findComponentById: function(id, deep) {
       if (deep == null) deep = false;
@@ -2688,23 +2718,21 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     selectByAttribute: function(attribute, value, deep) {
       var components;
+      if (value == null) value = void 0;
       if (deep == null) deep = false;
       components = _(this.components).map(function(component) {
         var matches, test;
         matches = [];
         test = component[attribute];
-        if (test === value) matches.push(component);
+        if (test === value || (!(value != null) && (test != null))) {
+          matches.push(component);
+        }
         if (deep === true) {
           matches.push(typeof component.selectByAttribute === "function" ? component.selectByAttribute(attribute, value, true) : void 0);
         }
         return _.compact(matches);
       });
       return _.flatten(components);
-    },
-    select: function(attribute, value, deep) {
-      if (deep == null) deep = false;
-      console.log("Container.select will be replaced by selectByAttribute in 1.0");
-      return Luca.core.Container.prototype.selectByAttribute.apply(this, arguments);
     }
   });
 
@@ -2743,31 +2771,34 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   createGetterMethods = function() {
+    var childrenWithGetter;
     container = this;
-    return this.eachComponent(function(component) {
-      if ((component.getter != null) && _.isString(component.getter)) {
-        return container[component.getter] = function() {
-          return component;
-        };
-      }
-    }, true);
+    childrenWithGetter = _(this.allChildren()).select(function(component) {
+      return component.getter != null;
+    });
+    return _(childrenWithGetter).each(function(component) {
+      var _name;
+      return container[_name = component.getter] || (container[_name] = function() {
+        console.log("getter is being deprecated in favor of role");
+        console.log(component.getter, component, container);
+        return component;
+      });
+    });
   };
 
   createMethodsToGetComponentsByRole = function() {
+    var childrenWithRole;
     container = this;
-    return this.eachComponent(function(component) {
-      var roleGetter;
-      if ((component.role != null) && _.isString(component.role)) {
-        roleGetter = _.str.camelize("get_" + component.role);
-        if (container[roleGetter] != null) {
-          return console.log("Attempt to create role based getter " + roleGetter + " for a method which already exists on " + container.cid);
-        } else {
-          return container[roleGetter] = function() {
-            return component;
-          };
-        }
-      }
-    }, true);
+    childrenWithRole = _(this.allChildren()).select(function(component) {
+      return component.role != null;
+    });
+    return _(childrenWithRole).each(function(component) {
+      var getter;
+      getter = _.str.camelize("get_" + component.role);
+      return container[getter] || (container[getter] = function() {
+        return component;
+      });
+    });
   };
 
   doComponents = function() {
@@ -3793,7 +3824,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         });
       }
       return (_ref2 = this.getMainController()) != null ? _ref2.each(function(component) {
-        if (component.ctype.match(/controller$/)) {
+        var type;
+        type = component.type || component.type;
+        if (type.match(/controller$/)) {
           return component.bind("after:card:switch", function(previous, current) {
             _this.state.set({
               active_sub_section: current.name
@@ -3809,7 +3842,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         definedComponents = this.components || [];
         this.components = [
           {
-            ctype: 'controller',
+            type: 'controller',
             name: "main_controller",
             components: definedComponents
           }
