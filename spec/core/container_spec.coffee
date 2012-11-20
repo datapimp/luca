@@ -93,10 +93,8 @@ describe 'Component Event Binding', ->
         "component_alpha trigger:one"       : "one"
         "alpha trigger:two"                 : "two"
         "getAlphaComponent trigger:three"   : "three"
-        "* wildcard"                        : "wildcard"
-
-      wildcard: ()->
-        @trigger "wildcard:son"  
+        "* trigger:four"                    : "four"
+        "beta trigger:five"                 : "five"
 
       one: ()->
         @trigger "one" 
@@ -107,13 +105,41 @@ describe 'Component Event Binding', ->
       three: ()->
         @trigger "three" 
 
+      four: ()->
+        @trigger "four"  
+
+      five: ()->
+        @trigger "five"  
+
+      registerComponentEvents: ()->
+        Luca.core.Container::registerComponentEvents.apply(@, arguments)
+
       components:[
         name: "component_alpha"
         role: "alpha"
         getter: "getAlphaComponent"
+      ,
+        name: "container_tester"
+        type: "container"
+        components:[
+          name: "beta_view"
+          role: "beta"
+        ]
       ]
 
     @container.render()
+
+  it "should give me all of the components", ->
+    names = _( @container.allChildren() ).pluck('name')
+    expect( names ).toEqual ['component_alpha','container_tester','beta_view']
+
+  it "should drill down into nested components", ->
+    expect( @container.getBeta ).toBeDefined()
+    expect( @container.getBeta().name ).toEqual 'beta_view'
+
+  it "should pick up events on nested components", ->
+    @container.getBeta().trigger("trigger:five")
+    expect( @container ).toHaveTriggered("five")
 
   it "should define a role based getter", ->
     expect( @container.getAlpha ).toBeDefined()
@@ -131,8 +157,8 @@ describe 'Component Event Binding', ->
     expect( @container.findComponentByGetter('getAlphaComponent') ).toBeDefined()
 
   it "should accept wildcard for component", ->
-    @container.getAlphaComponent().trigger "wildcard"
-    expect( @container ).toHaveTriggered("wildcard:son")
+    @container.getAlphaComponent().trigger "trigger:four"
+    expect( @container ).toHaveTriggered("four")
 
   it "should accept component events with a component name", ->
     @container.getAlphaComponent().trigger "trigger:one"

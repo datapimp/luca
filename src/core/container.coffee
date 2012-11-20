@@ -230,14 +230,25 @@ container.defines
         component.previously_activated = true
 
   #### Underscore Methods For Working with Components
+  _: ()-> _( @components )
+
   pluck: (attribute)-> 
-    _( @components ).pluck attribute
+    @_().pluck(attribute)
 
   invoke: (method)->
-    _( @components ).invoke method
+    @_().invoke(method)
+
+  select: (fn)->
+    @_().select(fn)
+
+  detect: (fn)->
+    @_().detect(attribute)
+  
+  reject: (fn)->
+    @_().reject(fn)
 
   map: (fn)->
-    _( @components ).map(fn)
+    @_().map(fn)
 
   registerComponentEvents: ()->
     container = @
@@ -260,18 +271,33 @@ container.defines
 
         component?.bind eventId, @[handler], container
 
+
+  subContainers: ()->
+    @select (component)-> 
+      component.isContainer is true
+
+  roles: ()->
+    _( @allChildren() ).pluck('role')
+     
+  allChildren: ()->
+    children = @components
+    grandchildren = _( @subContainers() ).invoke('allChildren')
+    @_allChildren ||= _([children,grandchildren]).chain().compact().flatten().uniq().value()
+
   findComponentForEventBinding: (nameRoleOrGetter, deep=false)->
     @findComponentByName(nameRoleOrGetter, deep) || @findComponentByGetter( nameRoleOrGetter, deep ) || @findComponentByRole( nameRoleOrGetter, deep )
 
-  findComponentByGetter: (nameRoleOrGetter, deep=false)->
-    if @[ nameRoleOrGetter ]? and _.isFunction( @[ nameRoleOrGetter ] )
-      return @[ nameRoleOrGetter ].call(@)
+  findComponentByGetter: (getter, deep=false)->
+    _( @allChildren() ).detect (component)->
+      component.getter is getter
 
   findComponentByRole: (role,deep=false)->
-    @findComponent(role, "role_index", deep)
+    _( @allChildren() ).detect (component)->
+      component.role is role
 
   findComponentByName: (name, deep=false)->
-    @findComponent(name, "name_index", deep)
+    _( @allChildren() ).detect (component)->
+      component.name is name
 
   findComponentById: (id, deep=false)->
     @findComponent(id, "cid_index", deep)
@@ -321,12 +347,13 @@ container.defines
   getRootComponent: ()->
     if @isRootComponent() then @ else @getParent().getRootComponent()
     
-  selectByAttribute: (attribute, value, deep=false)->
+
+  selectByAttribute: (attribute, value=undefined, deep=false)->
     components = _( @components ).map (component)->
       matches = []
       test = component[ attribute ]
 
-      matches.push( component ) if test is value
+      matches.push( component ) if test is value or (not value? and test?)
 
       # recursively traverse our components
       matches.push component.selectByAttribute?(attribute, value, true) if deep is true
@@ -335,9 +362,6 @@ container.defines
 
     _.flatten( components )
 
-  select: (attribute, value, deep=false)->
-    console.log "Container.select will be replaced by selectByAttribute in 1.0"
-    Luca.core.Container::selectByAttribute.apply(@, arguments)
 
 # This is the method by which a container injects the rendered child views
 # into the DOM.  It will get passed the container object, and the component
@@ -372,26 +396,30 @@ applyDOMConfig = (panel, panelIndex)->
 
   config
 
+
+
 createGetterMethods = ()->
   container = @
-  @eachComponent (component)->
-    if component.getter? and _.isString( component.getter )
-      container[ component.getter ] = ()-> component 
-  , true
+
+  childrenWithGetter = _( @allChildren() ).select (component)->
+    component.getter?
+
+  _( childrenWithGetter ).each (component)->
+    container[ component.getter ] ||= ()->
+      console.log "getter is being deprecated in favor of role" 
+      console.log component.getter, component, container
+      component
 
 createMethodsToGetComponentsByRole = ()->
   container = @
 
-  @eachComponent (component)->
-    if component.role? and _.isString( component.role )
-      roleGetter = _.str.camelize( "get_" + component.role ) 
+  childrenWithRole = _( @allChildren() ).select (component)->
+    component.role?
 
-      if container[ roleGetter ]?
-        console.log "Attempt to create role based getter #{ roleGetter } for a method which already exists on #{ container.cid }"
-      else
-        container[ roleGetter ] = ()-> component
-
-  , true
+  _( childrenWithRole ).each (component)->
+    getter = _.str.camelize( "get_" + component.role )
+    container[ getter ] ||= ()->
+      component
 
 doComponents = ()->
   @trigger "before:components", @, @components
