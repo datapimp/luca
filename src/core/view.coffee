@@ -48,13 +48,15 @@ view.defines
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 
-    if @mixins?.length > 0
-      for module in @mixins 
-        Luca.mixin(module)?.__initializer?.call(@, @, module)
-
+    @setupMixins()
     @delegateEvents()
 
     @trigger "after:initialize", @
+
+  setupMixins: ()->
+    if @mixins?.length > 0
+      for module in @mixins 
+        Luca.mixin(module)?.__initializer?.call(@, @, module)
 
   #### Hooks or Auto Event Binding
   #
@@ -94,9 +96,9 @@ view.defines
   models: ()-> Luca.util.selectProperties( Luca.isBackboneModel, @ )
   views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
 
-  debug: ()->
+  debug: (args...)->
     return unless @debugMode or window.LucaDebugMode?
-    console.log [(@name || @cid),message] for message in arguments
+    console.log [(@name || @cid), args...] 
 
   trigger: ()->
     if Luca.enableGlobalObserver

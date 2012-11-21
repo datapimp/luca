@@ -6,32 +6,51 @@ Luca.modules.Paginatable =
     _.extend(Luca.Collection::, __paginators: {})
 
   __initializer:()->
-    return if @paginatable is false or not Luca.isBackboneCollection(@collection)
-    
+    if @paginatable is false
+      return
+
+    # TEMP HACK
+    unless Luca.isBackboneCollection(@collection)
+      @collection = Luca.CollectionManager.get?()?.getOrCreate(@collection)
+
+    unless Luca.isBackboneCollection(@collection)
+      @debug "Skipping Paginatable due to no collection being present on #{ @name || @cid }"
+      @debug "collection", @collection
+      return
+
     _.bindAll @, "paginationControl"
 
-    @getCollection ||= ()-> @collection
+    @getCollection ||= ()-> 
+      @collection
 
     collection = @getCollection()
 
     paginationState = @getPaginationState()
 
-    paginationState.on "change", (state)=>
-      @trigger "collection:change:pagination", state, collection
-      @trigger "refresh"
+    @optionsSources ||= []
+    @queryOptions ||= {}
+
+    @optionsSources.push ()=> paginationState.toJSON()
+
+    paginationState.on "change", (state)=> 
+      @trigger "collection:change:pagination", state, @getCollection()
+
+    @on "collection:change:pagination", ()=>
+      if @isRemote() 
+        filter = _.extend(@toQuery(), @toQueryOptions()) 
+        @collection.applyFilter(filter, remote: true)
+      else
+        @trigger "refresh" 
+
+    @on "after:render", @renderPaginationControl, @
 
     @on "after:refresh", (models, query, options)=>
-      _.defer ()=>
-        @updatePagination.call(@, models, query, options)
+      @debug "after:refresh on paginatable"
+      _.defer ()=> @updatePagination.call(@, models, query, options)
 
-    @on "after:render", ()=> 
-      @paginationControl().refresh()
-          
-    if old = @getQueryOptions
-      @getQueryOptions = ()->
-        _.extend( old(), paginationState.toJSON() ) 
-    else
-      @getQueryOptions = ()-> paginationState.toJSON()
+
+  isRemote: ()->
+    @getQueryOptions().remote is true    
 
   getPaginationState: ()->
     @collection.__paginators[ @cid ] ||= @paginationControl().state
@@ -40,6 +59,9 @@ Luca.modules.Paginatable =
     @$(">#{ @paginationSelector }")
 
   setCurrentPage: (page=1, options={})->
+    @getPaginationState().set('page', page, options)
+
+  setPage: (page=1, options={})->
     @getPaginationState().set('page', page, options)
 
   setLimit: (limit=0,options={})->
@@ -58,7 +80,8 @@ Luca.modules.Paginatable =
     else
       paginator.$el.show()
 
-    paginator.state.set(page: options.page, limit: options.limit)
+    paginator.state.set({page: options.page, limit: options.limit}, silent: true)
+    paginator.refresh()
 
   paginationControl: ()->
     return @paginator if @paginator?
@@ -73,7 +96,8 @@ Luca.modules.Paginatable =
     @paginator
 
   renderPaginationControl: ()->
-    @paginationControl()
-    @paginationContainer().append @paginationControl().render().$el
+    control = @paginationControl()
+    @paginationContainer().append( control.render().$el )
+    control
 
 

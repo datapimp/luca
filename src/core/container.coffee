@@ -157,12 +157,14 @@ container.defines
       # adding the views @$el to the appropriate @container.
 
       # you can also just pass a string representing the component_type
-      component = if Luca.isBackboneView( object )
+      component = if Luca.isComponent( object )
         object
       else
         object.type ||= object.ctype
 
         if !object.type?
+          # TODO
+          # Add support for all of the various components property aliases
           if object.components?
             object.type = object.ctype = 'container'
           else
@@ -178,8 +180,12 @@ container.defines
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround to get them to
       # pick up the container config property
-      if !component.container and component.options.container
+      if !component.container and component.options?.container
         component.container = component.options.container
+
+      if not component.container?
+        console.log component,index,@
+        console.error "could not assign container property to component on container #{ @name || @cid }"
 
       indexComponent( component ).at(index).in( @componentIndex )
 
@@ -250,10 +256,10 @@ container.defines
   map: (fn)->
     @_().map(fn)
 
-  registerComponentEvents: ()->
+  registerComponentEvents: (eventList)->
     container = @
 
-    for listener, handler of (@componentEvents||{})
+    for listener, handler of (eventList || @componentEvents||{})
       [componentNameOrRole,eventId] = listener.split(' ')
 
       unless _.isFunction( @[handler] )
@@ -282,9 +288,9 @@ container.defines
   allChildren: ()->
     children = @components
     grandchildren = _( @subContainers() ).invoke('allChildren')
-    @_allChildren ||= _([children,grandchildren]).chain().compact().flatten().uniq().value()
+    _([children,grandchildren]).chain().compact().flatten().value()
 
-  findComponentForEventBinding: (nameRoleOrGetter, deep=false)->
+  findComponentForEventBinding: (nameRoleOrGetter, deep=true)->
     @findComponentByName(nameRoleOrGetter, deep) || @findComponentByGetter( nameRoleOrGetter, deep ) || @findComponentByRole( nameRoleOrGetter, deep )
 
   findComponentByGetter: (getter, deep=false)->
@@ -293,7 +299,7 @@ container.defines
 
   findComponentByRole: (role,deep=false)->
     _( @allChildren() ).detect (component)->
-      component.role is role
+      component.role is role or component.type is role or component.ctype is role
 
   findComponentByName: (name, deep=false)->
     _( @allChildren() ).detect (component)->
@@ -406,7 +412,6 @@ createGetterMethods = ()->
 
   _( childrenWithGetter ).each (component)->
     container[ component.getter ] ||= ()->
-      console.log "getter is being deprecated in favor of role" 
       console.log component.getter, component, container
       component
 
@@ -428,8 +433,11 @@ doComponents = ()->
   @trigger "before:render:components", @, @components
   @renderComponents()
   @trigger "after:components", @, @components
-  createGetterMethods.call(@)
-  createMethodsToGetComponentsByRole.call(@)  
+
+  unless @skipGetterMethods is true
+    createGetterMethods.call(@)
+    createMethodsToGetComponentsByRole.call(@)  
+    
   @registerComponentEvents()
 
 validateContainerConfiguration = ()->

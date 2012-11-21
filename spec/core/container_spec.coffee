@@ -90,7 +90,7 @@ describe 'Component Event Binding', ->
   beforeEach ->
     @container = new Luca.core.Container
       componentEvents:
-        "component_alpha trigger:one"       : "one"
+        "haha trigger:one"                  : "one"
         "alpha trigger:two"                 : "two"
         "getAlphaComponent trigger:three"   : "three"
         "* trigger:four"                    : "four"
@@ -111,6 +111,9 @@ describe 'Component Event Binding', ->
       five: ()->
         @trigger "five"  
 
+      afterRender: ()->
+        @getGamma().trigger("after:render:gamma")
+
       registerComponentEvents: ()->
         Luca.core.Container::registerComponentEvents.apply(@, arguments)
 
@@ -124,6 +127,10 @@ describe 'Component Event Binding', ->
         components:[
           name: "beta_view"
           role: "beta"
+          components:[
+            role: "gamma"
+            name: "haha"
+          ]
         ]
       ]
 
@@ -131,27 +138,35 @@ describe 'Component Event Binding', ->
 
   it "should give me all of the components", ->
     names = _( @container.allChildren() ).pluck('name')
-    expect( names ).toEqual ['component_alpha','container_tester','beta_view']
+    expect( names ).toEqual ['component_alpha','container_tester','beta_view','haha']
 
   it "should drill down into nested components", ->
     expect( @container.getBeta ).toBeDefined()
     expect( @container.getBeta().name ).toEqual 'beta_view'
 
+  it "should observe the right rendering order", ->
+    expect( @container.getGamma() ).toHaveTriggered("after:render:gamma")
+    
   it "should pick up events on nested components", ->
     @container.getBeta().trigger("trigger:five")
     expect( @container ).toHaveTriggered("five")
 
-  it "should define a role based getter", ->
+  it "should recursively define role based getters", ->
     expect( @container.getAlpha ).toBeDefined()
+    expect( @container.getBeta ).toBeDefined()
+    expect( @container.getGamma ).toBeDefined()
 
   it "should define a getter", ->
     expect( @container.getAlphaComponent ).toBeDefined()
 
-  it "should find the component by its role", ->
-    expect( @container.findComponentByRole("alpha") ).toBeDefined()
+  it "should find a nested component by name", ->
+    expect( @container.findComponentByName('haha') ).toBeDefined()
 
   it "should find the component by its name", ->
-    expect( @container.findComponentByName('component_alpha') ).toBeDefined()
+    expect( @container.findComponentByName("beta_view") ).toBeDefined()
+
+  it "should find the component by its role", ->
+    expect( @container.findComponentByRole("alpha") ).toBeDefined()
 
   it "should find the component by its getter", ->
     expect( @container.findComponentByGetter('getAlphaComponent') ).toBeDefined()
@@ -161,7 +176,7 @@ describe 'Component Event Binding', ->
     expect( @container ).toHaveTriggered("four")
 
   it "should accept component events with a component name", ->
-    @container.getAlphaComponent().trigger "trigger:one"
+    @container.getGamma().trigger "trigger:one"
     expect(@container).toHaveTriggered("one")
 
   it "should accept component events with a component role", ->

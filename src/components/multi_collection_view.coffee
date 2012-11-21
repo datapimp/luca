@@ -48,29 +48,50 @@ multiView.defaultsTo
 
     validateComponent( view ) for view in @components    
 
-    @on "collection:change", @refresh, @
+    @on "refresh", @refresh, @
     @on "after:card:switch", @refresh, @
-    @on "before:components", propagateCollectionComponents, @
-    @on "after:components", bubbleCollectionEvents, @
+    @on "after:components", propagateCollectionComponents, @
+
+    @debug("multi collection , proto initialize")
+
+    @registerComponentEvents
+      "* after:refresh" : "relayAfterRefresh"
 
     Luca.containers.CardView::initialize.apply(@, arguments) 
+
+  relayAfterRefresh: (models,query,options)->
+    @trigger "after:refresh", models, query, options
 
   refresh: ()->
     @activeComponent()?.trigger("refresh")
 
-  getQuery: Luca.components.CollectionView::getQuery
-  getQueryOptions: Luca.components.CollectionView::getQueryOptions
-  getCollection: Luca.components.CollectionView::getCollection
-  
-#### Private Helpers
+  getCollection: ()->
+    @collection
 
-bubbleCollectionEvents = ()->
-  container = @
-  container.eachComponent (component)->
-    for eventId in ['refresh','before:refresh','after:refresh','empty:results']
-      component.on eventId, ()->
-        if component is container.activeComponent()
-          container.trigger(eventId)
+  applyQuery: (query={},queryOptions={})->
+    @query = query
+    @queryOptions = queryOptions
+    @
+
+  # Private: returns the query that is applied to the underlying collection.
+  # accepts the same options as Luca.Collection.query's initial query option.
+  getQuery: ()-> 
+    @debug("Get Query")
+    query = @query ||= {}
+    for querySource in @querySources 
+      query = _.extend(query, (querySource()||{}) ) 
+    query
+
+  # Private: returns the query that is applied to the underlying collection.
+  # accepts the same options as Luca.Collection.query's initial query option.
+  getQueryOptions: ()-> 
+    @debug("Get Query Options")
+    options = @queryOptions ||= {}
+
+    for optionSource in @optionsSources 
+      options = _.extend(options, (optionSource()||{}) ) 
+
+    options  
 
 propagateCollectionComponents = ()->
   container = @
@@ -79,9 +100,13 @@ propagateCollectionComponents = ()->
   # collection, filter state, pagination options, etc
   for component in @components
     _.extend component, 
-      collection: container.getCollection?() || @collection 
-      getQuery: container.getQuery
-      getQueryOptions: container.getQueryOptions
+      collection: container.getCollection()
+
+      getQuery: ()->
+        container.getQuery.call(container)
+
+      getQueryOptions: ()->
+        container.getQueryOptions.call(container) 
 
 validateComponent = (component)->
   type = (component.type || component.ctype)

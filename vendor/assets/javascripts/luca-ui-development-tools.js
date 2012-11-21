@@ -18308,9 +18308,9 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     historyIndex: 0,
     width: 1000,
     componentEvents: {
-      "code_input key:keyup": "historyUp",
-      "code_input key:keydown": "historyDown",
-      "code_input key:enter": "runCommand"
+      "input key:keyup": "historyUp",
+      "input key:keydown": "historyDown",
+      "input key:enter": "runCommand"
     },
     compileOptions: {
       bare: true
@@ -18318,7 +18318,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     components: [
       {
         type: "code_mirror_field",
-        getter: "getCodeMirror",
+        role: "code_mirror",
         additionalClassNames: "clearfix",
         name: "code_output",
         readOnly: true,
@@ -18329,7 +18329,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
       }, {
         type: "text_field",
         name: "code_input",
-        getter: "getInput",
+        role: "input",
         lineNumbers: false,
         height: '30px',
         maxHeight: '30px',

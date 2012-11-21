@@ -3,30 +3,46 @@ Luca.modules.Filterable =
     _.extend(Luca.Collection::, __filters:{})
 
   __initializer: (component, module)->
-    return if @filterable is false or not Luca.isBackboneCollection(@collection) 
+    if @filterable is false
+      return
+
+    # TEMP HACK
+    unless Luca.isBackboneCollection(@collection)
+      @collection = Luca.CollectionManager.get?()?.getOrCreate(@collection)
+       
+    unless Luca.isBackboneCollection(@collection)
+      @debug "Skipping Filterable due to no collection being present on #{ @name || @cid }"
+      @debug "Collection", @collection
+      return
 
     @getCollection ||= ()-> @collection
 
     filter = @getFilterState()
 
-    filter.on "change", (state)=>
-      @trigger "collection:change:filter", state, @getCollection()
-      @trigger "refresh" 
+    @querySources ||= []
+    @optionsSources ||= []
+    @query ||= {}
+    @queryOptions ||= {}
 
-    if @getQuery?
-      @getQuery = _.compose @getQuery, (query={})->
-        obj = _.clone(query)
-        _.extend(obj, filter.toQuery() )
-    else
-      @getQuery = ()=>
-        filter.toQuery()
+    @querySources.push (()=> filter.toQuery())
+    @optionsSources.push (()=> filter.toOptions())
 
-    if @getQueryOptions?
-      @getQueryOptions = _.compose @getQueryOptions, (options={})->
-        obj = _.clone(options)
-        _.extend(obj, filter.toOptions() )
-    else
-      @getQueryOptions = ()-> filter.toOptions()
+    if @debugMode is true
+      console.log "Filterable"
+      console.log @querySources
+      console.log @optionsSources 
+
+    filter.on "change", ()=> 
+      if @isRemote()  
+        merged = _.extend(@getQuery(), @getQueryOptions())
+        @collection.applyFilter(merged, @getQueryOptions())
+      else
+        @trigger "refresh" 
+
+    module
+
+  isRemote: ()->
+    @getQueryOptions().remote is true    
 
   getFilterState: ()->
     @collection.__filters[ @cid ] ||= new FilterModel(@filterable)
@@ -38,11 +54,13 @@ Luca.modules.Filterable =
     options = _.defaults(options, @getQueryOptions())
     query = _.defaults(query, @getQuery())
 
-    silent = _( options ).delete('silent') is true
-
-    @getFilterState().set({query,options}, silent: silent)
+    @getFilterState().set({query,options}, options)
 
 class FilterModel extends Backbone.Model
+  defaults:
+    options: {}
+    query: {}
+    
   setOption: (option, value, options)->
     payload = {}
     payload[option] = value
@@ -58,3 +76,7 @@ class FilterModel extends Backbone.Model
 
   toQuery: ()->
     @toJSON().query
+
+  toRemote: ()->
+    options = @toOptions() 
+    _.extend( @toQuery(), limit: options.limit, page: options.page, sortBy: options.sortBy )

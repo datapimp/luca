@@ -43,10 +43,12 @@ collectionView.defaults
 
   itemClassName: 'collection-item'
 
+
   initialize: (@options={})->
     _.extend(@, @options)
 
     _.bindAll @, "refresh"
+
 
     unless @collection? or @options.collection
       console.log "Error on initialize of collection view", @
@@ -55,12 +57,14 @@ collectionView.defaults
     unless @itemTemplate? || @itemRenderer? || @itemProperty?
       throw "Collection Views must specify an item template or item renderer function"
 
-    Luca.components.Panel::initialize.apply(@, arguments)
-
-    if _.isString(@collection) and Luca.CollectionManager.get()
-      @collection = Luca.CollectionManager.get().getOrCreate(@collection)
+    if _.isString(@collection) 
+      if Luca.CollectionManager.get()
+        @collection = Luca.CollectionManager.get().getOrCreate(@collection)
+      else
+        console.log "String Collection but no collection manager"
 
     unless Luca.isBackboneCollection(@collection)
+      console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
       @collection.on "before:fetch", ()=>
@@ -79,12 +83,14 @@ collectionView.defaults
       if @observeChanges is true
         @collection.on "change", @refreshModel, @
 
+    Luca.components.Panel::initialize.apply(@, arguments)
+
     unless @autoRefreshOnModelsPresent is false
       @defer ()=> 
         @refresh() if @collection.length > 0
       .until("after:render")
 
-    @on "collection:change", @refresh, @
+    @on "refresh", @refresh, @
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
@@ -116,15 +122,28 @@ collectionView.defaults
   getCollection: ()->
     @collection
 
+  applyQuery: (query={},queryOptions={})->
+    @query = query
+    @queryOptions = queryOptions
+    @
+
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
   getQuery: ()-> 
-    @query ||= {}
+    query = @query ||= {}
+    for querySource in _( @querySources || [] ).compact()
+      query = _.extend(query, (querySource()||{}) ) 
+    query
 
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
   getQueryOptions: ()-> 
-    @queryOptions ||= {}
+    options = @queryOptions ||= {}
+
+    for optionSource in _( @optionsSources || [] ).compact()
+      options = _.extend(options, (optionSource()||{}) ) 
+
+    options
 
   # Private: returns the models to be rendered.  If the underlying collection
   # responds to @query() then it will use that interface. 
