@@ -54,9 +54,6 @@ multiView.defaultsTo
 
     @debug("multi collection , proto initialize")
 
-    @registerComponentEvents
-      "* after:refresh" : "relayAfterRefresh"
-
     Luca.containers.CardView::initialize.apply(@, arguments) 
 
   relayAfterRefresh: (models,query,options)->
@@ -99,6 +96,11 @@ propagateCollectionComponents = ()->
   # in the multi view will share the same
   # collection, filter state, pagination options, etc
   for component in @components
+
+    component.on "after:refresh", (models,query,options)=> 
+      @debug "collection member after refresh"
+      @trigger("after:refresh",models,query,options)
+
     _.extend component, 
       collection: container.getCollection()
 

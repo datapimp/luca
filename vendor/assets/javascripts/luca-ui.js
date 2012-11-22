@@ -1317,7 +1317,7 @@
         this.debug("collection", this.collection);
         return;
       }
-      _.bindAll(this, "paginationControl");
+      _.bindAll(this, "paginationControl", "pager");
       this.getCollection || (this.getCollection = function() {
         return this.collection;
       });
@@ -1326,12 +1326,13 @@
       this.optionsSources || (this.optionsSources = []);
       this.queryOptions || (this.queryOptions = {});
       this.optionsSources.push(function() {
-        return paginationState.toJSON();
+        var options;
+        options = _(paginationState.toJSON()).pick('limit', 'page', 'sortBy');
+        return _.extend(options, {
+          pager: _this.pager
+        });
       });
-      paginationState.on("change", function(state) {
-        return _this.trigger("collection:change:pagination", state, _this.getCollection());
-      });
-      this.on("collection:change:pagination", function() {
+      paginationState.on("change:page", function(state) {
         var filter;
         if (_this.isRemote()) {
           filter = _.extend(_this.toQuery(), _this.toQueryOptions());
@@ -1342,13 +1343,14 @@
           return _this.trigger("refresh");
         }
       });
-      this.on("after:render", this.renderPaginationControl, this);
-      return this.on("after:refresh", function(models, query, options) {
-        _this.debug("after:refresh on paginatable");
-        return _.defer(function() {
-          return _this.updatePagination.call(_this, models, query, options);
-        });
+      return this.on("before:render", this.renderPaginationControl, this);
+    },
+    pager: function(numberOfPages, models) {
+      this.getPaginationState().set({
+        numberOfPages: numberOfPages,
+        itemCount: models.length
       });
+      return this.paginationControl().refresh(numberOfPages);
     },
     isRemote: function() {
       return this.getQueryOptions().remote === true;
@@ -1375,30 +1377,6 @@
       if (options == null) options = {};
       return this.getPaginationState().set('limit', limit, options);
     },
-    updatePagination: function(models, query, options) {
-      var itemCount, paginator, totalCount, _ref;
-      if (models == null) models = [];
-      if (query == null) query = {};
-      if (options == null) options = {};
-      _.defaults(options, this.getQueryOptions(), {
-        limit: 0
-      });
-      paginator = this.paginationControl();
-      itemCount = (models != null ? models.length : void 0) || 0;
-      totalCount = (_ref = this.getCollection()) != null ? _ref.length : void 0;
-      if (itemCount === 0 || totalCount <= options.limit) {
-        paginator.$el.hide();
-      } else {
-        paginator.$el.show();
-      }
-      paginator.state.set({
-        page: options.page,
-        limit: options.limit
-      }, {
-        silent: true
-      });
-      return paginator.refresh();
-    },
     paginationControl: function() {
       if (this.paginator != null) return this.paginator;
       _.defaults(this.paginatable || (this.paginatable = {}), {
@@ -1408,7 +1386,9 @@
       this.paginator = Luca.util.lazyComponent({
         type: "pagination_control",
         collection: this.getCollection(),
-        defaultState: this.paginatable
+        defaultState: this.paginatable,
+        parent: this.name || this.cid,
+        debugMode: this.debugMode
       });
       return this.paginator;
     },
@@ -1419,11 +1399,6 @@
       return control;
     }
   };
-
-}).call(this);
-(function() {
-
-
 
 }).call(this);
 (function() {
@@ -4047,6 +4022,7 @@
       if (queryOptions == null) queryOptions = {};
       this.query = query;
       this.queryOptions = queryOptions;
+      this.refresh();
       return this;
     },
     getQuery: function() {
@@ -4091,12 +4067,12 @@
       }, model));
       return this.trigger("model:refreshed", index, model);
     },
-    refresh: function(query, options) {
-      var index, model, models, _i, _len;
+    refresh: function(query, options, models) {
+      var index, model, _i, _len;
       query || (query = this.getQuery());
       options || (options = this.getQueryOptions());
+      models || (models = this.getModels(query, options));
       this.$bodyEl().empty();
-      models = this.getModels(query, options);
       this.trigger("before:refresh", models, query, options);
       if (models.length === 0) this.trigger("empty:results");
       index = 0;
@@ -5232,9 +5208,6 @@
       this.on("after:card:switch", this.refresh, this);
       this.on("after:components", propagateCollectionComponents, this);
       this.debug("multi collection , proto initialize");
-      this.registerComponentEvents({
-        "* after:refresh": "relayAfterRefresh"
-      });
       return Luca.containers.CardView.prototype.initialize.apply(this, arguments);
     },
     relayAfterRefresh: function(models, query, options) {
@@ -5279,12 +5252,17 @@
   });
 
   propagateCollectionComponents = function() {
-    var component, container, _i, _len, _ref, _results;
+    var component, container, _i, _len, _ref, _results,
+      _this = this;
     container = this;
     _ref = this.components;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       component = _ref[_i];
+      component.on("after:refresh", function(models, query, options) {
+        _this.debug("collection member after refresh");
+        return _this.trigger("after:refresh", models, query, options);
+      });
       _results.push(_.extend(component, {
         collection: container.getCollection(),
         getQuery: function() {
@@ -5359,8 +5337,11 @@
       "click a.prev": "previousPage"
     },
     afterInitialize: function() {
+      var _this = this;
       _.bindAll(this, "refresh");
-      return this.state.on("change", this.refresh, this);
+      return this.state.on("change", function(state, numberOfPages) {
+        return _this.refresh(state.get('numberOfPages'));
+      });
     },
     limit: function() {
       var _ref;
@@ -5413,10 +5394,11 @@
     pageButtons: function() {
       return this.$('a[data-page-number]', this.pageButtonContainer());
     },
-    refresh: function() {
+    refresh: function(pageCount) {
       var button, page, _ref;
+      this.pageCount = pageCount;
       this.pageButtonContainer().empty();
-      for (page = 1, _ref = this.totalPages(); 1 <= _ref ? page <= _ref : page >= _ref; 1 <= _ref ? page++ : page--) {
+      for (page = 1, _ref = this.pageCount || this.totalPages(); 1 <= _ref ? page <= _ref : page >= _ref; 1 <= _ref ? page++ : page--) {
         button = this.make("a", {
           "data-page-number": page,
           "class": "page"
@@ -5441,7 +5423,7 @@
       return this.pageButtons().filter("[data-page-number='" + (this.page()) + "']");
     },
     totalPages: function() {
-      return parseInt(Math.ceil(this.totalItems() / this.itemsPerPage()));
+      return this.pageCount;
     },
     totalItems: function() {
       var _ref;

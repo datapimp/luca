@@ -125,6 +125,7 @@ collectionView.defaults
   applyQuery: (query={},queryOptions={})->
     @query = query
     @queryOptions = queryOptions
+    @refresh()
     @
 
   # Private: returns the query that is applied to the underlying collection.
@@ -164,12 +165,12 @@ collectionView.defaults
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
     @trigger("model:refreshed", index, model)
 
-  refresh: (query,options)->
-    query ||= @getQuery()
+  refresh: (query,options,models)->
+    query   ||= @getQuery()
     options ||= @getQueryOptions()
+    models  ||= @getModels(query, options)
 
     @$bodyEl().empty()
-    models = @getModels(query, options)
 
     @trigger("before:refresh", models, query, options)
 
@@ -177,7 +178,6 @@ collectionView.defaults
       @trigger("empty:results")
 
     index = 0
-
     for model in models
       @$append @makeItem(model, index++)
 

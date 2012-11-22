@@ -17,7 +17,8 @@ paginationControl.defines
   afterInitialize: ()->
     _.bindAll @, "refresh"
 
-    @state.on("change", @refresh, @)
+    @state.on "change", (state, numberOfPages)=>
+      @refresh( state.get('numberOfPages') )  
 
   limit: ()->
     parseInt (@state.get('limit') || @collection?.length)
@@ -66,10 +67,10 @@ paginationControl.defines
   pageButtons: ()->
     @$ 'a[data-page-number]', @pageButtonContainer()  
 
-  refresh: ()->
+  refresh: (@pageCount)->
     @pageButtonContainer().empty()
 
-    for page in [1..@totalPages()]
+    for page in [1..(@pageCount || @totalPages())]
       button = @make("a","data-page-number":page, class:"page", page )
       @pageButtonContainer().append(button) 
 
@@ -90,7 +91,7 @@ paginationControl.defines
     @pageButtons().filter("[data-page-number='#{ @page() }']")
 
   totalPages: ()->
-    parseInt( Math.ceil(@totalItems() / @itemsPerPage()) )
+    @pageCount
 
   totalItems: ()->
     parseInt @collection?.length || 0
