@@ -9,16 +9,16 @@ paginationControl.defines
 
   autoBindEventHandlers: true
 
-  events: 
+  events:
     "click a[data-page-number]" : "selectPage"
     "click a.next"              : "nextPage"
-    "click a.prev"              : "previousPage"  
+    "click a.prev"              : "previousPage"
 
   afterInitialize: ()->
     _.bindAll @, "updateWithPageCount"
 
     @state.on "change", (state, numberOfPages)=>
-      @updateWithPageCount( state.get('numberOfPages') )  
+      @updateWithPageCount( state.get('numberOfPages') )
 
   limit: ()->
     parseInt (@state.get('limit') || @collection?.length)
@@ -36,7 +36,7 @@ paginationControl.defines
 
   selectPage: (e)->
     me = my = @$( e.target )
-    me = my = my.closest('a.page') unless me.is('a.page') 
+    me = my = my.closest('a.page') unless me.is('a.page')
 
     my.siblings().removeClass('is-selected')
     me.addClass('is-selected')
@@ -51,9 +51,9 @@ paginationControl.defines
 
   pageButtonContainer: ()->
     @$ '.group'
-  
+
   previousEnabled: ()->
-    @page() > 1  
+    @page() > 1
 
   nextEnabled: ()->
     @page() < @totalPages()
@@ -65,18 +65,19 @@ paginationControl.defines
     @$ 'a.page.next'
 
   pageButtons: ()->
-    @$ 'a[data-page-number]', @pageButtonContainer()  
+    @$ 'a[data-page-number]', @pageButtonContainer()
 
   updateWithPageCount: (@pageCount, models=[])->
     modelCount = models.length
 
-    console.log "Update With Page Count", @pageCount, modelCount 
+    console.log "Update With Page Count", @pageCount, modelCount
 
     @pageButtonContainer().empty()
 
-    _( @pageCount ).times ()=>
+    _( @pageCount ).times (index)=>
+      page = index + 1
       button = @make("a","data-page-number":page, class:"page", page )
-      @pageButtonContainer().append(button) 
+      @pageButtonContainer().append(button)
 
     @toggleNavigationButtons()
     @selectActivePageButton()
@@ -100,6 +101,6 @@ paginationControl.defines
   totalItems: ()->
     parseInt @collection?.length || 0
 
-  itemsPerPage: (value, options={})-> 
+  itemsPerPage: (value, options={})->
     @state.set("limit", value, options) if value?
     parseInt @state.get("limit")

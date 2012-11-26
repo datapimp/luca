@@ -5400,8 +5400,9 @@
       modelCount = models.length;
       console.log("Update With Page Count", this.pageCount, modelCount);
       this.pageButtonContainer().empty();
-      _(this.pageCount).times(function() {
-        var button;
+      _(this.pageCount).times(function(index) {
+        var button, page;
+        page = index + 1;
         button = _this.make("a", {
           "data-page-number": page,
           "class": "page"
