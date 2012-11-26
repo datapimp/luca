@@ -1,9 +1,9 @@
-# Luca.Application 
+# Luca.Application
 #
 # The Application class is the global state tracking mechanism
 # for your single page application, as well as the entry point.
 #
-# By default it contains a main controller which is a Luca.components.Controller instance. 
+# By default it contains a main controller which is a Luca.components.Controller instance.
 #
 # In a typical Luca application, the router will use the applications @navigate_to() method to switch
 # from page to page on the main controller, or any other controllers nested inside of it.
@@ -12,9 +12,10 @@
 #
 # Decoupling application control flow from the URL Fragment from Backbone.History and preventing
 # your components from directly caring about the URL Fragment, allows you to build applications as
-# isolated components which can run separately or nested inside of other applications.   
+# isolated components which can run separately or nested inside of other applications.
 
-startHistory = ()-> Backbone.history.start()
+Luca.util.startHistory = ()->
+  Backbone.history.start()
 
 _.def('Luca.Application').extends('Luca.containers.Viewport').with
   name: "MyApp"
@@ -26,18 +27,18 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   # the @defaultState property will be the default attributes
   defaultState: {}
 
-  # if autoBoot is set to true, the application will 
+  # if autoBoot is set to true, the application will
   # attempt to boot on document ready.
   autoBoot: false
 
-  # automatically starts the @router if it exists, 
-  # once the components for the application have 
+  # automatically starts the @router if it exists,
+  # once the components for the application have
   # been created.  Pass the event name you want to
   # listen for on this component before you start history
   autoStartHistory: "before:render"
 
   # we will create a collection manager singleton
-  # by default unless otherwise specified. 
+  # by default unless otherwise specified.
   useCollectionManager: true
 
   # to pass options to the collection manager, set the @collectionManager
@@ -46,7 +47,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
   # by default we will use the standard collection manager which ships with
   # Luca.  If you would like to use your own extension of the collection manager
-  # just pass a reference to the class you would like to use. 
+  # just pass a reference to the class you would like to use.
   collectionManagerClass: "Luca.CollectionManager"
 
   # Luca plugin apps are apps which mount onto existing
@@ -61,7 +62,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   useController: true
 
   # Key Handler
-  # 
+  #
   # One responsibility of the application, since it is a viewport which monopolizes the entire screen
   # is to relay keypress events from the document, to whatever views are interested in responding to them.
   #
@@ -70,7 +71,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
   # You can configure key events by specifying them by their name, as it exists in Luca.keyMap. For example:
   #
-  keyEvents: {} 
+  keyEvents: {}
 
   # keyEvents
   #   keyup: keyUpHandler
@@ -103,7 +104,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     Luca.Application.instances ||= {}
     Luca.Application.instances[ appName ] = app
-    
+
     Luca.containers.Viewport::initialize.apply @, arguments
 
     @state = new Luca.Model( @defaultState )
@@ -115,7 +116,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # with the state machine of the application
     @setupMainController() if @useController is true
 
-    # The Collection Manager is responsible 
+    # The Collection Manager is responsible
     @setupCollectionManager()
 
     # we will render when all of the various components
@@ -137,23 +138,23 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     #     forwardslash: "altSlashHandler"
     if @useKeyRouter is true
       console.log "The useKeyRouter property is being deprecated. switch to useKeyHandler instead"
-    
+
     @setupKeyHandler() if (@useKeyHandler is true or @useKeyRouter is true) and @keyEvents?
 
     # if the application is a plugin designed to modify the behavior
     # of another app, then don't claim ownership.  otherwise the most common
     # use-case is that there will be one application instance
     unless @plugin is true or alreadyRunning
-      Luca.getApplication = (name)=> 
+      Luca.getApplication = (name)=>
         return app unless name?
-        Luca.Application.instances[ name ] 
+        Luca.Application.instances[ name ]
 
     if @autoBoot
       if Luca.util.resolve(@name)
         throw "Attempting to override window.#{ @name } when it already exists"
 
       $ ->
-        window[ appName ] = app 
+        window[ appName ] = app
         app.boot()
 
   # @activeView() returns a reference to the instance of the view
@@ -161,14 +162,14 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
   #
   # this will be whicever component is active on the controllers
   # nested within the main controller, if there are any, or the view
-  # itself which is active on the main controller. 
+  # itself which is active on the main controller.
   activeView: ()->
     if active = @activeSubSection()
       @view( active )
     else
       @view( @activeSection() )
 
-  # Returns the name of the active component on the main controller 
+  # Returns the name of the active component on the main controller
   activeSection: ()->
     @get("active_section")
 
@@ -216,7 +217,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     return @components[0] if @useController is true
     Luca.cache('main_controller')
 
-  # 
+  #
   keyHandler: (e)->
     return unless e and @keyEvents
 
@@ -256,7 +257,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
       type = component.type || component.type
       if type.match(/controller$/)
         component.bind "after:card:switch", (previous,current)=>
-          @state.set(active_sub_section:current.name)       
+          @state.set(active_sub_section:current.name)
           app.trigger "sub:page:change"
 
   setupMainController: ()->
@@ -275,9 +276,9 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     return unless @useCollectionManager is true
 
     return if @collectionManager? and @collectionManager?.get?
-    
+
     if _.isString( @collectionManagerClass )
-      @collectionManagerClass = Luca.util.resolve( @collectionManagerClass ) 
+      @collectionManagerClass = Luca.util.resolve( @collectionManagerClass )
 
     collectionManagerOptions = @collectionManagerOptions || {}
 
@@ -291,9 +292,9 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     # if the collection manager property is a string, then it is a
     # reference to a name of a collection manager to use.  so let's
-    # stash it 
+    # stash it
     if _.isString(@collectionManager)
-      collectionManagerOptions = 
+      collectionManagerOptions =
         name: @collectionManager
 
     # let's try and get the collection manager by name if we can
@@ -301,7 +302,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     # if we can't, then we will have to create one ourselves
     unless _.isFunction(@collectionManager?.get)
-      @collectionManager = new @collectionManagerClass( collectionManagerOptions )    
+      @collectionManager = new @collectionManagerClass( collectionManagerOptions )
 
   setupRouter: ()->
     app = @
@@ -315,7 +316,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # you can control which by setting the @startHistoryOn property
     if @router and @autoStartHistory
       @autoStartHistory = "before:render" if @autoStartHistory is true
-      @defer(startHistory, false).until(@, @autoStartHistory)   
+      @defer( Luca.Application.startHistory, false).until(@, @autoStartHistory)
 
   setupKeyHandler: ()->
     return unless @keyEvents

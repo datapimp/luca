@@ -15,10 +15,10 @@ paginationControl.defines
     "click a.prev"              : "previousPage"  
 
   afterInitialize: ()->
-    _.bindAll @, "refresh"
+    _.bindAll @, "updateWithPageCount"
 
     @state.on "change", (state, numberOfPages)=>
-      @refresh( state.get('numberOfPages') )  
+      @updateWithPageCount( state.get('numberOfPages') )  
 
   limit: ()->
     parseInt (@state.get('limit') || @collection?.length)
@@ -67,10 +67,14 @@ paginationControl.defines
   pageButtons: ()->
     @$ 'a[data-page-number]', @pageButtonContainer()  
 
-  refresh: (@pageCount)->
+  updateWithPageCount: (@pageCount, models=[])->
+    modelCount = models.length
+
+    console.log "Update With Page Count", @pageCount, modelCount 
+
     @pageButtonContainer().empty()
 
-    for page in [1..(@pageCount || @totalPages())]
+    _( @pageCount ).times ()=>
       button = @make("a","data-page-number":page, class:"page", page )
       @pageButtonContainer().append(button) 
 

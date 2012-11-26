@@ -45,7 +45,7 @@ Luca.modules.Paginatable =
 
   pager: (numberOfPages, models)->
     @getPaginationState().set(numberOfPages: numberOfPages, itemCount: models.length)
-    @paginationControl().refresh( numberOfPages )
+    @paginationControl().updateWithPageCount( numberOfPages, models )
 
   isRemote: ()->
     @getQueryOptions().remote is true    

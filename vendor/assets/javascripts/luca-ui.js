@@ -1350,7 +1350,7 @@
         numberOfPages: numberOfPages,
         itemCount: models.length
       });
-      return this.paginationControl().refresh(numberOfPages);
+      return this.paginationControl().updateWithPageCount(numberOfPages, models);
     },
     isRemote: function() {
       return this.getQueryOptions().remote === true;
@@ -5338,9 +5338,9 @@
     },
     afterInitialize: function() {
       var _this = this;
-      _.bindAll(this, "refresh");
+      _.bindAll(this, "updateWithPageCount");
       return this.state.on("change", function(state, numberOfPages) {
-        return _this.refresh(state.get('numberOfPages'));
+        return _this.updateWithPageCount(state.get('numberOfPages'));
       });
     },
     limit: function() {
@@ -5394,17 +5394,22 @@
     pageButtons: function() {
       return this.$('a[data-page-number]', this.pageButtonContainer());
     },
-    refresh: function(pageCount) {
-      var button, page, _ref;
+    updateWithPageCount: function(pageCount, models) {
+      var modelCount,
+        _this = this;
       this.pageCount = pageCount;
+      if (models == null) models = [];
+      modelCount = models.length;
+      console.log("Update With Page Count", this.pageCount, modelCount);
       this.pageButtonContainer().empty();
-      for (page = 1, _ref = this.pageCount || this.totalPages(); 1 <= _ref ? page <= _ref : page >= _ref; 1 <= _ref ? page++ : page--) {
-        button = this.make("a", {
+      _(this.pageCount).times(function() {
+        var button;
+        button = _this.make("a", {
           "data-page-number": page,
           "class": "page"
         }, page);
-        this.pageButtonContainer().append(button);
-      }
+        return _this.pageButtonContainer().append(button);
+      });
       this.toggleNavigationButtons();
       this.selectActivePageButton();
       return this;
