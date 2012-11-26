@@ -3630,9 +3630,8 @@
 
 }).call(this);
 (function() {
-  var startHistory;
 
-  startHistory = function() {
+  Luca.util.startHistory = function() {
     return Backbone.history.start();
   };
 
@@ -3834,7 +3833,7 @@
         if (this.autoStartHistory === true) {
           this.autoStartHistory = "before:render";
         }
-        return this.defer(startHistory, false).until(this, this.autoStartHistory);
+        return this.defer(Luca.Application.startHistory, false).until(this, this.autoStartHistory);
       }
     },
     setupKeyHandler: function() {
@@ -4659,27 +4658,6 @@
 
 }).call(this);
 (function() {
-  var defaultToolbar;
-
-  defaultToolbar = {
-    buttons: [
-      {
-        icon: "remove-sign",
-        label: "Reset",
-        eventId: "click:reset",
-        className: "reset-button",
-        align: 'right'
-      }, {
-        icon: "ok-sign",
-        white: true,
-        label: "Save Changes",
-        eventId: "click:submit",
-        color: "success",
-        className: 'submit-button',
-        align: 'right'
-      }
-    ]
-  };
 
   _.def("Luca.components.FormView")["extends"]('Luca.core.Container')["with"]({
     tagName: 'form',
@@ -4712,7 +4690,7 @@
       }
     },
     getDefaultToolbar: function() {
-      return defaultToolbar;
+      return Luca.component.FormView.defaultFormViewToolbar;
     },
     applyStyleClasses: function() {
       if (Luca.enableBootstrap) this.applyBootstrapStyleClasses();
@@ -4924,6 +4902,24 @@
         message: message
       }));
     }
+  }, Luca.components.FormView.defaultFormViewToolbar = {
+    buttons: [
+      {
+        icon: "remove-sign",
+        label: "Reset",
+        eventId: "click:reset",
+        className: "reset-button",
+        align: 'right'
+      }, {
+        icon: "ok-sign",
+        white: true,
+        label: "Save Changes",
+        eventId: "click:submit",
+        color: "success",
+        className: 'submit-button',
+        align: 'right'
+      }
+    ]
   });
 
 }).call(this);

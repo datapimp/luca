@@ -1,20 +1,3 @@
-defaultToolbar =
-  buttons:[
-    icon:"remove-sign"
-    label: "Reset"
-    eventId: "click:reset"
-    className:"reset-button"
-    align: 'right'
-  ,
-    icon:"ok-sign"
-    white: true
-    label: "Save Changes"
-    eventId: "click:submit"
-    color: "success"
-    className: 'submit-button'
-    align: 'right'
-  ]
-
 _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   tagName: 'form'
@@ -69,7 +52,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
       @bottomToolbar = @getDefaultToolbar() unless @toolbar is "top"
 
   getDefaultToolbar: ()->
-    defaultToolbar
+    Luca.component.FormView.defaultFormViewToolbar
 
   applyStyleClasses: ()->
     if Luca.enableBootstrap
@@ -112,7 +95,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     passOne = _( @getFields('name', name) ).first()
     return passOne if passOne?
 
-    _( @getFields('input_name', name) ).first() 
+    _( @getFields('input_name', name) ).first()
 
   getFields: (attr,value)->
     fields = @selectByAttribute("isField", true, true)
@@ -201,17 +184,17 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
       if options.skip_buttons and field.ctype is "button_field"
         skip = true
       else
-        if valueIsBlank and allowBlankValues is false 
-          skip = true 
+        if valueIsBlank and allowBlankValues is false
+          skip = true
 
         if field.input_name is "id" and valueIsBlank is true
           skip = true
 
       if options.debug
         console.log "Skip is true on #{ key }"
-        
+
       if skip isnt true
-        memo[ key ] = value 
+        memo[ key ] = value
 
       memo
 
@@ -275,3 +258,23 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
   errorMessage: (message)->
     @$('.alert.alert-error').remove()
     @flash Luca.template("components/form_alert", className:"alert alert-error", message: message)
+
+
+  Luca.components.FormView.defaultFormViewToolbar =
+  buttons:[
+    icon:"remove-sign"
+    label: "Reset"
+    eventId: "click:reset"
+    className:"reset-button"
+    align: 'right'
+  ,
+    icon:"ok-sign"
+    white: true
+    label: "Save Changes"
+    eventId: "click:submit"
+    color: "success"
+    className: 'submit-button'
+    align: 'right'
+  ]
+
+
