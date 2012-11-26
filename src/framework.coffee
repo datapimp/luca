@@ -19,7 +19,7 @@
     return fallback()
 
 _.extend Luca,
-  VERSION: "0.9.6"
+  VERSION: "0.9.65"
   core: {}
   containers: {}
   components: {}
@@ -107,7 +107,7 @@ Luca.isCollectionPrototype = (obj)->
 
 Luca.inheritanceChain = (obj)->
   _( Luca.parentClasses(obj) ).map (className)-> Luca.util.resolve(className)
-    
+
 Luca.parentClasses = (obj)->
   list = []
 

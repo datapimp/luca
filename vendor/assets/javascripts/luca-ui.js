@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.6",
+    VERSION: "0.9.65",
     core: {},
     containers: {},
     components: {},
@@ -2492,7 +2492,7 @@
           return container;
         };
         try {
-          $(component.container).append(component.el);
+          this.$(component.container).eq(0).append(component.el);
           return component.render();
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
@@ -3833,7 +3833,7 @@
         if (this.autoStartHistory === true) {
           this.autoStartHistory = "before:render";
         }
-        return this.defer(Luca.Application.startHistory, false).until(this, this.autoStartHistory);
+        return this.defer(Luca.util.startHistory, false).until(this, this.autoStartHistory);
       }
     },
     setupKeyHandler: function() {

@@ -9,7 +9,7 @@ container.triggers                "before:components",
                                   "after:layout",
                                   "first:activation"
 
-container.defines                                  
+container.defines
   className: 'luca-ui-container'
 
   componentTag: 'div'
@@ -25,7 +25,7 @@ container.defines
   # @componentEvents provides declarative syntax for responding to events on
   # the components in this container.  the format of the syntax is very similar
   # to the other event binding helpers:
-  # 
+  #
   #   component_accessor component:trigger
   #
   # where component_accessor is either the name of the role, or a method on the container
@@ -200,14 +200,14 @@ container.defines
   renderComponents: (@debugMode="")->
     @debug "container render components"
 
-    container = @ 
+    container = @
     _(@components).each (component)->
-      component.getParent = ()-> 
-        container 
+      component.getParent = ()->
+        container
 
       try
-        $( component.container ).append( component.el )
-        component.render() 
+        @$( component.container ).eq(0).append( component.el )
+        component.render()
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
 
@@ -238,7 +238,7 @@ container.defines
   #### Underscore Methods For Working with Components
   _: ()-> _( @components )
 
-  pluck: (attribute)-> 
+  pluck: (attribute)->
     @_().pluck(attribute)
 
   invoke: (method)->
@@ -249,7 +249,7 @@ container.defines
 
   detect: (fn)->
     @_().detect(attribute)
-  
+
   reject: (fn)->
     @_().reject(fn)
 
@@ -268,7 +268,7 @@ container.defines
 
       if componentNameOrRole is "*"
         @eachComponent (component)=> component.on(eventId, @[handler], container)
-      else 
+      else
         component = @findComponentForEventBinding( componentNameOrRole )
 
         unless component? and Luca.isComponent(component)
@@ -279,12 +279,12 @@ container.defines
 
 
   subContainers: ()->
-    @select (component)-> 
+    @select (component)->
       component.isContainer is true
 
   roles: ()->
     _( @allChildren() ).pluck('role')
-     
+
   allChildren: ()->
     children = @components
     grandchildren = _( @subContainers() ).invoke('allChildren')
@@ -317,7 +317,7 @@ container.defines
     return component if component
 
     if deep is true
-      sub_container = _( @components ).detect (component)-> 
+      sub_container = _( @components ).detect (component)->
         component?.findComponent?(needle, haystack, true)
 
       sub_container?.findComponent?(needle, haystack, true)
@@ -352,7 +352,7 @@ container.defines
 
   getRootComponent: ()->
     if @isRootComponent() then @ else @getParent().getRootComponent()
-    
+
 
   selectByAttribute: (attribute, value=undefined, deep=false)->
     components = _( @components ).map (component)->
@@ -371,7 +371,7 @@ container.defines
 
 # This is the method by which a container injects the rendered child views
 # into the DOM.  It will get passed the container object, and the component
-# that is being rendered.  
+# that is being rendered.
 Luca.core.Container.componentRenderer = (container, component)->
   attachMethod = $( component.container )[ component.attachWith || "append" ]
   attachMethod( component.render().el )
@@ -436,8 +436,8 @@ doComponents = ()->
 
   unless @skipGetterMethods is true
     createGetterMethods.call(@)
-    createMethodsToGetComponentsByRole.call(@)  
-    
+    createMethodsToGetComponentsByRole.call(@)
+
   @registerComponentEvents()
 
 validateContainerConfiguration = ()->
@@ -455,4 +455,4 @@ indexComponent = (component)->
       if component.role?
         map.role_index[ component.role ] = index
       if component.name?
-        map.name_index[ component.name ] = index      
+        map.name_index[ component.name ] = index

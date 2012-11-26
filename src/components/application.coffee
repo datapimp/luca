@@ -316,7 +316,7 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
     # you can control which by setting the @startHistoryOn property
     if @router and @autoStartHistory
       @autoStartHistory = "before:render" if @autoStartHistory is true
-      @defer( Luca.Application.startHistory, false).until(@, @autoStartHistory)
+      @defer( Luca.util.startHistory, false).until(@, @autoStartHistory)
 
   setupKeyHandler: ()->
     return unless @keyEvents
@@ -330,4 +330,3 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     for keyEvent in (@keypressEvents || ["keydown"])
       $( document ).on( keyEvent, handler )
-
