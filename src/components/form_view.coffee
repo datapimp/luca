@@ -52,7 +52,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
       @bottomToolbar = @getDefaultToolbar() unless @toolbar is "top"
 
   getDefaultToolbar: ()->
-    Luca.component.FormView.defaultFormViewToolbar
+    Luca.components.FormView.defaultFormViewToolbar
 
   applyStyleClasses: ()->
     if Luca.enableBootstrap
@@ -260,7 +260,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
     @flash Luca.template("components/form_alert", className:"alert alert-error", message: message)
 
 
-  Luca.components.FormView.defaultFormViewToolbar =
+Luca.components.FormView.defaultFormViewToolbar =
   buttons:[
     icon:"remove-sign"
     label: "Reset"

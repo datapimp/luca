@@ -4690,7 +4690,7 @@
       }
     },
     getDefaultToolbar: function() {
-      return Luca.component.FormView.defaultFormViewToolbar;
+      return Luca.components.FormView.defaultFormViewToolbar;
     },
     applyStyleClasses: function() {
       if (Luca.enableBootstrap) this.applyBootstrapStyleClasses();
@@ -4902,7 +4902,9 @@
         message: message
       }));
     }
-  }, Luca.components.FormView.defaultFormViewToolbar = {
+  });
+
+  Luca.components.FormView.defaultFormViewToolbar = {
     buttons: [
       {
         icon: "remove-sign",
@@ -4920,7 +4922,7 @@
         align: 'right'
       }
     ]
-  });
+  };
 
 }).call(this);
 (function() {
