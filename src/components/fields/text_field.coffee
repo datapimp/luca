@@ -1,4 +1,3 @@
-
 _.def('Luca.fields.TextField').extends('Luca.core.Field').with
   events:
     "blur input" : "blur_handler"
@@ -22,9 +21,7 @@ _.def('Luca.fields.TextField').extends('Luca.core.Field').with
     @label ||= @name
     @input_class ||= @class
     @input_value ||= @value || "" 
-
-    # TODO
-    # Placeholder?
+    @placeHolder ||= @placeHolder
     
     if @prepend
       @$el.addClass('input-prepend')

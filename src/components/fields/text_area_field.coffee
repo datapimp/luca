@@ -13,14 +13,15 @@ _.def('Luca.fields.TextAreaField').extends('Luca.core.Field').with
   initialize: (@options={})->
     _.bindAll @, "keydown_handler"
 
-    Luca.core.Field::initialize.apply @, arguments
-
     @input_id ||= _.uniqueId('field')
     @input_name ||= @name
     @label ||= @name
     @input_class ||= @class
     @input_value ||= ""
     @inputStyles ||= "height:#{ @height };width:#{ @width }"
+    @placeHolder ||= @placeHolder
+
+    Luca.core.Field::initialize.apply @, arguments
 
   setValue: (value)->
     $( @field() ).val(value)
