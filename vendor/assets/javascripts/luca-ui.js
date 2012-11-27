@@ -2443,7 +2443,7 @@
         }
       }
       return _(this.components).each(function(component, index) {
-        var ce, componentContainerElement, panel, _ref2, _ref3;
+        var ce, componentContainerElement, componentExtension, panel, _ref2, _ref3;
         ce = componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
         ce["class"] = ce["class"] || ce.className || ce.classes;
         if (_this.generateComponentElements) {
@@ -2453,8 +2453,13 @@
         if (container.defaults != null) {
           component = _.defaults(component, container.defaults || {});
         }
-        if (_.isObject((_ref3 = container.extensions) != null ? _ref3[index] : void 0)) {
-          component = _.extend(component, container.extensions[index]);
+        if (_.isArray(container.extensions) && _.isObject((_ref3 = container.extensions) != null ? _ref3[index] : void 0)) {
+          componentExtension = container.extensions[index];
+          component = _.extend(component, componentExtension);
+        }
+        if ((component.role != null) && _.isObject(container.extensions) && _.isObject(container.extensions[component.role])) {
+          componentExtension = container.extensions[component.role];
+          component = _.extend(component, componentExtension);
         }
         if (component.container == null) {
           if (_this.generateComponentElements) {

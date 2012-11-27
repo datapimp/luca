@@ -141,9 +141,17 @@ container.defines
       # if the container defines an @extensions property as an array of
       # configuration objects, then we will extend the component config with
       # the object in the matching position of the @extensions array.
-      if _.isObject(container.extensions?[ index ])
-        component = _.extend(component, container.extensions[index])
+      if _.isArray(container.extensions) and _.isObject(container.extensions?[ index ])
+        componentExtension = container.extensions[index]
+        component = _.extend(component, componentExtension)
 
+      # if the container defines an @extensions property as an object of nested hashes,
+      # then extensions is a key/value pair whose key represents the role of the component
+      # that we wish to extend / customize 
+      if component.role? and _.isObject(container.extensions) and _.isObject(container.extensions[component.role])
+        componentExtension = container.extensions[component.role]
+        component = _.extend(component, componentExtension)
+        
       unless component.container?
         component.container = "##{ componentContainerElement.id }" if @generateComponentElements
         component.container ||= @$bodyEl()

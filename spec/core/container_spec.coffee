@@ -96,6 +96,42 @@ describe 'The Luca Container', ->
     @container.eachComponent (c)-> c.spy()
     expect( Luca.cache("component_four").spy ).toHaveBeenCalled()
 
+describe 'Component Inheritance and Customization', ->
+  it "should accept an array for extensions configuration and join on position/index", ->
+    container = new Luca.core.Container
+      extensions:[
+        undefined
+      ,
+        name: "custom_two"   
+      ]
+      components:[
+        role: "component_one"
+        name: "component_one"
+      ,
+        role: "component_two"
+        name: "component_two"
+      ]
+
+    container.render()    
+
+    expect( container.getComponentTwo().name ).toEqual "custom_two"
+
+  it "should accept an object for extensions configuration and join using role", ->
+    container = new Luca.core.Container
+      extensions:
+        component_one:
+          name: "custom_one"
+      components:[
+        role: "component_one"
+        name: "component_one"
+      ,
+        role: "component_two"
+        name: "component_two"
+      ]
+
+    container.render()    
+
+    expect( container.getComponentOne().name ).toEqual "custom_one"
 
 describe 'Component Event Binding', ->
   beforeEach ->
