@@ -18,7 +18,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.45",
+    VERSION: "0.9.65",
     core: {},
     containers: {},
     components: {},
@@ -26,18 +26,21 @@
     util: {},
     fields: {},
     registry: {},
-    options: {}
+    options: {},
+    config: {}
   });
 
   _.extend(Luca, Backbone.Events);
 
-  Luca.autoRegister = true;
+  Luca.autoRegister = Luca.config.autoRegister = true;
 
-  Luca.developmentMode = false;
+  Luca.developmentMode = Luca.config.developmentMode = false;
 
-  Luca.enableGlobalObserver = false;
+  Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false;
 
-  Luca.enableBootstrap = true;
+  Luca.enableBootstrap = Luca.config.enableBootstrap = true;
+
+  Luca.config.enhancedViewProperties = true;
 
   Luca.keys = {
     ENTER: 13,
@@ -309,24 +312,32 @@
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-src/templates/fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n</label>\n<div class="controls">\n <textarea name="', input_name ,'" style="', inputStyles ,'" >', input_value ,'</textarea>\n  '); if(helperText) { __p.push('\n  <p class="helper-text help-block">\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');};
+  this.JST["luca-src/templates/fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n</label>\n<div class="controls">\n <textarea name="', input_name ,'" style="', inputStyles ,'" placeholder="', placeHolder ,'">', input_value ,'</textarea>\n  '); if(helperText) { __p.push('\n  <p class="helper-text help-block">\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-src/templates/fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class="control-label" for="', input_id ,'">', label ,'</label>\n'); } __p.push('\n\n<div class="controls">\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class="add-on">', addOn ,'</span>\n'); } __p.push('\n<input type="text" name="', input_name ,'" style="', inputStyles ,'" value="', input_value ,'" />\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n\n</div>\n');}return __p.join('');};
+  this.JST["luca-src/templates/fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class="control-label" for="', input_id ,'">', label ,'</label>\n'); } __p.push('\n\n<div class="controls">\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class="add-on">', addOn ,'</span>\n'); } __p.push('\n<input type="text" name="', input_name ,'" style="', inputStyles ,'" value="', input_value ,'" placeholder="', placeHolder ,'" />\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
   this.JST["luca-src/templates/table_view"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<thead></thead>\n<tbody class="table-body"></tbody>\n<tfoot></tfoot>\n<caption></caption>\n');}return __p.join('');};
 }).call(this);
 (function() {
-  var currentNamespace;
+  var currentNamespace,
+    __slice = Array.prototype.slice;
 
   Luca.util.resolve = function(accessor, source_object) {
-    source_object || (source_object = window || global);
-    return _(accessor.split(/\./)).inject(function(obj, key) {
-      return obj = obj != null ? obj[key] : void 0;
-    }, source_object);
+    var resolved;
+    try {
+      source_object || (source_object = window || global);
+      resolved = _(accessor.split(/\./)).inject(function(obj, key) {
+        return obj = obj != null ? obj[key] : void 0;
+      }, source_object);
+    } catch (e) {
+      console.log("Error resolving", accessor, source_object);
+      throw e;
+    }
+    return resolved;
   };
 
   Luca.util.nestedValue = Luca.util.resolve;
@@ -335,6 +346,16 @@
     return function() {
       return console.log(prompt, arguments);
     };
+  };
+
+  Luca.util.read = function() {
+    var args, property;
+    property = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (_.isFunction(property)) {
+      return property.apply(this, args);
+    } else {
+      return property;
+    }
   };
 
   Luca.util.classify = function(string) {
@@ -608,11 +629,11 @@
   var DefineProxy,
     __slice = Array.prototype.slice;
 
-  Luca.define = function(componentName) {
-    return new DefineProxy(componentName);
-  };
-
-  Luca.component = Luca.define;
+  _.mixin({
+    def: Luca.component = Luca.define = Luca.register = function(componentName) {
+      return new DefineProxy(componentName);
+    }
+  });
 
   DefineProxy = (function() {
 
@@ -620,6 +641,7 @@
       var parts;
       this.namespace = Luca.util.namespace();
       this.componentId = this.componentName = componentName;
+      this.superClassName = 'Luca.View';
       if (componentName.match(/\./)) {
         this.namespaced = true;
         parts = componentName.split('.');
@@ -649,27 +671,35 @@
       return this;
     };
 
-    DefineProxy.prototype.enhance = function(properties) {
-      if (properties != null) return this["with"](properties);
+    DefineProxy.prototype.triggers = function() {
+      var hook, hooks, _i, _len;
+      hooks = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties || (this.properties = {}), {
+        hooks: []
+      });
+      for (_i = 0, _len = hooks.length; _i < _len; _i++) {
+        hook = hooks[_i];
+        this.properties.hooks.push(hook);
+      }
+      this.properties.hooks = _.uniq(this.properties.hooks);
       return this;
     };
 
-    DefineProxy.prototype.defaultsTo = function(properties) {
-      if (properties != null) return this["with"](properties);
+    DefineProxy.prototype.includes = function() {
+      var include, includes, _i, _len;
+      includes = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties || (this.properties = {}), {
+        include: []
+      });
+      for (_i = 0, _len = includes.length; _i < _len; _i++) {
+        include = includes[_i];
+        this.properties.include.push(include);
+      }
+      this.properties.include = _.uniq(this.properties.include);
       return this;
     };
 
-    DefineProxy.prototype.defaults = function(properties) {
-      if (properties != null) return this["with"](properties);
-      return this;
-    };
-
-    DefineProxy.prototype.hasDefaultProperties = function(properties) {
-      if (properties != null) return this["with"](properties);
-      return this;
-    };
-
-    DefineProxy.prototype.behavesAs = function() {
+    DefineProxy.prototype.mixesIn = function() {
       var mixin, mixins, _i, _len;
       mixins = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       _.defaults(this.properties || (this.properties = {}), {
@@ -679,10 +709,11 @@
         mixin = mixins[_i];
         this.properties.mixins.push(mixin);
       }
+      this.properties.mixins = _.uniq(this.properties.mixins);
       return this;
     };
 
-    DefineProxy.prototype["with"] = function(properties) {
+    DefineProxy.prototype.defaultProperties = function(properties) {
       var at, componentType, _base;
       if (properties == null) properties = {};
       _.defaults((this.properties || (this.properties = {})), properties);
@@ -700,7 +731,7 @@
           componentType = "collection";
         }
         if (Luca.isModelPrototype(at[this.componentId])) componentType = "model";
-        Luca.register(_.string.underscored(this.componentId), this.componentName, componentType);
+        Luca.registerComponent(_.string.underscored(this.componentId), this.componentName, componentType);
       }
       return at[this.componentId];
     };
@@ -709,12 +740,19 @@
 
   })();
 
+  DefineProxy.prototype.behavesAs = DefineProxy.prototype.uses = DefineProxy.prototype.mixesIn;
+
+  DefineProxy.prototype.defines = DefineProxy.prototype.defaults = DefineProxy.prototype.exports = DefineProxy.prototype.defaultProperties;
+
+  DefineProxy.prototype.defaultsTo = DefineProxy.prototype.enhance = DefineProxy.prototype["with"] = DefineProxy.prototype.defaultProperties;
+
   Luca.extend = function(superClassName, childName, properties) {
     var definition, include, superClass, _i, _len, _ref;
     if (properties == null) properties = {};
     superClass = Luca.util.resolve(superClassName, window || global);
+    superClass.__initializers || (superClass.__initializers = []);
     if (!_.isFunction(superClass != null ? superClass.extend : void 0)) {
-      throw "" + superClassName + " is not a valid component to extend from";
+      throw "Error defining " + childName + ". " + superClassName + " is not a valid component to extend from";
     }
     properties.displayName = childName;
     properties._superClass = function() {
@@ -723,6 +761,8 @@
     };
     properties._super = function(method, context, args) {
       var _ref;
+      if (context == null) context = this;
+      if (args == null) args = [];
       return (_ref = this._superClass().prototype[method]) != null ? _ref.apply(context, args) : void 0;
     };
     definition = superClass.extend(properties);
@@ -764,18 +804,83 @@
     }
     return {
       "with": function(mixin) {
-        _.extend(componentPrototype, Luca.mixin(mixin));
+        var mixinDefinition, mixinPrivates, sanitized, superclassMixins, _ref;
+        mixinDefinition = Luca.mixin(mixin);
+        mixinPrivates = _(mixinDefinition).chain().keys().select(function(key) {
+          return ("" + key).match(/^__/);
+        });
+        sanitized = _(mixinDefinition).omit(mixinPrivates.value());
+        _.extend(componentPrototype, sanitized);
+        if (mixinDefinition != null) {
+          if ((_ref = mixinDefinition.__included) != null) {
+            _ref.call(mixinDefinition, mixin);
+          }
+        }
+        superclassMixins = componentPrototype._superClass().prototype.mixins;
         componentPrototype.mixins || (componentPrototype.mixins = []);
         componentPrototype.mixins.push(mixin);
-        componentPrototype.mixins = _(componentPrototype.mixins).uniq();
+        componentPrototype.mixins = componentPrototype.mixins.concat(superclassMixins);
+        componentPrototype.mixins = _(componentPrototype.mixins).chain().uniq().compact().value();
         return componentPrototype;
       }
     };
   };
 
-  _.mixin({
-    def: Luca.define
-  });
+}).call(this);
+(function() {
+
+  Luca.modules.ApplicationEventBindings = {
+    __initializer: function() {
+      var app, eventTrigger, handler, _len, _ref, _ref2, _results;
+      if (_.isEmpty(this.applicationEvents)) return;
+      app = this.app;
+      if (_.isString(app) || _.isUndefined(app)) {
+        app = (_ref = Luca.Application) != null ? typeof _ref.get === "function" ? _ref.get(app) : void 0 : void 0;
+      }
+      if (!Luca.supportsEvents(app)) {
+        throw "Error binding to the application object on " + (this.name || this.cid);
+      }
+      _ref2 = this.applicationEvents;
+      _results = [];
+      for (handler = 0, _len = _ref2.length; handler < _len; handler++) {
+        eventTrigger = _ref2[handler];
+        if (_.isString(handler)) handler = this[handler];
+        if (!_.isFunction(handler)) {
+          throw "Error registering application event " + eventTrigger + " on " + (this.name || this.cid);
+        }
+        _results.push(app.on(eventTrigger, handler));
+      }
+      return _results;
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.CollectionEventBindings = {
+    __initializer: function() {
+      var collection, eventTrigger, handler, key, manager, signature, _ref, _ref2, _results;
+      if (_.isEmpty(this.collectionEvents)) return;
+      manager = this.collectionManager || Luca.CollectionManager.get();
+      _ref = this.collectionEvents;
+      _results = [];
+      for (signature in _ref) {
+        handler = _ref[signature];
+        _ref2 = signature.split(" "), key = _ref2[0], eventTrigger = _ref2[1];
+        collection = manager.getOrCreate(key);
+        if (!collection) throw "Could not find collection specified by " + key;
+        if (_.isString(handler)) handler = this[handler];
+        if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
+        try {
+          _results.push(collection.on(eventTrigger, handler, collection));
+        } catch (e) {
+          console.log("Error Binding To Collection in registerCollectionEvents", this);
+          throw e;
+        }
+      }
+      return _results;
+    }
+  };
 
 }).call(this);
 (function() {
@@ -800,57 +905,146 @@
 
 }).call(this);
 (function() {
+
+  Luca.modules.DomHelpers = {
+    __initializer: function() {
+      var additional, additionalClasses, _i, _len, _results;
+      additionalClasses = _(this.additionalClassNames || []).clone();
+      if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
+      if (_.isString(additionalClasses)) {
+        additionalClasses = additionalClasses.split(" ");
+      }
+      if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
+      if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
+      if (this.gridRowFluid) additionalClasses.push("row-fluid");
+      if (this.gridRow) additionalClasses.push("row");
+      if (additionalClasses == null) return;
+      _results = [];
+      for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
+        additional = additionalClasses[_i];
+        _results.push(this.$el.addClass(additional));
+      }
+      return _results;
+    },
+    $wrap: function(wrapper) {
+      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
+        wrapper = this.make("div", {
+          "class": wrapper
+        });
+      }
+      return this.$el.wrap(wrapper);
+    },
+    $template: function(template, variables) {
+      if (variables == null) variables = {};
+      return this.$el.html(Luca.template(template, variables));
+    },
+    $html: function(content) {
+      return this.$el.html(content);
+    },
+    $append: function(content) {
+      return this.$el.append(content);
+    },
+    $attach: function() {
+      return this.$container().append(this.el);
+    },
+    $bodyEl: function() {
+      return this.$el;
+    },
+    $container: function() {
+      return $(this.container);
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.EnhancedProperties = {
+    __initializer: function() {
+      if (Luca.config.enhancedViewProperties !== true) return;
+      if (_.isString(this.collection) && Luca.CollectionManager.get()) {
+        this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
+      }
+      if (this.template != null) this.$template(this.template, this);
+      if (_.isString(this.collectionManager)) {
+        return this.collectionManager = Luca.CollectionManager.get(this.collectionManager);
+      }
+    }
+  };
+
+}).call(this);
+(function() {
   var FilterModel,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   Luca.modules.Filterable = {
-    _initializer: function(component, module) {
-      var oldOptions, oldQuery, sortBy, _ref, _ref2;
+    __included: function(component, module) {
+      return _.extend(Luca.Collection.prototype, {
+        __filters: {}
+      });
+    },
+    __initializer: function(component, module) {
+      var filter, _base, _ref,
+        _this = this;
       if (this.filterable === false) return;
-      this.filterState = this.getFilterModel();
-      if (oldQuery = this.getQuery) {
-        this.getQuery = function() {
-          return _.extend(oldQuery.call(this), this.filterState.toQuery());
-        };
+      if (!Luca.isBackboneCollection(this.collection)) {
+        this.collection = typeof (_base = Luca.CollectionManager).get === "function" ? (_ref = _base.get()) != null ? _ref.getOrCreate(this.collection) : void 0 : void 0;
       }
-      if (oldOptions = this.getQueryOptions) {
-        this.getQueryOptions = function() {
-          return {};
-          return _.extend(oldOptions.call(this), this.filterState.toOptions());
-        };
+      if (!Luca.isBackboneCollection(this.collection)) {
+        this.debug("Skipping Filterable due to no collection being present on " + (this.name || this.cid));
+        this.debug("Collection", this.collection);
+        return;
       }
-      if (sortBy = (_ref = this.filterable) != null ? (_ref2 = _ref.options) != null ? _ref2.sortBy : void 0 : void 0) {
-        return this.setSortBy(sortBy);
+      this.getCollection || (this.getCollection = function() {
+        return this.collection;
+      });
+      filter = this.getFilterState();
+      this.querySources || (this.querySources = []);
+      this.optionsSources || (this.optionsSources = []);
+      this.query || (this.query = {});
+      this.queryOptions || (this.queryOptions = {});
+      this.querySources.push((function() {
+        return filter.toQuery();
+      }));
+      this.optionsSources.push((function() {
+        return filter.toOptions();
+      }));
+      if (this.debugMode === true) {
+        console.log("Filterable");
+        console.log(this.querySources);
+        console.log(this.optionsSources);
       }
+      filter.on("change", function() {
+        var merged;
+        if (_this.isRemote()) {
+          merged = _.extend(_this.getQuery(), _this.getQueryOptions());
+          return _this.collection.applyFilter(merged, _this.getQueryOptions());
+        } else {
+          return _this.trigger("refresh");
+        }
+      });
+      return module;
+    },
+    isRemote: function() {
+      return this.getQueryOptions().remote === true;
+    },
+    getFilterState: function() {
+      var _base, _name;
+      return (_base = this.collection.__filters)[_name = this.cid] || (_base[_name] = new FilterModel(this.filterable));
     },
     setSortBy: function(sortBy, options) {
       if (options == null) options = {};
-      return this.filterState.setOption('sortBy', sortBy, options);
-    },
-    getFilterModel: function() {
-      if (this.filterState != null) return this.filterState;
-      this.filterState = new FilterModel(this.filterable || (this.filterable = {}));
-      this.filterState.on("change", function() {
-        return this.trigger("collection:change");
-      }, this);
-      return this.filterState;
+      return this.getFilterState().setOption('sortBy', sortBy, options);
     },
     applyFilter: function(query, options) {
-      var silent;
       if (query == null) query = {};
       if (options == null) options = {};
-      if (_.isEmpty(options)) {
-        options = _.defaults(options, this.getQueryOptions());
-      }
-      if (_.isEmpty(query)) query = _.defaults(query, this.getQuery());
-      silent = _(options)["delete"]('silent') === true;
-      return this.filterState.set({
+      options = _.defaults(options, this.getQueryOptions());
+      query = _.defaults(query, this.getQuery());
+      return this.getFilterState().set({
         query: query,
         options: options
-      }, {
-        silent: silent
-      });
+      }, options);
     }
   };
 
@@ -861,6 +1055,11 @@
     function FilterModel() {
       FilterModel.__super__.constructor.apply(this, arguments);
     }
+
+    FilterModel.prototype.defaults = {
+      options: {},
+      query: {}
+    };
 
     FilterModel.prototype.setOption = function(option, value, options) {
       var payload;
@@ -877,11 +1076,21 @@
     };
 
     FilterModel.prototype.toOptions = function() {
-      return this.get("options");
+      return this.toJSON().options;
     };
 
     FilterModel.prototype.toQuery = function() {
-      return this.get("query");
+      return this.toJSON().query;
+    };
+
+    FilterModel.prototype.toRemote = function() {
+      var options;
+      options = this.toOptions();
+      return _.extend(this.toQuery(), {
+        limit: options.limit,
+        page: options.page,
+        sortBy: options.sortBy
+      });
     };
 
     return FilterModel;
@@ -904,7 +1113,7 @@
 (function() {
 
   Luca.modules.LoadMaskable = {
-    _initializer: function() {
+    __initializer: function() {
       var _this = this;
       if (this.loadMask !== true) return;
       if (this.loadMask === true) {
@@ -1048,66 +1257,125 @@
 
 }).call(this);
 (function() {
+  var applyModalConfig;
+
+  Luca.modules.ModalView = {
+    closeOnEscape: true,
+    showOnInitialize: false,
+    backdrop: false,
+    __initializer: function() {
+      this.$el.addClass("modal");
+      this.on("before:render", applyModalConfig, this);
+      return this;
+    },
+    container: function() {
+      return $('body');
+    },
+    toggle: function() {
+      return this.$el.modal('toggle');
+    },
+    show: function() {
+      return this.$el.modal('show');
+    },
+    hide: function() {
+      return this.$el.modal('hide');
+    }
+  };
+
+  applyModalConfig = function() {
+    this.$el.addClass('modal');
+    if (this.fade === true) this.$el.addClass('fade');
+    $('body').append(this.$el);
+    this.$el.modal({
+      backdrop: this.backdrop === true,
+      keyboard: this.closeOnEscape === true,
+      show: this.showOnInitialize === true
+    });
+    return this;
+  };
+
+}).call(this);
+(function() {
 
   Luca.modules.Paginatable = {
     paginatorViewClass: 'Luca.components.PaginationControl',
-    _initializer: function() {
-      var old;
+    paginationSelector: ".toolbar.bottom",
+    __included: function() {
+      return _.extend(Luca.Collection.prototype, {
+        __paginators: {}
+      });
+    },
+    __initializer: function() {
+      var collection, paginationState, _base, _ref,
+        _this = this;
       if (this.paginatable === false) return;
-      _.bindAll(this, "paginationControl");
+      if (!Luca.isBackboneCollection(this.collection)) {
+        this.collection = typeof (_base = Luca.CollectionManager).get === "function" ? (_ref = _base.get()) != null ? _ref.getOrCreate(this.collection) : void 0 : void 0;
+      }
+      if (!Luca.isBackboneCollection(this.collection)) {
+        this.debug("Skipping Paginatable due to no collection being present on " + (this.name || this.cid));
+        this.debug("collection", this.collection);
+        return;
+      }
+      _.bindAll(this, "paginationControl", "pager");
       this.getCollection || (this.getCollection = function() {
         return this.collection;
       });
-      if (old = this.getQueryOptions) {
-        this.getQueryOptions = function() {
-          var filtered, p;
-          p = this.paginationControl();
-          filtered = _.extend(old.call(this), {
-            limit: p.limit(),
-            page: p.page()
+      collection = this.getCollection();
+      paginationState = this.getPaginationState();
+      this.optionsSources || (this.optionsSources = []);
+      this.queryOptions || (this.queryOptions = {});
+      this.optionsSources.push(function() {
+        var options;
+        options = _(paginationState.toJSON()).pick('limit', 'page', 'sortBy');
+        return _.extend(options, {
+          pager: _this.pager
+        });
+      });
+      paginationState.on("change:page", function(state) {
+        var filter;
+        if (_this.isRemote()) {
+          filter = _.extend(_this.toQuery(), _this.toQueryOptions());
+          return _this.collection.applyFilter(filter, {
+            remote: true
           });
-          return filtered;
-        };
-      }
-      if (this.paginationContainer().length === 0) {
-        return this.$bodyEl().after(this.make("div", {
-          "class": "toolbar bottom"
-        }));
-      }
+        } else {
+          return _this.trigger("refresh");
+        }
+      });
+      return this.on("before:render", this.renderPaginationControl, this);
+    },
+    pager: function(numberOfPages, models) {
+      this.getPaginationState().set({
+        numberOfPages: numberOfPages,
+        itemCount: models.length
+      });
+      return this.paginationControl().updateWithPageCount(numberOfPages, models);
+    },
+    isRemote: function() {
+      return this.getQueryOptions().remote === true;
+    },
+    getPaginationState: function() {
+      var _base, _name;
+      return (_base = this.collection.__paginators)[_name = this.cid] || (_base[_name] = this.paginationControl().state);
     },
     paginationContainer: function() {
-      return this.$('.toolbar.bottom');
+      return this.$(">" + this.paginationSelector);
     },
     setCurrentPage: function(page, options) {
       if (page == null) page = 1;
       if (options == null) options = {};
-      return this.paginationControl().state.set('page', page, options);
+      return this.getPaginationState().set('page', page, options);
+    },
+    setPage: function(page, options) {
+      if (page == null) page = 1;
+      if (options == null) options = {};
+      return this.getPaginationState().set('page', page, options);
     },
     setLimit: function(limit, options) {
       if (limit == null) limit = 0;
       if (options == null) options = {};
-      return this.paginationControl().state.set('limit', limit, options);
-    },
-    updatePagination: function(models, query, options) {
-      var itemCount, paginator, totalCount, _ref;
-      if (models == null) models = [];
-      if (query == null) query = {};
-      if (options == null) options = {};
-      _.defaults(options, this.getQueryOptions(), {
-        limit: 0
-      });
-      paginator = this.paginationControl();
-      itemCount = (models != null ? models.length : void 0) || 0;
-      totalCount = (_ref = this.getCollection()) != null ? _ref.length : void 0;
-      if (itemCount === 0 || totalCount <= options.limit) {
-        paginator.$el.hide();
-      } else {
-        paginator.$el.show();
-      }
-      return paginator.state.set({
-        page: options.page,
-        limit: options.limit
-      });
+      return this.getPaginationState().set('limit', limit, options);
     },
     paginationControl: function() {
       if (this.paginator != null) return this.paginator;
@@ -1118,22 +1386,68 @@
       this.paginator = Luca.util.lazyComponent({
         type: "pagination_control",
         collection: this.getCollection(),
-        parent: this
+        defaultState: this.paginatable,
+        parent: this.name || this.cid,
+        debugMode: this.debugMode
       });
-      this.paginator.setPage(this.paginatable.page);
-      this.paginator.setLimit(this.paginatable.limit);
-      this.paginator.state.on("change", function() {
-        return this.trigger("collection:change");
-      }, this);
-      this.on("after:refresh", this.updatePagination, this);
-      this.paginationContainer().append(this.paginator.render().$el);
       return this.paginator;
+    },
+    renderPaginationControl: function() {
+      var control;
+      control = this.paginationControl();
+      this.paginationContainer().append(control.render().$el);
+      return control;
     }
   };
 
 }).call(this);
 (function() {
-  var component_cache, registry;
+
+  Luca.modules.StateModel = {
+    __initializer: function() {
+      var _this = this;
+      if (this.stateful !== true) return;
+      if ((this.state != null) && !Luca.isBackboneModel(this.state)) return;
+      this.state = new Backbone.Model(this.defaultState || {});
+      this.set || (this.set = function() {
+        return _this.state.set.apply(_this.state, arguments);
+      });
+      this.get || (this.get = function() {
+        return _this.state.get.apply(_this.state, arguments);
+      });
+      return this.state.on("change", function(state) {
+        var changed, previousValues, value, _len, _ref, _results;
+        _this.trigger("state:change", state);
+        previousValues = state.previousAttributes();
+        _ref = state.changedAttributes;
+        _results = [];
+        for (value = 0, _len = _ref.length; value < _len; value++) {
+          changed = _ref[value];
+          _results.push(_this.trigger("state:change:" + changed, value, state.previous(changed)));
+        }
+        return _results;
+      });
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.modules.Templating = {
+    __initializer: function() {
+      var template, templateContent, templateVars;
+      templateVars = Luca.util.read.call(this, this.bodyTemplateVars) || {};
+      if (template = this.bodyTemplate) {
+        this.$el.empty();
+        templateContent = Luca.template(template, templateVars);
+        return Luca.View.prototype.$html.call(this, templateContent);
+      }
+    }
+  };
+
+}).call(this);
+(function() {
+  var componentCacheStore, registry;
 
   registry = {
     classes: {},
@@ -1142,12 +1456,14 @@
     namespaces: ['Luca.containers', 'Luca.components']
   };
 
-  component_cache = {
+  componentCacheStore = {
     cid_index: {},
     name_index: {}
   };
 
-  Luca.defaultComponentType = 'view';
+  Luca.config.defaultComponentClass = Luca.defaultComponentClass = 'Luca.View';
+
+  Luca.config.defaultComponentType = Luca.defaultComponentType = 'view';
 
   Luca.registry.aliases = {
     grid: "grid_view",
@@ -1164,7 +1480,7 @@
     table: "table_view"
   };
 
-  Luca.register = function(component, prototypeName, componentType) {
+  Luca.registerComponent = function(component, prototypeName, componentType) {
     if (componentType == null) componentType = "view";
     Luca.trigger("component:registered", component, prototypeName);
     switch (componentType) {
@@ -1188,7 +1504,7 @@
         return instance != null ? (_ref = instance.refreshCode) != null ? _ref.call(instance, prototypeDefinition) : void 0 : void 0;
       });
     }
-    return Luca.register(component, prototypeName);
+    return Luca.registerComponent(component, prototypeName);
   };
 
   Luca.registry.addNamespace = Luca.registry.namespace = function(identifier) {
@@ -1220,14 +1536,20 @@
   };
 
   Luca.registry.instances = function() {
-    return _(component_cache.cid_index).values();
+    return _(componentCacheStore.cid_index).values();
+  };
+
+  Luca.registry.findInstancesByClass = function(componentClass) {
+    return Luca.registry.findInstancesByClassName(componentClass.displayName);
   };
 
   Luca.registry.findInstancesByClassName = function(className) {
     var instances;
+    if (!_.isString(className)) className = className.displayName;
     instances = Luca.registry.instances();
     return _(instances).select(function(instance) {
-      var _ref;
+      var isClass, _ref;
+      isClass = instance.displayName === className;
       return instance.displayName === className || (typeof instance._superClass === "function" ? (_ref = instance._superClass()) != null ? _ref.displayName : void 0 : void 0) === className;
     });
   };
@@ -1246,18 +1568,20 @@
     });
   };
 
-  Luca.cache = function(needle, component) {
+  Luca.cache = Luca.cacheInstance = function(cacheKey, object) {
     var lookup_id;
-    if (component != null) component_cache.cid_index[needle] = component;
-    component = component_cache.cid_index[needle];
-    if ((component != null ? component.component_name : void 0) != null) {
-      component_cache.name_index[component.component_name] = component.cid;
-    } else if ((component != null ? component.name : void 0) != null) {
-      component_cache.name_index[component.name] = component.cid;
+    if (cacheKey == null) return;
+    if ((object != null ? object.doNotCache : void 0) === true) return object;
+    if (object != null) componentCacheStore.cid_index[cacheKey] = object;
+    object = componentCacheStore.cid_index[cacheKey];
+    if ((object != null ? object.component_name : void 0) != null) {
+      componentCacheStore.name_index[object.component_name] = object.cid;
+    } else if ((object != null ? object.name : void 0) != null) {
+      componentCacheStore.name_index[object.name] = object.cid;
     }
-    if (component != null) return component;
-    lookup_id = component_cache.name_index[needle];
-    return component_cache.cid_index[lookup_id];
+    if (object != null) return object;
+    lookup_id = componentCacheStore.name_index[cacheKey];
+    return componentCacheStore.cid_index[lookup_id];
   };
 
 }).call(this);
@@ -1303,70 +1627,46 @@
 
 }).call(this);
 (function() {
-  var bindAllEventHandlers, registerApplicationEvents, registerCollectionEvents, setupBodyTemplate, setupClassHelpers, setupStateMachine, setupTemplate;
+  var bindAllEventHandlers, bindEventHandlers, view,
+    __slice = Array.prototype.slice;
 
-  _.def("Luca.View")["extends"]("Backbone.View")["with"]({
-    include: ['Luca.Events'],
-    additionalClassNames: [],
-    hooks: ["before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation"],
+  view = Luca.register("Luca.View");
+
+  view["extends"]("Backbone.View");
+
+  view.includes("Luca.Events", "Luca.modules.DomHelpers");
+
+  view.mixesIn("DomHelpers", "Templating", "EnhancedProperties", "CollectionEventBindings", "ApplicationEventBindings", "StateModel");
+
+  view.triggers("before:initialize", "after:initialize", "before:render", "after:render", "first:activation", "activation", "deactivation");
+
+  view.defines({
     initialize: function(options) {
-      var module, _i, _len, _ref, _ref2, _ref3;
       this.options = options != null ? options : {};
       this.trigger("before:initialize", this, this.options);
       _.extend(this, this.options);
       if (this.autoBindEventHandlers === true || this.bindAllEvents === true) {
         bindAllEventHandlers.call(this);
       }
-      setupBodyTemplate.call(this);
       if (this.name != null) this.cid = _.uniqueId(this.name);
       this.$el.attr("data-luca-id", this.name || this.cid);
-      Luca.cache(this.cid, this);
+      Luca.cacheInstance(this.cid, this);
       this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
-      setupClassHelpers.call(this);
-      if (this.stateful === true && !(this.state != null)) {
-        setupStateMachine.call(this);
-      }
-      registerCollectionEvents.call(this);
-      registerApplicationEvents.call(this);
-      if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
-        _ref2 = _.uniq(this.mixins);
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          module = _ref2[_i];
-          if ((_ref3 = Luca.mixin(module)) != null) {
-            _ref3._initializer.call(this, this, module);
-          }
-        }
-      }
+      this.setupMixins();
       this.delegateEvents();
-      if (this.template && !this.isField) setupTemplate.call(this);
       return this.trigger("after:initialize", this);
     },
-    $wrap: function(wrapper) {
-      if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
-        wrapper = this.make("div", {
-          "class": wrapper
-        });
+    setupMixins: function() {
+      var module, _i, _len, _ref, _ref2, _ref3, _ref4, _results;
+      if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
+        _ref2 = this.mixins;
+        _results = [];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          module = _ref2[_i];
+          _results.push((_ref3 = Luca.mixin(module)) != null ? (_ref4 = _ref3.__initializer) != null ? _ref4.call(this, this, module) : void 0 : void 0);
+        }
+        return _results;
       }
-      return this.$el.wrap(wrapper);
-    },
-    $template: function(template, variables) {
-      if (variables == null) variables = {};
-      return this.$el.html(Luca.template(template, variables));
-    },
-    $html: function(content) {
-      return this.$el.html(content);
-    },
-    $append: function(content) {
-      return this.$el.append(content);
-    },
-    $attach: function() {
-      return this.$container().append(this.el);
-    },
-    $bodyEl: function() {
-      return this.$el;
-    },
-    $container: function() {
-      return $(this.container);
     },
     setupHooks: function(set) {
       var _this = this;
@@ -1376,12 +1676,12 @@
         fn = Luca.util.hook(eventId);
         callback = function() {
           var _ref;
-          return (_ref = _this[fn]) != null ? _ref.apply(_this, arguments) : void 0;
+          return (_ref = this[fn]) != null ? _ref.apply(this, arguments) : void 0;
         };
         if (eventId != null ? eventId.match(/once:/) : void 0) {
           callback = _.once(callback);
         }
-        return _this.bind(eventId, callback);
+        return _this.on(eventId, callback, _this);
       });
     },
     registerEvent: function(selector, handler) {
@@ -1403,14 +1703,10 @@
       return Luca.util.selectProperties(Luca.isBackboneView, this);
     },
     debug: function() {
-      var message, _i, _len, _results;
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (!(this.debugMode || (window.LucaDebugMode != null))) return;
-      _results = [];
-      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
-        message = arguments[_i];
-        _results.push(console.log([this.name || this.cid, message]));
-      }
-      return _results;
+      return console.log([this.name || this.cid].concat(__slice.call(args)));
     },
     trigger: function() {
       if (Luca.enableGlobalObserver) {
@@ -1432,7 +1728,7 @@
     _base = definition.render;
     _base || (_base = Luca.View.prototype.$attach);
     definition.render = function() {
-      var autoTrigger, deferred, fn, target, trigger, view,
+      var autoTrigger, deferred, fn, target, trigger,
         _this = this;
       view = this;
       if (this.deferrable) {
@@ -1470,108 +1766,29 @@
   };
 
   bindAllEventHandlers = function() {
-    var _this = this;
-    return _(this.events).each(function(handler, event) {
-      if (_.isString(handler)) return _.bindAll(_this, handler);
-    });
-  };
-
-  registerApplicationEvents = function() {
-    var app, eventTrigger, handler, _len, _ref, _ref2, _results;
-    if (_.isEmpty(this.applicationEvents)) return;
-    app = this.app;
-    if (_.isString(app) || _.isUndefined(app)) {
-      app = (_ref = Luca.Application) != null ? typeof _ref.get === "function" ? _ref.get(app) : void 0 : void 0;
-    }
-    if (!Luca.supportsEvents(app)) {
-      throw "Error binding to the application object on " + (this.name || this.cid);
-    }
-    _ref2 = this.applicationEvents;
+    var config, _i, _len, _ref, _results;
+    _ref = [this.events, this.componentEvents, this.collectionEvents, this.applicationEvents];
     _results = [];
-    for (handler = 0, _len = _ref2.length; handler < _len; handler++) {
-      eventTrigger = _ref2[handler];
-      if (_.isString(handler)) handler = this[handler];
-      if (!_.isFunction(handler)) {
-        throw "Error registering application event " + eventTrigger + " on " + (this.name || this.cid);
-      }
-      _results.push(app.on(eventTrigger, handler));
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      config = _ref[_i];
+      if (!_.isEmpty(config)) _results.push(bindEventHandlers.call(this, config));
     }
     return _results;
   };
 
-  registerCollectionEvents = function() {
-    var collection, eventTrigger, handler, key, manager, signature, _ref, _ref2, _results;
-    if (_.isEmpty(this.collectionEvents)) return;
-    manager = this.collectionManager;
-    if (_.isString(manager) || _.isUndefined(manager)) {
-      manager = Luca.CollectionManager.get(manager);
-    }
-    _ref = this.collectionEvents;
+  bindEventHandlers = function(events) {
+    var eventSignature, handler, _results;
+    if (events == null) events = {};
     _results = [];
-    for (signature in _ref) {
-      handler = _ref[signature];
-      _ref2 = signature.split(" "), key = _ref2[0], eventTrigger = _ref2[1];
-      collection = manager.getOrCreate(key);
-      if (!collection) throw "Could not find collection specified by " + key;
-      if (_.isString(handler)) handler = this[handler];
-      if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
-      try {
-        _results.push(collection.bind(eventTrigger, handler));
-      } catch (e) {
-        console.log("Error Binding To Collection in registerCollectionEvents", this);
-        throw e;
+    for (eventSignature in events) {
+      handler = events[eventSignature];
+      if (_.isString(handler)) {
+        _results.push(_.bindAll(this, handler));
+      } else {
+        _results.push(void 0);
       }
     }
     return _results;
-  };
-
-  setupClassHelpers = function() {
-    var additional, additionalClasses, _i, _len, _results;
-    additionalClasses = _(this.additionalClassNames || []).clone();
-    if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
-    if (_.isString(additionalClasses)) {
-      additionalClasses = additionalClasses.split(" ");
-    }
-    if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
-    if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
-    if (this.gridRowFluid) additionalClasses.push("row-fluid");
-    if (this.gridRow) additionalClasses.push("row");
-    if (additionalClasses == null) return;
-    _results = [];
-    for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
-      additional = additionalClasses[_i];
-      _results.push(this.$el.addClass(additional));
-    }
-    return _results;
-  };
-
-  setupStateMachine = function() {
-    var _this = this;
-    this.state = new Backbone.Model(this.defaultState || {});
-    this.set || (this.set = function() {
-      return _this.state.set.apply(_this.state, arguments);
-    });
-    return this.get || (this.get = function() {
-      return _this.state.get.apply(_this.state, arguments);
-    });
-  };
-
-  setupBodyTemplate = function() {
-    var template, templateVars;
-    templateVars = this.bodyTemplateVars ? this.bodyTemplateVars.call(this) : this;
-    if (template = this.bodyTemplate) {
-      this.$el.empty();
-      return Luca.View.prototype.$html.call(this, Luca.template(template, templateVars));
-    }
-  };
-
-  setupTemplate = function() {
-    var _this = this;
-    if (this.template != null) {
-      return this.defer(function() {
-        return _this.$template(_this.template, _this);
-      }).until("before:render");
-    }
   };
 
   Luca.View.extend = function(definition) {
@@ -1591,7 +1808,35 @@
 
 }).call(this);
 (function() {
-  var setupComputedProperties;
+  var model, setupComputedProperties;
+
+  model = Luca.define('Luca.Model');
+
+  model["extends"]('Backbone.Model');
+
+  model.includes('Luca.Events');
+
+  model.defines({
+    initialize: function() {
+      Backbone.Model.prototype.initialize(this, arguments);
+      return setupComputedProperties.call(this);
+    },
+    read: function(attr) {
+      if (_.isFunction(this[attr])) {
+        return this[attr].call(this);
+      } else {
+        return this.get(attr);
+      }
+    },
+    get: function(attr) {
+      var _ref;
+      if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
+        return this._computed[attr];
+      } else {
+        return Backbone.Model.prototype.get.call(this, attr);
+      }
+    }
+  });
 
   setupComputedProperties = function() {
     var attr, dependencies, _ref, _results,
@@ -1616,32 +1861,22 @@
     return _results;
   };
 
-  _.def('Luca.Model')["extends"]('Backbone.Model')["with"]({
-    include: ['Luca.Events'],
-    initialize: function() {
-      Backbone.Model.prototype.initialize(this, arguments);
-      return setupComputedProperties.call(this);
-    },
-    get: function(attr) {
-      var _ref;
-      if ((_ref = this.computed) != null ? _ref.hasOwnProperty(attr) : void 0) {
-        return this._computed[attr];
-      } else {
-        return Backbone.Model.prototype.get.call(this, attr);
-      }
-    }
-  });
-
 }).call(this);
 (function() {
-  var source;
+  var collection;
 
-  source = 'Backbone.Collection';
+  collection = Luca.define('Luca.Collection');
 
-  if (Backbone.QueryCollection != null) source = 'Backbone.QueryCollection';
+  if (Backbone.QueryCollection != null) {
+    collection["extends"]('Backbone.QueryCollection');
+  } else {
+    collection["extends"]('Backbone.Collection');
+  }
 
-  _.def("Luca.Collection")["extends"](source)["with"]({
-    include: ['Luca.Events'],
+  collection.includes('Luca.Events');
+
+  collection.defines({
+    model: Luca.Model,
     cachedMethods: [],
     remoteFilter: false,
     initialize: function(models, options) {
@@ -1874,7 +2109,7 @@
       return _results;
     },
     setupMethodCaching: function() {
-      var cache, collection, membershipEvents;
+      var cache, membershipEvents;
       collection = this;
       membershipEvents = ["reset", "add", "remove"];
       cache = this._methodCache = {};
@@ -2097,6 +2332,7 @@
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.input_class || (this.input_class = "");
+      this.input_type || (this.input_type = "");
       this.helperText || (this.helperText = "");
       if (this.required && !((_ref = this.label) != null ? _ref.match(/^\*/) : void 0)) {
         this.label || (this.label = "*" + this.label);
@@ -2110,22 +2346,20 @@
     },
     beforeRender: function() {
       if (Luca.enableBootstrap) this.$el.addClass('control-group');
-      if (this.required) this.$el.addClass('required');
-      this.$template(this.template, this);
-      return this.input = $('input', this.el);
+      if (this.required) return this.$el.addClass('required');
     },
     change_handler: function(e) {
       return this.trigger("on:change", this, e);
     },
     disable: function() {
-      return $("input", this.el).attr('disabled', true);
+      return this.getInputElement().attr('disabled', true);
     },
     enable: function() {
-      return $("input", this.el).attr('disabled', false);
+      return this.getInputElement().attr('disabled', false);
     },
     getValue: function() {
-      var raw;
-      raw = this.input.attr('value');
+      var raw, _ref;
+      raw = (_ref = this.getInputElement()) != null ? _ref.attr('value') : void 0;
       if (_.str.isBlank(raw)) return raw;
       switch (this.valueType) {
         case "integer":
@@ -2138,11 +2372,12 @@
           return raw;
       }
     },
-    render: function() {
-      return $(this.container).append(this.$el);
-    },
     setValue: function(value) {
-      return this.input.attr('value', value);
+      var _ref;
+      return (_ref = this.getInputElement()) != null ? _ref.attr('value', value) : void 0;
+    },
+    getInputElement: function() {
+      return this.input || (this.input = this.$('input').eq(0));
     },
     updateState: function(state) {
       var _this = this;
@@ -2155,58 +2390,28 @@
 
 }).call(this);
 (function() {
-  var applyDOMConfig, doComponents, doLayout;
+  var applyDOMConfig, container, createGetterMethods, createMethodsToGetComponentsByRole, doComponents, doLayout, indexComponent, validateContainerConfiguration;
 
-  doLayout = function() {
-    this.trigger("before:layout", this);
-    this.prepareLayout();
-    return this.trigger("after:layout", this);
-  };
+  container = Luca.register("Luca.core.Container");
 
-  applyDOMConfig = function(panel, panelIndex) {
-    var config, style_declarations;
-    style_declarations = [];
-    if (panel.height != null) {
-      style_declarations.push("height: " + (_.isNumber(panel.height) ? panel.height + 'px' : panel.height));
-    }
-    if (panel.width != null) {
-      style_declarations.push("width: " + (_.isNumber(panel.width) ? panel.width + 'px' : panel.width));
-    }
-    if (panel.float) style_declarations.push("float: " + panel.float);
-    config = {
-      "class": (panel != null ? panel.classes : void 0) || this.componentClass,
-      id: "" + this.cid + "-" + panelIndex,
-      style: style_declarations.join(';'),
-      "data-luca-parent": this.name || this.cid
-    };
-    if (this.customizeContainerEl != null) {
-      config = this.customizeContainerEl(config, panel, panelIndex);
-    }
-    return config;
-  };
+  container["extends"]("Luca.components.Panel");
 
-  doComponents = function() {
-    this.trigger("before:components", this, this.components);
-    this.prepareComponents();
-    this.createComponents();
-    this.trigger("before:render:components", this, this.components);
-    this.renderComponents();
-    return this.trigger("after:components", this, this.components);
-  };
+  container.triggers("before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation");
 
-  _.def('Luca.core.Container')["extends"]('Luca.components.Panel')["with"]({
+  container.defines({
     className: 'luca-ui-container',
     componentTag: 'div',
     componentClass: 'luca-ui-panel',
     isContainer: true,
-    hooks: ["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"],
     rendered: false,
     components: [],
+    componentEvents: {},
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
-      this.setupHooks(["before:components", "before:render:components", "before:layout", "after:components", "after:layout", "first:activation"]);
-      this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards)));
+      this.setupHooks(Luca.core.Container.prototype.hooks);
+      this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
+      validateContainerConfiguration(this);
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
     beforeRender: function() {
@@ -2219,7 +2424,6 @@
       return containerEl;
     },
     prepareLayout: function() {
-      var container;
       container = this;
       return this.componentContainers = _(this.components).map(function(component, index) {
         return applyDOMConfig.call(container, component, index);
@@ -2254,37 +2458,32 @@
       });
     },
     createComponents: function() {
-      var container, map,
+      var map,
         _this = this;
       if (this.componentsCreated === true) return;
       map = this.componentIndex = {
         name_index: {},
-        cid_index: {}
+        cid_index: {},
+        role_index: {}
       };
       container = this;
       this.components = _(this.components).map(function(object, index) {
-        var component, created;
-        component = Luca.isBackboneView(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object = _.defaults(object, container.defaults || {}), created = Luca.util.lazyComponent(object));
-        if (_.isString(component.getter)) {
-          container[component.getter] = (function() {
-            return component;
-          });
-        }
-        if (!component.container && component.options.container) {
+        var component, created, _ref;
+        component = Luca.isComponent(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object = _.defaults(object, container.defaults || {}), created = Luca.util.lazyComponent(object));
+        if (!component.container && ((_ref = component.options) != null ? _ref.container : void 0)) {
           component.container = component.options.container;
         }
-        if (map && (component.cid != null)) map.cid_index[component.cid] = index;
-        if (map && (component.name != null)) {
-          map.name_index[component.name] = index;
+        if (!(component.container != null)) {
+          console.log(component, index, _this);
+          console.error("could not assign container property to component on container " + (_this.name || _this.cid));
         }
+        indexComponent(component).at(index)["in"](_this.componentIndex);
         return component;
       });
       this.componentsCreated = true;
-      if (!_.isEmpty(this.componentEvents)) this.registerComponentEvents();
       return map;
     },
     renderComponents: function(debugMode) {
-      var container;
       this.debugMode = debugMode != null ? debugMode : "";
       this.debug("container render components");
       container = this;
@@ -2293,7 +2492,7 @@
           return container;
         };
         try {
-          $(component.container).append(component.el);
+          this.$(component.container).eq(0).append(component.el);
           return component.render();
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
@@ -2320,43 +2519,102 @@
         }
       });
     },
+    _: function() {
+      return _(this.components);
+    },
     pluck: function(attribute) {
-      return _(this.components).pluck(attribute);
+      return this._().pluck(attribute);
     },
     invoke: function(method) {
-      return _(this.components).invoke(method);
+      return this._().invoke(method);
+    },
+    select: function(fn) {
+      return this._().select(fn);
+    },
+    detect: function(fn) {
+      return this._().detect(attribute);
+    },
+    reject: function(fn) {
+      return this._().reject(fn);
     },
     map: function(fn) {
-      return _(this.components).map(fn);
+      return this._().map(fn);
     },
-    componentEvents: {},
-    registerComponentEvents: function() {
-      var component, componentName, handler, listener, trigger, _ref, _ref2, _results;
-      _ref = this.componentEvents;
+    registerComponentEvents: function(eventList) {
+      var component, componentNameOrRole, eventId, handler, listener, _ref, _ref2, _results,
+        _this = this;
+      container = this;
+      _ref = eventList || this.componentEvents || {};
       _results = [];
       for (listener in _ref) {
         handler = _ref[listener];
-        _ref2 = listener.split(' '), componentName = _ref2[0], trigger = _ref2[1];
-        component = this.findComponentByName(componentName);
-        _results.push(component != null ? component.bind(trigger, this[handler]) : void 0);
+        _ref2 = listener.split(' '), componentNameOrRole = _ref2[0], eventId = _ref2[1];
+        if (!_.isFunction(this[handler])) {
+          console.log("Error registering component event", listener, componentNameOrRole, eventId);
+          throw "Invalid component event definition " + listener + ". Specified handler is not a method on the container";
+        }
+        if (componentNameOrRole === "*") {
+          _results.push(this.eachComponent(function(component) {
+            return component.on(eventId, _this[handler], container);
+          }));
+        } else {
+          component = this.findComponentForEventBinding(componentNameOrRole);
+          if (!((component != null) && Luca.isComponent(component))) {
+            console.log("Error registering component event", listener, componentNameOrRole, eventId);
+            throw "Invalid component event definition: " + componentNameOrRole;
+          }
+          _results.push(component != null ? component.bind(eventId, this[handler], container) : void 0);
+        }
       }
       return _results;
     },
+    subContainers: function() {
+      return this.select(function(component) {
+        return component.isContainer === true;
+      });
+    },
+    roles: function() {
+      return _(this.allChildren()).pluck('role');
+    },
+    allChildren: function() {
+      var children, grandchildren;
+      children = this.components;
+      grandchildren = _(this.subContainers()).invoke('allChildren');
+      return _([children, grandchildren]).chain().compact().flatten().value();
+    },
+    findComponentForEventBinding: function(nameRoleOrGetter, deep) {
+      if (deep == null) deep = true;
+      return this.findComponentByName(nameRoleOrGetter, deep) || this.findComponentByGetter(nameRoleOrGetter, deep) || this.findComponentByRole(nameRoleOrGetter, deep);
+    },
+    findComponentByGetter: function(getter, deep) {
+      if (deep == null) deep = false;
+      return _(this.allChildren()).detect(function(component) {
+        return component.getter === getter;
+      });
+    },
+    findComponentByRole: function(role, deep) {
+      if (deep == null) deep = false;
+      return _(this.allChildren()).detect(function(component) {
+        return component.role === role || component.type === role || component.ctype === role;
+      });
+    },
     findComponentByName: function(name, deep) {
       if (deep == null) deep = false;
-      return this.findComponent(name, "name_index", deep);
+      return _(this.allChildren()).detect(function(component) {
+        return component.name === name;
+      });
     },
     findComponentById: function(id, deep) {
       if (deep == null) deep = false;
       return this.findComponent(id, "cid_index", deep);
     },
     findComponent: function(needle, haystack, deep) {
-      var component, position, sub_container, _ref, _ref2;
+      var component, position, sub_container, _ref;
       if (haystack == null) haystack = "name";
       if (deep == null) deep = false;
       if (this.componentsCreated !== true) this.createComponents();
       position = (_ref = this.componentIndex) != null ? _ref[haystack][needle] : void 0;
-      component = (_ref2 = this.components) != null ? _ref2[position] : void 0;
+      component = this.components[position];
       if (component) return component;
       if (deep === true) {
         sub_container = _(this.components).detect(function(component) {
@@ -2406,23 +2664,21 @@
     },
     selectByAttribute: function(attribute, value, deep) {
       var components;
+      if (value == null) value = void 0;
       if (deep == null) deep = false;
       components = _(this.components).map(function(component) {
         var matches, test;
         matches = [];
         test = component[attribute];
-        if (test === value) matches.push(component);
+        if (test === value || (!(value != null) && (test != null))) {
+          matches.push(component);
+        }
         if (deep === true) {
           matches.push(typeof component.selectByAttribute === "function" ? component.selectByAttribute(attribute, value, true) : void 0);
         }
         return _.compact(matches);
       });
       return _.flatten(components);
-    },
-    select: function(attribute, value, deep) {
-      if (deep == null) deep = false;
-      console.log("Container.select will be replaced by selectByAttribute in 1.0");
-      return Luca.core.Container.prototype.selectByAttribute.apply(this, arguments);
     }
   });
 
@@ -2430,6 +2686,98 @@
     var attachMethod;
     attachMethod = $(component.container)[component.attachWith || "append"];
     return attachMethod(component.render().el);
+  };
+
+  doLayout = function() {
+    this.trigger("before:layout", this);
+    this.prepareLayout();
+    return this.trigger("after:layout", this);
+  };
+
+  applyDOMConfig = function(panel, panelIndex) {
+    var config, style_declarations;
+    style_declarations = [];
+    if (panel.height != null) {
+      style_declarations.push("height: " + (_.isNumber(panel.height) ? panel.height + 'px' : panel.height));
+    }
+    if (panel.width != null) {
+      style_declarations.push("width: " + (_.isNumber(panel.width) ? panel.width + 'px' : panel.width));
+    }
+    if (panel.float) style_declarations.push("float: " + panel.float);
+    config = {
+      "class": (panel != null ? panel.classes : void 0) || this.componentClass,
+      id: "" + this.cid + "-" + panelIndex,
+      style: style_declarations.join(';'),
+      "data-luca-parent": this.name || this.cid
+    };
+    if (this.customizeContainerEl != null) {
+      config = this.customizeContainerEl(config, panel, panelIndex);
+    }
+    return config;
+  };
+
+  createGetterMethods = function() {
+    var childrenWithGetter;
+    container = this;
+    childrenWithGetter = _(this.allChildren()).select(function(component) {
+      return component.getter != null;
+    });
+    return _(childrenWithGetter).each(function(component) {
+      var _name;
+      return container[_name = component.getter] || (container[_name] = function() {
+        console.log(component.getter, component, container);
+        return component;
+      });
+    });
+  };
+
+  createMethodsToGetComponentsByRole = function() {
+    var childrenWithRole;
+    container = this;
+    childrenWithRole = _(this.allChildren()).select(function(component) {
+      return component.role != null;
+    });
+    return _(childrenWithRole).each(function(component) {
+      var getter;
+      getter = _.str.camelize("get_" + component.role);
+      return container[getter] || (container[getter] = function() {
+        return component;
+      });
+    });
+  };
+
+  doComponents = function() {
+    this.trigger("before:components", this, this.components);
+    this.prepareComponents();
+    this.createComponents();
+    this.trigger("before:render:components", this, this.components);
+    this.renderComponents();
+    this.trigger("after:components", this, this.components);
+    if (this.skipGetterMethods !== true) {
+      createGetterMethods.call(this);
+      createMethodsToGetComponentsByRole.call(this);
+    }
+    return this.registerComponentEvents();
+  };
+
+  validateContainerConfiguration = function() {
+    return true;
+  };
+
+  indexComponent = function(component) {
+    return {
+      at: function(index) {
+        return {
+          "in": function(map) {
+            if (component.cid != null) map.cid_index[component.cid] = index;
+            if (component.role != null) map.role_index[component.role] = index;
+            if (component.name != null) {
+              return map.name_index[component.name] = index;
+            }
+          }
+        };
+      }
+    };
   };
 
 }).call(this);
@@ -2482,7 +2830,12 @@
       CollectionClass = collectionOptions.base;
       CollectionClass || (CollectionClass = guessCollectionClass.call(this, key));
       if (collectionOptions.private) collectionOptions.name = "";
-      collection = new CollectionClass(initialModels, collectionOptions);
+      try {
+        collection = new CollectionClass(initialModels, collectionOptions);
+      } catch (e) {
+        console.log("Error creating collection", CollectionClass, collectionOptions, key);
+        throw e;
+      }
       this.add(key, collection);
       collectionManager = this;
       if (this.relayEvents === true) {
@@ -2556,8 +2909,26 @@
 
   })();
 
+  Luca.CollectionManager.isRunning = function() {
+    return _.isEmpty(Luca.CollectionManager.instances) !== true;
+  };
+
   Luca.CollectionManager.destroyAll = function() {
     return Luca.CollectionManager.instances = {};
+  };
+
+  Luca.CollectionManager.loadCollectionsByName = function(set, callback) {
+    var collection, name, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = set.length; _i < _len; _i++) {
+      name = set[_i];
+      collection = this.getOrCreate(name);
+      collection.once("reset", function() {
+        return callback(collection);
+      });
+      _results.push(collection.fetch());
+    }
+    return _results;
   };
 
   guessCollectionClass = function(key) {
@@ -2576,7 +2947,7 @@
   };
 
   loadInitialCollections = function() {
-    var collectionDidLoad,
+    var collectionDidLoad, set,
       _this = this;
     collectionDidLoad = function(collection) {
       var current;
@@ -2585,14 +2956,8 @@
       _this.trigger("collection_loaded", collection.name);
       return collection.unbind("reset");
     };
-    return _(this.initialCollections).each(function(name) {
-      var collection;
-      collection = _this.getOrCreate(name);
-      collection.once("reset", function() {
-        return collectionDidLoad(collection);
-      });
-      return collection.fetch();
-    });
+    set = this.initialCollections;
+    return Luca.CollectionManager.loadCollectionsByName.call(this, set, collectionDidLoad);
   };
 
   handleInitialCollections = function() {
@@ -2611,6 +2976,7 @@
       }));
     }
     loadInitialCollections.call(this);
+    this.initialCollectionsLoadedu;
     return this;
   };
 
@@ -2883,7 +3249,70 @@
 
 }).call(this);
 (function() {
-  var buildButton, make, prepareButtons;
+  var buildButton, make, panelToolbar, prepareButtons;
+
+  panelToolbar = Luca.register("Luca.components.PanelToolbar");
+
+  panelToolbar["extends"]("Luca.View");
+
+  panelToolbar.defines({
+    buttons: [],
+    className: "luca-ui-toolbar btn-toolbar",
+    well: true,
+    orientation: 'top',
+    autoBindEventHandlers: true,
+    events: {
+      "click a.btn, click .dropdown-menu li": "clickHandler"
+    },
+    initialize: function(options) {
+      var _ref;
+      this.options = options != null ? options : {};
+      this._super("initialize", this, arguments);
+      if (this.group === true && ((_ref = this.buttons) != null ? _ref.length : void 0) >= 0) {
+        return this.buttons = [
+          {
+            group: true,
+            buttons: this.buttons
+          }
+        ];
+      }
+    },
+    clickHandler: function(e) {
+      var eventId, hook, me, my, source;
+      me = my = $(e.target);
+      if (me.is('i')) me = my = $(e.target).parent();
+      if (this.selectable === true) {
+        my.siblings().removeClass("is-selected");
+        me.addClass('is-selected');
+      }
+      if (!(eventId = my.data('eventid'))) return;
+      hook = Luca.util.hook(eventId);
+      source = this.parent || this;
+      if (_.isFunction(source[hook])) {
+        return source[hook].call(this, me, e);
+      } else {
+        return source.trigger(eventId, me, e);
+      }
+    },
+    beforeRender: function() {
+      this._super("beforeRender", this, arguments);
+      if (this.well === true) this.$el.addClass('well');
+      if (this.selectable === true) this.$el.addClass('btn-selectable');
+      this.$el.addClass("toolbar-" + this.orientation);
+      if (this.align === "right") this.$el.addClass("pull-right");
+      if (this.align === "left") return this.$el.addClass("pull-left");
+    },
+    render: function() {
+      var element, _i, _len, _ref;
+      this.$el.empty();
+      _ref = prepareButtons(this.buttons);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        element = _ref[_i];
+        this.$el.append(element);
+      }
+      return this;
+    }
+  });
 
   make = Backbone.View.prototype.make;
 
@@ -2891,14 +3320,11 @@
     var autoWrapClass, buttonAttributes, buttonEl, buttons, dropdownEl, dropdownItems, label, object, white, wrapper,
       _this = this;
     if (wrap == null) wrap = true;
-    if (config.ctype != null) {
+    if ((config.ctype != null) || (config.type != null)) {
       config.className || (config.className = "");
       config.className += 'toolbar-component';
       object = Luca(config).render();
-      if (Luca.isBackboneView(object)) {
-        console.log("Adding toolbar component", object);
-        return object.el;
-      }
+      if (Luca.isBackboneView(object)) return object.$el;
     }
     if (config.spacer) {
       return make("div", {
@@ -2911,8 +3337,11 @@
       }, config.text);
     }
     wrapper = 'btn-group';
-    if (config.wrapper != null) wrapper += " " + config.wrapper;
-    if (config.align != null) wrapper += " align-" + config.align;
+    if (config.wrapper != null) wrapper += "" + config.wrapper;
+    if (config.align != null) {
+      wrapper += "pull-" + config.align + " align-" + config.align;
+    }
+    if (config.selectable === true) wrapper += 'btn-selectable';
     if ((config.group != null) && (config.buttons != null)) {
       buttons = prepareButtons(config.buttons, false);
       return make("div", {
@@ -2934,6 +3363,7 @@
       if (config.color != null) {
         buttonAttributes["class"] += " btn-" + config.color;
       }
+      if (config.selected != null) buttonAttributes["class"] += " is-selected";
       if (config.dropdown) {
         label = "" + label + " <span class='caret'></span>";
         buttonAttributes["class"] += " dropdown-toggle";
@@ -2963,51 +3393,16 @@
   };
 
   prepareButtons = function(buttons, wrap) {
+    var button, _i, _len, _results;
+    if (buttons == null) buttons = [];
     if (wrap == null) wrap = true;
-    return _(buttons).map(function(button) {
-      return buildButton(button, wrap);
-    });
-  };
-
-  _.def("Luca.containers.PanelToolbar")["extends"]("Luca.View")["with"]({
-    className: "luca-ui-toolbar btn-toolbar",
-    buttons: [],
-    well: true,
-    orientation: 'top',
-    autoBindEventHandlers: true,
-    events: {
-      "click a.btn, click .dropdown-menu li": "clickHandler"
-    },
-    clickHandler: function(e) {
-      var eventId, hook, me, my, source;
-      me = my = $(e.target);
-      if (me.is('i')) me = my = $(e.target).parent();
-      eventId = my.data('eventid');
-      if (eventId == null) return;
-      hook = Luca.util.hook(eventId);
-      source = this.parent || this;
-      if (_.isFunction(source[hook])) {
-        return source[hook].call(this, me, e);
-      } else {
-        return source.trigger(eventId, me, e);
-      }
-    },
-    beforeRender: function() {
-      this._super("beforeRender", this, arguments);
-      if (this.well === true) this.$el.addClass('well');
-      this.$el.addClass("toolbar-" + this.orientation);
-      if (this.styles != null) return this.applyStyles(this.styles);
-    },
-    render: function() {
-      var elements,
-        _this = this;
-      this.$el.empty();
-      elements = prepareButtons(this.buttons);
-      return _(elements).each(function(element) {
-        return _this.$el.append(element);
-      });
+    _results = [];
+    for (_i = 0, _len = buttons.length; _i < _len; _i++) {
+      button = buttons[_i];
+      _results.push(buildButton(button, wrap));
     }
-  });
+    return _results;
+  };
 
 }).call(this);
 (function() {
@@ -3235,9 +3630,8 @@
 
 }).call(this);
 (function() {
-  var startHistory;
 
-  startHistory = function() {
+  Luca.util.startHistory = function() {
     return Backbone.history.start();
   };
 
@@ -3376,7 +3770,9 @@
         });
       }
       return (_ref2 = this.getMainController()) != null ? _ref2.each(function(component) {
-        if (component.ctype.match(/controller$/)) {
+        var type;
+        type = component.type || component.type;
+        if (type.match(/controller$/)) {
           return component.bind("after:card:switch", function(previous, current) {
             _this.state.set({
               active_sub_section: current.name
@@ -3392,7 +3788,7 @@
         definedComponents = this.components || [];
         this.components = [
           {
-            ctype: 'controller',
+            type: 'controller',
             name: "main_controller",
             components: definedComponents
           }
@@ -3401,25 +3797,27 @@
       }
     },
     setupCollectionManager: function() {
-      var collectionManagerOptions, _base, _ref, _ref2;
-      if (this.useCollectionManager === true) {
-        if (_.isString(this.collectionManagerClass)) {
-          this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
-        }
-        collectionManagerOptions = this.collectionManagerOptions;
-        if (_.isObject(this.collectionManager) && !_.isFunction((_ref = this.collectionManager) != null ? _ref.get : void 0)) {
-          collectionManagerOptions = this.collectionManager;
-          this.collectionManager = void 0;
-        }
-        if (_.isString(this.collectionManager)) {
-          collectionManagerOptions = {
-            name: this.collectionManager
-          };
-        }
-        this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
-        if (!_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
-          return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
-        }
+      var collectionManagerOptions, _base, _ref, _ref2, _ref3;
+      if (this.useCollectionManager !== true) return;
+      if ((this.collectionManager != null) && (((_ref = this.collectionManager) != null ? _ref.get : void 0) != null)) {
+        return;
+      }
+      if (_.isString(this.collectionManagerClass)) {
+        this.collectionManagerClass = Luca.util.resolve(this.collectionManagerClass);
+      }
+      collectionManagerOptions = this.collectionManagerOptions || {};
+      if (_.isObject(this.collectionManager) && !_.isFunction((_ref2 = this.collectionManager) != null ? _ref2.get : void 0)) {
+        collectionManagerOptions = this.collectionManager;
+        this.collectionManager = void 0;
+      }
+      if (_.isString(this.collectionManager)) {
+        collectionManagerOptions = {
+          name: this.collectionManager
+        };
+      }
+      this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
+      if (!_.isFunction((_ref3 = this.collectionManager) != null ? _ref3.get : void 0)) {
+        return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
       }
     },
     setupRouter: function() {
@@ -3435,7 +3833,7 @@
         if (this.autoStartHistory === true) {
           this.autoStartHistory = "before:render";
         }
-        return this.defer(startHistory, false).until(this, this.autoStartHistory);
+        return this.defer(Luca.util.startHistory, false).until(this, this.autoStartHistory);
       }
     },
     setupKeyHandler: function() {
@@ -3515,7 +3913,7 @@
 
 }).call(this);
 (function() {
-  var collectionView, make, setupChangeObserver;
+  var collectionView, make;
 
   collectionView = Luca.define("Luca.components.CollectionView");
 
@@ -3523,7 +3921,9 @@
 
   collectionView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
 
-  collectionView.defaultsTo({
+  collectionView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
+
+  collectionView.defaults({
     tagName: "ol",
     className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
@@ -3531,45 +3931,52 @@
     itemRenderer: void 0,
     itemTagName: 'li',
     itemClassName: 'collection-item',
-    hooks: ["before:refresh", "empty:results", "after:refresh"],
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.bindAll(this, "refresh");
       if (!((this.collection != null) || this.options.collection)) {
+        console.log("Error on initialize of collection view", this);
         throw "Collection Views must specify a collection";
       }
       if (!((this.itemTemplate != null) || (this.itemRenderer != null) || (this.itemProperty != null))) {
         throw "Collection Views must specify an item template or item renderer function";
       }
-      Luca.components.Panel.prototype.initialize.apply(this, arguments);
-      if (_.isString(this.collection) && Luca.CollectionManager.get()) {
-        this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
+      if (_.isString(this.collection)) {
+        if (Luca.CollectionManager.get()) {
+          this.collection = Luca.CollectionManager.get().getOrCreate(this.collection);
+        } else {
+          console.log("String Collection but no collection manager");
+        }
       }
       if (!Luca.isBackboneCollection(this.collection)) {
+        console.log("Missing Collection on " + (this.name || this.cid), this, this.collection);
         throw "Collection Views must have a valid backbone collection";
         this.collection.on("before:fetch", function() {
-          if (_this.loadMask === true) return _this.trigger("enable:loadmask");
+          return _this.trigger("enable:loadmask");
         });
         this.collection.bind("reset", function() {
-          _this.trigger("collection:change");
-          if (_this.loadMask === true) return _this.trigger("disable:loadmask");
+          _this.refresh();
+          return _this.trigger("disable:loadmask");
         });
         this.collection.bind("remove", function() {
-          return _this.trigger("collection:change");
+          return _this.refresh();
         });
         this.collection.bind("add", function() {
-          return _this.trigger("collection:change");
+          return _this.refresh();
         });
-        if (this.observeChanges === true) setupChangeObserver.call(this);
+        if (this.observeChanges === true) {
+          this.collection.on("change", this.refreshModel, this);
+        }
       }
+      Luca.components.Panel.prototype.initialize.apply(this, arguments);
       if (this.autoRefreshOnModelsPresent !== false) {
         this.defer(function() {
           if (_this.collection.length > 0) return _this.refresh();
         }).until("after:render");
       }
-      return this.on("collection:change", this.refresh, this);
+      return this.on("refresh", this.refresh, this);
     },
     attributesForItem: function(item, model) {
       return _.extend({}, {
@@ -3609,11 +4016,33 @@
     getCollection: function() {
       return this.collection;
     },
+    applyQuery: function(query, queryOptions) {
+      if (query == null) query = {};
+      if (queryOptions == null) queryOptions = {};
+      this.query = query;
+      this.queryOptions = queryOptions;
+      this.refresh();
+      return this;
+    },
     getQuery: function() {
-      return {};
+      var query, querySource, _i, _len, _ref;
+      query = this.query || (this.query = {});
+      _ref = _(this.querySources || []).compact();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        querySource = _ref[_i];
+        query = _.extend(query, querySource() || {});
+      }
+      return query;
     },
     getQueryOptions: function() {
-      return {};
+      var optionSource, options, _i, _len, _ref;
+      options = this.queryOptions || (this.queryOptions = {});
+      _ref = _(this.optionsSources || []).compact();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        optionSource = _ref[_i];
+        options = _.extend(options, optionSource() || {});
+      }
+      return options;
     },
     getModels: function(query, options) {
       var _ref;
@@ -3631,15 +4060,18 @@
     refreshModel: function(model) {
       var index;
       index = this.collection.indexOf(model);
-      return this.locateItemElement(model.get('id')).empty().append(this.contentForItem({
+      this.locateItemElement(model.get('id')).empty().append(this.contentForItem({
         model: model,
         index: index
       }, model));
+      return this.trigger("model:refreshed", index, model);
     },
-    refresh: function(query, options) {
-      var index, model, models, _i, _len;
+    refresh: function(query, options, models) {
+      var index, model, _i, _len;
+      query || (query = this.getQuery());
+      options || (options = this.getQueryOptions());
+      models || (models = this.getModels(query, options));
       this.$bodyEl().empty();
-      models = this.getModels(query, options);
       this.trigger("before:refresh", models, query, options);
       if (models.length === 0) this.trigger("empty:results");
       index = 0;
@@ -3667,13 +4099,6 @@
   });
 
   make = Luca.View.prototype.make;
-
-  setupChangeObserver = function() {
-    var _this = this;
-    return this.collection.on("change", function(model) {
-      return _this.refreshModel(model);
-    });
-  };
 
 }).call(this);
 (function() {
@@ -3941,10 +4366,10 @@
       return this.label || (this.label = this.name);
     },
     setValue: function(checked) {
-      return this.input.attr('checked', checked);
+      return this.getInputElement().attr('checked', checked);
     },
     getValue: function() {
-      return this.input.is(":checked");
+      return this.getInputElement().is(":checked");
     }
   });
 
@@ -3953,10 +4378,6 @@
 
   _.def('Luca.fields.FileUploadField')["extends"]('Luca.core.Field')["with"]({
     template: 'fields/file_upload_field',
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
-    },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
@@ -3970,10 +4391,6 @@
 
   _.def('Luca.fields.HiddenField')["extends"]('Luca.core.Field')["with"]({
     template: 'fields/hidden_field',
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.core.Field.prototype.initialize.apply(this, arguments);
-    },
     afterInitialize: function() {
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
@@ -3987,16 +4404,13 @@
 
   _.def("Luca.components.LabelField")["extends"]("Luca.core.Field")["with"]({
     className: "luca-ui-field luca-ui-label-field",
-    getValue: function() {
-      return this.$('input').attr('value');
-    },
     formatter: function(value) {
       value || (value = this.getValue());
       return _.str.titleize(value);
     },
     setValue: function(value) {
       this.trigger("change", value, this.getValue());
-      this.$('input').attr('value', value);
+      this.getInputElement().attr('value', value);
       return this.$('.value').html(this.formatter(value));
     }
   });
@@ -4051,9 +4465,11 @@
         return hash;
       });
     },
+    getInputElement: function() {
+      return this.input || (this.input = this.$('select').eq(0));
+    },
     afterRender: function() {
       var _ref, _ref2;
-      this.input = $('select', this.el);
       if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
         return this.populateOptions();
       } else {
@@ -4071,9 +4487,9 @@
       return this.trigger("on:change", this, e);
     },
     resetOptions: function() {
-      this.input.html('');
+      this.getInputElement().html('');
       if (this.includeBlank) {
-        return this.input.append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
+        return this.getInputElement().append("<option value='" + this.blankValue + "'>" + this.blankText + "</option>");
       }
     },
     populateOptions: function() {
@@ -4087,7 +4503,7 @@
           display = model.get(_this.displayField);
           if (_this.selected && value === _this.selected) selected = "selected";
           option = "<option " + selected + " value='" + value + "'>" + display + "</option>";
-          return _this.input.append(option);
+          return _this.getInputElement().append(option);
         });
       }
       this.trigger("after:populate:options", this);
@@ -4110,13 +4526,14 @@
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.bindAll(this, "keydown_handler");
-      Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
       this.input_value || (this.input_value = "");
-      return this.inputStyles || (this.inputStyles = "height:" + this.height + ";width:" + this.width);
+      this.inputStyles || (this.inputStyles = "height:" + this.height + ";width:" + this.width);
+      this.placeHolder || (this.placeHolder = this.placeHolder);
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
     setValue: function(value) {
       return $(this.field()).val(value);
@@ -4162,6 +4579,7 @@
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
       this.input_value || (this.input_value = this.value || "");
+      this.placeHolder || (this.placeHolder = this.placeHolder);
       if (this.prepend) {
         this.$el.addClass('input-prepend');
         this.addOn = this.prepend;
@@ -4192,19 +4610,18 @@
   _.def('Luca.fields.TypeAheadField')["extends"]('Luca.fields.TextField')["with"]({
     className: 'luca-ui-field',
     getSource: function() {
-      if (_.isFunction(this.source)) return this.source.call(this);
-      return this.source || [];
+      return Luca.util.read(this.source) || [];
     },
     matcher: function(item) {
       return true;
     },
     beforeRender: function() {
-      this._super("beforeRender", this, arguments);
-      return this.$('input').attr('data-provide', 'typeahead');
+      Luca.fields.TextField.prototype.beforeRender.apply(this, arguments);
+      return this.getInputElement().attr('data-provide', 'typeahead');
     },
     afterRender: function() {
-      this._super("afterRender", this, arguments);
-      return this.$('input').typeahead({
+      Luca.fields.TextField.prototype.afterRender.apply(this, arguments);
+      return this.getInputElement().typeahead({
         matcher: this.matcher,
         source: this.getSource()
       });
@@ -4243,27 +4660,6 @@
 
 }).call(this);
 (function() {
-  var defaultToolbar;
-
-  defaultToolbar = {
-    buttons: [
-      {
-        icon: "remove-sign",
-        label: "Reset",
-        eventId: "click:reset",
-        className: "reset-button",
-        align: 'right'
-      }, {
-        icon: "ok-sign",
-        white: true,
-        label: "Save Changes",
-        eventId: "click:submit",
-        color: "success",
-        className: 'submit-button',
-        align: 'right'
-      }
-    ]
-  };
 
   _.def("Luca.components.FormView")["extends"]('Luca.core.Container')["with"]({
     tagName: 'form',
@@ -4296,7 +4692,7 @@
       }
     },
     getDefaultToolbar: function() {
-      return defaultToolbar;
+      return Luca.components.FormView.defaultFormViewToolbar;
     },
     applyStyleClasses: function() {
       if (Luca.enableBootstrap) this.applyBootstrapStyleClasses();
@@ -4509,6 +4905,26 @@
       }));
     }
   });
+
+  Luca.components.FormView.defaultFormViewToolbar = {
+    buttons: [
+      {
+        icon: "remove-sign",
+        label: "Reset",
+        eventId: "click:reset",
+        className: "reset-button",
+        align: 'right'
+      }, {
+        icon: "ok-sign",
+        white: true,
+        label: "Save Changes",
+        eventId: "click:submit",
+        color: "success",
+        className: 'submit-button',
+        align: 'right'
+      }
+    ]
+  };
 
 }).call(this);
 (function() {
@@ -4762,6 +5178,115 @@
 
 }).call(this);
 (function() {
+  var multiView, propagateCollectionComponents, validateComponent;
+
+  multiView = Luca.define("Luca.components.MultiCollectionView");
+
+  multiView["extends"]("Luca.containers.CardView");
+
+  multiView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
+
+  multiView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
+
+  multiView.defaultsTo({
+    version: 1,
+    stateful: true,
+    defaultState: {
+      activeView: 0
+    },
+    viewContainerClass: "luca-ui-multi-view-container",
+    initialize: function(options) {
+      var view, _i, _len, _ref;
+      this.options = options != null ? options : {};
+      this.components || (this.components = this.views);
+      _ref = this.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        view = _ref[_i];
+        validateComponent(view);
+      }
+      this.on("refresh", this.refresh, this);
+      this.on("after:card:switch", this.refresh, this);
+      this.on("after:components", propagateCollectionComponents, this);
+      this.debug("multi collection , proto initialize");
+      return Luca.containers.CardView.prototype.initialize.apply(this, arguments);
+    },
+    relayAfterRefresh: function(models, query, options) {
+      return this.trigger("after:refresh", models, query, options);
+    },
+    refresh: function() {
+      var _ref;
+      return (_ref = this.activeComponent()) != null ? _ref.trigger("refresh") : void 0;
+    },
+    getCollection: function() {
+      return this.collection;
+    },
+    applyQuery: function(query, queryOptions) {
+      if (query == null) query = {};
+      if (queryOptions == null) queryOptions = {};
+      this.query = query;
+      this.queryOptions = queryOptions;
+      return this;
+    },
+    getQuery: function() {
+      var query, querySource, _i, _len, _ref;
+      this.debug("Get Query");
+      query = this.query || (this.query = {});
+      _ref = this.querySources;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        querySource = _ref[_i];
+        query = _.extend(query, querySource() || {});
+      }
+      return query;
+    },
+    getQueryOptions: function() {
+      var optionSource, options, _i, _len, _ref;
+      this.debug("Get Query Options");
+      options = this.queryOptions || (this.queryOptions = {});
+      _ref = this.optionsSources;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        optionSource = _ref[_i];
+        options = _.extend(options, optionSource() || {});
+      }
+      return options;
+    }
+  });
+
+  propagateCollectionComponents = function() {
+    var component, container, _i, _len, _ref, _results,
+      _this = this;
+    container = this;
+    _ref = this.components;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      component = _ref[_i];
+      component.on("after:refresh", function(models, query, options) {
+        _this.debug("collection member after refresh");
+        return _this.trigger("after:refresh", models, query, options);
+      });
+      _results.push(_.extend(component, {
+        collection: container.getCollection(),
+        getQuery: function() {
+          return container.getQuery.call(container);
+        },
+        getQueryOptions: function() {
+          return container.getQueryOptions.call(container);
+        }
+      }));
+    }
+    return _results;
+  };
+
+  validateComponent = function(component) {
+    var type;
+    type = component.type || component.ctype;
+    if (type === "collection" || type === "collection_view" || type === "table" || type === "table_view") {
+      return;
+    }
+    throw "The MultiCollectionView expects to contain multiple collection views";
+  };
+
+}).call(this);
+(function() {
 
   _.def("Luca.components.NavBar")["extends"]("Luca.View")["with"]({
     fixed: true,
@@ -4798,11 +5323,11 @@
 (function() {
   var paginationControl;
 
-  paginationControl = Luca.define("Luca.components.PaginationControl");
+  paginationControl = Luca.register("Luca.components.PaginationControl");
 
   paginationControl["extends"]("Luca.View");
 
-  paginationControl.defaultsTo({
+  paginationControl.defines({
     template: "components/pagination",
     stateful: true,
     autoBindEventHandlers: true,
@@ -4812,7 +5337,11 @@
       "click a.prev": "previousPage"
     },
     afterInitialize: function() {
-      return this.state.on("change", this.refresh, this);
+      var _this = this;
+      _.bindAll(this, "updateWithPageCount");
+      return this.state.on("change", function(state, numberOfPages) {
+        return _this.updateWithPageCount(state.get('numberOfPages'));
+      });
     },
     limit: function() {
       var _ref;
@@ -4865,18 +5394,26 @@
     pageButtons: function() {
       return this.$('a[data-page-number]', this.pageButtonContainer());
     },
-    refresh: function() {
-      var button, page, _ref;
+    updateWithPageCount: function(pageCount, models) {
+      var modelCount,
+        _this = this;
+      this.pageCount = pageCount;
+      if (models == null) models = [];
+      modelCount = models.length;
+      console.log("Update With Page Count", this.pageCount, modelCount);
       this.pageButtonContainer().empty();
-      for (page = 1, _ref = this.totalPages(); 1 <= _ref ? page <= _ref : page >= _ref; 1 <= _ref ? page++ : page--) {
-        button = this.make("a", {
+      _(this.pageCount).times(function(index) {
+        var button, page;
+        page = index + 1;
+        button = _this.make("a", {
           "data-page-number": page,
           "class": "page"
         }, page);
-        this.pageButtonContainer().append(button);
-      }
+        return _this.pageButtonContainer().append(button);
+      });
       this.toggleNavigationButtons();
-      return this.selectActivePageButton();
+      this.selectActivePageButton();
+      return this;
     },
     toggleNavigationButtons: function() {
       this.$('a.next, a.prev').addClass('disabled');
@@ -4892,7 +5429,7 @@
       return this.pageButtons().filter("[data-page-number='" + (this.page()) + "']");
     },
     totalPages: function() {
-      return parseInt(Math.ceil(this.totalItems() / this.itemsPerPage()));
+      return this.pageCount;
     },
     totalItems: function() {
       var _ref;
@@ -4900,8 +5437,8 @@
     },
     itemsPerPage: function(value, options) {
       if (options == null) options = {};
-      if (value != null) this.set("limit", value, options);
-      return parseInt(this.get("limit"));
+      if (value != null) this.state.set("limit", value, options);
+      return parseInt(this.state.get("limit"));
     }
   });
 
@@ -5209,11 +5746,8 @@
       }
       return _results;
     })();
-    console.log("one");
-    this.$(targetElement).append(make("tr", {}, content));
-    console.log("two");
+    this.$(targetElement).append("<tr>" + (content.join('')) + "</tr>");
     index = 0;
-    console.log("three");
     _results = [];
     for (_i = 0, _len = columns.length; _i < _len; _i++) {
       column = columns[_i];
@@ -5305,6 +5839,82 @@
 (function() {
 
 
+
+}).call(this);
+(function() {
+
+  describe('The Collection View', function() {
+    beforeEach(function() {
+      this.collection = new Luca.Collection([
+        {
+          id: 1,
+          attr: "value_one",
+          filter: "value"
+        }, {
+          id: 2,
+          attr: "value_two",
+          filter: "value"
+        }
+      ], {
+        model: Luca.Model
+      });
+      this.view = new Luca.components.CollectionView({
+        itemTagName: "li",
+        itemClassName: "custom-class",
+        itemProperty: 'attr',
+        collection: this.collection,
+        filterable: {
+          query: {
+            filter: "value"
+          },
+          options: {
+            sortBy: "filter"
+          }
+        }
+      });
+      return this.view.render();
+    });
+    it("should provide access to the query", function() {
+      return expect(this.view.getQuery()).toBeDefined();
+    });
+    it("should provide access to the query options", function() {
+      return expect(this.view.getQueryOptions()).toBeDefined();
+    });
+    it("should combine filter and pagination in the options hash", function() {
+      var options, query;
+      this.view.setPage(5);
+      this.view.applyFilter({
+        filter: "value"
+      }, {
+        sortBy: 'filter'
+      });
+      options = this.view.getQueryOptions();
+      query = this.view.getQuery();
+      expect(options.page).toEqual(5);
+      expect(options.sortBy).toEqual('filter');
+      return expect(query.filter).toEqual('value');
+    });
+    it("should render the attributes in the specified list elements", function() {
+      return expect(this.view.$html()).toContain('value_one');
+    });
+    it("should render each of the attributes", function() {
+      return expect(this.view.$('li.custom-class').length).toEqual(2);
+    });
+    it("should locate a dom element by luca model id", function() {
+      return expect(this.view.locateItemElement(2).html()).toContain('value_two');
+    });
+    it("should refresh the view when a model is added", function() {
+      this.view.collection.add({
+        attr: "value_three",
+        id: 3
+      });
+      return expect(this.view).toHaveTriggered('after:refresh');
+    });
+    return it("should refresh the view when a model is removed", function() {
+      this.view.collection.remove(this.view.collection.at(0));
+      return expect(this.view).toHaveTriggered('after:refresh');
+    });
+  });
 
 }).call(this);
 (function() {
@@ -5432,6 +6042,21 @@
       });
       return expect(this.form.getValues().field1).toEqual("yes");
     });
+  });
+
+}).call(this);
+(function() {
+
+
+
+}).call(this);
+(function() {
+
+  describe('The Collection Multi View component', function() {
+    it("should share a single collection among multiple collection views", function() {});
+    it("should toggle visibility of one or more views", function() {});
+    it("should share pagination state across the multiple views", function() {});
+    return it("should share filter state across the multiple views", function() {});
   });
 
 }).call(this);
@@ -5939,7 +6564,7 @@
   describe('The Luca Container', function() {
     beforeEach(function() {
       var c;
-      return c = this.container = new Luca.core.Container({
+      c = this.container = new Luca.core.Container({
         defaults: {
           defaultProperty: 'it_works'
         },
@@ -5954,7 +6579,8 @@
             id: "c1",
             value: 1,
             getter: "getOne",
-            spy: sinon.spy()
+            spy: sinon.spy(),
+            role: "role_one"
           }, {
             name: "component_two",
             ctype: "view",
@@ -5963,7 +6589,9 @@
             },
             id: "c2",
             value: 0,
-            spy: sinon.spy()
+            spy: sinon.spy(),
+            role: "role_two",
+            getter: "getComponentTwo"
           }, {
             name: "component_three",
             ctype: "container",
@@ -5983,6 +6611,23 @@
           }
         ]
       });
+      return this.container.render();
+    });
+    it("should create getter methods on the for components with roles", function() {
+      return expect(this.container.getRoleTwo).toBeDefined();
+    });
+    it("should create getter methods on the for components with roles", function() {
+      return expect(this.container.getRoleTwo().name).toEqual('component_two');
+    });
+    it("should create a getter function on the container", function() {
+      return expect(this.container.getOne().name).toEqual('component_one');
+    });
+    it("should apply default properties to components", function() {
+      var custom, defaults;
+      defaults = this.container.selectByAttribute('defaultProperty', 'it_works');
+      custom = this.container.selectByAttribute('defaultProperty', 'oh_yeah');
+      expect(defaults.length).toEqual(2);
+      return expect(custom.length).toEqual(1);
     });
     it("should trigger after initialize", function() {
       return expect(this.container).toHaveTriggered("after:initialize");
@@ -6016,16 +6661,122 @@
         return expect(component.spy).toHaveBeenCalled();
       });
     });
-    it("should run a function on each component including nested", function() {
+    return it("should run a function on each component including nested", function() {
       this.container.render();
       this.container.eachComponent(function(c) {
         return c.spy();
       });
       return expect(Luca.cache("component_four").spy).toHaveBeenCalled();
     });
-    return it("should be able to find a component by name", function() {
-      expect(this.container.findComponentByName("component_one")).toBeDefined();
-      return expect(this.container.findComponentByName("undefined")).not.toBeDefined();
+  });
+
+  describe('Component Event Binding', function() {
+    beforeEach(function() {
+      this.container = new Luca.core.Container({
+        componentEvents: {
+          "haha trigger:one": "one",
+          "alpha trigger:two": "two",
+          "getAlphaComponent trigger:three": "three",
+          "* trigger:four": "four",
+          "beta trigger:five": "five"
+        },
+        one: function() {
+          return this.trigger("one");
+        },
+        two: function() {
+          return this.trigger("two");
+        },
+        three: function() {
+          return this.trigger("three");
+        },
+        four: function() {
+          return this.trigger("four");
+        },
+        five: function() {
+          return this.trigger("five");
+        },
+        afterRender: function() {
+          return this.getGamma().trigger("after:render:gamma");
+        },
+        registerComponentEvents: function() {
+          return Luca.core.Container.prototype.registerComponentEvents.apply(this, arguments);
+        },
+        components: [
+          {
+            name: "component_alpha",
+            role: "alpha",
+            getter: "getAlphaComponent"
+          }, {
+            name: "container_tester",
+            type: "container",
+            components: [
+              {
+                name: "beta_view",
+                role: "beta",
+                components: [
+                  {
+                    role: "gamma",
+                    name: "haha"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+      return this.container.render();
+    });
+    it("should give me all of the components", function() {
+      var names;
+      names = _(this.container.allChildren()).pluck('name');
+      return expect(names).toEqual(['component_alpha', 'container_tester', 'beta_view', 'haha']);
+    });
+    it("should drill down into nested components", function() {
+      expect(this.container.getBeta).toBeDefined();
+      return expect(this.container.getBeta().name).toEqual('beta_view');
+    });
+    it("should observe the right rendering order", function() {
+      return expect(this.container.getGamma()).toHaveTriggered("after:render:gamma");
+    });
+    it("should pick up events on nested components", function() {
+      this.container.getBeta().trigger("trigger:five");
+      return expect(this.container).toHaveTriggered("five");
+    });
+    it("should recursively define role based getters", function() {
+      expect(this.container.getAlpha).toBeDefined();
+      expect(this.container.getBeta).toBeDefined();
+      return expect(this.container.getGamma).toBeDefined();
+    });
+    it("should define a getter", function() {
+      return expect(this.container.getAlphaComponent).toBeDefined();
+    });
+    it("should find a nested component by name", function() {
+      return expect(this.container.findComponentByName('haha')).toBeDefined();
+    });
+    it("should find the component by its name", function() {
+      return expect(this.container.findComponentByName("beta_view")).toBeDefined();
+    });
+    it("should find the component by its role", function() {
+      return expect(this.container.findComponentByRole("alpha")).toBeDefined();
+    });
+    it("should find the component by its getter", function() {
+      return expect(this.container.findComponentByGetter('getAlphaComponent')).toBeDefined();
+    });
+    it("should accept wildcard for component", function() {
+      this.container.getAlphaComponent().trigger("trigger:four");
+      return expect(this.container).toHaveTriggered("four");
+    });
+    it("should accept component events with a component name", function() {
+      this.container.getGamma().trigger("trigger:one");
+      return expect(this.container).toHaveTriggered("one");
+    });
+    it("should accept component events with a component role", function() {
+      this.container.getAlphaComponent().trigger("trigger:two");
+      return expect(this.container).toHaveTriggered("two");
+    });
+    return it("should accept component events with a component getter", function() {
+      this.container.getAlphaComponent().trigger("trigger:three");
+      return expect(this.container).toHaveTriggered("three");
     });
   });
 
@@ -6055,17 +6806,17 @@
         fullName: ['firstName', 'lastName']
       }
     });
-    it("should have it undefined if dependences are not set", function() {
+    it("should be undefined if dependences are not set", function() {
       var model;
       model = new App.models.Sample;
       return expect(model.get("fullName")).toEqual(void 0);
     });
-    it("should have it undefined if callback function is not present", function() {
+    it("should be undefined if callback function is not present", function() {
       var model;
       model = new App.models.SampleWithoutCallback;
       return expect(model.get("fullName")).toEqual(void 0);
     });
-    it("should not call it's callback if dependences are not set", function() {
+    it("should not call the callback if dependences are not set", function() {
       var model, spy;
       model = new App.models.Sample;
       spy = sinon.spy(model, "fullName");
@@ -6109,6 +6860,29 @@
         lastName: "Schwarz"
       });
       return expect(model.get("fullName")).toEqual('Nickolay Schwarz');
+    });
+  });
+
+  describe('The Read Method', function() {
+    var ModelClass;
+    ModelClass = Luca.Model.extend({
+      defaults: {
+        attribute: "attribute"
+      },
+      reader: function() {
+        return "reader";
+      }
+    });
+    it("should read an attribute", function() {
+      var model;
+      model = new ModelClass();
+      return expect(model.read('attribute')).toEqual("attribute");
+    });
+    return it("should read functions", function() {
+      var model;
+      model = new ModelClass();
+      expect(model.read('attribute')).toEqual("attribute");
+      return expect(model.read('reader')).toEqual('reader');
     });
   });
 
@@ -6350,6 +7124,34 @@
       collection.reset([]);
       return expect(view.resetHandler).toHaveBeenCalled();
     });
+  });
+
+}).call(this);
+(function() {
+
+  describe('The Component Definition System', function() {
+    beforeEach(function() {
+      return Luca.components.SampleComponentDefinition = void 0;
+    });
+    it("should define a component", function() {
+      Luca.register("Luca.components.SampleComponentDefinition").defines({
+        version: 1
+      });
+      return expect(Luca.isComponentPrototype(Luca.components.SampleComponentDefinition)).toEqual(true);
+    });
+    it("should default to Luca.View for the extends portion", function() {
+      Luca.register("Luca.components.SampleComponentDefinition").defines({
+        version: 1
+      });
+      return expect(Luca.parentClasses(Luca.components.SampleComponentDefinition)).toContain('Luca.View');
+    });
+    it("should track the parent classes", function() {
+      Luca.register("Luca.components.SampleComponentDefinition").defines({
+        version: 1
+      });
+      return expect(Luca.parentClasses(Luca.components.SampleComponentDefinition)).toEqual(['Luca.View', 'Backbone.View']);
+    });
+    return xit("should defer component extension until dependencies are defined", function() {});
   });
 
 }).call(this);
@@ -6802,10 +7604,116 @@
 (function() {
 
   describe('The Mixin System', function() {
-    it('Should not extend the prototype with the initializer', function() {});
-    it('Should fire the intializer when an instance is created', function() {});
-    return describe('The Initializer on extended classes', function() {});
+    var sampleView, secondView;
+    window.Luca || (window.Luca = {});
+    Luca.mixin.namespace('Luca.test_modules');
+    Luca.test_modules = {
+      SecondMixin: {
+        __included: function() {
+          return window.secondMixinIncluded = true;
+        },
+        __initializer: function() {
+          return this.trigger("second:mixin");
+        }
+      },
+      FirstMixin: {
+        __initializer: function() {
+          return this.trigger("first:mixin");
+        },
+        __privateMethod: function() {
+          return true;
+        },
+        publicMethod: function() {
+          return true;
+        }
+      }
+    };
+    sampleView = Luca.register('Luca.components.FirstView');
+    sampleView.mixesIn('FirstMixin');
+    sampleView.defines({
+      sampleMethod: function() {
+        return "sample";
+      }
+    });
+    secondView = Luca.register("Luca.components.SecondView");
+    secondView["extends"]('Luca.components.FirstView');
+    secondView.mixesIn('SecondMixin');
+    secondView.defines({
+      version: 2
+    });
+    it("should omit the private methods defined on the mixin", function() {
+      sampleView = new Luca.components.FirstView;
+      return expect(sampleView.__privateMethod).not.toBeDefined();
+    });
+    it("should extend the prototype with the mixins normal methods", function() {
+      sampleView = new Luca.components.FirstView;
+      return expect(sampleView.publicMethod).toBeDefined();
+    });
+    it("should call the initializer for that module on the instance", function() {
+      secondView = new Luca.components.SecondView;
+      return expect(secondView).toHaveTriggered("second:mixin");
+    });
+    return it("should call the initializers up the prototype chain", function() {
+      secondView = new Luca.components.SecondView;
+      return expect(secondView).toHaveTriggered("first:mixin");
+    });
   });
+
+}).call(this);
+(function() {
+
+  describe('The Filterable Plugin', function() {
+    return describe('Through the CollectionView', function() {
+      beforeEach(function() {
+        this.collection = new Luca.Collection([
+          {
+            name: "name"
+          }, {
+            name: "filterable"
+          }
+        ]);
+        return this.view = new Luca.components.TableView({
+          collection: this.collection,
+          columns: [
+            {
+              reader: "name"
+            }
+          ]
+        });
+      });
+      it('should generate a Backbone.QueryCollection query payload', function() {
+        return expect(this.view.getFilterState().toQuery()).toBeDefined();
+      });
+      it("should have a toRemote method which merges params", function() {
+        return expect(this.view.getFilterState().toRemote()).toBeDefined();
+      });
+      it('should apply filter values', function() {
+        this.view.applyFilter({
+          filter: "value"
+        });
+        return expect(this.view.getFilterState().toQuery().filter).toEqual('value');
+      });
+      it('should generate a Backbone.QueryCollection options payload', function() {
+        return expect(this.view.getFilterState().toOptions()).toBeDefined();
+      });
+      return it("should trigger a refresh event on filter change", function() {
+        this.view.applyFilter({
+          filter: "value"
+        });
+        return expect(this.view).toHaveTriggered("refresh");
+      });
+    });
+  });
+
+}).call(this);
+(function() {
+
+
+
+}).call(this);
+(function() {
+
+
 
 }).call(this);
 (function() {

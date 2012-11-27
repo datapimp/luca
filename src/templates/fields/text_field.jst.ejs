@@ -6,7 +6,7 @@
 <% if( typeof(addOn) !== "undefined" ) { %>
   <span class="add-on"><%= addOn %></span>
 <% } %>
-<input type="text" name="<%= input_name %>" style="<%= inputStyles %>" value="<%= input_value %>" />
+<input type="text" name="<%= input_name %>" style="<%= inputStyles %>" value="<%= input_value %>" placeholder="<%= placeHolder %>" />
 <% if(helperText) { %>
 <p class="helper-text help-block">
   <%= helperText %>
