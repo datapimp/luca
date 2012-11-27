@@ -3,6 +3,13 @@ describe 'The Luca Container', ->
     c = @container = new Luca.core.Container
       defaults:
         defaultProperty: 'it_works'
+      extensions:[
+        extension: 1
+      ,
+        extension: 2
+      ,
+        extension: 3
+      ]
       components:[
         name: "component_one"
         ctype: "view"
@@ -46,6 +53,10 @@ describe 'The Luca Container', ->
 
   it "should create a getter function on the container", ->
     expect( @container.getOne().name ).toEqual 'component_one'
+
+  it "should apply extensions to the components", ->
+    expect( @container.getRoleOne().extension ).toEqual 1
+    expect( @container.getRoleTwo().extension ).toEqual 2
 
   it "should apply default properties to components", ->
     defaults = @container.selectByAttribute('defaultProperty','it_works')
@@ -97,19 +108,19 @@ describe 'Component Event Binding', ->
         "beta trigger:five"                 : "five"
 
       one: ()->
-        @trigger "one" 
+        @trigger "one"
 
       two: ()->
-        @trigger "two" 
+        @trigger "two"
 
       three: ()->
-        @trigger "three" 
+        @trigger "three"
 
       four: ()->
-        @trigger "four"  
+        @trigger "four"
 
       five: ()->
-        @trigger "five"  
+        @trigger "five"
 
       afterRender: ()->
         @getGamma().trigger("after:render:gamma")
@@ -146,7 +157,7 @@ describe 'Component Event Binding', ->
 
   it "should observe the right rendering order", ->
     expect( @container.getGamma() ).toHaveTriggered("after:render:gamma")
-    
+
   it "should pick up events on nested components", ->
     @container.getBeta().trigger("trigger:five")
     expect( @container ).toHaveTriggered("five")

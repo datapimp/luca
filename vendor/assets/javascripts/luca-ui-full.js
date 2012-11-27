@@ -95,7 +95,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.65",
+    VERSION: "0.9.66",
     core: {},
     containers: {},
     components: {},
@@ -2509,6 +2509,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     prepareComponents: function() {
       var component, _i, _len, _ref,
         _this = this;
+      container = this;
       _ref = this.components;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         component = _ref[_i];
@@ -2519,12 +2520,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         }
       }
       return _(this.components).each(function(component, index) {
-        var ce, componentContainerElement, panel, _ref2;
+        var ce, componentContainerElement, panel, _ref2, _ref3;
         ce = componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
         ce["class"] = ce["class"] || ce.className || ce.classes;
         if (_this.generateComponentElements) {
           panel = _this.make(_this.componentTag, componentContainerElement, '');
           _this.$append(panel);
+        }
+        if (container.defaults != null) {
+          component = _.defaults(component, container.defaults || {});
+        }
+        if (_.isObject((_ref3 = container.extensions) != null ? _ref3[index] : void 0)) {
+          component = _.extend(component, container.extensions[index]);
         }
         if (component.container == null) {
           if (_this.generateComponentElements) {
@@ -2546,7 +2553,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       container = this;
       this.components = _(this.components).map(function(object, index) {
         var component, created, _ref;
-        component = Luca.isComponent(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object = _.defaults(object, container.defaults || {}), created = Luca.util.lazyComponent(object));
+        component = Luca.isComponent(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, created = Luca.util.lazyComponent(object));
         if (!component.container && ((_ref = component.options) != null ? _ref.container : void 0)) {
           component.container = component.options.container;
         }

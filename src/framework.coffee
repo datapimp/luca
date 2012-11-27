@@ -19,7 +19,7 @@
     return fallback()
 
 _.extend Luca,
-  VERSION: "0.9.65"
+  VERSION: "0.9.66"
   core: {}
   containers: {}
   components: {}

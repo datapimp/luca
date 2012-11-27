@@ -184,3 +184,7 @@
     Previously required an element with a specific ID which made it harder to build extendable components
     with specific render targets
 
+0.9.66
+  - Luca.core.Container components can now be extended by subclasses by specifying an @extensions property.
+    @extensions work by applying the hash to the component in the same index'd position as that component
+    configuration in the superclass.

@@ -115,6 +115,8 @@ container.defines
       applyDOMConfig.call(container, component, index)
 
   prepareComponents: ()->
+    container = @
+
     # accept components as an array of strings representing
     # the luca component type
     for component in @components when _.isString(component)
@@ -129,6 +131,18 @@ container.defines
       if @generateComponentElements
         panel = @make(@componentTag, componentContainerElement, '')
         @$append( panel )
+
+      # if the container defines a @defaults property
+      # then we should make sure our child components inherit
+      # these values unless specifically defined
+      if container.defaults?
+        component = _.defaults(component, (container.defaults || {}))
+
+      # if the container defines an @extensions property as an array of
+      # configuration objects, then we will extend the component config with
+      # the object in the matching position of the @extensions array.
+      if _.isObject(container.extensions?[ index ])
+        component = _.extend(component, container.extensions[index])
 
       unless component.container?
         component.container = "##{ componentContainerElement.id }" if @generateComponentElements
@@ -169,11 +183,6 @@ container.defines
             object.type = object.ctype = 'container'
           else
             object.type = object.ctype = Luca.defaultComponentType
-
-        # if the container defines a @defaults property
-        # then we should make sure our child components inherit
-        # these values unless specifically defined
-        object = _.defaults(object, (container.defaults || {}))
 
         created = Luca.util.lazyComponent( object )
 
