@@ -373,14 +373,16 @@
     return fn = prefix + parts.join('');
   };
 
-  Luca.util.toCssClass = function(componentName) {
-    var part, parts, transformed;
+  Luca.util.toCssClass = function() {
+    var componentName, exclusions, part, parts, transformed;
+    componentName = arguments[0], exclusions = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     parts = componentName.split('.');
     transformed = (function() {
       var _i, _len, _results;
       _results = [];
       for (_i = 0, _len = parts.length; _i < _len; _i++) {
         part = parts[_i];
+        if (!(_(exclusions).indexOf(part) === -1)) continue;
         part = _.str.underscored(part);
         part = part.replace(/_/g, '-');
         _results.push(part);
@@ -1689,7 +1691,11 @@
     };
 
     MetaDataProxy.prototype.styleHierarchy = function() {
-      return _(this.classHierarchy()).map(Luca.util.toCssClass);
+      var list;
+      list = _(this.classHierarchy()).map(function(cls) {
+        return Luca.util.toCssClass(cls, 'views', 'components', 'core', 'fields', 'containers');
+      });
+      return _(list).without('backbone-view', 'luca-view');
     };
 
     MetaDataProxy.prototype.classHierarchy = function() {
@@ -3592,16 +3598,27 @@
 
 }).call(this);
 (function() {
+  var tabView;
 
-  _.def('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"]({
-    hooks: ["before:select", "after:select"],
-    componentType: 'tab_view',
-    className: 'luca-ui-tab-view tabbable',
+  _.def('Luca.containers.TabView')["extends"]('Luca.containers.CardView')["with"];
+
+  tabView = Luca.register("Luca.containers.TabView");
+
+  tabView.triggers("before:select", "after:select");
+
+  tabView.publicConfiguration({
     tab_position: 'top',
-    tabVerticalOffset: '50px',
+    tabVerticalOffset: '50px'
+  });
+
+  tabView.privateConfiguration({
+    additionalClassNames: 'tabbable',
     navClass: "nav-tabs",
     bodyTemplate: "containers/tab_view",
-    bodyEl: "div.tab-content",
+    bodyEl: "div.tab-content"
+  });
+
+  tabView.defines({
     initialize: function(options) {
       this.options = options != null ? options : {};
       if (this.navStyle === "list") this.navClass = "nav-list";
@@ -3633,7 +3650,6 @@
       }
     },
     createTabSelectors: function() {
-      var tabView;
       tabView = this;
       return this.each(function(component, index) {
         var icon, link, selector, _ref;
@@ -4014,14 +4030,17 @@
 
 }).call(this);
 (function() {
+  var toolbar;
 
-  _.def('Luca.components.Toolbar')["extends"]('Luca.core.Container')["with"]({
+  _.def('Luca.components.Toolbar')["extends"]('Luca.core.Container')["with"];
+
+  toolbar = Luca.register("Luca.components.Toolbar");
+
+  toolbar["extends"]("Luca.core.Container");
+
+  toolbar.defines({
     className: 'luca-ui-toolbar toolbar',
     position: 'bottom',
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.core.Container.prototype.initialize.apply(this, arguments);
-    },
     prepareComponents: function() {
       var _this = this;
       return _(this.components).each(function(component) {
@@ -4029,14 +4048,20 @@
       });
     },
     render: function() {
-      return $(this.container).append(this.el);
+      $(this.container).append(this.el);
+      return this;
     }
   });
 
 }).call(this);
 (function() {
+  var loaderView;
 
-  _.def('Luca.components.CollectionLoaderView')["extends"]('Luca.components.Template')["with"]({
+  loaderView = Luca.register("Luca.components.CollectionLoaderView");
+
+  loaderView["extends"]("Luca.View");
+
+  loaderView.defines({
     className: 'luca-ui-collection-loader-view',
     template: "components/collection_loader_view",
     initialize: function(options) {
@@ -4073,15 +4098,15 @@
 (function() {
   var collectionView, make;
 
-  collectionView = Luca.define("Luca.components.CollectionView");
+  collectionView = Luca.register("Luca.components.CollectionView");
 
   collectionView["extends"]("Luca.components.Panel");
 
-  collectionView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
+  collectionView.mixesIn("LoadMaskable", "Filterable", "Paginatable");
 
   collectionView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
 
-  collectionView.defaults({
+  collectionView.defines({
     tagName: "ol",
     className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
@@ -4266,8 +4291,13 @@
 
 }).call(this);
 (function() {
+  var controller;
 
-  _.def('Luca.components.Controller')["extends"]('Luca.containers.CardView')["with"]({
+  controller = Luca.register("Luca.components.Controller");
+
+  controller["extends"]("Luca.containers.CardView");
+
+  controller.defines({
     additionalClassNames: ['luca-ui-controller'],
     activeAttribute: "active-section",
     initialize: function(options) {
@@ -4865,13 +4895,19 @@
 
 }).call(this);
 (function() {
+  var toolbar;
 
-  _.def('Luca.components.FormButtonToolbar')["extends"]('Luca.components.Toolbar')["with"]({
+  toolbar = Luca.register("Luca.components.FormButtonToolbar");
+
+  toolbar["extends"]("Luca.components.Toolbar");
+
+  toolbar.defines({
     className: 'luca-ui-form-toolbar form-actions',
     position: 'bottom',
     includeReset: false,
     render: function() {
-      return $(this.container).append(this.el);
+      $(this.container).append(this.el);
+      return this;
     },
     initialize: function(options) {
       this.options = options != null ? options : {};
@@ -4895,11 +4931,17 @@
 
 }).call(this);
 (function() {
+  var formView;
 
-  _.def("Luca.components.FormView")["extends"]('Luca.core.Container')["with"]({
+  formView = Luca.register("Luca.components.FormView");
+
+  formView["extends"]("Luca.core.Container");
+
+  formView.triggers("before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error");
+
+  formView.defines({
     tagName: 'form',
     className: 'luca-ui-form-view',
-    hooks: ["before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error"],
     events: {
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
@@ -4907,7 +4949,7 @@
     toolbar: true,
     legend: "",
     bodyClassName: "form-view-body",
-    version: "0.9.33333333",
+    version: 1,
     initialize: function(options) {
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.enableBootstrap;
@@ -5415,11 +5457,11 @@
 (function() {
   var multiView, propagateCollectionComponents, validateComponent;
 
-  multiView = Luca.define("Luca.components.MultiCollectionView");
+  multiView = Luca.register("Luca.components.MultiCollectionView");
 
   multiView["extends"]("Luca.containers.CardView");
 
-  multiView.behavesAs("LoadMaskable", "Filterable", "Paginatable");
+  multiView.mixesIn("LoadMaskable", "Filterable", "Paginatable");
 
   multiView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
 

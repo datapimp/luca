@@ -6,7 +6,8 @@ html.luca-ui-fullscreen, body.luca-ui-fullscreen {
   .fluid-viewport-wrapper {
     padding-top:40px;
   }
-  .luca-ui-viewport, .fullscreen-container {
+
+  .luca-viewport, .luca-ui-viewport, .fullscreen-container {
     min-height: 100%;
     height: auto !important;
     height: 100%;

@@ -15,5 +15,10 @@ describe 'The Luca Utilities', ->
       cssClass = Luca.util.toCssClass(component)
       expect( cssClass ).toEqual 'luca-view'
 
+    it "should exclude parts", ->
+      component = "Luca.components.MultiCollectionView"
+      cssClass = Luca.util.toCssClass(component, 'components')
+      expect( cssClass ).toEqual "luca-multi-collection-view"
+
 
 

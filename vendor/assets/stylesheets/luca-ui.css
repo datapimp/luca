@@ -1,27 +1,27 @@
-.luca-ui-checkbox-array input.array-checkbox {
+.luca-ui-checkbox-array input.array-checkbox, .luca-checkbox-array input.array-checkbox {
   display: inline-block; }
-.luca-ui-form-view-wrapper {
+.luca-form-view {
   width: 100%;
   float: left;
   display: block;
   clear: both;
   margin: 10px 0px; }
 
-.luca-ui-form-view .luca-ui-field {
+.luca-form-view .luca-ui-field {
   margin: 5px;
   padding: 5px; }
-  .luca-ui-form-view .luca-ui-field .helper-text {
+  .luca-form-view .luca-ui-field .helper-text {
     font-size: 0.75em;
     font-color: #ccc; }
 
-.luca-ui-form-view.label-align-top .luca-ui-field label, .luca-ui-form-view.label-align-top .luca-ui-field input, .luca-ui-form-view.label-align-top .luca-ui-field select, .luca-ui-form-view.label-align-top .luca-ui-field textarea {
+.luca-form-view.label-align-top .luca-ui-field label, .luca-form-view.label-align-top .luca-ui-field input, .luca-form-view.label-align-top .luca-ui-field select, .luca-form-view.label-align-top .luca-ui-field textarea {
   margin: 5px 0px;
   display: block; }
 
-.luca-ui-form-view.column-layout .luca-ui-field {
+.luca-form-view.column-layout .luca-ui-field {
   float: left; }
 
-.luca-ui-form-view .toolbar-container {
+.luca-form-view .toolbar-container {
   padding-right: 12px; }
 
 /* support for older form view config */
@@ -124,7 +124,7 @@ html.luca-ui-fullscreen, body.luca-ui-fullscreen {
 
 .luca-ui-fullscreen .fluid-viewport-wrapper {
   padding-top: 40px; }
-.luca-ui-fullscreen .luca-ui-viewport, .luca-ui-fullscreen .fullscreen-container {
+.luca-ui-fullscreen .luca-viewport, .luca-ui-fullscreen .luca-ui-viewport, .luca-ui-fullscreen .fullscreen-container {
   min-height: 100%;
   height: auto !important;
   height: 100%; }
@@ -151,23 +151,23 @@ html.luca-ui-fullscreen, body.luca-ui-fullscreen {
   .luca-ui-toolbar.toolbar-top {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px; }
-.luca-ui-tab-view .luca-ui-card .luca-ui-grid-view, .luca-ui-tab-view .luca-ui-card .luca-ui-form-view, .luca-ui-tab-view .luca-ui-card .luca-ui-card {
+.luca-tab-view .luca-ui-card .luca-ui-grid-view, .luca-tab-view .luca-ui-card .luca-form-view, .luca-tab-view .luca-ui-card .luca-ui-card {
   overflow: hidden; }
 
-.luca-ui-tab-view.tabs-below .tab-selector-container, .luca-ui-tab-view.tabs-right .tab-selector-container {
+.luca-tab-view.tabs-below .tab-selector-container, .luca-tab-view.tabs-right .tab-selector-container {
   display: block;
   clear: both; }
 
-.luca-ui-tab-view.tabs-left .tab-selector-container {
+.luca-tab-view.tabs-left .tab-selector-container {
   float: left; }
-  .luca-ui-tab-view.tabs-left .tab-selector-container ul.nav-tabs {
+  .luca-tab-view.tabs-left .tab-selector-container ul.nav-tabs {
     padding: 0px; }
-.luca-ui-tab-view.tabs-left .tab-content {
+.luca-tab-view.tabs-left .tab-content {
   float: left; }
 
-.luca-ui-tab-view.tabs-right .tab-selector-container {
+.luca-tab-view.tabs-right .tab-selector-container {
   float: right; }
-.luca-ui-tab-view.tabs-right .tab-content {
+.luca-tab-view.tabs-right .tab-content {
   float: left; }
 /* normalize.css 2011-11-04T15:38 UTC - http://github.com/necolas/normalize.css */
 /* =============================================================================

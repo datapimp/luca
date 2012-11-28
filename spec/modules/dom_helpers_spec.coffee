@@ -7,8 +7,8 @@ describe 'The DOM Helpers module', ->
   describe "Auto Assigning Class Names", ->
     it "should apply the class of the component all the way up its hierarchy", ->
       c = new Luca.core.Container()
-      expect( c.$el.is(".luca-core-container") ).toBeTruthy()
-      expect( c.$el.is(".luca-components-panel") ).toBeTruthy()
+      expect( c.$el.is(".luca-container") ).toBeTruthy()
+      expect( c.$el.is(".luca-panel") ).toBeTruthy()
 
     it "should leave out backbone and luca view classes", ->
       c = new Luca.core.Container()

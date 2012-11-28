@@ -20,7 +20,10 @@ class MetaDataProxy
     Luca.util.resolve(@meta["display name"])
 
   styleHierarchy: ()->
-    _( @classHierarchy() ).map(Luca.util.toCssClass)
+    list = _( @classHierarchy() ).map (cls)->
+      Luca.util.toCssClass(cls, 'views', 'components', 'core','fields','containers')
+
+    _( list ).without('backbone-view','luca-view')
       
   classHierarchy: ()->
     list = [ @meta["display name"], @meta["super class name"]]

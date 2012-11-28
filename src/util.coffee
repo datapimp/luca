@@ -36,10 +36,10 @@ Luca.util.hook = (eventId="")->
   parts = _( parts ).map (p)-> _.string.capitalize(p)
   fn = prefix + parts.join('')
 
-Luca.util.toCssClass = (componentName)->
+Luca.util.toCssClass = (componentName, exclusions...)->
   parts = componentName.split('.')
 
-  transformed = for part in parts
+  transformed = for part in parts when _( exclusions ).indexOf(part) is -1
     part = _.str.underscored(part)
     part = part.replace(/_/g,'-')
     part

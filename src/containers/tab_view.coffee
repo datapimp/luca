@@ -1,23 +1,20 @@
 _.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
 
-  hooks:[
-    "before:select"
-    "after:select"
-  ]
+tabView = Luca.register       "Luca.containers.TabView"
+tabView.triggers              "before:select",
+                              "after:select"
 
-  componentType: 'tab_view'
-
-  className: 'luca-ui-tab-view tabbable'
-
+tabView.publicConfiguration
   tab_position: 'top'
-
   tabVerticalOffset: '50px'
 
+tabView.privateConfiguration
+  additionalClassNames: 'tabbable'
   navClass: "nav-tabs"
-
   bodyTemplate: "containers/tab_view"
   bodyEl: "div.tab-content"
 
+tabView.defines
   initialize: (@options={})->
     @navClass = "nav-list"if @navStyle is "list"
 
