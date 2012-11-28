@@ -1,6 +1,7 @@
-_.def("Luca.components.LabelField").extends("Luca.core.Field").with
-  className: "luca-ui-field luca-ui-label-field"
-    
+labelField = Luca.register          "Luca.components.LabelField"
+labelField.extends                  "Luca.core.Field"
+
+labelField.defines
   formatter: (value)->
     value ||= @getValue()
     _.str.titleize( value )

@@ -1,4 +1,8 @@
-_.def('Luca.fields.FileUploadField').extends('Luca.core.Field').with
+fileUpload = Luca.register              "Luca.fields.FileUploadField"
+fileUpload.extends                      "Luca.core.Field"
+
+fileUpload.defines
+  version: 1
 
   template: 'fields/file_upload_field'
 

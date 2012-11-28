@@ -10,10 +10,4 @@ describe 'The Component Definition System', ->
     Luca.register("Luca.components.SampleComponentDefinition").defines(version: 1)
     expect( Luca.parentClasses(Luca.components.SampleComponentDefinition) ).toContain 'Luca.View'
 
-  it "should track the parent classes", ->
-    Luca.register("Luca.components.SampleComponentDefinition").defines(version: 1)
-    expect( Luca.parentClasses(Luca.components.SampleComponentDefinition) ).toEqual ['Luca.View','Backbone.View'] 
-
-  xit "should defer component extension until dependencies are defined", ->
-
 

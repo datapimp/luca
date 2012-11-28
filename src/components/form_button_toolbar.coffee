@@ -1,5 +1,7 @@
-_.def('Luca.components.FormButtonToolbar').extends('Luca.components.Toolbar').with
+toolbar = Luca.register         "Luca.components.FormButtonToolbar"
+toolbar.extends                 "Luca.components.Toolbar"
 
+toolbar.defines
   className: 'luca-ui-form-toolbar form-actions'
 
   position: 'bottom'
@@ -8,6 +10,7 @@ _.def('Luca.components.FormButtonToolbar').extends('Luca.components.Toolbar').wi
 
   render: ()->
     $(@container).append(@el)
+    @
 
   initialize: (@options={})->
     Luca.components.Toolbar.prototype.initialize.apply @, arguments

@@ -50,7 +50,7 @@ view.defines
 
     @setupMixins()
     @delegateEvents()
-
+        
     @trigger "after:initialize", @
 
   setupMixins: ()->
@@ -92,9 +92,14 @@ view.defines
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
 
-  collections: ()-> Luca.util.selectProperties( Luca.isBackboneCollection, @ )
-  models: ()-> Luca.util.selectProperties( Luca.isBackboneModel, @ )
-  views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
+  collections: ()-> 
+    Luca.util.selectProperties( Luca.isBackboneCollection, @ )
+
+  models: ()-> 
+    Luca.util.selectProperties( Luca.isBackboneModel, @ )
+
+  views: ()-> 
+    Luca.util.selectProperties( Luca.isBackboneView, @ )
 
   debug: (args...)->
     return unless @debugMode or window.LucaDebugMode?

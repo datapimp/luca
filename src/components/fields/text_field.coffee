@@ -1,5 +1,7 @@
+textField = Luca.register     'Luca.fields.TextField'
+textField.extends             'Luca.core.Field'
 
-_.def('Luca.fields.TextField').extends('Luca.core.Field').with
+textField.defines
   events:
     "blur input" : "blur_handler"
     "focus input" : "focus_handler"

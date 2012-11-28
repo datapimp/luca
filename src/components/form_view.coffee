@@ -1,24 +1,27 @@
-_.def("Luca.components.FormView").extends('Luca.core.Container').with
+#_.def("Luca.components.FormView").extends('Luca.core.Container').with
 
+formView = Luca.register        "Luca.components.FormView"
+formView.extends                "Luca.core.Container"
+
+formView.triggers               "before:submit",
+                                "before:reset",
+                                "before:load",
+                                "before:load:new",
+                                "before:load:existing",
+                                "after:submit",
+                                "after:reset",
+                                "after:load",
+                                "after:load:new",
+                                "after:load:existing",
+                                "after:submit:success",
+                                "after:submit:fatal_error",
+                                "after:submit:error"
+
+
+formView.defines
   tagName: 'form'
 
   className: 'luca-ui-form-view'
-
-  hooks:[
-    "before:submit"
-    "before:reset"
-    "before:load"
-    "before:load:new"
-    "before:load:existing"
-    "after:submit"
-    "after:reset"
-    "after:load"
-    "after:load:new"
-    "after:load:existing"
-    "after:submit:success"
-    "after:submit:fatal_error"
-    "after:submit:error"
-  ]
 
   events:
     "click .submit-button" : "submitHandler"
@@ -30,7 +33,7 @@ _.def("Luca.components.FormView").extends('Luca.core.Container').with
 
   bodyClassName: "form-view-body"
 
-  version: "0.9.33333333"
+  version: 1 
 
   initialize: (@options={})->
     @loadMask = Luca.enableBootstrap unless @loadMask?

@@ -19,7 +19,7 @@
     return fallback()
 
 _.extend Luca,
-  VERSION: "0.9.66"
+  VERSION: "0.9.7"
   core: {}
   containers: {}
   components: {}
@@ -32,6 +32,10 @@ _.extend Luca,
 
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events
+
+Luca.config.maintainStyleHierarchy = true
+Luca.config.maintainClassHierarchy = true
+Luca.config.autoApplyClassHierarchyAsCssClasses = true
 
 # When using Luca.define() should we automatically register
 # the component with the registry?
@@ -106,7 +110,7 @@ Luca.isCollectionPrototype = (obj)->
   obj? and obj::? and !Luca.isModelPrototype(obj) and obj::reset? and obj::select? and obj::reject?
 
 Luca.inheritanceChain = (obj)->
-  _( Luca.parentClasses(obj) ).map (className)-> Luca.util.resolve(className)
+  Luca.parentClasses(obj)
 
 Luca.parentClasses = (obj)->
   list = []
@@ -114,26 +118,22 @@ Luca.parentClasses = (obj)->
   if _.isString(obj)
     obj = Luca.util.resolve(obj)
 
-  list.push( obj.displayName || obj::?.displayName || Luca.parentClass(obj) )
+  metaData = obj.componentMetaData?()
+  metaData ||= obj::componentMetaData?()
 
-  classes = until not Luca.parentClass(obj)?
-    obj = Luca.parentClass(obj)
+  list = metaData?.classHierarchy() || [obj.displayName || obj::displayName]
 
-  list = list.concat(classes)
-
-  _.uniq list
-
-Luca.parentClass = (obj)->
-  list = []
-
+Luca.parentClass = (obj, resolve=true)->
   if _.isString( obj )
     obj = Luca.util.resolve(obj)
 
-  if Luca.isComponent(obj)
-    obj.displayName
+  parent = obj.componentMetaData?()?.meta["super class name"]
+  parent ||= obj::componentMetaData?()?.meta["super class name"]
 
-  else if Luca.isComponentPrototype(obj)
-    obj::_superClass?()?.displayName
+  parent || obj.displayName || obj.prototype?.displayName
+
+  if resolve then Luca.util.resolve(parent) else parent
+
 
 # This is a convenience method for accessing the templates
 # available to the client side app, either the ones which ship with Luca
@@ -191,6 +191,9 @@ UnderscoreExtensions =
   # this function will ensure a function gets called at least once
   # afrer x delay.  by setting defaults, we can use this on backbone
   # view definitions
+  #
+  # Note:  I am not sure if this is the same as _.debounce or not.  I will need
+  # to look into it
   idle: (code, delay=1000)->
     delay = 0 if window.DISABLE_IDLE
     handle = undefined

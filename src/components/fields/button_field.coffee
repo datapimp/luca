@@ -1,18 +1,25 @@
 _.def('Luca.fields.ButtonField').extends('Luca.core.Field').with
 
-  readOnly: true
+buttonField = Luca.register         "Luca.fields.ButtonField"
 
+buttonField.extends                 "Luca.core.Field"
+
+buttonField.triggers                "button:click"
+
+buttonField.publicConfiguration
+  readOnly: true
+  input_type: "button" 
+  input_value: undefined 
+  icon_class: undefined
+  input_name: undefined
+  white: undefined
+
+buttonField.privateConfiguration
   events:
     "click input" : "click_handler"
-
-  hooks:[
-    "button:click"
-  ]
-
-  className: 'luca-ui-field luca-ui-button-field'
-
   template: 'fields/button_field'
 
+buttonField.privateInterface
   click_handler: (e)->
     me = my = $( e.currentTarget )
     @trigger "button:click"
@@ -29,10 +36,12 @@ _.def('Luca.fields.ButtonField').extends('Luca.core.Field').with
     @input_id ||= _.uniqueId('button')
     @input_name ||= @name ||= @input_id
     @input_value ||= @label ||= @text
-    @input_type ||= "button"
     @input_class ||= @class
     @icon_class ||= ""
     @icon_class = "icon-#{ @icon_class }" if @icon_class.length and !@icon_class.match(/^icon-/)
     @icon_class += " icon-white" if @white
 
   setValue: ()-> true
+
+buttonField.defines
+  version: 1

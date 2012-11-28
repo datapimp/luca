@@ -211,7 +211,7 @@ collection.defines
     # fetch will try to pull from the bootstrap if it is setup to do so
     # you can actually make the roundtrip to the server anyway if you pass
     # refresh = true in the options hash
-    return @bootstrap() if @cached_models().length and not options.refresh
+    return @bootstrap() if @cached_models().length and not (options.refresh is true or options.remote is true)
 
     url = if _.isFunction(@url) then @url() else @url
 

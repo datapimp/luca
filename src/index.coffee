@@ -5,6 +5,7 @@
 #= require_tree ./modules
 
 #= require ./core/registry
+#= require ./core/meta_data
 #= require ./core/observer
 #= require ./core/view
 #= require ./core/model

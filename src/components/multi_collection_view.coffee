@@ -1,4 +1,4 @@
-multiView = Luca.define     "Luca.components.MultiCollectionView"
+multiView = Luca.register     "Luca.components.MultiCollectionView"
 
 # The CollectionMultiView is a collection view with multiple renderings
 # of the list.  ( e.g. Icons, Table, List ).  It works by maintaining
@@ -24,9 +24,9 @@ multiView = Luca.define     "Luca.components.MultiCollectionView"
 #     ]
 multiView.extends           "Luca.containers.CardView"
 
-multiView.behavesAs         "LoadMaskable",
-                            "Filterable",
-                            "Paginatable"
+multiView.mixesIn         "LoadMaskable",
+                          "Filterable",
+                          "Paginatable"
 
 multiView.triggers          "before:refresh",
                             "after:refresh",

@@ -1,26 +1,51 @@
-_.def('Luca.core.Field').extends('Luca.View').with
+field = Luca.register         "Luca.core.Field"
 
-  className: 'luca-ui-text-field luca-ui-field'
+field.extends                 "Luca.View"
 
-  isField: true
+field.triggers                "before:validation",
+                              "after:validation",
+                              "on:change"
 
-  template: 'fields/text_field'
-
+field.publicConfiguration   
   labelAlign: 'top'
-
-  hooks:[
-    "before:validation",
-    "after:validation",
-    "on:change"
-  ]
-
-  # see: http://twitter.github.com/bootstrap/base-css.html
+  className: 'luca-ui-text-field luca-ui-field'
   statuses: [
     "warning"
     "error"
     "success"
   ]
 
+field.publicInterface
+  disable: ()->
+    @getInputElement().attr('disabled', true)
+
+  enable: ()->
+    @getInputElement().attr('disabled', false)
+
+  getValue: ()->
+    raw = @getInputElement()?.attr('value')
+
+    return raw if _.str.isBlank( raw )
+
+    switch @valueType
+      when "integer" then parseInt(raw)
+      when "string" then "#{ raw }"
+      when "float" then parseFloat(raw)
+      else raw
+
+  setValue: (value)->
+    @getInputElement()?.attr('value', value)
+
+  updateState: (state)->
+    _( @statuses ).each (cls)=>
+      @$el.removeClass(cls)
+      @$el.addClass(state)
+
+field.privateConfiguration
+  isField: true
+  template: 'fields/text_field'
+
+field.defines
   initialize: (@options={})->
     _.extend @, @options
 
@@ -29,6 +54,7 @@ _.def('Luca.core.Field').extends('Luca.View').with
     @input_class ||= ""
     @input_type ||= ""
     @helperText ||= ""
+    @label = @name if not @label? or @label.length is 0
     @label ||= "*#{ @label }" if @required and not @label?.match(/^\*/)
     @inputStyles ||= ""
     @input_value ||= @value || ""
@@ -53,30 +79,5 @@ _.def('Luca.core.Field').extends('Luca.View').with
   change_handler: (e)->
     @trigger "on:change", @, e
 
-  disable: ()->
-    @getInputElement().attr('disabled', true)
-
-  enable: ()->
-    @getInputElement().attr('disabled', false)
-
-  getValue: ()->
-    raw = @getInputElement()?.attr('value')
-
-    return raw if _.str.isBlank( raw )
-
-    switch @valueType
-      when "integer" then parseInt(raw)
-      when "string" then "#{ raw }"
-      when "float" then parseFloat(raw)
-      else raw
-
-  setValue: (value)->
-    @getInputElement()?.attr('value', value)
-
   getInputElement: ()->
     @input ||= @$('input').eq(0)
-
-  updateState: (state)->
-    _( @statuses ).each (cls)=>
-      @$el.removeClass(cls)
-      @$el.addClass(state)

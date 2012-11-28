@@ -70,8 +70,6 @@ paginationControl.defines
   updateWithPageCount: (@pageCount, models=[])->
     modelCount = models.length
 
-    console.log "Update With Page Count", @pageCount, modelCount
-
     @pageButtonContainer().empty()
 
     _( @pageCount ).times (index)=>

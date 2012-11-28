@@ -3,8 +3,10 @@
 # if you want to. Default implementation uses twitter bootstrap modal and
 # progress bar (http://twitter.github.com/bootstrap/). You template
 # should contain `progress`, `bar` and `message` classes
-_.def('Luca.components.CollectionLoaderView').extends('Luca.components.Template').with
+loaderView = Luca.register        "Luca.components.CollectionLoaderView"
+loaderView.extends                "Luca.View"
 
+loaderView.defines
   className: 'luca-ui-collection-loader-view'
 
   template: "components/collection_loader_view"

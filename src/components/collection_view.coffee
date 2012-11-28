@@ -1,4 +1,4 @@
-collectionView = Luca.define      "Luca.components.CollectionView"
+collectionView = Luca.register      "Luca.components.CollectionView"
 # The CollectionView facilitates the rendering of a Collection
 # of models into a group of many rendered templates
 # 
@@ -16,17 +16,16 @@ collectionView = Luca.define      "Luca.components.CollectionView"
 #
 collectionView.extends            "Luca.components.Panel"
 
-collectionView.behavesAs          "LoadMaskable", 
-                                  "Filterable", 
-                                  "Paginatable"
+collectionView.mixesIn          "LoadMaskable", 
+                                "Filterable", 
+                                "Paginatable"
 
-collectionView.triggers           "before:refresh",
-                                  "after:refresh",
-                                  "refresh",
-                                  "empty:results"
+collectionView.triggers         "before:refresh",
+                                "after:refresh",
+                                "refresh",
+                                "empty:results"
 
-collectionView.defaults
-
+collectionView.defines
   tagName: "ol"
 
   className: "luca-ui-collection-view"
@@ -121,6 +120,9 @@ collectionView.defaults
 
   getCollection: ()->
     @collection
+
+  loadModels: (models=[], options={})->
+    @getCollection()?.reset(models, options)
 
   applyQuery: (query={},queryOptions={})->
     @query = query

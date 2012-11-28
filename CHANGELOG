@@ -188,3 +188,11 @@
   - Luca.core.Container components can now be extended by subclasses by specifying an @extensions property.
     @extensions work by applying the hash to the component in the same index'd position as that component
     configuration in the superclass.
+  - Luca.components.CollectionView now has a @loadModels() method which resets the collection with the passed models.
+  - Added @componentMetaData() method which is going to replace the trickery done behind the scenes in Luca.extend
+  - Luca.config.autoApplyCssClassHierarchy if set to true, will add css class names to your luca components to make inheritance based styling easier.
+
+0.9.7
+  - Introduced publicInterface, publicConfiguration, privateInterface, and privateConfiguration as component registry methods.
+    These methods are intended to offer finer grain control over the component definition process for the purposes of building
+    our auto-generated documentation tool.

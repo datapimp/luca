@@ -20,6 +20,7 @@ class DefineProxy
     @namespace = Luca.util.namespace()
     @componentId = @componentName = componentName
     @superClassName = 'Luca.View' 
+    @properties ||= {}
 
     if componentName.match(/\./)
       @namespaced = true
@@ -29,6 +30,14 @@ class DefineProxy
 
       # automatically add the namespace to the namespace registry
       Luca.registry.addNamespace( parts.join('.') )
+
+  meta: (key, value)->
+    metaKey = @namespace + '.' + @componentId
+    metaKey = metaKey.replace(/^\./,'')
+    data = Luca.registry.addMetaData(metaKey, key, value)
+
+    @properties.componentMetaData = ()->
+      Luca.registry.getMetaDataFor(metaKey)
 
   # allow for specifying the namespace
   in: (@namespace)-> @
@@ -43,6 +52,7 @@ class DefineProxy
     for hook in hooks
       @properties.hooks.push(hook) 
     @properties.hooks = _.uniq(@properties.hooks)
+    @meta("hooks", @properties.hooks)
     @
 
   includes: (includes...)->
@@ -50,6 +60,7 @@ class DefineProxy
     for include in includes
       @properties.include.push(include) 
     @properties.include = _.uniq(@properties.include)
+    @meta("includes", @properties.include)
     @
 
   mixesIn: (mixins...)->
@@ -57,9 +68,27 @@ class DefineProxy
     for mixin in mixins
       @properties.mixins.push(mixin) 
     @properties.mixins = _.uniq(@properties.mixins)
+
+    @meta("mixins", @properties.mixins)
     @
 
-  defaultProperties: (properties={})->
+  publicConfiguration: (properties={})->
+    @meta("public configuration", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+
+  privateConfiguration: (properties={})->
+    @meta("private configuration", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+
+  publicInterface: (properties={})->
+    @meta("public interface", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+
+  privateInterface: (properties={})->
+    @meta("private interface", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+
+  definePrototype: (properties={})->
     _.defaults((@properties||={}), properties)
 
     at = if @namespaced
@@ -72,29 +101,37 @@ class DefineProxy
       eval("(window||global).#{ @namespace } = {}")
       at = Luca.util.resolve(@namespace,(window || global))
 
-    at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
+    @meta("super class name", @superClassName )
+    @meta("display name", @componentName)
 
-    if Luca.autoRegister is true 
-      componentType = "view" if Luca.isViewPrototype( at[@componentId] )
+    @properties.displayName = @componentName
+    
+    @properties.componentMetaData = ()->
+      Luca.registry.getMetaDataFor(@displayName)
 
-      if Luca.isCollectionPrototype( at[@componentId] )
+    definition = at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
+
+    if Luca.config.autoRegister is true 
+      componentType = "view" if Luca.isViewPrototype( definition )
+
+      if Luca.isCollectionPrototype( definition )
         Luca.Collection.namespaces ||= []
         Luca.Collection.namespaces.push( @namespace )
         componentType = "collection" 
 
-      componentType = "model" if Luca.isModelPrototype( at[@componentId] )
+      componentType = "model" if Luca.isModelPrototype( definition )
 
       # automatically register this with the component registry
       Luca.registerComponent( _.string.underscored(@componentId), @componentName, componentType)
 
-    at[@componentId]
+    definition
 
 # Aliases for the mixin definition
 DefineProxy::behavesAs = DefineProxy::uses = DefineProxy::mixesIn 
 
 # Aliases for the final call on the define proxy
-DefineProxy::defines = DefineProxy::defaults = DefineProxy::exports = DefineProxy::defaultProperties 
-DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy::defaultProperties
+DefineProxy::defines = DefineProxy::defaults = DefineProxy::exports = DefineProxy::defaultProperties = DefineProxy::definePrototype
+DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy::definePrototype
 
 # The last method of the DefineProxy chain is always going to result in
 # a call to Luca.extend.  Luca.extend wraps the call to Luca.View.extend,
@@ -104,8 +141,6 @@ DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy
 # of introspection and development tools
 Luca.extend = (superClassName, childName, properties={})->
   superClass = Luca.util.resolve( superClassName, (window || global) )
-
-  superClass.__initializers ||= []
 
   unless _.isFunction(superClass?.extend)
     throw "Error defining #{ childName }. #{ superClassName } is not a valid component to extend from"
@@ -117,9 +152,8 @@ Luca.extend = (superClassName, childName, properties={})->
     superClass
 
   properties._super = (method, context=@, args=[])->
-    # protect against a stack too deep error in weird cases
     # TODO: debug this better
-    
+    # protect against a stack too deep error in weird cases
     @_superClass().prototype[method]?.apply(context, args)
 
   definition = superClass.extend(properties)

@@ -1,5 +1,7 @@
-_.def('Luca.components.Controller').extends('Luca.containers.CardView').with
+controller = Luca.register        "Luca.components.Controller"
+controller.extends                "Luca.containers.CardView"
 
+controller.defines
   additionalClassNames:['luca-ui-controller']
 
   activeAttribute: "active-section"

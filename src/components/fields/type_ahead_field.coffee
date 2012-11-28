@@ -1,6 +1,8 @@
-_.def('Luca.fields.TypeAheadField').extends('Luca.fields.TextField').with
-  className: 'luca-ui-field'
+typeAheadField = Luca.register      "Luca.fields.TypeAheadField"
+typeAheadField.extends              "Luca.fields.TextField" 
 
+
+typeAheadField.defines
   getSource: ()->
     Luca.util.read(@source) || []
 

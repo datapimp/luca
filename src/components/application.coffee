@@ -1,3 +1,6 @@
+application = Luca.register       "Luca.Application"
+application.extends               "Luca.containers.Viewport"
+
 # Luca.Application
 #
 # The Application class is the global state tracking mechanism
@@ -13,11 +16,7 @@
 # Decoupling application control flow from the URL Fragment from Backbone.History and preventing
 # your components from directly caring about the URL Fragment, allows you to build applications as
 # isolated components which can run separately or nested inside of other applications.
-
-Luca.util.startHistory = ()->
-  Backbone.history.start()
-
-_.def('Luca.Application').extends('Luca.containers.Viewport').with
+application.defines
   name: "MyApp"
 
   # The Application uses a Backbone.Model as a state machine, which
@@ -330,3 +329,6 @@ _.def('Luca.Application').extends('Luca.containers.Viewport').with
 
     for keyEvent in (@keypressEvents || ["keydown"])
       $( document ).on( keyEvent, handler )
+
+Luca.util.startHistory = ()->
+  Backbone.history.start()

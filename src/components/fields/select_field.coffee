@@ -1,13 +1,12 @@
-_.def('Luca.fields.SelectField').extends('Luca.core.Field').with
+selectField = Luca.register   "Luca.fields.SelectField"
 
+selectField.extends           "Luca.core.Field"
+
+selectField.triggers          "after:select"
+
+selectField.defines
   events:
     "change select" : "change_handler"
-
-  hooks:[
-    "after:select"
-  ]
-
-  className: 'luca-ui-select-field luca-ui-field'
 
   template: "fields/select_field"
 

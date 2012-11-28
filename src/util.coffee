@@ -36,6 +36,16 @@ Luca.util.hook = (eventId="")->
   parts = _( parts ).map (p)-> _.string.capitalize(p)
   fn = prefix + parts.join('')
 
+Luca.util.toCssClass = (componentName)->
+  parts = componentName.split('.')
+
+  transformed = for part in parts
+    part = _.str.underscored(part)
+    part = part.replace(/_/g,'-')
+    part
+
+  transformed.join '-'
+
 Luca.util.isIE = ()->
   try
     Object.defineProperty({}, '', {})
