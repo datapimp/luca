@@ -53,8 +53,9 @@ Luca.decorate = (target)->
     _.extend(componentPrototype, sanitized)
 
     if mixinDefinition.classMethods?
-      _.defaults(componentClass, mixinDefinition.classMethods)
-        
+      for method, fn of mixinDefinition.classMethods
+        componentClass[ method ] = _.bind(fn, componentClass)
+
     # When a mixin is included, we may want to do things 
     mixinDefinition?.__included?(componentName, componentClass, mixinDefinition)
 
