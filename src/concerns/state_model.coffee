@@ -1,4 +1,4 @@
-Luca.modules.StateModel =
+Luca.concerns.StateModel =
   __initializer: ()->
     return unless @stateful is true
     return if @state? and not Luca.isBackboneModel(@state)

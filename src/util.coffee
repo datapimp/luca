@@ -128,3 +128,40 @@ Luca.util.badge = (contents="", type, baseClass="badge")->
   cssClass += " #{ baseClass }-#{ type }" if type?
   Luca.util.make("span",{class:cssClass},contents)
 
+Luca.util.setupHooks = (set)->
+  set ||= @hooks
+
+  _(set).each (eventId)=>
+    fn = Luca.util.hook( eventId )
+
+    callback = ()->
+      @[fn]?.apply @, arguments
+
+    callback = _.once(callback) if eventId?.match(/once:/)
+
+    @on eventId, callback, @
+
+Luca.util.setupHooksAdvanced = (set)->
+  set ||= @hooks
+
+  _(set).each (eventId)=>
+    hookSetup = @[ Luca.util.hook( eventId ) ]
+
+    unless _.isArray(hookSetup)
+      hookSetup = [hookSetup]
+    
+    for entry in hookSetup      
+      fn = if _.isString(entry)
+        @[ entry ]
+
+      if _.isFunction(entry)
+        fn = entry
+
+      callback = ()-> 
+        @[fn]?.apply @, arguments
+
+      if eventId?.match(/once:/)
+        callback = _.once(callback) 
+
+      @on eventId, callback, @
+

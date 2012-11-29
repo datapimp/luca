@@ -1,8 +1,9 @@
 #= require ./util
 #= require_tree ./plugins
+#= require ./concerns
 #= require ./define
 
-#= require_tree ./modules
+#= require_tree ./concerns
 
 #= require ./core/registry
 #= require ./core/meta_data

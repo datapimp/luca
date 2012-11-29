@@ -17,7 +17,7 @@ checkboxArray.defines
 
   initialize: (@options={})->
     _.extend @, @options
-    _.extend @, Luca.modules.Deferrable
+    _.extend @, Luca.concerns.Deferrable
     _.bindAll @, "renderCheckboxes", "clickHandler", "checkSelected"
 
     Luca.core.Field::initialize.apply @, arguments

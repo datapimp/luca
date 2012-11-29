@@ -1,4 +1,4 @@
-Luca.modules.ApplicationEventBindings = 
+Luca.concerns.ApplicationEventBindings = 
   __initializer: ()->
     return if _.isEmpty(@applicationEvents)
 

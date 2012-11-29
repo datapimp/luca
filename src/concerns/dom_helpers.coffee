@@ -1,4 +1,4 @@
-Luca.modules.DomHelpers = 
+Luca.concerns.DomHelpers = 
   __initializer: ()->
     additionalClasses = _( @additionalClassNames || [] ).clone()
 

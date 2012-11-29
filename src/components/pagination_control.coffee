@@ -17,7 +17,7 @@ paginationControl.defines
   afterInitialize: ()->
     _.bindAll @, "updateWithPageCount"
 
-    @state.on "change", (state, numberOfPages)=>
+    @state?.on "change", (state, numberOfPages)=>
       @updateWithPageCount( state.get('numberOfPages') )
 
   limit: ()->

@@ -91,6 +91,8 @@ collection.defines
     if models
       @reset models, silent: true, parse: options?.parse
 
+    Luca.concern.setup.call(@)
+
     @trigger "after:initialize"
 
   # Luca.Collections will append a query string to the URL
@@ -349,6 +351,20 @@ _.extend Luca.Collection.prototype,
       Luca.CollectionObserver.relay(@, arguments)
 
     Backbone.View.prototype.trigger.apply @, arguments
+
+Luca.Collection._originalExtend = Backbone.Collection.extend
+
+Luca.Collection.extend = (definition={})->
+  # for backward compatibility
+  definition.concerns ||= definition.concerns if definition.concerns?
+
+  componentClass = Luca.Collection._originalExtend.call(@, definition)
+
+  if definition.concerns? and _.isArray( definition.concerns )
+    for module in definition.concerns
+      Luca.decorate( componentClass ).with( module )
+
+  componentClass
 
 # Always include these parameters in every request to your REST API.
 #

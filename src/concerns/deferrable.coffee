@@ -1,7 +1,7 @@
 # TODO
 # 
 # This is horrendous code.  I need to replace it ASAP
-Luca.modules.Deferrable = 
+Luca.concerns.Deferrable = 
   configure_collection: (setAsDeferrable=true)->
     return unless @collection
 

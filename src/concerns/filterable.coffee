@@ -1,4 +1,4 @@
-Luca.modules.Filterable = 
+Luca.concerns.Filterable = 
   __included: (component, module)->
     _.extend(Luca.Collection::, __filters:{})
 

@@ -13,6 +13,7 @@
 # _.def("MyView").extends("Luca.View").with the_custom:"shit"
 _.mixin
   def: Luca.component = Luca.define = Luca.register = (componentName)-> new DefineProxy(componentName)
+  register: Luca.register
 
 # The define proxy chain sets up a call to Luca.extend, which is a wrapper around Luca and Backbone component class' extend function.
 class DefineProxy
@@ -63,13 +64,13 @@ class DefineProxy
     @meta("includes", @properties.include)
     @
 
-  mixesIn: (mixins...)->
-    _.defaults(@properties ||= {}, mixins: []) 
-    for mixin in mixins
-      @properties.mixins.push(mixin) 
-    @properties.mixins = _.uniq(@properties.mixins)
+  mixesIn: (concerns...)->
+    _.defaults(@properties ||= {}, concerns: []) 
+    for concern in concerns
+      @properties.concerns.push(concern) 
+    @properties.concerns = _.uniq(@properties.concerns)
 
-    @meta("mixins", @properties.mixins)
+    @meta("concerns", @properties.concerns)
     @
 
   publicConfiguration: (properties={})->
@@ -127,7 +128,7 @@ class DefineProxy
     definition
 
 # Aliases for the mixin definition
-DefineProxy::behavesAs = DefineProxy::uses = DefineProxy::mixesIn 
+DefineProxy::concerns = DefineProxy::behavesAs = DefineProxy::uses = DefineProxy::mixesIn 
 
 # Aliases for the final call on the define proxy
 DefineProxy::defines = DefineProxy::defaults = DefineProxy::exports = DefineProxy::defaultProperties = DefineProxy::definePrototype
@@ -167,50 +168,3 @@ Luca.extend = (superClassName, childName, properties={})->
 
   definition
 
-
-Luca.mixin = (mixinName)->
-  namespace = _( Luca.mixin.namespaces ).detect (space)->
-    Luca.util.resolve(space)?[ mixinName ]?
-
-  namespace ||= "Luca.modules"
-
-  resolved = Luca.util.resolve(namespace)[ mixinName ]
-
-  console.log "Could not find #{ mixinName } in ", Luca.mixin.namespaces unless resolved?
-
-  resolved
-
-Luca.mixin.namespaces = [
-  "Luca.modules"
-]
-
-Luca.mixin.namespace = (namespace)->
-  Luca.mixin.namespaces.push(namespace)
-  Luca.mixin.namespaces = _( Luca.mixin.namespaces ).uniq()
-
-# Luca.decorate('Luca.View').with('Luca.modules.MyCustomMixin')
-Luca.decorate = (componentPrototype)->
-  componentPrototype = Luca.util.resolve(componentPrototype).prototype if _.isString(componentPrototype)
-  
-  return with: (mixin)->
-    mixinDefinition = Luca.mixin(mixin)
-
-    mixinPrivates   = _( mixinDefinition ).chain().keys().select (key)-> 
-      "#{ key }".match(/^__/)
-
-    sanitized   = _( mixinDefinition ).omit( mixinPrivates.value() )
-
-    _.extend(componentPrototype, sanitized)
-
-    # When a mixin is included, we may want to do things 
-    mixinDefinition?.__included?.call(mixinDefinition, mixin) 
-
-    superclassMixins = componentPrototype._superClass()::mixins
-
-    componentPrototype.mixins ||= []
-    componentPrototype.mixins.push( mixin )
-    componentPrototype.mixins = componentPrototype.mixins.concat( superclassMixins )
-
-    componentPrototype.mixins = _( componentPrototype.mixins ).chain().uniq().compact().value()
-
-    componentPrototype

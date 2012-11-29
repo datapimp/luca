@@ -1,4 +1,4 @@
-Luca.modules.ModalView = 
+Luca.concerns.ModalView = 
   closeOnEscape: true
 
   showOnInitialize: false

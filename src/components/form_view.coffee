@@ -42,8 +42,7 @@ formView.defines
 
     @components ||= @fields
 
-    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars", "applyLoadMask"
-
+    _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
     @state ||= new Backbone.Model
 
     @setupHooks( @hooks )

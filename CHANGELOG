@@ -196,3 +196,6 @@
   - Introduced publicInterface, publicConfiguration, privateInterface, and privateConfiguration as component registry methods.
     These methods are intended to offer finer grain control over the component definition process for the purposes of building
     our auto-generated documentation tool.
+  - Added Luca.mixin support on Collection and Model
+  - Renaming 'mixin' and 'module' functionality to 'concern'
+  - Luca.concerns now follow the active support concern in spirit

@@ -57,7 +57,7 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
 
   initialize: (@options={})->
     _.extend @, @options
-    _.extend @, Luca.modules.Deferrable
+    _.extend @, Luca.concerns.Deferrable
 
     @loadMask = Luca.enableBootstrap unless @loadMask?
     @loadMaskEl ||= ".luca-ui-g-view-body" if @loadMask is true

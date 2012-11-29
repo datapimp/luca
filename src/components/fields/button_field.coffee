@@ -1,5 +1,3 @@
-_.def('Luca.fields.ButtonField').extends('Luca.core.Field').with
-
 buttonField = Luca.register         "Luca.fields.ButtonField"
 
 buttonField.extends                 "Luca.core.Field"
@@ -7,17 +5,17 @@ buttonField.extends                 "Luca.core.Field"
 buttonField.triggers                "button:click"
 
 buttonField.publicConfiguration
-  readOnly: true
-  input_type: "button" 
-  input_value: undefined 
-  icon_class: undefined
-  input_name: undefined
-  white: undefined
+  readOnly:     true
+  input_value:  undefined 
+  input_type:   "button" 
+  icon_class:   undefined
+  input_name:   undefined
+  white:        undefined
 
 buttonField.privateConfiguration
+  template: "fields/button_field"
   events:
     "click input" : "click_handler"
-  template: 'fields/button_field'
 
 buttonField.privateInterface
   click_handler: (e)->

@@ -1,4 +1,4 @@
-Luca.modules.Paginatable = 
+Luca.concerns.Paginatable = 
   paginatorViewClass: 'Luca.components.PaginationControl'
   paginationSelector: ".toolbar.bottom"
 

@@ -18,7 +18,7 @@ selectField.defines
 
   initialize: (@options={})->
     _.extend @, @options
-    _.extend @, Luca.modules.Deferrable
+    _.extend @, Luca.concerns.Deferrable
     _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
     Luca.core.Field::initialize.apply @, arguments

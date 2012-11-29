@@ -4,9 +4,9 @@ view.extends            "Backbone.View"
 
 # includes are extensions to the prototype, and have no special behavior
 view.includes           "Luca.Events",
-                        "Luca.modules.DomHelpers"
+                        "Luca.concerns.DomHelpers"
 
-# mixins are includes with special property / method conventions
+# concerns are includes with special property / method conventions
 # which customize the components through the use of __initializer and
 # __included method names.  These will be called every time an instance
 # is created, and the first time the mixin is used to enhance a component.
@@ -48,15 +48,11 @@ view.defines
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 
-    @setupMixins()
+    Luca.concern.setup.call(@)
+
     @delegateEvents()
         
     @trigger "after:initialize", @
-
-  setupMixins: ()->
-    if @mixins?.length > 0
-      for module in @mixins 
-        Luca.mixin(module)?.__initializer?.call(@, @, module)
 
   #### Hooks or Auto Event Binding
   #
@@ -71,18 +67,7 @@ view.defines
   # after:render      : afterRender()
   # after:initialize  : afterInitialize()
   # first:activation  : firstActivation()
-  setupHooks: (set)->
-    set ||= @hooks
-
-    _(set).each (eventId)=>
-      fn = Luca.util.hook( eventId )
-
-      callback = ()->
-        @[fn]?.apply @, arguments
-
-      callback = _.once(callback) if eventId?.match(/once:/)
-
-      @on eventId, callback, @
+  setupHooks: Luca.util.setupHooks
 
   registerEvent: (selector, handler)->
     @events ||= {}
@@ -170,14 +155,18 @@ bindEventHandlers = (events={})->
     if _.isString(handler)
       _.bindAll @, handler
 
-Luca.View.extend = (definition)->
-  definition = Luca.View.renderWrapper( definition )
-
-  if definition.mixins? and _.isArray( definition.mixins )
-    for module in definition.mixins
-      Luca.decorate( definition ).with( module )
-
-  Luca.View._originalExtend.call(@, definition)
-
-
 Luca.View.deferrableEvent = "reset"
+
+Luca.View.extend = (definition={})->
+  definition = Luca.View.renderWrapper( definition )
+  # for backward compatibility
+  definition.concerns ||= definition.concerns if definition.concerns?
+
+  componentClass = Luca.View._originalExtend.call(@, definition)
+
+  if definition.concerns? and _.isArray( definition.concerns )
+    for module in definition.concerns
+      Luca.decorate( componentClass ).with( module )
+
+  componentClass
+

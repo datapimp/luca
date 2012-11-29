@@ -1,4 +1,4 @@
-Luca.modules.Templating =
+Luca.concerns.Templating =
   __initializer: ()->
     templateVars = Luca.util.read.call(@, @bodyTemplateVars) || {}
 

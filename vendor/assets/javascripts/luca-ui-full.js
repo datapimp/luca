@@ -563,6 +563,61 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     }, contents);
   };
 
+  Luca.util.setupMixins = function() {
+    var module, _i, _len, _ref, _ref2, _ref3, _ref4, _results;
+    if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
+      _ref2 = this.mixins;
+      _results = [];
+      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+        module = _ref2[_i];
+        _results.push((_ref3 = Luca.mixin(module)) != null ? (_ref4 = _ref3.__initializer) != null ? _ref4.call(this, this, module) : void 0 : void 0);
+      }
+      return _results;
+    }
+  };
+
+  Luca.util.setupHooks = function(set) {
+    var _this = this;
+    set || (set = this.hooks);
+    return _(set).each(function(eventId) {
+      var callback, fn;
+      fn = Luca.util.hook(eventId);
+      callback = function() {
+        var _ref;
+        return (_ref = this[fn]) != null ? _ref.apply(this, arguments) : void 0;
+      };
+      if (eventId != null ? eventId.match(/once:/) : void 0) {
+        callback = _.once(callback);
+      }
+      return _this.on(eventId, callback, _this);
+    });
+  };
+
+  Luca.util.setupHooksAdvanced = function(set) {
+    var _this = this;
+    set || (set = this.hooks);
+    return _(set).each(function(eventId) {
+      var callback, entry, fn, hookSetup, _i, _len, _results;
+      hookSetup = _this[Luca.util.hook(eventId)];
+      if (!_.isArray(hookSetup)) hookSetup = [hookSetup];
+      _results = [];
+      for (_i = 0, _len = hookSetup.length; _i < _len; _i++) {
+        entry = hookSetup[_i];
+        fn = _.isString(entry) ? _this[entry] : void 0;
+        if (_.isFunction(entry)) fn = entry;
+        callback = function() {
+          var _ref;
+          return (_ref = this[fn]) != null ? _ref.apply(this, arguments) : void 0;
+        };
+        if (eventId != null ? eventId.match(/once:/) : void 0) {
+          callback = _.once(callback);
+        }
+        _results.push(_this.on(eventId, callback, _this));
+      }
+      return _results;
+    });
+  };
+
 }).call(this);
 (function() {
 
@@ -1448,6 +1503,27 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
 
+  Luca.modules.ModelPresenter = {
+    __initializer: function() {},
+    __included: function() {
+      return console.log("Model Presenter Included Into", arguments);
+    },
+    presentAs: function(format) {
+      var attributeList, presenterConfig, _base,
+        _this = this;
+      presenterConfig = (_base = this.componentMetaData().componentDefinition()).presenters || (_base.presenters = {});
+      attributeList = presenterConfig[format];
+      if (attributeList == null) return this.toJSON();
+      return _(attributeList).reduce(function(memo, attribute) {
+        memo[attribute] = _this.read(attribute);
+        return memo;
+      });
+    }
+  };
+
+}).call(this);
+(function() {
+
   Luca.modules.Paginatable = {
     paginatorViewClass: 'Luca.components.PaginationControl',
     paginationSelector: ".toolbar.bottom",
@@ -1858,38 +1934,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.$el.attr("data-luca-id", this.name || this.cid);
       Luca.cacheInstance(this.cid, this);
       this.setupHooks(_(Luca.View.prototype.hooks.concat(this.hooks)).uniq());
-      this.setupMixins();
+      Luca.util.setupMixins.call(this);
       this.delegateEvents();
       return this.trigger("after:initialize", this);
     },
-    setupMixins: function() {
-      var module, _i, _len, _ref, _ref2, _ref3, _ref4, _results;
-      if (((_ref = this.mixins) != null ? _ref.length : void 0) > 0) {
-        _ref2 = this.mixins;
-        _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          module = _ref2[_i];
-          _results.push((_ref3 = Luca.mixin(module)) != null ? (_ref4 = _ref3.__initializer) != null ? _ref4.call(this, this, module) : void 0 : void 0);
-        }
-        return _results;
-      }
-    },
-    setupHooks: function(set) {
-      var _this = this;
-      set || (set = this.hooks);
-      return _(set).each(function(eventId) {
-        var callback, fn;
-        fn = Luca.util.hook(eventId);
-        callback = function() {
-          var _ref;
-          return (_ref = this[fn]) != null ? _ref.apply(this, arguments) : void 0;
-        };
-        if (eventId != null ? eventId.match(/once:/) : void 0) {
-          callback = _.once(callback);
-        }
-        return _this.on(eventId, callback, _this);
-      });
-    },
+    setupHooks: Luca.util.setupHooks,
     registerEvent: function(selector, handler) {
       this.events || (this.events = {});
       this.events[selector] = handler;
@@ -2022,16 +2071,19 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   model.includes('Luca.Events');
 
+  model.mixesIn("ModelPresenter");
+
   model.defines({
     initialize: function() {
       Backbone.Model.prototype.initialize(this, arguments);
-      return setupComputedProperties.call(this);
+      setupComputedProperties.call(this);
+      return Luca.util.setupMixins.call(this);
     },
     read: function(attr) {
       if (_.isFunction(this[attr])) {
         return this[attr].call(this);
       } else {
-        return this.get(attr);
+        return this.get(attr) || this[attr];
       }
     },
     get: function(attr) {
@@ -2065,6 +2117,21 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }));
     }
     return _results;
+  };
+
+  Luca.Model._originalExtend = Backbone.Model.extend;
+
+  Luca.Model.extend = function(definition) {
+    var module, _i, _len, _ref;
+    console.log("Luca Model Extend", definition.mixins);
+    if ((definition.mixins != null) && _.isArray(definition.mixins)) {
+      _ref = definition.mixins;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        module = _ref[_i];
+        Luca.decorate(definition)["with"](module);
+      }
+    }
+    return Luca.Model._originalExtend.call(this, definition);
   };
 
 }).call(this);
@@ -2376,6 +2443,20 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return Backbone.View.prototype.trigger.apply(this, arguments);
     }
   });
+
+  Luca.Collection._originalExtend = Backbone.Collection.extend;
+
+  Luca.Collection.extend = function(definition) {
+    var module, _i, _len, _ref;
+    if ((definition.mixins != null) && _.isArray(definition.mixins)) {
+      _ref = definition.mixins;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        module = _ref[_i];
+        Luca.decorate(definition)["with"](module);
+      }
+    }
+    return Luca.Collection._originalExtend.call(this, definition);
+  };
 
   Luca.Collection.baseParams = function(obj) {
     if (obj) return Luca.Collection._baseParams = obj;

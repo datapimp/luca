@@ -1,10 +1,13 @@
-describe 'The Mixin System', ->
+describe 'The Concern System', ->
 
   window.Luca ||= {}
 
-  Luca.mixin.namespace 'Luca.test_modules'
+  Luca.concern.namespace 'Luca.test_concerns'
 
-  Luca.test_modules =
+  Luca.test_concerns =
+    CollectionMixin:
+      __initializer: ()->
+        @trigger "collection:mixin"
     SecondMixin:
       __included: ()->
         window.secondMixinIncluded = true
@@ -32,18 +35,35 @@ describe 'The Mixin System', ->
   secondView.defines
     version: 2
 
+  collection = Luca.register("Luca.components.MixinCollection")
+  collection.mixesIn "CollectionMixin"
+  collection.defines version: 2
+
+  model = Luca.register("Luca.components.MixinModel")
+  model.mixesIn "CollectionMixin"
+  model.defines version: 2
+
+  it "should work on models", ->
+    model = new Luca.components.MixinModel()
+    expect( model ).toHaveTriggered("collection:mixin")
+
+  it "should work on collections", ->
+    collection = new Luca.components.MixinCollection()
+    expect( collection ).toHaveTriggered("collection:mixin")
+
+  it "should work on views", ->
+    secondView = new Luca.components.SecondView
+    expect( secondView ).toHaveTriggered("second:mixin")
+
   it "should omit the private methods defined on the mixin", ->
     sampleView = new Luca.components.FirstView
     expect( sampleView.__privateMethod ).not.toBeDefined()
 
-  it "should extend the prototype with the mixins normal methods", ->
+  it "should extend the prototype with the concerns normal methods", ->
     sampleView = new Luca.components.FirstView
     expect( sampleView.publicMethod ).toBeDefined()
-
-  it "should call the initializer for that module on the instance", ->
-    secondView = new Luca.components.SecondView
-    expect( secondView ).toHaveTriggered("second:mixin")
 
   it "should call the initializers up the prototype chain", ->
     secondView = new Luca.components.SecondView
     expect( secondView ).toHaveTriggered("first:mixin")
+    expect( secondView ).toHaveTriggered("second:mixin")

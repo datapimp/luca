@@ -1,4 +1,4 @@
-Luca.modules.EnhancedProperties = 
+Luca.concerns.EnhancedProperties = 
   __initializer: ()->
     return unless Luca.config.enhancedViewProperties is true 
 

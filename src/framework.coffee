@@ -21,9 +21,11 @@
 _.extend Luca,
   VERSION: "0.9.7"
   core: {}
+  collections: {}
   containers: {}
   components: {}
-  modules: {}
+  models: {}
+  concerns: {}
   util: {}
   fields: {}
   registry:{}

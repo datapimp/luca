@@ -1,4 +1,4 @@
-Luca.modules.CollectionEventBindings = 
+Luca.concerns.CollectionEventBindings = 
   __initializer: ()->
     return if _.isEmpty( @collectionEvents )
 
