@@ -37,6 +37,7 @@ Luca.concerns.Paginatable =
     paginationState.on "change:page", (state)=> 
       if @isRemote() 
         filter = _.extend(@toQuery(), @toQueryOptions()) 
+        filter = _( filter ).omit('pager','remote')
         @collection.applyFilter(filter, remote: true)
       else
         @trigger "refresh" 

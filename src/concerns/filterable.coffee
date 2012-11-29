@@ -27,14 +27,10 @@ Luca.concerns.Filterable =
     @querySources.push (()=> filter.toQuery())
     @optionsSources.push (()=> filter.toOptions())
 
-    if @debugMode is true
-      console.log "Filterable"
-      console.log @querySources
-      console.log @optionsSources 
-
     filter.on "change", ()=> 
       if @isRemote()  
         merged = _.extend(@getQuery(), @getQueryOptions())
+        merged = _( merged ).omit('pager','remote','changes')
         @collection.applyFilter(merged, @getQueryOptions())
       else
         @trigger "refresh" 

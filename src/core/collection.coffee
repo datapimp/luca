@@ -1,11 +1,10 @@
 collection = Luca.define            'Luca.Collection'
-
-if Backbone.QueryCollection?
-  collection.extends                'Backbone.QueryCollection'
-else
-  collection.extends                'Backbone.Collection'
-
+collection.extends                  'Backbone.QueryCollection'
 collection.includes                 'Luca.Events'
+
+collection.triggers                 "after:initialize",  
+                                    "before:fetch",
+                                    "after:response"
 
 collection.defines    
   model: Luca.Model
@@ -92,6 +91,7 @@ collection.defines
       @reset models, silent: true, parse: options?.parse
 
     Luca.concern.setup.call(@)
+    Luca.util.setupHooks.call(@, @hooks)
 
     @trigger "after:initialize"
 
@@ -141,9 +141,11 @@ collection.defines
     @
 
   applyFilter: (filter={}, options={})->
+    options = _( options ).clone()
+
     if options.remote? is true or @remoteFilter is true
       @applyParams(filter)
-      @fetch _.extend(options,refresh:true)
+      @fetch _.extend(options,refresh:true,remote:true)
     else
       @reset @query filter
 
@@ -232,10 +234,11 @@ collection.defines
   # reset trigger with a function wrapped in _.once
   # so that it only gets run...ahem...once.
   #
-  # that being said, if the collection already has models
   # it won't even bother fetching it it will just run
   # as if reset was already triggered
-  onceLoaded: (fn, options={autoFetch:true})->
+  onceLoaded: (fn, options={})->
+    _.defaults(options, autoFetch: true)
+
     if @length > 0 and not @fetching
       fn.apply @, [@]
       return
@@ -264,17 +267,6 @@ collection.defines
     unless @fetching is true or !options.autoFetch or @length > 0
       @fetch()
 
-  # parse is very close to the stock Backbone.Collection parse, which
-  # just returns the response.  However, it also triggers a callback
-  # after:response, and automatically parses responses which contain
-  # a JSON root like you would see in rails, if you specify the @root
-  # property.
-  #
-  # it will also update the Luca.Collection.cache with the models from
-  # the response, so that any subsequent calls to fetch() on a bootstrapped
-  # collection, will have updated models from the server.  Really only
-  # useful if you call fetch(refresh:true) manually on any bootstrapped
-  # collection
   parse: (response)->
     @fetching = false
     @trigger "after:response", response

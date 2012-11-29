@@ -36,6 +36,8 @@ textField.defines
       @$el.addClass('input-append')
       @addOn = @append
 
+    @placeHolder ||= ""
+
     Luca.core.Field::initialize.apply @, arguments
 
   keyup_handler: (e)->

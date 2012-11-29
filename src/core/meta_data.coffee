@@ -8,7 +8,6 @@ Luca.registry.addMetaData = (componentName, key, value)->
   data[ key ] = _(value).clone()
   data
 
-
 class MetaDataProxy
   constructor: (@meta={})->
     @
@@ -18,6 +17,24 @@ class MetaDataProxy
 
   componentDefinition: ()->
     Luca.util.resolve(@meta["display name"])
+
+  publicMethods: ()->
+    @meta["public interface"]
+
+  publicConfiguration: ()->
+    @meta["public configuration"]
+
+  privateMethods: ()->
+    @meta["private interface"]
+
+  privateConfiguration: ()->
+    @meta["private configuration"]
+
+  triggers: ()->
+    @meta["hooks"]
+
+  hooks: ()->
+    @meta["hooks"]
 
   styleHierarchy: ()->
     list = _( @classHierarchy() ).map (cls)->

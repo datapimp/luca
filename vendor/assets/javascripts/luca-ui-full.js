@@ -1242,15 +1242,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.optionsSources.push((function() {
         return filter.toOptions();
       }));
-      if (this.debugMode === true) {
-        console.log("Filterable");
-        console.log(this.querySources);
-        console.log(this.optionsSources);
-      }
       filter.on("change", function() {
         var merged;
         if (_this.isRemote()) {
           merged = _.extend(_this.getQuery(), _this.getQueryOptions());
+          merged = _(merged).omit('pager', 'remote', 'changes');
           return _this.collection.applyFilter(merged, _this.getQueryOptions());
         } else {
           return _this.trigger("refresh");
@@ -1600,6 +1596,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         var filter;
         if (_this.isRemote()) {
           filter = _.extend(_this.toQuery(), _this.toQueryOptions());
+          filter = _(filter).omit('pager', 'remote');
           return _this.collection.applyFilter(filter, {
             remote: true
           });
@@ -1878,6 +1875,30 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
     MetaDataProxy.prototype.componentDefinition = function() {
       return Luca.util.resolve(this.meta["display name"]);
+    };
+
+    MetaDataProxy.prototype.publicMethods = function() {
+      return this.meta["public interface"];
+    };
+
+    MetaDataProxy.prototype.publicConfiguration = function() {
+      return this.meta["public configuration"];
+    };
+
+    MetaDataProxy.prototype.privateMethods = function() {
+      return this.meta["private interface"];
+    };
+
+    MetaDataProxy.prototype.privateConfiguration = function() {
+      return this.meta["private configuration"];
+    };
+
+    MetaDataProxy.prototype.triggers = function() {
+      return this.meta["hooks"];
+    };
+
+    MetaDataProxy.prototype.hooks = function() {
+      return this.meta["hooks"];
     };
 
     MetaDataProxy.prototype.styleHierarchy = function() {
@@ -2184,13 +2205,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   collection = Luca.define('Luca.Collection');
 
-  if (Backbone.QueryCollection != null) {
-    collection["extends"]('Backbone.QueryCollection');
-  } else {
-    collection["extends"]('Backbone.Collection');
-  }
+  collection["extends"]('Backbone.QueryCollection');
 
   collection.includes('Luca.Events');
+
+  collection.triggers("after:initialize", "before:fetch", "after:response");
 
   collection.defines({
     model: Luca.Model,
@@ -2243,6 +2262,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         });
       }
       Luca.concern.setup.call(this);
+      Luca.util.setupHooks.call(this, this.hooks);
       return this.trigger("after:initialize");
     },
     __wrapUrl: function() {
@@ -2286,10 +2306,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     applyFilter: function(filter, options) {
       if (filter == null) filter = {};
       if (options == null) options = {};
+      options = _(options).clone();
       if ((options.remote != null) === true || this.remoteFilter === true) {
         this.applyParams(filter);
         return this.fetch(_.extend(options, {
-          refresh: true
+          refresh: true,
+          remote: true
         }));
       } else {
         return this.reset(this.query(filter));
@@ -2354,11 +2376,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     onceLoaded: function(fn, options) {
       var wrapped,
         _this = this;
-      if (options == null) {
-        options = {
-          autoFetch: true
-        };
-      }
+      if (options == null) options = {};
+      _.defaults(options, {
+        autoFetch: true
+      });
       if (this.length > 0 && !this.fetching) {
         fn.apply(this, [this]);
         return;
