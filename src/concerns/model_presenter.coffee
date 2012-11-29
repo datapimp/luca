@@ -1,19 +1,23 @@
 Luca.concerns.ModelPresenter = 
   classMethods:
-    registerPresenter: ()->
-      console.log "registering presenter", @
+    getPresenter: (format)->
+      @presenters?[format]
+
+    registerPresenter: (format, config)->
+      @presenters ||= {} 
+      @presenters[ format ] = config
 
   presentAs: (format)->
     try
-      presenterConfig = @componentMetaData().componentDefinition().presenters ||= {}
-
-      attributeList = presenterConfig[ format ]
+      attributeList = @componentMetaData().componentDefinition().getPresenter(format) 
 
       return @toJSON() unless attributeList?
 
       _( attributeList ).reduce (memo, attribute)=>
         memo[ attribute ] = @read(attribute)
         memo 
+      , {}
 
     catch e
+      console.log "Error presentAs", e.stack, e.message
       return @toJSON()
