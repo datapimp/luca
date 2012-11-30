@@ -12,16 +12,34 @@
 # _.def("Luca.View").extends("Backbone.View").with the_good:"shit"
 # _.def("MyView").extends("Luca.View").with the_custom:"shit"
 _.mixin
-  def: Luca.component = Luca.define = Luca.register = (componentName)-> new DefineProxy(componentName)
+  def: Luca.component = Luca.define = Luca.register = (componentName)-> 
+    new ComponentDefinition(componentName)
   register: Luca.register
 
+Luca.define.__definitions = []
+
+Luca.define.incomplete = ()->
+  _( Luca.define.__definitions ).select (definition)-> 
+    definition.isOpen()
+
+Luca.define.close = ()->
+  for open in Luca.define.incomplete()
+    open.register() if open.isValid()
+
+  Luca.define.__definitions.length = 0
+
+Luca.define.findDefinition = (componentName)->
+  _( Luca.define.__definitions ).detect (definition)->
+    definition.componentName is componentName
+
 # The define proxy chain sets up a call to Luca.extend, which is a wrapper around Luca and Backbone component class' extend function.
-class DefineProxy
+class ComponentDefinition
   constructor:(componentName)->
     @namespace = Luca.util.namespace()
     @componentId = @componentName = componentName
     @superClassName = 'Luca.View' 
     @properties ||= {}
+    @classProperties ||= {}
 
     if componentName.match(/\./)
       @namespaced = true
@@ -31,6 +49,20 @@ class DefineProxy
 
       # automatically add the namespace to the namespace registry
       Luca.registry.addNamespace( parts.join('.') )
+
+    Luca.define.__definitions.push(@)
+
+  isValid: ()->
+    return false unless _.isObject(@properties) 
+    return false unless Luca.util.resolve(@superClassName)?
+    return false unless @componentName?
+    true
+
+  isDefined: ()->
+    @defined is true
+
+  isOpen: ()->
+    !!(@isValid() and not @isDefined())
 
   meta: (key, value)->
     metaKey = @namespace + '.' + @componentId
@@ -73,21 +105,35 @@ class DefineProxy
     @meta("concerns", @properties.concerns)
     @
 
+  classConfiguration: (properties={})->
+    @meta("class configuration", _.keys(properties))
+    _.defaults((@_classProperties||={}), properties)
+    @
+
   publicConfiguration: (properties={})->
     @meta("public configuration", _.keys(properties) )
-    _.defaults((@properties||={}), properties)
+    _.defaults((@_properties||={}), properties)
+    @
 
   privateConfiguration: (properties={})->
     @meta("private configuration", _.keys(properties) )
-    _.defaults((@properties||={}), properties)
+    _.defaults((@_properties||={}), properties)
+    @
+
+  classInterface: (properties={})->
+    @meta("class interface", _.keys(properties))
+    _.defaults((@_classProperties||={}), properties)
+    @
 
   publicInterface: (properties={})->
     @meta("public interface", _.keys(properties) )
     _.defaults((@properties||={}), properties)
+    @
 
   privateInterface: (properties={})->
     @meta("private interface", _.keys(properties) )
     _.defaults((@properties||={}), properties)
+    @
 
   definePrototype: (properties={})->
     _.defaults((@properties||={}), properties)
@@ -125,16 +171,28 @@ class DefineProxy
       # automatically register this with the component registry
       Luca.registerComponent( _.string.underscored(@componentId), @componentName, componentType)
 
+    @defined = true
+
+    unless _.isEmpty(@_classProperties)
+      _.extend(definition, @_classProperties)
+
     definition
 
 # Aliases for the mixin definition
-DefineProxy::concerns = DefineProxy::behavesAs = DefineProxy::uses = DefineProxy::mixesIn 
+cd = ComponentDefinition::
+
+cd.concerns = cd.behavesAs = cd.uses = cd.mixesIn 
 
 # Aliases for the final call on the define proxy
-DefineProxy::defines = DefineProxy::defaults = DefineProxy::exports = DefineProxy::defaultProperties = DefineProxy::definePrototype
-DefineProxy::defaultsTo = DefineProxy::enhance = DefineProxy::with = DefineProxy::definePrototype
+cd.register = cd.defines = cd.defaults = cd.exports = cd.defaultProperties = cd.definePrototype
 
-# The last method of the DefineProxy chain is always going to result in
+cd.defaultsTo = cd.enhance = cd.with = cd.definePrototype
+
+cd.publicMethods = cd.publicInterface
+cd.privateMethods = cd.privateInterface
+cd.classMethods = cd.classInterface
+
+# The last method of the ComponentDefinition chain is always going to result in
 # a call to Luca.extend.  Luca.extend wraps the call to Luca.View.extend,
 # or Backbone.Collection.extend, and accepts the names of the extending,
 # and extended classes as strings.  This allows us to maintain information

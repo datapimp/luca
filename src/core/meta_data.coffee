@@ -10,25 +10,64 @@ Luca.registry.addMetaData = (componentName, key, value)->
 
 class MetaDataProxy
   constructor: (@meta={})->
-    @
+    _.defaults @meta, 
+      "super class name" : ""
+      "display name" : ""
+      "public interface" : []
+      "public configuration" : [] 
+      "private interface" : []
+      "private configuration" : [] 
+      "class configuration" : []
+      "class interface" : []
 
   superClass: ()->
     Luca.util.resolve(@meta["super class name"])
 
   componentDefinition: ()->
-    Luca.util.resolve(@meta["display name"])
+    Luca.registry.find @meta["display name"]
+
+  componentPrototype: ()->
+    @componentDefinition()?.prototype
+
+  prototypeFunctions: ()->
+    _.functions( @componentPrototype() )
+
+  classAttributes: ()->
+    _.uniq @classInterface().concat( @classConfiguration() )
+
+  publicAttributes: ()->
+    _.uniq @publicInterface().concat( @publicConfiguration() )
+
+  privateAttributes: ()->
+    _.uniq @privateInterface().concat( @privateConfiguration() )
+
+  classMethods: ()->
+    list = _.functions( @componentDefinition() )
+    _( list ).intersection( @classAttributes() )
 
   publicMethods: ()->
-    @meta["public interface"]
+    _( @prototypeFunctions() ).intersection( @publicAttributes() )
+
+  privateMethods: ()->
+    _( @prototypeFunctions() ).intersection( @privateAttributes() )
+
+  classConfiguration: ()->
+    @meta["class configuration"]
 
   publicConfiguration: ()->
     @meta["public configuration"]
 
-  privateMethods: ()->
-    @meta["private interface"]
-
   privateConfiguration: ()->
     @meta["private configuration"]
+
+  classInterface: ()->
+    @meta["class interface"]
+
+  publicInterface: ()->
+    @meta["public interface"]
+
+  privateInterface: ()->
+    @meta["private interface"]
 
   triggers: ()->
     @meta["hooks"]
