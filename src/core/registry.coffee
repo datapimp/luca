@@ -76,10 +76,8 @@ Luca.registry.namespaces = (resolve=true)->
   _( registry.namespaces ).map (namespace)->
     if resolve then Luca.util.resolve( namespace ) else namespace
 
-
-
 # Lookup a component in the Luca component registry
-# by it's ctype identifier.  If it doesn't exist,
+# by it's type identifier.  If it doesn't exist,
 # check any other registered namespace
 Luca.registry.lookup = (ctype)->
   if alias = Luca.registry.aliases[ ctype ] 
@@ -118,6 +116,9 @@ Luca.registry.classes = (toString=false)->
     else
       className: className
       ctype: ctype
+
+Luca.registry.find = (search)->
+  Luca.util.resolve(search) || Luca.define.findDefinition(search)
 
 Luca.cache = Luca.cacheInstance = (cacheKey, object)->
   return unless cacheKey?

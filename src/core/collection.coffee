@@ -358,6 +358,10 @@ Luca.Collection.extend = (definition={})->
 
   componentClass
 
+Luca.Collection.namespace = (namespace)->
+  Luca.Collection.__defaultNamespace = namespace if namespace?
+  Luca.Collection.__defaultNamespace ||= (window || global)
+  
 # Always include these parameters in every request to your REST API.
 #
 # either specify a function which returns a hash, or just a normal hash

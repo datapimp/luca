@@ -1,11 +1,17 @@
 # the Luca() browser utility function is meant to be a smart wrapper around various
 # types of input which will return what the developer would expect given the
 # context it is used.
-(window || global).Luca = (payload, args...)->
+lucaUtilityHelper = (payload, args...)->
   if _.isString(payload) and result = Luca.cache(payload)
     return result
 
   if _.isString(payload) and result = Luca.find(payload)
+    return result
+
+  if _.isString(payload) and result = Luca.registry.find(payload)
+    return result
+
+  if payload instanceof jQuery and result = Luca.find(payload)
     return result
 
   if _.isObject(payload) and payload.ctype?
@@ -18,8 +24,10 @@
   if _.isFunction( fallback = _(args).last() )
     return fallback()
 
+(window || global).Luca = lucaUtilityHelper
+
 _.extend Luca,
-  VERSION: "0.9.7"
+  VERSION: "0.9.75"
   core: {}
   collections: {}
   containers: {}
@@ -31,6 +39,8 @@ _.extend Luca,
   registry:{}
   options: {}
   config: {}
+  getHelper: ()->
+    lucaUtilityHelper
 
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events
@@ -59,7 +69,7 @@ Luca.enableBootstrap = Luca.config.enableBootstrap = true
 
 Luca.config.enhancedViewProperties = true
 
-Luca.keys =
+Luca.keys = Luca.config.keys =
   ENTER: 13
   ESCAPE: 27
   KEYLEFT: 37
@@ -70,10 +80,32 @@ Luca.keys =
   FORWARDSLASH: 191
 
 # build a reverse map
-Luca.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
+Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo[value] = symbol.toLowerCase()
   memo
 , {}
+
+Luca.initialize = (namespace, options={})->
+  defaults = 
+    views: {}
+    collections: {}
+    models: {}
+    components: {}
+    lib: {}
+    util: {}
+    concerns: {}
+
+  object = {}
+  object[ namespace ] = defaults
+
+  Luca.concern.namespace "#{ namespace }.concerns"
+  Luca.registry.namespace "#{ namespace }.views"
+  Luca.collection.namespace "#{ namespace }.collections"
+ 
+  Luca.Collection.baseParams( Luca.util.read(window.LucaBaseParams ||= {}) )
+  Luca.Collection.bootstrap( Luca.util.read(window.LucaModelBootstrap ||= {}) ) 
+
+  _.defaults (window || global), initialized
 
 Luca.find = (el)->
   Luca( $(el).data('luca-id') )

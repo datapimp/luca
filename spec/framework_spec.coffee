@@ -113,3 +113,21 @@ describe "Luca Component Definition", ->
   it "should allow me to set the namespace before the definition", ->
     Luca.util.namespace("Luca.View")
     expect( Luca.util.namespace() ).toEqual Luca.View
+
+describe 'Application Space Initialization', ->
+  window.SampleLucaApplication = undefined
+  Luca.initialize("SampleLucaApplication")
+
+  it "should create the namespace", ->
+    expect( SampleLucaApplication ).toBeDefined()
+    
+  it "should create the default containers", ->
+    expect( SampleLucaApplication.views ).toBeDefined()
+    expect( SampleLucaApplication.models ).toBeDefined()
+    expect( SampleLucaApplication.collections ).toBeDefined()
+
+  it "should set the collection namespace", ->
+    namespace = Luca.util.read( Luca.Collection.namespace )
+    expect( namespace ).toEqual SampleLucaApplication.collections
+
+

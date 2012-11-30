@@ -1,8 +1,6 @@
 class Luca.CollectionManager
   name: "primary"
 
-  collectionNamespace: Luca.Collection.namespace
-
   __collections: {}
 
   relayEvents: true 
@@ -15,6 +13,8 @@ class Luca.CollectionManager
     if existing = Luca.CollectionManager.get?(@name)
       throw 'Attempt to create a collection manager with a name which already exists'
 
+    @collectionNamespace ||= Luca.util.read( Luca.Collection.namespace )  
+    
     Luca.CollectionManager.instances ||= {}
 
     _.extend @, Backbone.Events
@@ -116,12 +116,16 @@ Luca.CollectionManager.loadCollectionsByName = (set, callback)->
       callback(collection)
     collection.fetch()  
 
-
 #### Private Methods
 guessCollectionClass = (key)->
   classified = Luca.util.classify( key )
+
+  if _.isString( @collectionNamespace )
+    @collectionNamespace = Luca.util.resolve(@collectionNamespace)
+
   # support our naming convention of Books
   guess = (@collectionNamespace || (window || global) )[ classified ]
+
   # support naming covention like BooksCollection
   guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
 
