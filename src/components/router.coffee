@@ -14,6 +14,9 @@ _.def("Luca.Router").extends("Backbone.Router").with
       @bind "route:#{ route_id }", ()=>
         @trigger.apply @, ["change:navigation", route_id  ].concat( _( arguments ).flatten() )
 
+
+    Backbone.Router.initialize.apply(@, arguments)
+
   #### Router Functions
 
   # Intercept calls to Backbone.Router.navigate so that we can at least

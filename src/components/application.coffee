@@ -5,44 +5,7 @@
 application = Luca.register       "Luca.Application"
 application.extends               "Luca.containers.Viewport"
 
-application.classMethods
-  controller: (controllerName)->
-    controllerPage = Luca(controllerName)
-
-    return action: (action)->
-      path = controllerPage.controllerPath()
-      path.push({action})
-      Luca.Application.routeTo(path...)
-
-  routeTo: (pages...)->
-    lastPage = _( pages ).last()
-
-    (args...)->
-      path = @app || Luca.getApplication()
-      index = 0
-
-      for page in pages when _.isString(page)
-        nextItem = pages[++index]
-        action = undefined
-
-        if _.isFunction(nextItem)
-          action = nextItem
-        else if _.isObject(nextItem) and nextItem.action?
-          action = nextItem.action
-        else if page is lastPage and routeHandler = Luca(lastPage)?.routeHandler
-          action = Luca.util.read(routeHandler)
-
-        if _.isString( action )
-          callback = ()-> 
-            @[ action ].apply(@, args)
-
-        if _.isFunction( action )
-          callback = nextItem
-
-        path = path.navigate_to(page, callback)
-
-
-application.defines
+application.publicConfiguration
   name: "MyApp"
 
   # The Application uses a Backbone.Model as a state machine, which
@@ -238,11 +201,6 @@ application.defines
   navigate_to: (component_name, callback)->
     @getMainController().navigate_to(component_name, callback)
 
-  getMainController: ()->
-    return @components[0] if @useController is true
-    Luca.cache('main_controller')
-
-  #
   keyHandler: (e)->
     return unless e and @keyEvents
 
@@ -291,8 +249,8 @@ application.defines
 
       @components = [
         type: 'controller'
-        name: "main_controller"
         components: definedComponents
+        role: "main_controller"
       ]
 
       @defer( @setupControllerBindings, false ).until("after:components")

@@ -2992,6 +2992,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
+      _.bindAll(this, "beforeRender");
       this.setupHooks(Luca.core.Container.prototype.hooks);
       this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
       validateContainerConfiguration(this);
@@ -3064,10 +3065,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       container = this;
       this.components = _(this.components).map(function(object, index) {
         var component, created, _ref;
-        component = Luca.isComponent(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, created = Luca.util.lazyComponent(object));
+        component = Luca.isComponent(object) ? object : (object.type || (object.type = object.ctype), !(object.type != null) ? object.components != null ? object.type = object.ctype = 'container' : object.type = object.ctype = Luca.defaultComponentType : void 0, object._parentCid || (object._parentCid = container.cid), created = Luca.util.lazyComponent(object));
         if (!component.container && ((_ref = component.options) != null ? _ref.container : void 0)) {
           component.container = component.options.container;
         }
+        component.getParent || (component.getParent = function() {
+          return Luca(component._parentCid);
+        });
         if (!(component.container != null)) {
           console.log(component, index, _this);
           console.error("could not assign container property to component on container " + (_this.name || _this.cid));
@@ -3083,9 +3087,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.debug("container render components");
       container = this;
       return _(this.components).each(function(component) {
-        component.getParent = function() {
-          return container;
-        };
         try {
           this.$(component.container).eq(0).append(component.el);
           return component.render();
@@ -3248,7 +3249,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.components[needle];
     },
     isRootComponent: function() {
-      return !(this.getParent != null);
+      return this.rootComponent === true || !(this.getParent != null);
     },
     getRootComponent: function() {
       if (this.isRootComponent()) {
@@ -4265,6 +4266,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       var lastPage, pages;
       pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       lastPage = _(pages).last();
+      console.log("Building Route To", pages);
       return function() {
         var action, args, callback, index, nextItem, page, path, routeHandler, _i, _len, _ref, _results;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -4788,8 +4790,41 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   controller["extends"]("Luca.containers.CardView");
 
+  controller.publicInterface({
+    "default": function(callback) {
+      return this.navigate_to(this.defaultPage || this.defaultCard, callback);
+    },
+    activePage: function() {
+      return this.activeSection();
+    },
+    navigate_to: function(section, callback) {
+      var _this = this;
+      section || (section = this.defaultCard);
+      this.activate(section, false, function(activator, previous, current) {
+        _this.state.set({
+          active_section: current.name
+        });
+        if (_.isFunction(callback)) return callback.apply(current);
+      });
+      return this.find(section);
+    }
+  });
+
+  controller.classMethods({
+    controllerPath: function() {
+      var component, list;
+      list = [];
+      component = this;
+      while (component) {
+        component = typeof component.getParent === "function" ? component.getParent() : void 0;
+        if (component != null) list.push(component.name);
+      }
+      return list;
+    }
+  });
+
   controller.defines({
-    additionalClassNames: ['luca-ui-controller'],
+    additionalClassNames: 'luca-ui-controller',
     activeAttribute: "active-section",
     stateful: true,
     initialize: function(options) {
@@ -4804,15 +4839,15 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (this.defaultCard == null) {
         throw "Controllers must specify a defaultCard property and/or the first component must have a name";
       }
+      return this._().each(function(component) {
+        return component.controllerPath = Luca.components.Controller.controllerPath;
+      });
     },
     each: function(fn) {
       var _this = this;
       return _(this.components).each(function(component) {
         return fn.call(_this, component);
       });
-    },
-    activePage: function() {
-      return this.activeSection();
     },
     activeSection: function() {
       return this.get("active_section");
@@ -4848,20 +4883,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     sectionNames: function(deep) {
       if (deep == null) deep = false;
       return this.pluck('name');
-    },
-    "default": function(callback) {
-      return this.navigate_to(this.defaultPage || this.defaultCard, callback);
-    },
-    navigate_to: function(section, callback) {
-      var _this = this;
-      section || (section = this.defaultCard);
-      this.activate(section, false, function(activator, previous, current) {
-        _this.state.set({
-          active_section: current.name
-        });
-        if (_.isFunction(callback)) return callback.apply(current);
-      });
-      return this.find(section);
     }
   });
 
@@ -6447,11 +6468,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.options = options;
       _.extend(this, this.options);
       this.routeHandlers = _(this.routes).values();
-      return _(this.routeHandlers).each(function(route_id) {
+      _(this.routeHandlers).each(function(route_id) {
         return _this.bind("route:" + route_id, function() {
           return _this.trigger.apply(_this, ["change:navigation", route_id].concat(_(arguments).flatten()));
         });
       });
+      return Backbone.Router.initialize.apply(this, arguments);
     },
     navigate: function(route, triggerRoute) {
       if (triggerRoute == null) triggerRoute = false;

@@ -1,40 +1,34 @@
 # Component Definition Helpers
 #
-#
 # We have customized the core Backbone.extend process to use a slightly
 # different syntax, which allows us to intercept the component definition at
 # various points, and maintain information about classes being defined, and
 # the relationships between inherited classes, etc.
+#
+# Under the hood it isn't much more than Backbone.View.extend(@proto)  
+#
+# Luca provides a self-documenting component generation language which
+# allows you to build the @proto property in a way which captures the intent
+# of the interface being described.  
+#
+# Example:
+#   myForm = MyApp.register    'MyForm'
+# 
+#   myForm.extends             'Luca.components.FormView'
+#
+#   myForm.triggers            'some:custom:hook'
+#
+#   myForm.publicMethods
+#     publicMethod: ()-> ...
+#
+#   myForm.classMethods 
+#     classMethod: ()-> ...
+#
+# This gives us the ability to inspect our component registry at run time,
+# auto-generate nice documentation, build development tools, etc.
 
-# _.def, or Luca.define returns a chainable object which allows you to define
-# your components with a readable syntax.  For example:
-
-# _.def("Luca.View").extends("Backbone.View").with the_good:"shit"
-# _.def("MyView").extends("Luca.View").with the_custom:"shit"
-_.mixin
-  def: Luca.component = Luca.define = Luca.register = (componentName)-> 
-    new ComponentDefinition(componentName)
-  register: Luca.register
-
-Luca.define.__definitions = []
-
-Luca.define.incomplete = ()->
-  _( Luca.define.__definitions ).select (definition)-> 
-    definition.isOpen()
-
-Luca.define.close = ()->
-  for open in Luca.define.incomplete()
-    open.register() if open.isValid()
-
-  Luca.define.__definitions.length = 0
-
-Luca.define.findDefinition = (componentName)->
-  _( Luca.define.__definitions ).detect (definition)->
-    definition.componentName is componentName
-
-# The define proxy chain sets up a call to Luca.extend, which is a wrapper around Luca and Backbone component class' extend function.
 class ComponentDefinition
-  constructor:(componentName)->
+  constructor:(componentName, @autoRegister=true)->
     @namespace = Luca.util.namespace()
     @componentId = @componentName = componentName
     @superClassName = 'Luca.View' 
@@ -51,6 +45,9 @@ class ComponentDefinition
       Luca.registry.addNamespace( parts.join('.') )
 
     Luca.define.__definitions.push(@)
+
+  @create: (componentName, autoRegister=Luca.config.autoRegister)->
+    new ComponentDefinition(componentName, autoRegister)
 
   isValid: ()->
     return false unless _.isObject(@properties) 
@@ -103,6 +100,12 @@ class ComponentDefinition
     @properties.concerns = _.uniq(@properties.concerns)
 
     @meta("concerns", @properties.concerns)
+    @
+
+  contains: (components...)->
+    _.defaults(@properties, components: [])
+    current = @properties.components
+    @properties.components = current.concat(components)
     @
 
   classConfiguration: (properties={})->
@@ -158,7 +161,7 @@ class ComponentDefinition
 
     definition = at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
 
-    if Luca.config.autoRegister is true 
+    if @autoRegister is true 
       componentType = "view" if Luca.isViewPrototype( definition )
 
       if Luca.isCollectionPrototype( definition )
@@ -178,6 +181,7 @@ class ComponentDefinition
 
     definition
 
+
 # Aliases for the mixin definition
 cd = ComponentDefinition::
 
@@ -191,6 +195,24 @@ cd.defaultsTo = cd.enhance = cd.with = cd.definePrototype
 cd.publicMethods = cd.publicInterface
 cd.privateMethods = cd.privateInterface
 cd.classMethods = cd.classInterface
+
+_.extend (Luca.define = ComponentDefinition.create),
+  __definitions: []
+  incomplete: ()->
+    _( Luca.define.__definitions ).select (definition)-> 
+      definition.isOpen()
+  close: ()->
+    for open in Luca.define.incomplete()
+      open.register() if open.isValid()
+    Luca.define.__definitions.length = 0
+  findDefinition: (componentName)->
+    _( Luca.define.__definitions ).detect (definition)->
+      definition.componentName is componentName
+
+Luca.register = (componentName)->
+  new ComponentDefinition(componentName, true)
+
+_.mixin def: Luca.define
 
 # The last method of the ComponentDefinition chain is always going to result in
 # a call to Luca.extend.  Luca.extend wraps the call to Luca.View.extend,

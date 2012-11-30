@@ -42,6 +42,8 @@ container.defines
   initialize: (@options={})->
     _.extend @, @options
 
+    _.bindAll(@, "beforeRender")
+
     @setupHooks( Luca.core.Container::hooks )
 
     # aliases for the components property
@@ -192,6 +194,7 @@ container.defines
           else
             object.type = object.ctype = Luca.defaultComponentType
 
+        object._parentCid ||= container.cid
         created = Luca.util.lazyComponent( object )
 
       # if we're using base backbone views, then they don't extend themselves
@@ -199,6 +202,8 @@ container.defines
       # pick up the container config property
       if !component.container and component.options?.container
         component.container = component.options.container
+
+      component.getParent ||= ()-> Luca( component._parentCid )
 
       if not component.container?
         console.log component,index,@
@@ -218,10 +223,8 @@ container.defines
     @debug "container render components"
 
     container = @
-    _(@components).each (component)->
-      component.getParent = ()->
-        container
 
+    _(@components).each (component)->
       try
         @$( component.container ).eq(0).append( component.el )
         component.render()
@@ -365,7 +368,7 @@ container.defines
     @components[ needle ]
 
   isRootComponent:()->
-    !@getParent?
+    @rootComponent is true || !@getParent?
 
   getRootComponent: ()->
     if @isRootComponent() then @ else @getParent().getRootComponent()

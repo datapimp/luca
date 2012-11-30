@@ -5,6 +5,7 @@ describe 'The Controller Component', ->
     controller.defines
       name: "spec_controller"
       defaultCard: 'one'
+      rootComponent: true
       components:[
         name: "one"
         type: "controller"
@@ -48,3 +49,10 @@ describe 'The Controller Component', ->
   it "should track the active page", -> 
     @controller.navigate_to("two")
     expect( @controller.activePage() ).toEqual 'two'
+
+  it "should define a controllerPath method on each page", ->
+    expect( @controller.activeComponent().controllerPath ).toBeDefined()
+
+  it "should know the controller path", ->
+    path = @controller.activeComponent().controllerPath()
+    expect( path... ).toEqual "spec_controller", "one"

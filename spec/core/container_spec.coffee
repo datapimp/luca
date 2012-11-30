@@ -233,3 +233,53 @@ describe 'Component Event Binding', ->
   it "should accept component events with a component getter", ->
     @container.getAlphaComponent().trigger "trigger:three"
     expect(@container).toHaveTriggered("three")
+
+
+describe 'Parent Container Tracking', ->
+  nestedContainer = Luca.register("Luca.components.NestedSpec")
+  nestedContainer.extends("Luca.core.Container")
+  nestedContainer.defines
+    name: "nested_container"
+    components:[
+      type: "container"
+      name: "one",
+      role: "one"
+      components:[
+        type: "container"
+        role: "two"
+        name: "two"
+        components:[
+          name: "three"
+          role: "three"
+        ]
+      ]
+    ]
+
+  it "should not have a parent unless created by a container", ->
+    nestedContainer = (new Luca.components.NestedSpec()).render()
+    expect( nestedContainer.getParent ).not.toBeDefined()
+
+  it "should know the root", ->
+    nestedContainer = (new Luca.components.NestedSpec()).render()
+    one = nestedContainer.getOne()
+    expect( one.getRootComponent().name ).toEqual 'nested_container'
+
+  it "should know the root", ->
+    nestedContainer = (new Luca.components.NestedSpec()).render()
+    two = nestedContainer.getTwo()
+    expect( two.getRootComponent().name ).toEqual 'nested_container'
+
+  it "should know its parent", ->
+    nestedContainer = (new Luca.components.NestedSpec()).render()
+    one = nestedContainer.getOne()
+    expect( one.getParent().name ).toEqual 'nested_container' 
+
+  it "should know its parent", ->
+    nestedContainer = (new Luca.components.NestedSpec()).render()
+    two = nestedContainer.getTwo()
+    expect( two.getParent().name ).toEqual 'one' 
+
+  it "should know its parent", ->
+    nestedContainer = (new Luca.components.NestedSpec()).render()
+    three = nestedContainer.getThree()
+    expect( three.getParent().name ).toEqual 'two'    

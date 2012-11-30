@@ -112,6 +112,8 @@ Luca.initialize = (namespace, options={})->
     lib: {}
     util: {}
     concerns: {}
+    register: ()->
+      Luca.register.apply(@, arguments)
     onReady: ()-> 
       Luca.onReady.apply(@, arguments)
     getApplication: ()->
