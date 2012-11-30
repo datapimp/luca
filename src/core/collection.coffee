@@ -359,20 +359,19 @@ Luca.Collection.extend = (definition={})->
   componentClass
 
 Luca.Collection.namespace = (namespace)->
+  namespace = Luca.util.resolve(namespace) if _.isString(namespace)
   Luca.Collection.__defaultNamespace = namespace if namespace?
   Luca.Collection.__defaultNamespace ||= (window || global)
+  Luca.util.read( Luca.Collection.__defaultNamespace )
   
 # Always include these parameters in every request to your REST API.
 #
 # either specify a function which returns a hash, or just a normal hash
 Luca.Collection.baseParams = (obj)->
-  return Luca.Collection._baseParams = obj if obj
+  obj = Luca.util.resolve(obj) if _.isString(obj)
+  Luca.Collection._baseParams = obj if obj
 
-  if _.isFunction( Luca.Collection._baseParams )
-    return Luca.Collection._baseParams()
-
-  if _.isObject( Luca.Collection._baseParams )
-    Luca.Collection._baseParams
+  Luca.util.read( Luca.Collection._baseParams )
 
 # In order to make our Backbone Apps super fast it is a good practice
 # to pre-populate your collections by what is referred to as bootstrapping

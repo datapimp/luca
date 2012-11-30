@@ -98,14 +98,15 @@ Luca.initialize = (namespace, options={})->
   object = {}
   object[ namespace ] = defaults
 
+  _.defaults (window || global), object
+
   Luca.concern.namespace "#{ namespace }.concerns"
   Luca.registry.namespace "#{ namespace }.views"
-  Luca.collection.namespace "#{ namespace }.collections"
+  Luca.Collection.namespace "#{ namespace }.collections"
  
   Luca.Collection.baseParams( Luca.util.read(window.LucaBaseParams ||= {}) )
-  Luca.Collection.bootstrap( Luca.util.read(window.LucaModelBootstrap ||= {}) ) 
+  Luca.Collection.bootstrap( Luca.util.read(window.LucaModelBootstrap ||= {}) )
 
-  _.defaults (window || global), initialized
 
 Luca.find = (el)->
   Luca( $(el).data('luca-id') )
