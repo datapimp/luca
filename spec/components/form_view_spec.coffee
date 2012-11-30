@@ -47,6 +47,10 @@ describe 'The Form View', ->
   it "should create a form", ->
     expect( @form ).toBeDefined()
 
+  it "should have access to all of the fields", ->
+    @form.render()
+    expect( @form.getFields().length ).toEqual 6
+
   it "should load the model", ->
     @form.loadModel(@model)
     expect( @form.currentModel() ).toEqual @model

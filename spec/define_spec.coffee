@@ -55,6 +55,10 @@ describe 'The Component Definition System', ->
   it "should define a component", ->
     expect( Luca.isComponentPrototype(Luca.components.SampleComponentDefinition) ).toEqual true
 
+  it "should add everything defined for the prototype", ->
+    for attribute in ["publicMethod","publicProperty","publicAttribute","privateAttribute","privateMethod","privateProperty"]
+      expect( Luca.components.SampleComponentDefinition.prototype[attribute] ).toBeDefined()
+
   it "should default to Luca.View for the extends portion", ->
     expect( Luca.parentClasses(Luca.components.SampleComponentDefinition) ).toContain 'Luca.View'
   

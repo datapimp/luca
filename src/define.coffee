@@ -112,12 +112,12 @@ class ComponentDefinition
 
   publicConfiguration: (properties={})->
     @meta("public configuration", _.keys(properties) )
-    _.defaults((@_properties||={}), properties)
+    _.defaults((@properties||={}), properties)
     @
 
   privateConfiguration: (properties={})->
     @meta("private configuration", _.keys(properties) )
-    _.defaults((@_properties||={}), properties)
+    _.defaults((@properties||={}), properties)
     @
 
   classInterface: (properties={})->
