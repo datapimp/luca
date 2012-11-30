@@ -88,18 +88,18 @@ Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
 Luca.config.showWarnings = true
 
 Luca.setupCollectionSpace = ()->
-    baseParams = Luca.util.read( Luca.util.resolve("LucaBaseParams") ) 
-    modelBoostrap = Luca.util.read( Luca.util.resolve("LucaModelBootstrap") ) 
+  baseParams = Luca.util.read( Luca.util.resolve("Luca.config.baseParams") ) 
+  modelBootstrap = Luca.util.read( Luca.util.resolve("Luca.config.modelBootstrap") ) 
 
-    if baseParams? 
-      Luca.Collection.baseParams( baseParams )
-    else
-      Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on window.LucaBaseParams')
+  if baseParams? 
+    Luca.Collection.baseParams( baseParams )
+  else
+    Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on Luca.config.baseParams')
 
-    if modelBootstrap?
-      Luca.Collection.bootstrap( modelBootstrap )
-    else
-      Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on window.LucaModelBootstrap")
+  if modelBootstrap?
+    Luca.Collection.bootstrap( modelBootstrap )
+  else
+    Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on Luca.config.modelBootstrap")
 
 # Creates a basic Namespace for you to begin defining
 # your application and all of its components.
@@ -112,6 +112,13 @@ Luca.initialize = (namespace, options={})->
     lib: {}
     util: {}
     concerns: {}
+    onReady: ()-> 
+      Luca.onReady.apply(@, arguments)
+    getApplication: ()->
+      Luca.getApplication?.apply(@, arguments)
+    getCollectionManager: ()->
+      Luca.CollectionManager.get?.apply(@, arguments)
+
 
   object = {}
   object[ namespace ] = _.extend(Luca.getHelper(), defaults)

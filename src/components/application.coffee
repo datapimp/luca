@@ -1,21 +1,47 @@
-application = Luca.register       "Luca.Application"
-application.extends               "Luca.containers.Viewport"
-
 # Luca.Application
 #
 # The Application class is the global state tracking mechanism
 # for your single page application, as well as the entry point.
-#
-# By default it contains a main controller which is a Luca.components.Controller instance.
-#
-# In a typical Luca application, the router will use the applications @navigate_to() method to switch
-# from page to page on the main controller, or any other controllers nested inside of it.
-#
-# You would control flow when the controller fires activation events on the nested view components inside of it.
-#
-# Decoupling application control flow from the URL Fragment from Backbone.History and preventing
-# your components from directly caring about the URL Fragment, allows you to build applications as
-# isolated components which can run separately or nested inside of other applications.
+application = Luca.register       "Luca.Application"
+application.extends               "Luca.containers.Viewport"
+
+application.classMethods
+  controller: (controllerName)->
+    controllerPage = Luca(controllerName)
+
+    return action: (action)->
+      path = controllerPage.controllerPath()
+      path.push({action})
+      Luca.Application.routeTo(path...)
+
+  routeTo: (pages...)->
+    lastPage = _( pages ).last()
+
+    (args...)->
+      path = @app || Luca.getApplication()
+      index = 0
+
+      for page in pages when _.isString(page)
+        nextItem = pages[++index]
+        action = undefined
+
+        if _.isFunction(nextItem)
+          action = nextItem
+        else if _.isObject(nextItem) and nextItem.action?
+          action = nextItem.action
+        else if page is lastPage and routeHandler = Luca(lastPage)?.routeHandler
+          action = Luca.util.read(routeHandler)
+
+        if _.isString( action )
+          callback = ()-> 
+            @[ action ].apply(@, args)
+
+        if _.isFunction( action )
+          callback = nextItem
+
+        path = path.navigate_to(page, callback)
+
+
 application.defines
   name: "MyApp"
 
@@ -333,29 +359,3 @@ application.defines
 Luca.util.startHistory = ()->
   Backbone.history.start()
 
-Luca.Application.routeTo = (pages...)->
-  lastPage = _( pages ).last()
-
-  (args...)->
-    path = @app || Luca.getApplication()
-    index = 0
-
-    for page in pages when _.isString(page)
-      nextItem = pages[++index]
-      action = undefined
-
-      if _.isFunction(nextItem)
-        action = nextItem
-      else if _.isObject(nextItem) and nextItem.action?
-        action = nextItem.action
-      else if page is lastPage and routeHandler = Luca(lastPage)?.routeHandler
-        action = Luca.util.read(routeHandler)
-
-      if _.isString( action )
-        callback = ()-> 
-          @[ action ].apply(@, args)
-
-      if _.isFunction( action )
-        callback = nextItem
-
-      path = path.navigate_to(page, callback)

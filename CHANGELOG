@@ -209,4 +209,6 @@
   - Luca.initialize('Namespace') will setup a complete namespace for 
     your application, and give you a Namespace() method which works similar
     to the Luca() helper.
+  - Added Luca.config.modelBootrstrap and Luca.config.baseParams as pointers
+    to either properties, or methods, which can be used to configure Luca.Collection behavior
   - Luca.onReady is now the preferred way of launching the application.

@@ -82,18 +82,18 @@
   Luca.config.showWarnings = true;
 
   Luca.setupCollectionSpace = function() {
-    var baseParams, modelBoostrap;
-    baseParams = Luca.util.read(Luca.util.resolve("LucaBaseParams"));
-    modelBoostrap = Luca.util.read(Luca.util.resolve("LucaModelBootstrap"));
+    var baseParams, modelBootstrap;
+    baseParams = Luca.util.read(Luca.util.resolve("Luca.config.baseParams"));
+    modelBootstrap = Luca.util.read(Luca.util.resolve("Luca.config.modelBootstrap"));
     if (baseParams != null) {
       Luca.Collection.baseParams(baseParams);
     } else {
-      Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on window.LucaBaseParams');
+      Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on Luca.config.baseParams');
     }
-    if (typeof modelBootstrap !== "undefined" && modelBootstrap !== null) {
+    if (modelBootstrap != null) {
       return Luca.Collection.bootstrap(modelBootstrap);
     } else {
-      return Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on window.LucaModelBootstrap");
+      return Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on Luca.config.modelBootstrap");
     }
   };
 
@@ -107,7 +107,18 @@
       components: {},
       lib: {},
       util: {},
-      concerns: {}
+      concerns: {},
+      onReady: function() {
+        return Luca.onReady.apply(this, arguments);
+      },
+      getApplication: function() {
+        var _ref;
+        return (_ref = Luca.getApplication) != null ? _ref.apply(this, arguments) : void 0;
+      },
+      getCollectionManager: function() {
+        var _ref;
+        return (_ref = Luca.CollectionManager.get) != null ? _ref.apply(this, arguments) : void 0;
+      }
     };
     object = {};
     object[namespace] = _.extend(Luca.getHelper(), defaults);
@@ -4158,6 +4169,56 @@
 
   application["extends"]("Luca.containers.Viewport");
 
+  application.classMethods({
+    controller: function(controllerName) {
+      var controllerPage;
+      controllerPage = Luca(controllerName);
+      return {
+        action: function(action) {
+          var path, _ref;
+          path = controllerPage.controllerPath();
+          path.push({
+            action: action
+          });
+          return (_ref = Luca.Application).routeTo.apply(_ref, path);
+        }
+      };
+    },
+    routeTo: function() {
+      var lastPage, pages;
+      pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      lastPage = _(pages).last();
+      return function() {
+        var action, args, callback, index, nextItem, page, path, routeHandler, _i, _len, _ref, _results;
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        path = this.app || Luca.getApplication();
+        index = 0;
+        _results = [];
+        for (_i = 0, _len = pages.length; _i < _len; _i++) {
+          page = pages[_i];
+          if (!(_.isString(page))) continue;
+          nextItem = pages[++index];
+          action = void 0;
+          if (_.isFunction(nextItem)) {
+            action = nextItem;
+          } else if (_.isObject(nextItem) && (nextItem.action != null)) {
+            action = nextItem.action;
+          } else if (page === lastPage && (routeHandler = (_ref = Luca(lastPage)) != null ? _ref.routeHandler : void 0)) {
+            action = Luca.util.read(routeHandler);
+          }
+          if (_.isString(action)) {
+            callback = function() {
+              return this[action].apply(this, args);
+            };
+          }
+          if (_.isFunction(action)) callback = nextItem;
+          _results.push(path = path.navigate_to(page, callback));
+        }
+        return _results;
+      };
+    }
+  });
+
   application.defines({
     name: "MyApp",
     defaultState: {},
@@ -4379,40 +4440,6 @@
 
   Luca.util.startHistory = function() {
     return Backbone.history.start();
-  };
-
-  Luca.Application.routeTo = function() {
-    var lastPage, pages;
-    pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    lastPage = _(pages).last();
-    return function() {
-      var action, args, callback, index, nextItem, page, path, routeHandler, _i, _len, _ref, _results;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      path = this.app || Luca.getApplication();
-      index = 0;
-      _results = [];
-      for (_i = 0, _len = pages.length; _i < _len; _i++) {
-        page = pages[_i];
-        if (!(_.isString(page))) continue;
-        nextItem = pages[++index];
-        action = void 0;
-        if (_.isFunction(nextItem)) {
-          action = nextItem;
-        } else if (_.isObject(nextItem) && (nextItem.action != null)) {
-          action = nextItem.action;
-        } else if (page === lastPage && (routeHandler = (_ref = Luca(lastPage)) != null ? _ref.routeHandler : void 0)) {
-          action = Luca.util.read(routeHandler);
-        }
-        if (_.isString(action)) {
-          callback = function() {
-            return this[action].apply(this, args);
-          };
-        }
-        if (_.isFunction(action)) callback = nextItem;
-        _results.push(path = path.navigate_to(page, callback));
-      }
-      return _results;
-    };
   };
 
 }).call(this);
