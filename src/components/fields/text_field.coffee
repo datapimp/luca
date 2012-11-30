@@ -24,9 +24,6 @@ textField.defines
     @label ||= @name
     @input_class ||= @class
     @input_value ||= @value || "" 
-
-    # TODO
-    # Placeholder?
     
     if @prepend
       @$el.addClass('input-prepend')
