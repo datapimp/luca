@@ -204,6 +204,9 @@
 
 0.9.75
   - Component registration is now beautifully readable and self documenting,
-    and flexible.  Luca.register("MyComponent").extends("Luca.View")
-  - Component definition now supports specifying class methods
-  - Luca.CollectionManager property cleanup 
+    and flexible.  Minimally only requires one call to Luca.register().  This allows you to be as descriptive as you like when defining a component, and does not require you to call any definition methods which do not make literary sense in your component description. 
+  - Component definition now supports specifying class methods.
+  - Luca.initialize('Namespace') will setup a complete namespace for 
+    your application, and give you a Namespace() method which works similar
+    to the Luca() helper.
+  - Luca.onReady is now the preferred way of launching the application.

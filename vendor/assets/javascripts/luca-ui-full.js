@@ -76,14 +76,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 !function(a){a(function(){a.support.transition=function(){var a=function(){var a=document.createElement("bootstrap"),b={WebkitTransition:"webkitTransitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd",msTransition:"MSTransitionEnd",transition:"transitionend"},c;for(c in b)if(a.style[c]!==undefined)return b[c]}();return a&&{end:a}}()})}(window.jQuery),!function(a){function c(){var b=this,c=setTimeout(function(){b.$element.off(a.support.transition.end),d.call(b)},500);this.$element.one(a.support.transition.end,function(){clearTimeout(c),d.call(b)})}function d(a){this.$element.hide().trigger("hidden"),e.call(this)}function e(b){var c=this,d=this.$element.hasClass("fade")?"fade":"";if(this.isShown&&this.options.backdrop){var e=a.support.transition&&d;this.$backdrop=a('<div class="modal-backdrop '+d+'" />').appendTo(document.body),this.options.backdrop!="static"&&this.$backdrop.click(a.proxy(this.hide,this)),e&&this.$backdrop[0].offsetWidth,this.$backdrop.addClass("in"),e?this.$backdrop.one(a.support.transition.end,b):b()}else!this.isShown&&this.$backdrop?(this.$backdrop.removeClass("in"),a.support.transition&&this.$element.hasClass("fade")?this.$backdrop.one(a.support.transition.end,a.proxy(f,this)):f.call(this)):b&&b()}function f(){this.$backdrop.remove(),this.$backdrop=null}function g(){var b=this;this.isShown&&this.options.keyboard?a(document).on("keyup.dismiss.modal",function(a){a.which==27&&b.hide()}):this.isShown||a(document).off("keyup.dismiss.modal")}var b=function(b,c){this.options=c,this.$element=a(b).delegate('[data-dismiss="modal"]',"click.dismiss.modal",a.proxy(this.hide,this))};b.prototype={constructor:b,toggle:function(){return this[this.isShown?"hide":"show"]()},show:function(){var b=this,c=a.Event("show");this.$element.trigger(c);if(this.isShown||c.isDefaultPrevented())return;a("body").addClass("modal-open"),this.isShown=!0,g.call(this),e.call(this,function(){var c=a.support.transition&&b.$element.hasClass("fade");b.$element.parent().length||b.$element.appendTo(document.body),b.$element.show(),c&&b.$element[0].offsetWidth,b.$element.addClass("in"),c?b.$element.one(a.support.transition.end,function(){b.$element.trigger("shown")}):b.$element.trigger("shown")})},hide:function(b){b&&b.preventDefault();var e=this;b=a.Event("hide"),this.$element.trigger(b);if(!this.isShown||b.isDefaultPrevented())return;this.isShown=!1,a("body").removeClass("modal-open"),g.call(this),this.$element.removeClass("in"),a.support.transition&&this.$element.hasClass("fade")?c.call(this):d.call(this)}},a.fn.modal=function(c){return this.each(function(){var d=a(this),e=d.data("modal"),f=a.extend({},a.fn.modal.defaults,d.data(),typeof c=="object"&&c);e||d.data("modal",e=new b(this,f)),typeof c=="string"?e[c]():f.show&&e.show()})},a.fn.modal.defaults={backdrop:!0,keyboard:!0,show:!0},a.fn.modal.Constructor=b,a(function(){a("body").on("click.modal.data-api",'[data-toggle="modal"]',function(b){var c=a(this),d,e=a(c.attr("data-target")||(d=c.attr("href"))&&d.replace(/.*(?=#[^\s]+$)/,"")),f=e.data("modal")?"toggle":a.extend({},e.data(),c.data());b.preventDefault(),e.modal(f)})})}(window.jQuery),!function(a){function d(){a(b).parent().removeClass("open")}var b='[data-toggle="dropdown"]',c=function(b){var c=a(b).on("click.dropdown.data-api",this.toggle);a("html").on("click.dropdown.data-api",function(){c.parent().removeClass("open")})};c.prototype={constructor:c,toggle:function(b){var c=a(this),e,f,g;if(c.is(".disabled, :disabled"))return;return f=c.attr("data-target"),f||(f=c.attr("href"),f=f&&f.replace(/.*(?=#[^\s]*$)/,"")),e=a(f),e.length||(e=c.parent()),g=e.hasClass("open"),d(),g||e.toggleClass("open"),!1}},a.fn.dropdown=function(b){return this.each(function(){var d=a(this),e=d.data("dropdown");e||d.data("dropdown",e=new c(this)),typeof b=="string"&&e[b].call(d)})},a.fn.dropdown.Constructor=c,a(function(){a("html").on("click.dropdown.data-api",d),a("body").on("click.dropdown",".dropdown form",function(a){a.stopPropagation()}).on("click.dropdown.data-api",b,c.prototype.toggle)})}(window.jQuery),!function(a){var b=function(a,b){this.init("tooltip",a,b)};b.prototype={constructor:b,init:function(b,c,d){var e,f;this.type=b,this.$element=a(c),this.options=this.getOptions(d),this.enabled=!0,this.options.trigger!="manual"&&(e=this.options.trigger=="hover"?"mouseenter":"focus",f=this.options.trigger=="hover"?"mouseleave":"blur",this.$element.on(e,this.options.selector,a.proxy(this.enter,this)),this.$element.on(f,this.options.selector,a.proxy(this.leave,this))),this.options.selector?this._options=a.extend({},this.options,{trigger:"manual",selector:""}):this.fixTitle()},getOptions:function(b){return b=a.extend({},a.fn[this.type].defaults,b,this.$element.data()),b.delay&&typeof b.delay=="number"&&(b.delay={show:b.delay,hide:b.delay}),b},enter:function(b){var c=a(b.currentTarget)[this.type](this._options).data(this.type);if(!c.options.delay||!c.options.delay.show)return c.show();clearTimeout(this.timeout),c.hoverState="in",this.timeout=setTimeout(function(){c.hoverState=="in"&&c.show()},c.options.delay.show)},leave:function(b){var c=a(b.currentTarget)[this.type](this._options).data(this.type);if(!c.options.delay||!c.options.delay.hide)return c.hide();clearTimeout(this.timeout),c.hoverState="out",this.timeout=setTimeout(function(){c.hoverState=="out"&&c.hide()},c.options.delay.hide)},show:function(){var a,b,c,d,e,f,g;if(this.hasContent()&&this.enabled){a=this.tip(),this.setContent(),this.options.animation&&a.addClass("fade"),f=typeof this.options.placement=="function"?this.options.placement.call(this,a[0],this.$element[0]):this.options.placement,b=/in/.test(f),a.remove().css({top:0,left:0,display:"block"}).appendTo(b?this.$element:document.body),c=this.getPosition(b),d=a[0].offsetWidth,e=a[0].offsetHeight;switch(b?f.split(" ")[1]:f){case"bottom":g={top:c.top+c.height,left:c.left+c.width/2-d/2};break;case"top":g={top:c.top-e,left:c.left+c.width/2-d/2};break;case"left":g={top:c.top+c.height/2-e/2,left:c.left-d};break;case"right":g={top:c.top+c.height/2-e/2,left:c.left+c.width}}a.css(g).addClass(f).addClass("in")}},isHTML:function(a){return typeof a!="string"||a.charAt(0)==="<"&&a.charAt(a.length-1)===">"&&a.length>=3||/^(?:[^<]*<[\w\W]+>[^>]*$)/.exec(a)},setContent:function(){var a=this.tip(),b=this.getTitle();a.find(".tooltip-inner")[this.isHTML(b)?"html":"text"](b),a.removeClass("fade in top bottom left right")},hide:function(){function d(){var b=setTimeout(function(){c.off(a.support.transition.end).remove()},500);c.one(a.support.transition.end,function(){clearTimeout(b),c.remove()})}var b=this,c=this.tip();c.removeClass("in"),a.support.transition&&this.$tip.hasClass("fade")?d():c.remove()},fixTitle:function(){var a=this.$element;(a.attr("title")||typeof a.attr("data-original-title")!="string")&&a.attr("data-original-title",a.attr("title")||"").removeAttr("title")},hasContent:function(){return this.getTitle()},getPosition:function(b){return a.extend({},b?{top:0,left:0}:this.$element.offset(),{width:this.$element[0].offsetWidth,height:this.$element[0].offsetHeight})},getTitle:function(){var a,b=this.$element,c=this.options;return a=b.attr("data-original-title")||(typeof c.title=="function"?c.title.call(b[0]):c.title),a},tip:function(){return this.$tip=this.$tip||a(this.options.template)},validate:function(){this.$element[0].parentNode||(this.hide(),this.$element=null,this.options=null)},enable:function(){this.enabled=!0},disable:function(){this.enabled=!1},toggleEnabled:function(){this.enabled=!this.enabled},toggle:function(){this[this.tip().hasClass("in")?"hide":"show"]()}},a.fn.tooltip=function(c){return this.each(function(){var d=a(this),e=d.data("tooltip"),f=typeof c=="object"&&c;e||d.data("tooltip",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.tooltip.Constructor=b,a.fn.tooltip.defaults={animation:!0,placement:"top",selector:!1,template:'<div class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',trigger:"hover",title:"",delay:0}}(window.jQuery),!function(a){var b=function(a,b){this.init("popover",a,b)};b.prototype=a.extend({},a.fn.tooltip.Constructor.prototype,{constructor:b,setContent:function(){var a=this.tip(),b=this.getTitle(),c=this.getContent();a.find(".popover-title")[this.isHTML(b)?"html":"text"](b),a.find(".popover-content > *")[this.isHTML(c)?"html":"text"](c),a.removeClass("fade top bottom left right in")},hasContent:function(){return this.getTitle()||this.getContent()},getContent:function(){var a,b=this.$element,c=this.options;return a=b.attr("data-content")||(typeof c.content=="function"?c.content.call(b[0]):c.content),a},tip:function(){return this.$tip||(this.$tip=a(this.options.template)),this.$tip}}),a.fn.popover=function(c){return this.each(function(){var d=a(this),e=d.data("popover"),f=typeof c=="object"&&c;e||d.data("popover",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.popover.Constructor=b,a.fn.popover.defaults=a.extend({},a.fn.tooltip.defaults,{placement:"right",content:"",template:'<div class="popover"><div class="arrow"></div><div class="popover-inner"><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'})}(window.jQuery),!function(a){var b='[data-dismiss="alert"]',c=function(c){a(c).on("click",b,this.close)};c.prototype.close=function(b){function f(){e.trigger("closed").remove()}var c=a(this),d=c.attr("data-target"),e;d||(d=c.attr("href"),d=d&&d.replace(/.*(?=#[^\s]*$)/,"")),e=a(d),b&&b.preventDefault(),e.length||(e=c.hasClass("alert")?c:c.parent()),e.trigger(b=a.Event("close"));if(b.isDefaultPrevented())return;e.removeClass("in"),a.support.transition&&e.hasClass("fade")?e.on(a.support.transition.end,f):f()},a.fn.alert=function(b){return this.each(function(){var d=a(this),e=d.data("alert");e||d.data("alert",e=new c(this)),typeof b=="string"&&e[b].call(d)})},a.fn.alert.Constructor=c,a(function(){a("body").on("click.alert.data-api",b,c.prototype.close)})}(window.jQuery),!function(a){var b=function(b,c){this.$element=a(b),this.options=a.extend({},a.fn.button.defaults,c)};b.prototype.setState=function(a){var b="disabled",c=this.$element,d=c.data(),e=c.is("input")?"val":"html";a+="Text",d.resetText||c.data("resetText",c[e]()),c[e](d[a]||this.options[a]),setTimeout(function(){a=="loadingText"?c.addClass(b).attr(b,b):c.removeClass(b).removeAttr(b)},0)},b.prototype.toggle=function(){var a=this.$element.parent('[data-toggle="buttons-radio"]');a&&a.find(".active").removeClass("active"),this.$element.toggleClass("active")},a.fn.button=function(c){return this.each(function(){var d=a(this),e=d.data("button"),f=typeof c=="object"&&c;e||d.data("button",e=new b(this,f)),c=="toggle"?e.toggle():c&&e.setState(c)})},a.fn.button.defaults={loadingText:"loading..."},a.fn.button.Constructor=b,a(function(){a("body").on("click.button.data-api","[data-toggle^=button]",function(b){var c=a(b.target);c.hasClass("btn")||(c=c.closest(".btn")),c.button("toggle")})})}(window.jQuery),!function(a){var b=function(b,c){this.$element=a(b),this.options=a.extend({},a.fn.collapse.defaults,c),this.options.parent&&(this.$parent=a(this.options.parent)),this.options.toggle&&this.toggle()};b.prototype={constructor:b,dimension:function(){var a=this.$element.hasClass("width");return a?"width":"height"},show:function(){var b,c,d,e;if(this.transitioning)return;b=this.dimension(),c=a.camelCase(["scroll",b].join("-")),d=this.$parent&&this.$parent.find("> .accordion-group > .in");if(d&&d.length){e=d.data("collapse");if(e&&e.transitioning)return;d.collapse("hide"),e||d.data("collapse",null)}this.$element[b](0),this.transition("addClass",a.Event("show"),"shown"),this.$element[b](this.$element[0][c])},hide:function(){var b;if(this.transitioning)return;b=this.dimension(),this.reset(this.$element[b]()),this.transition("removeClass",a.Event("hide"),"hidden"),this.$element[b](0)},reset:function(a){var b=this.dimension();return this.$element.removeClass("collapse")[b](a||"auto")[0].offsetWidth,this.$element[a!==null?"addClass":"removeClass"]("collapse"),this},transition:function(b,c,d){var e=this,f=function(){c.type=="show"&&e.reset(),e.transitioning=0,e.$element.trigger(d)};this.$element.trigger(c);if(c.isDefaultPrevented())return;this.transitioning=1,this.$element[b]("in"),a.support.transition&&this.$element.hasClass("collapse")?this.$element.one(a.support.transition.end,f):f()},toggle:function(){this[this.$element.hasClass("in")?"hide":"show"]()}},a.fn.collapse=function(c){return this.each(function(){var d=a(this),e=d.data("collapse"),f=typeof c=="object"&&c;e||d.data("collapse",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.collapse.defaults={toggle:!0},a.fn.collapse.Constructor=b,a(function(){a("body").on("click.collapse.data-api","[data-toggle=collapse]",function(b){var c=a(this),d,e=c.attr("data-target")||b.preventDefault()||(d=c.attr("href"))&&d.replace(/.*(?=#[^\s]+$)/,""),f=a(e).data("collapse")?"toggle":c.data();a(e).collapse(f)})})}(window.jQuery),!function(a){var b=function(b,c){this.$element=a(b),this.options=a.extend({},a.fn.typeahead.defaults,c),this.matcher=this.options.matcher||this.matcher,this.sorter=this.options.sorter||this.sorter,this.highlighter=this.options.highlighter||this.highlighter,this.updater=this.options.updater||this.updater,this.$menu=a(this.options.menu).appendTo("body"),this.source=this.options.source,this.shown=!1,this.listen()};b.prototype={constructor:b,select:function(){var a=this.$menu.find(".active").attr("data-value");return this.$element.val(this.updater(a)).change(),this.hide()},updater:function(a){return a},show:function(){var b=a.extend({},this.$element.offset(),{height:this.$element[0].offsetHeight});return this.$menu.css({top:b.top+b.height,left:b.left}),this.$menu.show(),this.shown=!0,this},hide:function(){return this.$menu.hide(),this.shown=!1,this},lookup:function(b){var c=this,d,e;return this.query=this.$element.val(),this.query?(d=a.grep(this.source,function(a){return c.matcher(a)}),d=this.sorter(d),d.length?this.render(d.slice(0,this.options.items)).show():this.shown?this.hide():this):this.shown?this.hide():this},matcher:function(a){return~a.toLowerCase().indexOf(this.query.toLowerCase())},sorter:function(a){var b=[],c=[],d=[],e;while(e=a.shift())e.toLowerCase().indexOf(this.query.toLowerCase())?~e.indexOf(this.query)?c.push(e):d.push(e):b.push(e);return b.concat(c,d)},highlighter:function(a){var b=this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&");return a.replace(new RegExp("("+b+")","ig"),function(a,b){return"<strong>"+b+"</strong>"})},render:function(b){var c=this;return b=a(b).map(function(b,d){return b=a(c.options.item).attr("data-value",d),b.find("a").html(c.highlighter(d)),b[0]}),b.first().addClass("active"),this.$menu.html(b),this},next:function(b){var c=this.$menu.find(".active").removeClass("active"),d=c.next();d.length||(d=a(this.$menu.find("li")[0])),d.addClass("active")},prev:function(a){var b=this.$menu.find(".active").removeClass("active"),c=b.prev();c.length||(c=this.$menu.find("li").last()),c.addClass("active")},listen:function(){this.$element.on("blur",a.proxy(this.blur,this)).on("keypress",a.proxy(this.keypress,this)).on("keyup",a.proxy(this.keyup,this)),(a.browser.webkit||a.browser.msie)&&this.$element.on("keydown",a.proxy(this.keypress,this)),this.$menu.on("click",a.proxy(this.click,this)).on("mouseenter","li",a.proxy(this.mouseenter,this))},keyup:function(a){switch(a.keyCode){case 40:case 38:break;case 9:case 13:if(!this.shown)return;this.select();break;case 27:if(!this.shown)return;this.hide();break;default:this.lookup()}a.stopPropagation(),a.preventDefault()},keypress:function(a){if(!this.shown)return;switch(a.keyCode){case 9:case 13:case 27:a.preventDefault();break;case 38:if(a.type!="keydown")break;a.preventDefault(),this.prev();break;case 40:if(a.type!="keydown")break;a.preventDefault(),this.next()}a.stopPropagation()},blur:function(a){var b=this;setTimeout(function(){b.hide()},150)},click:function(a){a.stopPropagation(),a.preventDefault(),this.select()},mouseenter:function(b){this.$menu.find(".active").removeClass("active"),a(b.currentTarget).addClass("active")}},a.fn.typeahead=function(c){return this.each(function(){var d=a(this),e=d.data("typeahead"),f=typeof c=="object"&&c;e||d.data("typeahead",e=new b(this,f)),typeof c=="string"&&e[c]()})},a.fn.typeahead.defaults={source:[],items:8,menu:'<ul class="typeahead dropdown-menu"></ul>',item:'<li><a href="#"></a></li>'},a.fn.typeahead.Constructor=b,a(function(){a("body").on("focus.typeahead.data-api",'[data-provide="typeahead"]',function(b){var c=a(this);if(c.data("typeahead"))return;b.preventDefault(),c.typeahead(c.data())})})}(window.jQuery)
 ;
 (function() {
-  var UnderscoreExtensions,
+  var UnderscoreExtensions, lucaUtilityHelper,
     __slice = Array.prototype.slice;
 
-  (window || global).Luca = function() {
+  lucaUtilityHelper = function() {
     var args, definition, fallback, inheritsFrom, payload, result;
     payload = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     if (_.isString(payload) && (result = Luca.cache(payload))) return result;
     if (_.isString(payload) && (result = Luca.find(payload))) return result;
+    if (_.isString(payload) && (result = Luca.registry.find(payload))) {
+      return result;
+    }
+    if (payload instanceof jQuery && (result = Luca.find(payload))) return result;
     if (_.isObject(payload) && (payload.ctype != null)) {
       return Luca.util.lazyComponent(payload);
     }
@@ -94,8 +98,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     if (_.isFunction(fallback = _(args).last())) return fallback();
   };
 
+  (window || global).Luca = function() {
+    return lucaUtilityHelper.apply(this, arguments);
+  };
+
   _.extend(Luca, {
-    VERSION: "0.9.7",
+    VERSION: "0.9.75",
     core: {},
     collections: {},
     containers: {},
@@ -106,7 +114,12 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     fields: {},
     registry: {},
     options: {},
-    config: {}
+    config: {},
+    getHelper: function() {
+      return function() {
+        return lucaUtilityHelper.apply(this, arguments);
+      };
+    }
   });
 
   _.extend(Luca, Backbone.Events);
@@ -123,11 +136,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false;
 
-  Luca.enableBootstrap = Luca.config.enableBootstrap = true;
+  Luca.config.enableBoostrap = Luca.config.enableBootstrap = true;
 
   Luca.config.enhancedViewProperties = true;
 
-  Luca.keys = {
+  Luca.keys = Luca.config.keys = {
     ENTER: 13,
     ESCAPE: 27,
     KEYLEFT: 37,
@@ -138,10 +151,62 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     FORWARDSLASH: 191
   };
 
-  Luca.keyMap = _(Luca.keys).inject(function(memo, value, symbol) {
+  Luca.keyMap = Luca.config.keyMap = _(Luca.keys).inject(function(memo, value, symbol) {
     memo[value] = symbol.toLowerCase();
     return memo;
   }, {});
+
+  Luca.config.showWarnings = true;
+
+  Luca.setupCollectionSpace = function() {
+    var baseParams, modelBoostrap;
+    baseParams = Luca.util.read(Luca.util.resolve("LucaBaseParams"));
+    modelBoostrap = Luca.util.read(Luca.util.resolve("LucaModelBootstrap"));
+    if (baseParams != null) {
+      Luca.Collection.baseParams(baseParams);
+    } else {
+      Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on window.LucaBaseParams');
+    }
+    if (typeof modelBootstrap !== "undefined" && modelBootstrap !== null) {
+      return Luca.Collection.bootstrap(modelBootstrap);
+    } else {
+      return Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on window.LucaModelBootstrap");
+    }
+  };
+
+  Luca.initialize = function(namespace, options) {
+    var defaults, object;
+    if (options == null) options = {};
+    defaults = {
+      views: {},
+      collections: {},
+      models: {},
+      components: {},
+      lib: {},
+      util: {},
+      concerns: {}
+    };
+    object = {};
+    object[namespace] = _.extend(Luca.getHelper(), defaults);
+    _.extend(Luca.config, options);
+    _.extend(window || global, object);
+    Luca.concern.namespace("" + namespace + ".concerns");
+    Luca.registry.namespace("" + namespace + ".views");
+    Luca.Collection.namespace("" + namespace + ".collections");
+    Luca.on("ready", Luca.define.close);
+    return Luca.on("ready", Luca.setupCollectionSpace);
+  };
+
+  Luca.onReady = function(callback) {
+    Luca.trigger("ready");
+    return $(function() {
+      return callback.apply(this, arguments);
+    });
+  };
+
+  Luca.warn = function(message) {
+    if (Luca.config.showWarnings === true) return console.log(message);
+  };
 
   Luca.find = function(el) {
     return Luca($(el).data('luca-id'));
@@ -851,24 +916,49 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var DefineProxy,
+  var ComponentDefinition, cd,
     __slice = Array.prototype.slice;
 
   _.mixin({
     def: Luca.component = Luca.define = Luca.register = function(componentName) {
-      return new DefineProxy(componentName);
+      return new ComponentDefinition(componentName);
     },
     register: Luca.register
   });
 
-  DefineProxy = (function() {
+  Luca.define.__definitions = [];
 
-    function DefineProxy(componentName) {
+  Luca.define.incomplete = function() {
+    return _(Luca.define.__definitions).select(function(definition) {
+      return definition.isOpen();
+    });
+  };
+
+  Luca.define.close = function() {
+    var open, _i, _len, _ref;
+    _ref = Luca.define.incomplete();
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      open = _ref[_i];
+      if (open.isValid()) open.register();
+    }
+    return Luca.define.__definitions.length = 0;
+  };
+
+  Luca.define.findDefinition = function(componentName) {
+    return _(Luca.define.__definitions).detect(function(definition) {
+      return definition.componentName === componentName;
+    });
+  };
+
+  ComponentDefinition = (function() {
+
+    function ComponentDefinition(componentName) {
       var parts;
       this.namespace = Luca.util.namespace();
       this.componentId = this.componentName = componentName;
       this.superClassName = 'Luca.View';
       this.properties || (this.properties = {});
+      this.classProperties || (this.classProperties = {});
       if (componentName.match(/\./)) {
         this.namespaced = true;
         parts = componentName.split('.');
@@ -876,9 +966,25 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         this.namespace = parts.join('.');
         Luca.registry.addNamespace(parts.join('.'));
       }
+      Luca.define.__definitions.push(this);
     }
 
-    DefineProxy.prototype.meta = function(key, value) {
+    ComponentDefinition.prototype.isValid = function() {
+      if (!_.isObject(this.properties)) return false;
+      if (Luca.util.resolve(this.superClassName) == null) return false;
+      if (this.componentName == null) return false;
+      return true;
+    };
+
+    ComponentDefinition.prototype.isDefined = function() {
+      return this.defined === true;
+    };
+
+    ComponentDefinition.prototype.isOpen = function() {
+      return !!(this.isValid() && !this.isDefined());
+    };
+
+    ComponentDefinition.prototype.meta = function(key, value) {
       var data, metaKey;
       metaKey = this.namespace + '.' + this.componentId;
       metaKey = metaKey.replace(/^\./, '');
@@ -888,27 +994,27 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       };
     };
 
-    DefineProxy.prototype["in"] = function(namespace) {
+    ComponentDefinition.prototype["in"] = function(namespace) {
       this.namespace = namespace;
       return this;
     };
 
-    DefineProxy.prototype.from = function(superClassName) {
+    ComponentDefinition.prototype.from = function(superClassName) {
       this.superClassName = superClassName;
       return this;
     };
 
-    DefineProxy.prototype["extends"] = function(superClassName) {
+    ComponentDefinition.prototype["extends"] = function(superClassName) {
       this.superClassName = superClassName;
       return this;
     };
 
-    DefineProxy.prototype.extend = function(superClassName) {
+    ComponentDefinition.prototype.extend = function(superClassName) {
       this.superClassName = superClassName;
       return this;
     };
 
-    DefineProxy.prototype.triggers = function() {
+    ComponentDefinition.prototype.triggers = function() {
       var hook, hooks, _i, _len;
       hooks = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       _.defaults(this.properties || (this.properties = {}), {
@@ -923,7 +1029,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this;
     };
 
-    DefineProxy.prototype.includes = function() {
+    ComponentDefinition.prototype.includes = function() {
       var include, includes, _i, _len;
       includes = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       _.defaults(this.properties || (this.properties = {}), {
@@ -938,7 +1044,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this;
     };
 
-    DefineProxy.prototype.mixesIn = function() {
+    ComponentDefinition.prototype.mixesIn = function() {
       var concern, concerns, _i, _len;
       concerns = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       _.defaults(this.properties || (this.properties = {}), {
@@ -953,31 +1059,49 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this;
     };
 
-    DefineProxy.prototype.publicConfiguration = function(properties) {
+    ComponentDefinition.prototype.classConfiguration = function(properties) {
+      if (properties == null) properties = {};
+      this.meta("class configuration", _.keys(properties));
+      _.defaults((this._classProperties || (this._classProperties = {})), properties);
+      return this;
+    };
+
+    ComponentDefinition.prototype.publicConfiguration = function(properties) {
       if (properties == null) properties = {};
       this.meta("public configuration", _.keys(properties));
-      return _.defaults((this.properties || (this.properties = {})), properties);
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
     };
 
-    DefineProxy.prototype.privateConfiguration = function(properties) {
+    ComponentDefinition.prototype.privateConfiguration = function(properties) {
       if (properties == null) properties = {};
       this.meta("private configuration", _.keys(properties));
-      return _.defaults((this.properties || (this.properties = {})), properties);
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
     };
 
-    DefineProxy.prototype.publicInterface = function(properties) {
+    ComponentDefinition.prototype.classInterface = function(properties) {
+      if (properties == null) properties = {};
+      this.meta("class interface", _.keys(properties));
+      _.defaults((this._classProperties || (this._classProperties = {})), properties);
+      return this;
+    };
+
+    ComponentDefinition.prototype.publicInterface = function(properties) {
       if (properties == null) properties = {};
       this.meta("public interface", _.keys(properties));
-      return _.defaults((this.properties || (this.properties = {})), properties);
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
     };
 
-    DefineProxy.prototype.privateInterface = function(properties) {
+    ComponentDefinition.prototype.privateInterface = function(properties) {
       if (properties == null) properties = {};
       this.meta("private interface", _.keys(properties));
-      return _.defaults((this.properties || (this.properties = {})), properties);
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
     };
 
-    DefineProxy.prototype.definePrototype = function(properties) {
+    ComponentDefinition.prototype.definePrototype = function(properties) {
       var at, componentType, definition, _base;
       if (properties == null) properties = {};
       _.defaults((this.properties || (this.properties = {})), properties);
@@ -1003,18 +1127,30 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (Luca.isModelPrototype(definition)) componentType = "model";
         Luca.registerComponent(_.string.underscored(this.componentId), this.componentName, componentType);
       }
+      this.defined = true;
+      if (!_.isEmpty(this._classProperties)) {
+        _.extend(definition, this._classProperties);
+      }
       return definition;
     };
 
-    return DefineProxy;
+    return ComponentDefinition;
 
   })();
 
-  DefineProxy.prototype.concerns = DefineProxy.prototype.behavesAs = DefineProxy.prototype.uses = DefineProxy.prototype.mixesIn;
+  cd = ComponentDefinition.prototype;
 
-  DefineProxy.prototype.defines = DefineProxy.prototype.defaults = DefineProxy.prototype.exports = DefineProxy.prototype.defaultProperties = DefineProxy.prototype.definePrototype;
+  cd.concerns = cd.behavesAs = cd.uses = cd.mixesIn;
 
-  DefineProxy.prototype.defaultsTo = DefineProxy.prototype.enhance = DefineProxy.prototype["with"] = DefineProxy.prototype.definePrototype;
+  cd.register = cd.defines = cd.defaults = cd.exports = cd.defaultProperties = cd.definePrototype;
+
+  cd.defaultsTo = cd.enhance = cd["with"] = cd.definePrototype;
+
+  cd.publicMethods = cd.publicInterface;
+
+  cd.privateMethods = cd.privateInterface;
+
+  cd.classMethods = cd.classInterface;
 
   Luca.extend = function(superClassName, childName, properties) {
     var definition, include, superClass, _i, _len, _ref;
@@ -1829,6 +1965,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     });
   };
 
+  Luca.registry.find = function(search) {
+    return Luca.util.resolve(search) || Luca.define.findDefinition(search);
+  };
+
   Luca.cache = Luca.cacheInstance = function(cacheKey, object) {
     var lookup_id;
     if (cacheKey == null) return;
@@ -1866,7 +2006,16 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
     function MetaDataProxy(meta) {
       this.meta = meta != null ? meta : {};
-      this;
+      _.defaults(this.meta, {
+        "super class name": "",
+        "display name": "",
+        "public interface": [],
+        "public configuration": [],
+        "private interface": [],
+        "private configuration": [],
+        "class configuration": [],
+        "class interface": []
+      });
     }
 
     MetaDataProxy.prototype.superClass = function() {
@@ -1874,23 +2023,66 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     };
 
     MetaDataProxy.prototype.componentDefinition = function() {
-      return Luca.util.resolve(this.meta["display name"]);
+      return Luca.registry.find(this.meta["display name"]);
+    };
+
+    MetaDataProxy.prototype.componentPrototype = function() {
+      var _ref;
+      return (_ref = this.componentDefinition()) != null ? _ref.prototype : void 0;
+    };
+
+    MetaDataProxy.prototype.prototypeFunctions = function() {
+      return _.functions(this.componentPrototype());
+    };
+
+    MetaDataProxy.prototype.classAttributes = function() {
+      return _.uniq(this.classInterface().concat(this.classConfiguration()));
+    };
+
+    MetaDataProxy.prototype.publicAttributes = function() {
+      return _.uniq(this.publicInterface().concat(this.publicConfiguration()));
+    };
+
+    MetaDataProxy.prototype.privateAttributes = function() {
+      return _.uniq(this.privateInterface().concat(this.privateConfiguration()));
+    };
+
+    MetaDataProxy.prototype.classMethods = function() {
+      var list;
+      list = _.functions(this.componentDefinition());
+      return _(list).intersection(this.classAttributes());
     };
 
     MetaDataProxy.prototype.publicMethods = function() {
-      return this.meta["public interface"];
+      return _(this.prototypeFunctions()).intersection(this.publicAttributes());
+    };
+
+    MetaDataProxy.prototype.privateMethods = function() {
+      return _(this.prototypeFunctions()).intersection(this.privateAttributes());
+    };
+
+    MetaDataProxy.prototype.classConfiguration = function() {
+      return this.meta["class configuration"];
     };
 
     MetaDataProxy.prototype.publicConfiguration = function() {
       return this.meta["public configuration"];
     };
 
-    MetaDataProxy.prototype.privateMethods = function() {
-      return this.meta["private interface"];
-    };
-
     MetaDataProxy.prototype.privateConfiguration = function() {
       return this.meta["private configuration"];
+    };
+
+    MetaDataProxy.prototype.classInterface = function() {
+      return this.meta["class interface"];
+    };
+
+    MetaDataProxy.prototype.publicInterface = function() {
+      return this.meta["public interface"];
+    };
+
+    MetaDataProxy.prototype.privateInterface = function() {
+      return this.meta["private interface"];
     };
 
     MetaDataProxy.prototype.triggers = function() {
@@ -2529,14 +2721,18 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     return componentClass;
   };
 
+  Luca.Collection.namespace = function(namespace) {
+    var _base;
+    if (_.isString(namespace)) namespace = Luca.util.resolve(namespace);
+    if (namespace != null) Luca.Collection.__defaultNamespace = namespace;
+    (_base = Luca.Collection).__defaultNamespace || (_base.__defaultNamespace = window || global);
+    return Luca.util.read(Luca.Collection.__defaultNamespace);
+  };
+
   Luca.Collection.baseParams = function(obj) {
-    if (obj) return Luca.Collection._baseParams = obj;
-    if (_.isFunction(Luca.Collection._baseParams)) {
-      return Luca.Collection._baseParams();
-    }
-    if (_.isObject(Luca.Collection._baseParams)) {
-      return Luca.Collection._baseParams;
-    }
+    if (_.isString(obj)) obj = Luca.util.resolve(obj);
+    if (obj) Luca.Collection._baseParams = obj;
+    return Luca.util.read(Luca.Collection._baseParams);
   };
 
   Luca.Collection._bootstrapped_models = {};
@@ -2753,7 +2949,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
     beforeRender: function() {
-      if (Luca.enableBootstrap) this.$el.addClass('control-group');
+      if (Luca.config.enableBoostrap) this.$el.addClass('control-group');
       if (this.required) return this.$el.addClass('required');
     },
     change_handler: function(e) {
@@ -3176,8 +3372,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
     CollectionManager.prototype.name = "primary";
 
-    CollectionManager.prototype.collectionNamespace = Luca.Collection.namespace;
-
     CollectionManager.prototype.__collections = {};
 
     CollectionManager.prototype.relayEvents = true;
@@ -3190,6 +3384,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (existing = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(this.name) : void 0) {
         throw 'Attempt to create a collection manager with a name which already exists';
       }
+      this.collectionNamespace || (this.collectionNamespace = Luca.util.read(Luca.Collection.namespace));
       (_base2 = Luca.CollectionManager).instances || (_base2.instances = {});
       _.extend(this, Backbone.Events);
       _.extend(this, Luca.Events);
@@ -3322,6 +3517,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   guessCollectionClass = function(key) {
     var classified, guess, guesses, _ref;
     classified = Luca.util.classify(key);
+    if (_.isString(this.collectionNamespace)) {
+      this.collectionNamespace = Luca.util.resolve(this.collectionNamespace);
+    }
     guess = (this.collectionNamespace || (window || global))[classified];
     guess || (guess = (this.collectionNamespace || (window || global))["" + classified + "Collection"]);
     if (!(guess != null) && ((_ref = Luca.Collection.namespaces) != null ? _ref.length : void 0) > 0) {
@@ -3492,9 +3690,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     generateComponentElements: true,
     initialize: function(options) {
       this.options = options;
+      this.components || (this.components = this.pages || (this.pages = this.cards));
       Luca.core.Container.prototype.initialize.apply(this, arguments);
-      this.setupHooks(this.hooks);
-      return this.components || (this.components = this.pages || (this.pages = this.cards));
+      return this.setupHooks(this.hooks);
     },
     prepareComponents: function() {
       var _ref;
@@ -3540,7 +3738,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous,
+      var activationContext, current, previous,
         _this = this;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
@@ -3583,11 +3781,17 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           current.trigger("activation", this, previous, current);
         }
       }
+      activationContext = this;
+      if (Luca.containers.CardView.activationContext === "current") {
+        activationContext = current;
+      }
       if (_.isFunction(callback)) {
-        return callback.apply(current, [this, previous, current]);
+        return callback.apply(activationContext, [this, previous, current]);
       }
     }
   });
+
+  Luca.containers.CardView.activationContext = "current";
 
 }).call(this);
 (function() {
@@ -3869,7 +4073,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
       tabContainerId = this.tabContainer().attr("id");
       this.registerEvent("click #" + tabContainerId + " li a", "select");
-      if (Luca.enableBootstrap && (this.tab_position === "left" || this.tab_position === "right")) {
+      if (Luca.config.enableBoostrap && (this.tab_position === "left" || this.tab_position === "right")) {
         this.tabContainerWrapper().addClass("span2");
         return this.tabContentWrapper().addClass("span9");
       }
@@ -3936,7 +4140,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.extend(this, this.options);
-      if (Luca.enableBootstrap === true) {
+      if (Luca.config.enableBoostrap === true) {
         this.wrapperClass = this.fluid === true ? Luca.containers.Viewport.fluidWrapperClass : Luca.containers.Viewport.defaultWrapperClass;
       }
       Luca.core.Container.prototype.initialize.apply(this, arguments);
@@ -3985,7 +4189,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if ((_ref = Luca.containers.CardView.prototype.after) != null) {
         _ref.apply(this, arguments);
       }
-      if (Luca.enableBootstrap === true && this.containerClassName) {
+      if (Luca.config.enableBoostrap === true && this.containerClassName) {
         return this.$el.children().wrap('<div class="#{ containerClassName }" />');
       }
     },
@@ -4024,7 +4228,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
 }).call(this);
 (function() {
-  var application;
+  var application,
+    __slice = Array.prototype.slice;
 
   application = Luca.register("Luca.Application");
 
@@ -4044,7 +4249,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     keyEvents: {},
     components: [
       {
-        ctype: 'template',
+        type: 'template',
         name: 'welcome',
         template: 'sample/welcome',
         templateContainer: "Luca.templates"
@@ -4251,6 +4456,40 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   Luca.util.startHistory = function() {
     return Backbone.history.start();
+  };
+
+  Luca.Application.routeTo = function() {
+    var lastPage, pages;
+    pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    lastPage = _(pages).last();
+    return function() {
+      var action, args, callback, index, nextItem, page, path, routeHandler, _i, _len, _ref, _results;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      path = this.app || Luca.getApplication();
+      index = 0;
+      _results = [];
+      for (_i = 0, _len = pages.length; _i < _len; _i++) {
+        page = pages[_i];
+        if (!(_.isString(page))) continue;
+        nextItem = pages[++index];
+        action = void 0;
+        if (_.isFunction(nextItem)) {
+          action = nextItem;
+        } else if (_.isObject(nextItem) && (nextItem.action != null)) {
+          action = nextItem.action;
+        } else if (page === lastPage && (routeHandler = (_ref = Luca(lastPage)) != null ? _ref.routeHandler : void 0)) {
+          action = Luca.util.read(routeHandler);
+        }
+        if (_.isString(action)) {
+          callback = function() {
+            return this[action].apply(this, args);
+          };
+        }
+        if (_.isFunction(action)) callback = nextItem;
+        _results.push(path = path.navigate_to(page, callback));
+      }
+      return _results;
+    };
   };
 
 }).call(this);
@@ -4525,30 +4764,46 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   controller.defines({
     additionalClassNames: ['luca-ui-controller'],
     activeAttribute: "active-section",
+    stateful: true,
     initialize: function(options) {
       var _ref;
       this.options = options;
+      this.defaultCard || (this.defaultCard = this.defaultPage || (this.defaultPage = ((_ref = this.components[0]) != null ? _ref.name : void 0) || 0));
+      this.defaultPage || (this.defaultPage = this.defaultCard);
+      this.defaultState || (this.defaultState = {
+        active_section: this.defaultPage
+      });
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
-      this.defaultCard || (this.defaultCard = ((_ref = this.components[0]) != null ? _ref.name : void 0) || 0);
-      if (!this.defaultCard) {
+      if (this.defaultCard == null) {
         throw "Controllers must specify a defaultCard property and/or the first component must have a name";
       }
-      return this.state = new Backbone.Model({
-        active_section: this.defaultCard
-      });
     },
     each: function(fn) {
       var _this = this;
       return _(this.components).each(function(component) {
-        return fn.apply(_this, [component]);
+        return fn.call(_this, component);
       });
     },
+    activePage: function() {
+      return this.activeSection();
+    },
     activeSection: function() {
-      return this.get("activeSection");
+      return this.get("active_section");
+    },
+    pageControllers: function(deep) {
+      if (deep == null) deep = false;
+      return this.controllers.apply(this, arguments);
     },
     controllers: function(deep) {
       if (deep == null) deep = false;
-      return this.select('ctype', 'controller', deep);
+      return this.select(function(component) {
+        var type;
+        type = component.type || component.ctype;
+        return type === "controller" || type === "page_controller";
+      });
+    },
+    availablePages: function() {
+      return this.availableSections.apply(this, arguments);
     },
     availableSections: function() {
       var base,
@@ -4560,12 +4815,15 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         return memo;
       }, base);
     },
+    pageNames: function() {
+      return this.sectionNames();
+    },
     sectionNames: function(deep) {
       if (deep == null) deep = false;
       return this.pluck('name');
     },
     "default": function(callback) {
-      return this.navigate_to(this.defaultCard, callback);
+      return this.navigate_to(this.defaultPage || this.defaultCard, callback);
     },
     navigate_to: function(section, callback) {
       var _this = this;
@@ -5176,7 +5434,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     version: 1,
     initialize: function(options) {
       this.options = options != null ? options : {};
-      if (this.loadMask == null) this.loadMask = Luca.enableBootstrap;
+      if (this.loadMask == null) this.loadMask = Luca.config.enableBoostrap;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       this.components || (this.components = this.fields);
       _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
@@ -5196,7 +5454,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return Luca.components.FormView.defaultFormViewToolbar;
     },
     applyStyleClasses: function() {
-      if (Luca.enableBootstrap) this.applyBootstrapStyleClasses();
+      if (Luca.config.enableBoostrap) this.applyBootstrapStyleClasses();
       if (this.labelAlign) this.$el.addClass("label-align-" + this.labelAlign);
       if (this.fieldLayoutClass) return this.$el.addClass(this.fieldLayoutClass);
     },
@@ -5454,7 +5712,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.extend(this, Luca.concerns.Deferrable);
-      if (this.loadMask == null) this.loadMask = Luca.enableBootstrap;
+      if (this.loadMask == null) this.loadMask = Luca.config.enableBoostrap;
       if (this.loadMask === true) {
         this.loadMaskEl || (this.loadMaskEl = ".luca-ui-g-view-body");
       }
@@ -5516,7 +5774,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         var _ref;
         return (_ref = _this.wrapper) != null ? _ref.addClass(containerClass) : void 0;
       });
-      if (Luca.enableBootstrap) this.table.addClass('table');
+      if (Luca.config.enableBoostrap) this.table.addClass('table');
       return _((_ref = this.tableStyle) != null ? _ref.split(" ") : void 0).each(function(style) {
         return _this.table.addClass("table-" + style);
       });

@@ -59,7 +59,7 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
     _.extend @, @options
     _.extend @, Luca.concerns.Deferrable
 
-    @loadMask = Luca.enableBootstrap unless @loadMask?
+    @loadMask = Luca.config.enableBoostrap unless @loadMask?
     @loadMaskEl ||= ".luca-ui-g-view-body" if @loadMask is true
 
     Luca.components.Panel::initialize.apply(@, arguments)
@@ -120,7 +120,7 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
     _( @additionalWrapperClasses ).each (containerClass)=>
       @wrapper?.addClass( containerClass )
 
-    if Luca.enableBootstrap
+    if Luca.config.enableBoostrap
       @table.addClass('table')
 
     _( @tableStyle?.split(" ") ).each (style)=>

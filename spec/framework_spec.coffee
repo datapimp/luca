@@ -8,7 +8,7 @@ describe "The Luca Framework", ->
     expect(Luca).toBeDefined()
 
   it "should enable bootstrap by default", ->
-    expect(Luca.enableBootstrap).toBeTruthy()
+    expect(Luca.config.enableBoostrap).toBeTruthy()
 
   it "should have classes in the registry", ->
     expect( Luca.registry.classes ).toBeDefined()
@@ -116,14 +116,25 @@ describe "Luca Component Definition", ->
 
 describe 'Application Space Initialization', ->
   window.SampleLucaApplication = undefined
-  Luca.initialize("SampleLucaApplication")
+
+  Luca.initialize("SampleLucaApplication", configOption: true)
 
   it "should create the namespace", ->
     expect( SampleLucaApplication ).toBeDefined()
+
+  it "should override luca config settings", ->
+    expect( Luca.config.configOption ).toEqual true
     
-  it "should create the default containers", ->
+  it "should create a helper function", ->
+    expect( SampleLucaApplication("Luca.View") ).toEqual( Luca.View )    
+
+  it "should create the container for views", ->
     expect( SampleLucaApplication.views ).toBeDefined()
+
+  it "should create the container for models", ->
     expect( SampleLucaApplication.models ).toBeDefined()
+
+  it "should create the container for collections", ->
     expect( SampleLucaApplication.collections ).toBeDefined()
 
   it "should set the collection namespace", ->

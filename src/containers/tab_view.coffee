@@ -42,7 +42,7 @@ tabView.defines
     tabContainerId = @tabContainer().attr("id")
     @registerEvent("click ##{ tabContainerId } li a", "select")
 
-    if Luca.enableBootstrap and (@tab_position is "left" or @tab_position is "right")
+    if Luca.config.enableBoostrap and (@tab_position is "left" or @tab_position is "right")
       @tabContainerWrapper().addClass("span2")
       @tabContentWrapper().addClass("span9")
 

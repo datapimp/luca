@@ -36,7 +36,7 @@ formView.defines
   version: 1 
 
   initialize: (@options={})->
-    @loadMask = Luca.enableBootstrap unless @loadMask?
+    @loadMask = Luca.config.enableBoostrap unless @loadMask?
 
     Luca.core.Container::initialize.apply @, arguments
 
@@ -57,7 +57,7 @@ formView.defines
     Luca.components.FormView.defaultFormViewToolbar
 
   applyStyleClasses: ()->
-    if Luca.enableBootstrap
+    if Luca.config.enableBoostrap
       @applyBootstrapStyleClasses()
 
     @$el.addClass( "label-align-#{ @labelAlign }") if @labelAlign

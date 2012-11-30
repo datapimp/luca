@@ -12,7 +12,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   initialize: (@options={})->
     _.extend @, @options
 
-    if Luca.enableBootstrap is true
+    if Luca.config.enableBoostrap is true
       @wrapperClass = if @fluid is true then Luca.containers.Viewport.fluidWrapperClass else Luca.containers.Viewport.defaultWrapperClass 
 
     Luca.core.Container::initialize.apply(@, arguments)
@@ -42,7 +42,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   beforeRender: ()->
     Luca.containers.CardView::beforeRender?.apply(@, arguments)
 
-    #if Luca.enableBootstrap and @topNav and @fullscreen
+    #if Luca.config.enableBoostrap and @topNav and @fullscreen
     #  $('body').css('padding','40px')
 
     @renderTopNavigation() if @topNav?
@@ -57,7 +57,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
   afterRender: ()->
     Luca.containers.CardView::after?.apply(@, arguments)
 
-    if Luca.enableBootstrap is true and @containerClassName
+    if Luca.config.enableBoostrap is true and @containerClassName
       @$el.children().wrap('<div class="#{ containerClassName }" />')
 
   renderTopNavigation: ()->

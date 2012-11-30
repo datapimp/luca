@@ -24,7 +24,7 @@ lucaUtilityHelper = (payload, args...)->
   if _.isFunction( fallback = _(args).last() )
     return fallback()
 
-(window || global).Luca = lucaUtilityHelper
+(window || global).Luca = ()-> lucaUtilityHelper.apply(@, arguments)
 
 _.extend Luca,
   VERSION: "0.9.75"
@@ -40,7 +40,7 @@ _.extend Luca,
   options: {}
   config: {}
   getHelper: ()->
-    lucaUtilityHelper
+    ()-> lucaUtilityHelper.apply(@, arguments)
 
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events
@@ -65,7 +65,7 @@ Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false
 # let's use the Twitter 2.0 Bootstrap Framework
 # for what it is best at, and not try to solve this
 # problem on our own!
-Luca.enableBootstrap = Luca.config.enableBootstrap = true
+Luca.config.enableBoostrap = Luca.config.enableBootstrap = true
 
 Luca.config.enhancedViewProperties = true
 
@@ -85,6 +85,24 @@ Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo
 , {}
 
+Luca.config.showWarnings = true
+
+Luca.setupCollectionSpace = ()->
+    baseParams = Luca.util.read( Luca.util.resolve("LucaBaseParams") ) 
+    modelBoostrap = Luca.util.read( Luca.util.resolve("LucaModelBootstrap") ) 
+
+    if baseParams? 
+      Luca.Collection.baseParams( baseParams )
+    else
+      Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on window.LucaBaseParams')
+
+    if modelBootstrap?
+      Luca.Collection.bootstrap( modelBootstrap )
+    else
+      Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on window.LucaModelBootstrap")
+
+# Creates a basic Namespace for you to begin defining
+# your application and all of its components.
 Luca.initialize = (namespace, options={})->
   defaults = 
     views: {}
@@ -96,17 +114,25 @@ Luca.initialize = (namespace, options={})->
     concerns: {}
 
   object = {}
-  object[ namespace ] = defaults
+  object[ namespace ] = _.extend(Luca.getHelper(), defaults)
 
-  _.defaults (window || global), object
+  _.extend(Luca.config, options)
+  _.extend (window || global), object
 
   Luca.concern.namespace "#{ namespace }.concerns"
   Luca.registry.namespace "#{ namespace }.views"
   Luca.Collection.namespace "#{ namespace }.collections"
- 
-  Luca.Collection.baseParams( Luca.util.read(window.LucaBaseParams ||= {}) )
-  Luca.Collection.bootstrap( Luca.util.read(window.LucaModelBootstrap ||= {}) )
 
+  Luca.on "ready", Luca.define.close
+  Luca.on "ready", Luca.setupCollectionSpace
+
+Luca.onReady = (callback)->
+  Luca.trigger("ready")
+  $ ->
+    callback.apply(@, arguments)
+
+Luca.warn = (message)->
+  console.log(message) if Luca.config.showWarnings is true
 
 Luca.find = (el)->
   Luca( $(el).data('luca-id') )

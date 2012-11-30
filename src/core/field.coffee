@@ -71,7 +71,7 @@ field.defines
     Luca.View::initialize.apply(@, arguments)
 
   beforeRender: ()->
-    if Luca.enableBootstrap
+    if Luca.config.enableBoostrap
       @$el.addClass('control-group')
 
     @$el.addClass('required') if @required
