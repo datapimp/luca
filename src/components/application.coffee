@@ -90,7 +90,7 @@ application.defines
   # will get wrapped by the main controller unless you
   # set useController = false
   components:[
-    ctype: 'template'
+    type: 'template'
     name: 'welcome'
     template: 'sample/welcome'
     templateContainer: "Luca.templates"
@@ -332,3 +332,30 @@ application.defines
 
 Luca.util.startHistory = ()->
   Backbone.history.start()
+
+Luca.Application.routeTo = (pages...)->
+  lastPage = _( pages ).last()
+
+  (args...)->
+    path = @app || Luca.getApplication()
+    index = 0
+
+    for page in pages when _.isString(page)
+      nextItem = pages[++index]
+      action = undefined
+
+      if _.isFunction(nextItem)
+        action = nextItem
+      else if _.isObject(nextItem) and nextItem.action?
+        action = nextItem.action
+      else if page is lastPage and routeHandler = Luca(lastPage)?.routeHandler
+        action = Luca.util.read(routeHandler)
+
+      if _.isString( action )
+        callback = ()-> 
+          @[ action ].apply(@, args)
+
+      if _.isFunction( action )
+        callback = nextItem
+
+      path = path.navigate_to(page, callback)

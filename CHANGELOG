@@ -200,3 +200,4 @@
   - Renaming 'mixin' and 'module' functionality to 'concern'
   - Luca.concerns now follow the active support concern in spirit, with __included hooks, ClassMethods handling, etc
   - Introducing an optional Concern for Luca.Model classes, called ModelPresenter.
+  - The callback argument passed to CardView activate, now gets called in the context of the activated component

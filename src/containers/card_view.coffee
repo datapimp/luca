@@ -39,9 +39,9 @@ component.defaults
   generateComponentElements: true
 
   initialize: (@options)->
+    @components ||= @pages ||= @cards 
     Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
-    @components ||= @pages ||= @cards 
 
   prepareComponents: ()->
     Luca.core.Container::prepareComponents?.apply(@, arguments)
@@ -99,28 +99,35 @@ component.defaults
     unless current
       return
 
-    unless silent
+    unless silent is true
       @trigger "before:card:switch", previous, current
-      previous?.trigger?.apply(previous,["before:deactivation", @, previous, current])
-      current?.trigger?.apply(previous,["before:activation", @, previous, current])
+      previous?.trigger "before:deactivation", @, previous, current
+      current?.trigger "before:activation", @, previous, current
 
       _.defer ()=>
         @$el.data( @activeAttribute || "active-card", current.name)
 
     @componentElements().hide()
 
-    unless current.previously_activated
+    unless current.previously_activated is true
       current.trigger "first:activation"
       current.previously_activated = true
 
     @activeCard = index
     @activeComponentElement().show()
 
-    unless silent
+    unless silent is true
       @trigger "after:card:switch", previous, current
-      previous.trigger?.apply(previous, ["deactivation", @, previous, current])
-      current.trigger?.apply(current, ["activation", @, previous, current])
+      previous?.trigger "deactivation", @, previous, current
+      current?.trigger "activation", @, previous, current
 
+    activationContext = @
+
+    if Luca.containers.CardView.activationContext is "current"
+      activationContext = current
 
     if _.isFunction(callback)
-      callback.apply @, [@,previous,current]
+      callback.apply activationContext, [@,previous,current]
+
+
+Luca.containers.CardView.activationContext = "current"

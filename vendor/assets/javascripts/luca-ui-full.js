@@ -394,7 +394,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-src/templates/fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class="control-label" for="', input_id ,'">', label ,'</label>\n'); } __p.push('\n\n<div class="controls">\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class="add-on">', addOn ,'</span>\n'); } __p.push('\n<input type="text" name="', input_name ,'" style="', inputStyles ,'" value="', input_value ,'" />\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n\n</div>\n');}return __p.join('');};
+  this.JST["luca-src/templates/fields/text_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push(''); if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {__p.push('\n<label class="control-label" for="', input_id ,'">', label ,'</label>\n'); } __p.push('\n\n<div class="controls">\n'); if( typeof(addOn) !== "undefined" ) { __p.push('\n  <span class="add-on">', addOn ,'</span>\n'); } __p.push('\n<input type="text" placeholder="', placeHolder ,'" name="', input_name ,'" style="', inputStyles ,'" value="', input_value ,'" />\n'); if(helperText) { __p.push('\n<p class="helper-text help-block">\n  ', helperText ,'\n</p>\n'); } __p.push('\n\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
@@ -3540,7 +3540,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this.activeComponent().trigger("first:activation", this, this.activeComponent());
     },
     activate: function(index, silent, callback) {
-      var current, previous, _ref, _ref2, _ref3, _ref4,
+      var current, previous,
         _this = this;
       if (silent == null) silent = false;
       if (_.isFunction(silent)) {
@@ -3555,40 +3555,36 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         current = this.getComponent(index);
       }
       if (!current) return;
-      if (!silent) {
+      if (silent !== true) {
         this.trigger("before:card:switch", previous, current);
         if (previous != null) {
-          if ((_ref = previous.trigger) != null) {
-            _ref.apply(previous, ["before:deactivation", this, previous, current]);
-          }
+          previous.trigger("before:deactivation", this, previous, current);
         }
         if (current != null) {
-          if ((_ref2 = current.trigger) != null) {
-            _ref2.apply(previous, ["before:activation", this, previous, current]);
-          }
+          current.trigger("before:activation", this, previous, current);
         }
         _.defer(function() {
           return _this.$el.data(_this.activeAttribute || "active-card", current.name);
         });
       }
       this.componentElements().hide();
-      if (!current.previously_activated) {
+      if (current.previously_activated !== true) {
         current.trigger("first:activation");
         current.previously_activated = true;
       }
       this.activeCard = index;
       this.activeComponentElement().show();
-      if (!silent) {
+      if (silent !== true) {
         this.trigger("after:card:switch", previous, current);
-        if ((_ref3 = previous.trigger) != null) {
-          _ref3.apply(previous, ["deactivation", this, previous, current]);
+        if (previous != null) {
+          previous.trigger("deactivation", this, previous, current);
         }
-        if ((_ref4 = current.trigger) != null) {
-          _ref4.apply(current, ["activation", this, previous, current]);
+        if (current != null) {
+          current.trigger("activation", this, previous, current);
         }
       }
       if (_.isFunction(callback)) {
-        return callback.apply(this, [this, previous, current]);
+        return callback.apply(current, [this, previous, current]);
       }
     }
   });
@@ -4533,7 +4529,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       var _ref;
       this.options = options;
       Luca.containers.CardView.prototype.initialize.apply(this, arguments);
-      this.defaultCard || (this.defaultCard = (_ref = this.components[0]) != null ? _ref.name : void 0);
+      this.defaultCard || (this.defaultCard = ((_ref = this.components[0]) != null ? _ref.name : void 0) || 0);
       if (!this.defaultCard) {
         throw "Controllers must specify a defaultCard property and/or the first component must have a name";
       }
@@ -5076,6 +5072,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         this.$el.addClass('input-append');
         this.addOn = this.append;
       }
+      this.placeHolder || (this.placeHolder = "");
       return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
     keyup_handler: function(e) {

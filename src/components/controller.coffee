@@ -6,25 +6,40 @@ controller.defines
 
   activeAttribute: "active-section"
 
+  stateful: true
+
   initialize: (@options)->
+    # let's phase out the 'card' terminology 
+    # and 'section' while we're at it.  page is the word.
+    @defaultCard ||= @defaultPage ||= @components[0]?.name || 0
+    @defaultPage ||= @defaultCard 
+
+    @defaultState ||= 
+      active_section: @defaultPage
+
     Luca.containers.CardView::initialize.apply @, arguments
 
-    @defaultCard ||= @components[0]?.name
-
-    throw "Controllers must specify a defaultCard property and/or the first component must have a name" unless @defaultCard
-
-    @state = new Backbone.Model 
-      active_section: @defaultCard
+    throw "Controllers must specify a defaultCard property and/or the first component must have a name" unless @defaultCard?
 
   each: (fn)->
-    _( @components ).each (component)=>
-      fn.apply @, [component]
+    _( @components ).each (component)=> fn.call(@,component)
+
+  activePage: ()->
+    @activeSection()
 
   activeSection: ()->
-    @get("activeSection")
+    @get("active_section")
+
+  pageControllers: (deep=false)->
+    @controllers.apply(@, arguments)
 
   controllers:(deep=false)->
-    @select 'ctype', 'controller', deep
+    @select (component)->
+      type = (component.type || component.ctype) 
+      type is "controller" or type is "page_controller"
+
+  availablePages: ()->
+    @availableSections.apply(@, arguments)    
 
   availableSections: ()->
     base = {}
@@ -35,11 +50,14 @@ controller.defines
       memo
     , base 
 
+  pageNames: ()->
+    @sectionNames()
+
   sectionNames: (deep=false)->
     @pluck('name')
 
   default: (callback)->
-    @navigate_to(@defaultCard, callback)
+    @navigate_to(@defaultPage || @defaultCard, callback)
 
   # switch the active card of this controller
   # optionally passing an onActivation callback
