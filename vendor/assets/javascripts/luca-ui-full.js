@@ -80,8 +80,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     __slice = Array.prototype.slice;
 
   lucaUtilityHelper = function() {
-    var args, definition, fallback, inheritsFrom, payload, result;
+    var args, definition, fallback, inheritsFrom, payload, result, _ref;
     payload = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (payload == null) {
+      return (_ref = _(Luca.Application.instances).values()) != null ? _ref[0] : void 0;
+    }
     if (_.isString(payload) && (result = Luca.cache(payload))) return result;
     if (_.isString(payload) && (result = Luca.find(payload))) return result;
     if (_.isString(payload) && (result = Luca.registry.find(payload))) {
@@ -158,10 +161,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   Luca.config.showWarnings = true;
 
-  Luca.setupCollectionSpace = function() {
+  Luca.setupCollectionSpace = function(options) {
     var baseParams, modelBootstrap;
-    baseParams = Luca.util.read(Luca.util.resolve("Luca.config.baseParams"));
-    modelBootstrap = Luca.util.read(Luca.util.resolve("Luca.config.modelBootstrap"));
+    if (options == null) options = {};
+    baseParams = options.baseParams, modelBootstrap = options.modelBootstrap;
     if (baseParams != null) {
       Luca.Collection.baseParams(baseParams);
     } else {
@@ -185,6 +188,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       lib: {},
       util: {},
       concerns: {},
+      register: function() {
+        return Luca.register.apply(this, arguments);
+      },
       onReady: function() {
         return Luca.onReady.apply(this, arguments);
       },
@@ -204,8 +210,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     Luca.concern.namespace("" + namespace + ".concerns");
     Luca.registry.namespace("" + namespace + ".views");
     Luca.Collection.namespace("" + namespace + ".collections");
-    Luca.on("ready", Luca.define.close);
-    return Luca.on("ready", Luca.setupCollectionSpace);
+    return Luca.on("ready", function() {
+      Luca.define.close();
+      return Luca.setupCollectionSpace(options);
+    });
   };
 
   Luca.onReady = function(callback) {
@@ -466,7 +474,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
-  this.JST["luca-src/templates/fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n</label>\n<div class="controls">\n <textarea name="', input_name ,'" style="', inputStyles ,'" >', input_value ,'</textarea>\n  '); if(helperText) { __p.push('\n  <p class="helper-text help-block">\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');};
+  this.JST["luca-src/templates/fields/text_area_field"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<label for="', input_id ,'">\n  ', label ,'\n</label>\n<div class="controls">\n <textarea placeholder="', placeHolder ,'" name="', input_name ,'" style="', inputStyles ,'" >', input_value ,'</textarea>\n  '); if(helperText) { __p.push('\n  <p class="helper-text help-block">\n    ', helperText ,'\n  </p>\n  '); } __p.push('\n</div>\n');}return __p.join('');};
 }).call(this);
 (function() {
   this.JST || (this.JST = {});
@@ -930,46 +938,16 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   var ComponentDefinition, cd,
     __slice = Array.prototype.slice;
 
-  _.mixin({
-    def: Luca.component = Luca.define = Luca.register = function(componentName) {
-      return new ComponentDefinition(componentName);
-    },
-    register: Luca.register
-  });
-
-  Luca.define.__definitions = [];
-
-  Luca.define.incomplete = function() {
-    return _(Luca.define.__definitions).select(function(definition) {
-      return definition.isOpen();
-    });
-  };
-
-  Luca.define.close = function() {
-    var open, _i, _len, _ref;
-    _ref = Luca.define.incomplete();
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      open = _ref[_i];
-      if (open.isValid()) open.register();
-    }
-    return Luca.define.__definitions.length = 0;
-  };
-
-  Luca.define.findDefinition = function(componentName) {
-    return _(Luca.define.__definitions).detect(function(definition) {
-      return definition.componentName === componentName;
-    });
-  };
-
   ComponentDefinition = (function() {
 
-    function ComponentDefinition(componentName) {
+    function ComponentDefinition(componentName, autoRegister) {
       var parts;
+      this.autoRegister = autoRegister != null ? autoRegister : true;
       this.namespace = Luca.util.namespace();
       this.componentId = this.componentName = componentName;
       this.superClassName = 'Luca.View';
       this.properties || (this.properties = {});
-      this.classProperties || (this.classProperties = {});
+      this._classProperties || (this._classProperties = {});
       if (componentName.match(/\./)) {
         this.namespaced = true;
         parts = componentName.split('.');
@@ -979,6 +957,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
       Luca.define.__definitions.push(this);
     }
+
+    ComponentDefinition.create = function(componentName, autoRegister) {
+      if (autoRegister == null) autoRegister = Luca.config.autoRegister;
+      return new ComponentDefinition(componentName, autoRegister);
+    };
 
     ComponentDefinition.prototype.isValid = function() {
       if (!_.isObject(this.properties)) return false;
@@ -1070,6 +1053,33 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       return this;
     };
 
+    ComponentDefinition.prototype.contains = function() {
+      var components;
+      components = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      _.defaults(this.properties, {
+        components: []
+      });
+      this.properties.components = components;
+      return this;
+    };
+
+    ComponentDefinition.prototype.validatesConfigurationWith = function(validationConfiguration) {
+      if (validationConfiguration == null) validationConfiguration = {};
+      this.meta("configuration validations", validationConfiguration);
+      this.properties.validatable = true;
+      return this;
+    };
+
+    ComponentDefinition.prototype.beforeDefinition = function(callback) {
+      this._classProperties.beforeDefinition = callback;
+      return this;
+    };
+
+    ComponentDefinition.prototype.afterDefinition = function(callback) {
+      this._classProperties.afterDefinition = callback;
+      return this;
+    };
+
     ComponentDefinition.prototype.classConfiguration = function(properties) {
       if (properties == null) properties = {};
       this.meta("class configuration", _.keys(properties));
@@ -1113,7 +1123,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     };
 
     ComponentDefinition.prototype.definePrototype = function(properties) {
-      var at, componentType, definition, _base;
+      var at, componentType, definition, _base, _ref, _ref2;
       if (properties == null) properties = {};
       _.defaults((this.properties || (this.properties = {})), properties);
       at = this.namespaced ? Luca.util.resolve(this.namespace, window || global) : window || global;
@@ -1127,8 +1137,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.properties.componentMetaData = function() {
         return Luca.registry.getMetaDataFor(this.displayName);
       };
+      if ((_ref = this._classProperties) != null) {
+        if (typeof _ref.beforeDefinition === "function") {
+          _ref.beforeDefinition(this);
+        }
+      }
       definition = at[this.componentId] = Luca.extend(this.superClassName, this.componentName, this.properties);
-      if (Luca.config.autoRegister === true) {
+      if (this.autoRegister === true) {
         if (Luca.isViewPrototype(definition)) componentType = "view";
         if (Luca.isCollectionPrototype(definition)) {
           (_base = Luca.Collection).namespaces || (_base.namespaces = []);
@@ -1141,6 +1156,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       this.defined = true;
       if (!_.isEmpty(this._classProperties)) {
         _.extend(definition, this._classProperties);
+      }
+      if (definition != null) {
+        if ((_ref2 = definition.afterDefinition) != null) {
+          _ref2.call(definition, this);
+        }
       }
       return definition;
     };
@@ -1162,6 +1182,37 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
   cd.privateMethods = cd.privateInterface;
 
   cd.classMethods = cd.classInterface;
+
+  _.extend((Luca.define = ComponentDefinition.create), {
+    __definitions: [],
+    incomplete: function() {
+      return _(Luca.define.__definitions).select(function(definition) {
+        return definition.isOpen();
+      });
+    },
+    close: function() {
+      var open, _i, _len, _ref;
+      _ref = Luca.define.incomplete();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        open = _ref[_i];
+        if (open.isValid()) open.register();
+      }
+      return Luca.define.__definitions.length = 0;
+    },
+    findDefinition: function(componentName) {
+      return _(Luca.define.__definitions).detect(function(definition) {
+        return definition.componentName === componentName;
+      });
+    }
+  });
+
+  Luca.register = function(componentName) {
+    return new ComponentDefinition(componentName, true);
+  };
+
+  _.mixin({
+    def: Luca.define
+  });
 
   Luca.extend = function(superClassName, childName, properties) {
     var definition, include, superClass, _i, _len, _ref;
@@ -1805,6 +1856,60 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       control = this.paginationControl();
       this.paginationContainer().append(control.render().$el);
       return control;
+    }
+  };
+
+}).call(this);
+(function() {
+
+  Luca.concerns.QueryCollectionBindings = {
+    getCollection: function() {
+      return this.collection;
+    },
+    loadModels: function(models, options) {
+      var _ref;
+      if (models == null) models = [];
+      if (options == null) options = {};
+      return (_ref = this.getCollection()) != null ? _ref.reset(models, options) : void 0;
+    },
+    applyQuery: function(query, queryOptions) {
+      if (query == null) query = {};
+      if (queryOptions == null) queryOptions = {};
+      this.query = query;
+      this.queryOptions = queryOptions;
+      this.refresh();
+      return this;
+    },
+    getQuery: function(options) {
+      var query, querySource, _i, _len, _ref;
+      if (options == null) options = {};
+      query = this.query || (this.query = {});
+      _ref = _(this.querySources || []).compact();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        querySource = _ref[_i];
+        query = _.extend(query, querySource(options) || {});
+      }
+      return query;
+    },
+    getQueryOptions: function() {
+      var optionSource, options, _i, _len, _ref;
+      options = this.queryOptions || (this.queryOptions = {});
+      _ref = _(this.optionsSources || []).compact();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        optionSource = _ref[_i];
+        options = _.extend(options, optionSource() || {});
+      }
+      return options;
+    },
+    getModels: function(query, options) {
+      var _ref;
+      if ((_ref = this.collection) != null ? _ref.query : void 0) {
+        query || (query = this.getQuery());
+        options || (options = this.getQueryOptions());
+        return this.collection.query(query, options);
+      } else {
+        return this.collection.models;
+      }
     }
   };
 
@@ -2517,7 +2622,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           remote: true
         }));
       } else {
-        return this.reset(this.query(filter));
+        return this.reset(this.query(filter, options));
       }
     },
     applyParams: function(params) {
@@ -4247,58 +4352,9 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   application["extends"]("Luca.containers.Viewport");
 
-  application.classMethods({
-    controller: function(controllerName) {
-      var controllerPage;
-      controllerPage = Luca(controllerName);
-      return {
-        action: function(action) {
-          var path, _ref;
-          path = controllerPage.controllerPath();
-          path.push({
-            action: action
-          });
-          return (_ref = Luca.Application).routeTo.apply(_ref, path);
-        }
-      };
-    },
-    routeTo: function() {
-      var lastPage, pages;
-      pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      lastPage = _(pages).last();
-      console.log("Building Route To", pages);
-      return function() {
-        var action, args, callback, index, nextItem, page, path, routeHandler, _i, _len, _ref, _results;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        path = this.app || Luca.getApplication();
-        index = 0;
-        _results = [];
-        for (_i = 0, _len = pages.length; _i < _len; _i++) {
-          page = pages[_i];
-          if (!(_.isString(page))) continue;
-          nextItem = pages[++index];
-          action = void 0;
-          if (_.isFunction(nextItem)) {
-            action = nextItem;
-          } else if (_.isObject(nextItem) && (nextItem.action != null)) {
-            action = nextItem.action;
-          } else if (page === lastPage && (routeHandler = (_ref = Luca(lastPage)) != null ? _ref.routeHandler : void 0)) {
-            action = Luca.util.read(routeHandler);
-          }
-          if (_.isString(action)) {
-            callback = function() {
-              return this[action].apply(this, args);
-            };
-          }
-          if (_.isFunction(action)) callback = nextItem;
-          _results.push(path = path.navigate_to(page, callback));
-        }
-        return _results;
-      };
-    }
-  });
+  application.triggers("controller:change", "action:change");
 
-  application.defines({
+  application.publicInterface({
     name: "MyApp",
     defaultState: {},
     autoBoot: false,
@@ -4319,14 +4375,13 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       }
     ],
     initialize: function(options) {
-      var alreadyRunning, app, appName, _base,
+      var alreadyRunning, app, appName,
         _this = this;
       this.options = options != null ? options : {};
       app = this;
       appName = this.name;
       alreadyRunning = typeof Luca.getApplication === "function" ? Luca.getApplication() : void 0;
-      (_base = Luca.Application).instances || (_base.instances = {});
-      Luca.Application.instances[appName] = app;
+      Luca.Application.registerInstance(this);
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       this.state = new Luca.Model(this.defaultState);
       if (this.useController === true) this.setupMainController();
@@ -4394,11 +4449,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     },
     navigate_to: function(component_name, callback) {
       return this.getMainController().navigate_to(component_name, callback);
-    },
-    getMainController: function() {
-      if (this.useController === true) return this.components[0];
-      return Luca.cache('main_controller');
-    },
+    }
+  });
+
+  application.privateInterface({
     keyHandler: function(e) {
       var control, isInputEvent, keyEvent, keyname, meta, source, _ref;
       if (!(e && this.keyEvents)) return;
@@ -4429,7 +4483,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           _this.state.set({
             active_section: current.name
           });
-          return app.trigger("page:change");
+          return app.trigger("controller:change");
         });
       }
       return (_ref2 = this.getMainController()) != null ? _ref2.each(function(component) {
@@ -4440,22 +4494,27 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
             _this.state.set({
               active_sub_section: current.name
             });
-            return app.trigger("sub:page:change");
+            return app.trigger("action:change");
           });
         }
       }) : void 0;
     },
     setupMainController: function() {
-      var definedComponents;
+      var definedComponents,
+        _this = this;
       if (this.useController === true) {
         definedComponents = this.components || [];
         this.components = [
           {
             type: 'controller',
             name: "main_controller",
+            role: "main_controller",
             components: definedComponents
           }
         ];
+        this.getMainController = function() {
+          return _this.findComponentByRole('main_controller');
+        };
         return this.defer(this.setupControllerBindings, false).until("after:components");
       }
     },
@@ -4496,7 +4555,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         if (this.autoStartHistory === true) {
           this.autoStartHistory = "before:render";
         }
-        return this.defer(Luca.util.startHistory, false).until(this, this.autoStartHistory);
+        return this.defer(Luca.Application.startHistory, false).until(this, this.autoStartHistory);
       }
     },
     setupKeyHandler: function() {
@@ -4517,9 +4576,56 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     }
   });
 
-  Luca.util.startHistory = function() {
-    return Backbone.history.start();
-  };
+  application.classInterface({
+    instances: {},
+    registerInstance: function(app) {
+      return Luca.Application.instances[app.name] = app;
+    },
+    routeTo: function() {
+      var callback, lastPage, pages, routeHelper, specifiedAction;
+      pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      lastPage = _(pages).last();
+      callback = void 0;
+      specifiedAction = void 0;
+      return routeHelper = function() {
+        var action, args, index, nextItem, page, path, routeHandler, _i, _len, _ref;
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        path = this.app || Luca.getApplication();
+        index = 0;
+        for (_i = 0, _len = pages.length; _i < _len; _i++) {
+          page = pages[_i];
+          if (!(_.isString(page))) continue;
+          nextItem = pages[++index];
+          action = void 0;
+          if (_.isFunction(nextItem)) {
+            action = nextItem;
+          } else if (_.isObject(nextItem) && (nextItem.action != null)) {
+            action = nextItem.action;
+          } else if (page === lastPage && (routeHandler = (_ref = Luca(lastPage)) != null ? _ref.routeHandler : void 0)) {
+            action = Luca.util.read(routeHandler);
+          }
+          if (_.isString(action)) {
+            callback = function() {
+              return this[action].apply(this, args);
+            };
+          }
+          if (_.isFunction(action)) callback = nextItem;
+          path = path.navigate_to(page, callback);
+        }
+        routeHelper.action = function(action) {
+          return pages.push({
+            action: action
+          });
+        };
+        return routeHelper;
+      };
+    },
+    startHistory: function() {
+      return Backbone.history.start();
+    }
+  });
+
+  application.register();
 
 }).call(this);
 (function() {
@@ -4595,18 +4701,21 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   collectionView["extends"]("Luca.components.Panel");
 
-  collectionView.mixesIn("LoadMaskable", "Filterable", "Paginatable");
+  collectionView.mixesIn("QueryCollectionBindings", "LoadMaskable", "Filterable", "Paginatable");
 
   collectionView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
 
-  collectionView.defines({
+  collectionView.publicConfiguration({
     tagName: "ol",
-    className: "luca-ui-collection-view",
     bodyClassName: "collection-ui-panel",
-    itemTemplate: void 0,
-    itemRenderer: void 0,
     itemTagName: 'li',
     itemClassName: 'collection-item',
+    itemTemplate: void 0,
+    itemRenderer: void 0,
+    itemProperty: void 0
+  });
+
+  collectionView.defines({
     initialize: function(options) {
       var _this = this;
       this.options = options != null ? options : {};
@@ -4629,29 +4738,24 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       if (!Luca.isBackboneCollection(this.collection)) {
         console.log("Missing Collection on " + (this.name || this.cid), this, this.collection);
         throw "Collection Views must have a valid backbone collection";
-        this.collection.on("before:fetch", function() {
-          return _this.trigger("enable:loadmask");
-        });
-        this.collection.bind("reset", function() {
-          _this.refresh();
-          return _this.trigger("disable:loadmask");
-        });
-        this.collection.bind("remove", function() {
-          return _this.refresh();
-        });
-        this.collection.bind("add", function() {
-          return _this.refresh();
-        });
-        if (this.observeChanges === true) {
-          this.collection.on("change", this.refreshModel, this);
-        }
+      }
+      this.collection.on("before:fetch", function() {
+        return _this.trigger("enable:loadmask");
+      });
+      this.collection.bind("reset", function() {
+        _this.refresh();
+        return _this.trigger("disable:loadmask");
+      });
+      this.collection.bind("remove", function() {
+        return _this.refresh();
+      });
+      this.collection.bind("add", function() {
+        return _this.refresh();
+      });
+      if (this.observeChanges === true) {
+        this.collection.on("change", this.refreshModel, this);
       }
       Luca.components.Panel.prototype.initialize.apply(this, arguments);
-      if (this.autoRefreshOnModelsPresent !== false) {
-        this.defer(function() {
-          if (_this.collection.length > 0) return _this.refresh();
-        }).until("after:render");
-      }
       return this.on("refresh", this.refresh, this);
     },
     attributesForItem: function(item, model) {
@@ -4687,53 +4791,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         return make(this.itemTagName, attributes, content);
       } catch (e) {
         return console.log("Error generating DOM element for CollectionView", this, model, index);
-      }
-    },
-    getCollection: function() {
-      return this.collection;
-    },
-    loadModels: function(models, options) {
-      var _ref;
-      if (models == null) models = [];
-      if (options == null) options = {};
-      return (_ref = this.getCollection()) != null ? _ref.reset(models, options) : void 0;
-    },
-    applyQuery: function(query, queryOptions) {
-      if (query == null) query = {};
-      if (queryOptions == null) queryOptions = {};
-      this.query = query;
-      this.queryOptions = queryOptions;
-      this.refresh();
-      return this;
-    },
-    getQuery: function() {
-      var query, querySource, _i, _len, _ref;
-      query = this.query || (this.query = {});
-      _ref = _(this.querySources || []).compact();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        querySource = _ref[_i];
-        query = _.extend(query, querySource() || {});
-      }
-      return query;
-    },
-    getQueryOptions: function() {
-      var optionSource, options, _i, _len, _ref;
-      options = this.queryOptions || (this.queryOptions = {});
-      _ref = _(this.optionsSources || []).compact();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        optionSource = _ref[_i];
-        options = _.extend(options, optionSource() || {});
-      }
-      return options;
-    },
-    getModels: function(query, options) {
-      var _ref;
-      if ((_ref = this.collection) != null ? _ref.query : void 0) {
-        query || (query = this.getQuery());
-        options || (options = this.getQueryOptions());
-        return this.collection.query(query, options);
-      } else {
-        return this.collection.models;
       }
     },
     locateItemElement: function(id) {
@@ -5313,13 +5370,14 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     initialize: function(options) {
       this.options = options != null ? options : {};
       _.bindAll(this, "keydown_handler");
-      Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
       this.input_class || (this.input_class = this["class"]);
       this.input_value || (this.input_value = "");
-      return this.inputStyles || (this.inputStyles = "height:" + this.height + ";width:" + this.width);
+      this.inputStyles || (this.inputStyles = "height:" + this.height + ";width:" + this.width);
+      this.placeHolder || (this.placeHolder = "");
+      return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
     setValue: function(value) {
       return $(this.field()).val(value);
@@ -5991,11 +6049,11 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
 
   multiView["extends"]("Luca.containers.CardView");
 
-  multiView.mixesIn("LoadMaskable", "Filterable", "Paginatable");
+  multiView.mixesIn("QueryCollectionBindings", "LoadMaskable", "Filterable", "Paginatable");
 
   multiView.triggers("before:refresh", "after:refresh", "refresh", "empty:results");
 
-  multiView.defaultsTo({
+  multiView.defines({
     version: 1,
     stateful: true,
     defaultState: {
@@ -6011,11 +6069,10 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
         view = _ref[_i];
         validateComponent(view);
       }
+      Luca.containers.CardView.prototype.initialize.apply(this, arguments);
       this.on("refresh", this.refresh, this);
       this.on("after:card:switch", this.refresh, this);
-      this.on("after:components", propagateCollectionComponents, this);
-      this.debug("multi collection , proto initialize");
-      return Luca.containers.CardView.prototype.initialize.apply(this, arguments);
+      return this.on("after:components", propagateCollectionComponents, this);
     },
     relayAfterRefresh: function(models, query, options) {
       return this.trigger("after:refresh", models, query, options);
@@ -6023,38 +6080,6 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
     refresh: function() {
       var _ref;
       return (_ref = this.activeComponent()) != null ? _ref.trigger("refresh") : void 0;
-    },
-    getCollection: function() {
-      return this.collection;
-    },
-    applyQuery: function(query, queryOptions) {
-      if (query == null) query = {};
-      if (queryOptions == null) queryOptions = {};
-      this.query = query;
-      this.queryOptions = queryOptions;
-      return this;
-    },
-    getQuery: function() {
-      var query, querySource, _i, _len, _ref;
-      this.debug("Get Query");
-      query = this.query || (this.query = {});
-      _ref = this.querySources;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        querySource = _ref[_i];
-        query = _.extend(query, querySource() || {});
-      }
-      return query;
-    },
-    getQueryOptions: function() {
-      var optionSource, options, _i, _len, _ref;
-      this.debug("Get Query Options");
-      options = this.queryOptions || (this.queryOptions = {});
-      _ref = this.optionsSources;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        optionSource = _ref[_i];
-        options = _.extend(options, optionSource() || {});
-      }
-      return options;
     }
   });
 
@@ -6464,7 +6489,8 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
       "": "default"
     },
     initialize: function(options) {
-      var _this = this;
+      var _ref,
+        _this = this;
       this.options = options;
       _.extend(this, this.options);
       this.routeHandlers = _(this.routes).values();
@@ -6473,7 +6499,7 @@ null:f.isFunction(a[b])?a[b]():a[b]},o=function(){throw Error('A "url" property 
           return _this.trigger.apply(_this, ["change:navigation", route_id].concat(_(arguments).flatten()));
         });
       });
-      return Backbone.Router.initialize.apply(this, arguments);
+      return (_ref = Backbone.Router.initialize) != null ? _ref.apply(this, arguments) : void 0;
     },
     navigate: function(route, triggerRoute) {
       if (triggerRoute == null) triggerRoute = false;
