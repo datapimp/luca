@@ -33,7 +33,7 @@ class ComponentDefinition
     @componentId = @componentName = componentName
     @superClassName = 'Luca.View' 
     @properties ||= {}
-    @classProperties ||= {}
+    @_classProperties ||= {}
 
     if componentName.match(/\./)
       @namespaced = true
@@ -104,8 +104,20 @@ class ComponentDefinition
 
   contains: (components...)->
     _.defaults(@properties, components: [])
-    current = @properties.components
-    @properties.components = current.concat(components)
+    @properties.components = components 
+    @
+
+  validatesConfigurationWith:(validationConfiguration={})->
+    @meta "configuration validations", validationConfiguration
+    @properties.validatable = true
+    @
+
+  beforeDefinition: (callback)->
+    @_classProperties.beforeDefinition = callback  
+    @
+
+  afterDefinition: (callback)->
+    @_classProperties.afterDefinition = callback  
     @
 
   classConfiguration: (properties={})->
@@ -138,6 +150,8 @@ class ComponentDefinition
     _.defaults((@properties||={}), properties)
     @
 
+  # This is the end of the chain. It MUST be called
+  # in order for the component definition to be complete. 
   definePrototype: (properties={})->
     _.defaults((@properties||={}), properties)
 
@@ -159,6 +173,8 @@ class ComponentDefinition
     @properties.componentMetaData = ()->
       Luca.registry.getMetaDataFor(@displayName)
 
+    @_classProperties?.beforeDefinition?(@)
+
     definition = at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
 
     if @autoRegister is true 
@@ -178,6 +194,8 @@ class ComponentDefinition
 
     unless _.isEmpty(@_classProperties)
       _.extend(definition, @_classProperties)
+
+    definition?.afterDefinition?.call(definition, @)
 
     definition
 

@@ -15,6 +15,8 @@ describe 'The Component Definition System', ->
     sample.classConfiguration
       classAttribute: "classAttribute"
 
+    sample.afterDefinition( sinon.spy() )
+
     sample.publicInterface
       publicAttribute: "publicAttribute"
       publicMethod: ()-> "publicMethod"
@@ -102,3 +104,10 @@ describe 'The Component Definition System', ->
     it "should know the class methods", ->
       expect( @metaData.classMethods() ).toContain("classMethod")
 
+    it "should fire the afterDefinition hook on the component class", ->
+      expect( Luca.components.SampleComponentDefinition.afterDefinition ).toHaveBeenCalled() 
+
+    describe 'Component Configuration Validations', ->
+      xit "should support specifying which values are required"
+      xit "should validate required values are present"
+      xit "should validate required values match certain expectations around data type"
