@@ -5,7 +5,10 @@
 application = Luca.register       "Luca.Application"
 application.extends               "Luca.containers.Viewport"
 
-application.publicConfiguration
+application.triggers              "controller:change",
+                                  "action:change"
+
+application.publicInterface
   name: "MyApp"
 
   # The Application uses a Backbone.Model as a state machine, which
@@ -200,6 +203,7 @@ application.publicConfiguration
   navigate_to: (component_name, callback)->
     @getMainController().navigate_to(component_name, callback)
 
+application.privateInterface
   keyHandler: (e)->
     return unless e and @keyEvents
 
@@ -231,7 +235,7 @@ application.publicConfiguration
     # the active card on the global state chart
     @getMainController()?.bind "after:card:switch", (previous,current)=>
       @state.set(active_section:current.name)
-      app.trigger "page:change"
+      app.trigger "controller:change"
 
     # any time the card switches on one of the sub controllers
     # then we should track the active sub section on the global state chart
@@ -240,7 +244,7 @@ application.publicConfiguration
       if type.match(/controller$/)
         component.bind "after:card:switch", (previous,current)=>
           @state.set(active_sub_section:current.name)
-          app.trigger "sub:page:change"
+          app.trigger "action:change"
 
   setupMainController: ()->
     if @useController is true
@@ -248,9 +252,12 @@ application.publicConfiguration
 
       @components = [
         type: 'controller'
-        components: definedComponents
+        name: "main_controller"
         role: "main_controller"
+        components: definedComponents
       ]
+      
+      @getMainController = ()=> @findComponentByRole('main_controller')
 
       @defer( @setupControllerBindings, false ).until("after:components")
 
