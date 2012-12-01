@@ -2,6 +2,9 @@
 # types of input which will return what the developer would expect given the
 # context it is used.
 lucaUtilityHelper = (payload, args...)->
+  unless payload?
+    return _( Luca.Application.instances ).values()?[0]
+
   if _.isString(payload) and result = Luca.cache(payload)
     return result
 
@@ -87,9 +90,8 @@ Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
 
 Luca.config.showWarnings = true
 
-Luca.setupCollectionSpace = ()->
-  baseParams = Luca.util.read( Luca.util.resolve("Luca.config.baseParams") ) 
-  modelBootstrap = Luca.util.read( Luca.util.resolve("Luca.config.modelBootstrap") ) 
+Luca.setupCollectionSpace = (options={})->
+  {baseParams, modelBootstrap} = options
 
   if baseParams? 
     Luca.Collection.baseParams( baseParams )
@@ -132,13 +134,14 @@ Luca.initialize = (namespace, options={})->
   Luca.registry.namespace "#{ namespace }.views"
   Luca.Collection.namespace "#{ namespace }.collections"
 
-  Luca.on "ready", Luca.define.close
-  Luca.on "ready", Luca.setupCollectionSpace
+  Luca.on "ready", ()->
+    Luca.define.close()
+    Luca.setupCollectionSpace(options)
 
 Luca.onReady = (callback)->
   Luca.trigger("ready")
-  $ ->
-    callback.apply(@, arguments)
+
+  $ -> callback.apply(@, arguments)
 
 Luca.warn = (message)->
   console.log(message) if Luca.config.showWarnings is true
