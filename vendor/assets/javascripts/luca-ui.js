@@ -4505,16 +4505,20 @@
       return Luca.Application.instances[app.name] = app;
     },
     routeTo: function() {
-      var callback, lastPage, pages, routeHelper, specifiedAction;
+      var callback, first, last, pages, routeHelper, specifiedAction;
       pages = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      lastPage = _(pages).last();
+      last = _(pages).last();
+      first = _(pages).first();
       callback = void 0;
       specifiedAction = void 0;
       return routeHelper = function() {
-        var action, args, index, nextItem, page, path, routeHandler, _i, _len, _ref;
+        var action, args, index, nextItem, page, path, routeHandler, target, _i, _len, _ref;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        path = this.app || Luca.getApplication();
+        path = this.app || Luca();
         index = 0;
+        if (pages.length === 1 && (target = Luca(first))) {
+          pages = target.controllerPath();
+        }
         for (_i = 0, _len = pages.length; _i < _len; _i++) {
           page = pages[_i];
           if (!(_.isString(page))) continue;
@@ -4524,7 +4528,7 @@
             action = nextItem;
           } else if (_.isObject(nextItem) && (nextItem.action != null)) {
             action = nextItem.action;
-          } else if (page === lastPage && (routeHandler = (_ref = Luca(lastPage)) != null ? _ref.routeHandler : void 0)) {
+          } else if (page === last && (routeHandler = (_ref = Luca(last)) != null ? _ref.routeHandler : void 0)) {
             action = Luca.util.read(routeHandler);
           }
           if (_.isString(action)) {
@@ -4792,14 +4796,18 @@
 
   controller.classMethods({
     controllerPath: function() {
-      var component, list;
-      list = [];
+      var atBase, component, list;
       component = this;
-      while (component) {
+      list = [component.name];
+      atBase = false;
+      while (component && !atBase) {
         component = typeof component.getParent === "function" ? component.getParent() : void 0;
-        if (component != null) list.push(component.name);
+        if ((component != null ? component.role : void 0) === "main_controller") {
+          atBase = true;
+        }
+        if ((component != null) && !atBase) list.push(component.name);
       }
-      return list;
+      return list.reverse();
     }
   });
 

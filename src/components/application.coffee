@@ -325,13 +325,18 @@ application.classInterface
   registerInstance: (app)->
     Luca.Application.instances[ app.name ] = app
   routeTo: (pages...)->
-    lastPage = _( pages ).last()
+    last = _( pages ).last()
+    first = _( pages ).first()
+
     callback = undefined    
     specifiedAction = undefined
 
     routeHelper = (args...)->
-      path = @app || Luca.getApplication()
+      path = @app || Luca()
       index = 0
+
+      if pages.length is 1 and target = Luca(first)
+        pages = target.controllerPath()
 
       for page in pages when _.isString(page)
         nextItem = pages[++index]
@@ -341,7 +346,7 @@ application.classInterface
           action = nextItem
         else if _.isObject(nextItem) and nextItem.action?
           action = nextItem.action
-        else if page is lastPage and routeHandler = Luca(lastPage)?.routeHandler
+        else if page is last and routeHandler = Luca(last)?.routeHandler
           action = Luca.util.read(routeHandler)
 
         if _.isString( action )

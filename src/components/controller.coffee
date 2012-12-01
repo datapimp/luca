@@ -33,14 +33,17 @@ controller.publicInterface
 
 controller.classMethods
   controllerPath: ()->
-    list = []
     component = @
+    
+    list = [component.name]
+    atBase = false
 
-    while component
+    while component and not atBase
       component = component.getParent?()
-      list.push( component.name ) if component?
+      atBase = true if component?.role is "main_controller"
+      list.push( component.name ) if component? and not atBase
 
-    list
+    list.reverse()
 
 controller.defines
   additionalClassNames: 'luca-ui-controller'
