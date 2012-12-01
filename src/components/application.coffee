@@ -90,8 +90,7 @@ application.publicConfiguration
     appName         = @name
     alreadyRunning  = Luca.getApplication?()
 
-    Luca.Application.instances ||= {}
-    Luca.Application.instances[ appName ] = app
+    Luca.Application.registerInstance(@)
 
     Luca.containers.Viewport::initialize.apply @, arguments
 
@@ -299,7 +298,7 @@ application.publicConfiguration
     # you can control which by setting the @startHistoryOn property
     if @router and @autoStartHistory
       @autoStartHistory = "before:render" if @autoStartHistory is true
-      @defer( Luca.util.startHistory, false).until(@, @autoStartHistory)
+      @defer( Luca.Application.startHistory, false).until(@, @autoStartHistory)
 
   setupKeyHandler: ()->
     return unless @keyEvents
@@ -314,6 +313,45 @@ application.publicConfiguration
     for keyEvent in (@keypressEvents || ["keydown"])
       $( document ).on( keyEvent, handler )
 
-Luca.util.startHistory = ()->
-  Backbone.history.start()
+application.classInterface
+  instances: {}
+  registerInstance: (app)->
+    Luca.Application.instances[ app.name ] = app
+  routeTo: (pages...)->
+    lastPage = _( pages ).last()
+    callback = undefined    
+    specifiedAction = undefined
 
+    routeHelper = (args...)->
+      path = @app || Luca.getApplication()
+      index = 0
+
+      for page in pages when _.isString(page)
+        nextItem = pages[++index]
+        action = undefined
+
+        if _.isFunction(nextItem)
+          action = nextItem
+        else if _.isObject(nextItem) and nextItem.action?
+          action = nextItem.action
+        else if page is lastPage and routeHandler = Luca(lastPage)?.routeHandler
+          action = Luca.util.read(routeHandler)
+
+        if _.isString( action )
+          callback = ()-> 
+            @[ action ].apply(@, args)
+
+        if _.isFunction( action )
+          callback = nextItem
+
+        path = path.navigate_to(page, callback)
+
+      routeHelper.action = (action)->
+        pages.push(action: action)
+
+      return routeHelper
+
+  startHistory: ()->
+    Backbone.history.start()
+
+application.register()
