@@ -24,16 +24,16 @@ multiView = Luca.register     "Luca.components.MultiCollectionView"
 #     ]
 multiView.extends           "Luca.containers.CardView"
 
-multiView.mixesIn         "LoadMaskable",
-                          "Filterable",
-                          "Paginatable"
+multiView.mixesIn           "LoadMaskable",
+                            "Filterable",
+                            "Paginatable"
 
 multiView.triggers          "before:refresh",
                             "after:refresh",
                             "refresh",
                             "empty:results"
 
-multiView.defaultsTo
+multiView.defines
   version: 1
 
   stateful: true
@@ -48,13 +48,11 @@ multiView.defaultsTo
 
     validateComponent( view ) for view in @components    
 
+    Luca.containers.CardView::initialize.apply(@, arguments) 
+
     @on "refresh", @refresh, @
     @on "after:card:switch", @refresh, @
     @on "after:components", propagateCollectionComponents, @
-
-    @debug("multi collection , proto initialize")
-
-    Luca.containers.CardView::initialize.apply(@, arguments) 
 
   relayAfterRefresh: (models,query,options)->
     @trigger "after:refresh", models, query, options
