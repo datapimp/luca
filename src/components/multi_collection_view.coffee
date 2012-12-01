@@ -24,7 +24,8 @@ multiView = Luca.register     "Luca.components.MultiCollectionView"
 #     ]
 multiView.extends           "Luca.containers.CardView"
 
-multiView.mixesIn           "LoadMaskable",
+multiView.mixesIn           "QueryCollectionBindings", 
+                            "LoadMaskable",
                             "Filterable",
                             "Paginatable"
 
@@ -59,34 +60,6 @@ multiView.defines
 
   refresh: ()->
     @activeComponent()?.trigger("refresh")
-
-  getCollection: ()->
-    @collection
-
-  applyQuery: (query={},queryOptions={})->
-    @query = query
-    @queryOptions = queryOptions
-    @
-
-  # Private: returns the query that is applied to the underlying collection.
-  # accepts the same options as Luca.Collection.query's initial query option.
-  getQuery: ()-> 
-    @debug("Get Query")
-    query = @query ||= {}
-    for querySource in @querySources 
-      query = _.extend(query, (querySource()||{}) ) 
-    query
-
-  # Private: returns the query that is applied to the underlying collection.
-  # accepts the same options as Luca.Collection.query's initial query option.
-  getQueryOptions: ()-> 
-    @debug("Get Query Options")
-    options = @queryOptions ||= {}
-
-    for optionSource in @optionsSources 
-      options = _.extend(options, (optionSource()||{}) ) 
-
-    options  
 
 propagateCollectionComponents = ()->
   container = @
