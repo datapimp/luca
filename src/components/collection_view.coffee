@@ -16,39 +16,45 @@ collectionView = Luca.register      "Luca.components.CollectionView"
 #
 collectionView.extends            "Luca.components.Panel"
 
-collectionView.mixesIn          "LoadMaskable", 
-                                "Filterable", 
-                                "Paginatable"
+collectionView.mixesIn            "LoadMaskable", 
+                                  "Filterable", 
+                                  "Paginatable"
 
-collectionView.triggers         "before:refresh",
-                                "after:refresh",
-                                "refresh",
-                                "empty:results"
+collectionView.triggers           "before:refresh",
+                                  "after:refresh",
+                                  "refresh",
+                                  "empty:results"
+
+# IDEA:
+# 
+# For validation of component configuration,
+# we could define a convention like:
+#
+# collectionView.validatesConfigurationWith
+#   requiresValidCollectionAt: "collection"
+#   requiresPresenceOf: 
+#     either: ["itemTemplate", "itemRenderer", "itemProperty"]
+#
+#
+collectionView.publicConfiguration
+  tagName: "ol"
+  bodyClassName: "collection-ui-panel"
+  itemTagName: 'li'
+  itemClassName: 'collection-item'
+  itemTemplate: undefined
+  itemRenderer: undefined
+  itemProperty: undefined
 
 collectionView.defines
-  tagName: "ol"
-
-  className: "luca-ui-collection-view"
-
-  bodyClassName: "collection-ui-panel"
-
-  # A collection view can pass a model through to a template
-  itemTemplate: undefined
-
-  # A collection view can pass a model through a function which should return a string
-  itemRenderer: undefined
-
-  itemTagName: 'li'
-
-  itemClassName: 'collection-item'
-
-
   initialize: (@options={})->
     _.extend(@, @options)
-
     _.bindAll @, "refresh"
 
-
+    # IDEA:
+    #
+    # This type of code could be moved into a re-usable concern
+    # which higher order components can mixin to make it easier
+    # to extend them, instantiate them, etc.
     unless @collection? or @options.collection
       console.log "Error on initialize of collection view", @
       throw "Collection Views must specify a collection"
@@ -66,28 +72,23 @@ collectionView.defines
       console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
-      @collection.on "before:fetch", ()=>
-        @trigger "enable:loadmask"
-        
-      @collection.bind "reset", ()=>
-        @refresh()
-        @trigger "disable:loadmask"
+    @collection.on "before:fetch", ()=>
+      @trigger "enable:loadmask"
+      
+    @collection.bind "reset", ()=>
+      @refresh()
+      @trigger "disable:loadmask"
 
-      @collection.bind "remove", ()=>
-        @refresh()
+    @collection.bind "remove", ()=>
+      @refresh()
 
-      @collection.bind "add", ()=>
-        @refresh()
+    @collection.bind "add", ()=>
+      @refresh()
 
-      if @observeChanges is true
-        @collection.on "change", @refreshModel, @
+    if @observeChanges is true
+      @collection.on "change", @refreshModel, @
 
     Luca.components.Panel::initialize.apply(@, arguments)
-
-    unless @autoRefreshOnModelsPresent is false
-      @defer ()=> 
-        @refresh() if @collection.length > 0
-      .until("after:render")
 
     @on "refresh", @refresh, @
 
@@ -132,10 +133,10 @@ collectionView.defines
 
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
-  getQuery: ()-> 
+  getQuery: (options={})-> 
     query = @query ||= {}
     for querySource in _( @querySources || [] ).compact()
-      query = _.extend(query, (querySource()||{}) ) 
+      query = _.extend(query, (querySource(options)||{}) ) 
     query
 
   # Private: returns the query that is applied to the underlying collection.
