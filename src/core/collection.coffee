@@ -147,7 +147,7 @@ collection.defines
       @applyParams(filter)
       @fetch _.extend(options,refresh:true,remote:true)
     else
-      @reset @query filter
+      @reset @query(filter, options)
 
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified
