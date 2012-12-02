@@ -1,9 +1,3 @@
-window.<%= javascript_namespace %> =
-  views: {}
-  collections: {}
-  models: {}
-  util: {}
-  components: {}
-
-Luca.registry.addNamespace '<%= javascript_namespace %>.views'
-Luca.Collection.namespace = <%= javascript_namespace %>.collections
+Luca.initialize '<%= javascript_namespace %>',
+  modelBootstrap: window.<%= javascript_namespace %>Bootstrap
+  baseParams: window.<%= javascript_namespace %>BaseParams

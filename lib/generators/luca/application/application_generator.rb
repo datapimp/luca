@@ -27,17 +27,19 @@ module Luca
       end
 
       def generate_javascript
-        file_extension = javascript_extension == :coffee ? "js.coffee" : "js"
+        file_extension = "js.coffee"
         template "javascripts/application.#{file_extension}", "app/assets/javascripts/#{application_name}/application.#{file_extension}"
         template "javascripts/dependencies.#{file_extension}", "app/assets/javascripts/#{application_name}/dependencies.#{file_extension}"
         template "javascripts/index.#{file_extension}", "app/assets/javascripts/#{application_name}/index.#{file_extension}"
         template "javascripts/router.#{file_extension}", "app/assets/javascripts/#{application_name}/router.#{file_extension}"
-        template "javascripts/main.#{file_extension}", "app/assets/javascripts/#{application_name}/views/main.#{file_extension}"
+        template "javascripts/home.#{file_extension}", "app/assets/javascripts/#{application_name}/views/home.#{file_extension}"
         template "javascripts/config.#{file_extension}", "app/assets/javascripts/#{application_name}/config.#{file_extension}"
-        template "javascripts/main.jst.ejs", "app/assets/javascripts/#{application_name}/templates/main.jst.ejs"
+        template "javascripts/home.jst.ejs", "app/assets/javascripts/#{application_name}/templates/home.jst.ejs"
         
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/models")
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/collections")
+        empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/views")
+        empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/lib")
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/util")
       end
 

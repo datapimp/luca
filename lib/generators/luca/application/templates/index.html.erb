@@ -1,7 +1,19 @@
 <div id='viewport'></div>
 
 <script type="text/javascript">
+  /* 
+    the bootstrap is where you should include serialized
+    models that you want to be available to your collections on
+    page load.  A collection will look for an array of models
+    at the property returned by that collection's cache_key() property.
+  */
   window.<%= javascript_namespace %>Bootstrap = {};
+  
+  /*
+    the base params will be included as query parameters for
+    any RESTful call to the API made by your collections.
+  */
+  window.<%= javascript_namespace %>BaseParams = {};
 </script>
   
 <%%= javascript_include_tag "<%= application_name %>/dependencies", "<%= application_name %>" %>

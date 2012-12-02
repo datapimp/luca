@@ -9,8 +9,8 @@ _.def('<%= javascript_namespace %>.Application').extends('Luca.Application').wit
     ctype: 'controller'
     name: 'pages'
     components:[
-      type: "main"
-      name: "main"
+      type: "home"
+      name: "home"
     ]
   ]
 
