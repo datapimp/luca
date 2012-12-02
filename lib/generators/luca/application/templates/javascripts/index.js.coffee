@@ -7,3 +7,8 @@
 
 #= require ./router
 #= require ./application
+
+#= require_self
+
+<%= javascript_namespace %>.onReady ->
+  (window.<%= javascript_namespace %>App = new <%= javascript_namespace %>Application()).boot();

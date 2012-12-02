@@ -6,15 +6,10 @@ _.def('<%= javascript_namespace %>.Application').extends('Luca.Application').wit
   el: '#viewport'
 
   components:[
-    ctype: 'controller'
+    type: 'controller'
     name: 'pages'
     components:[
       type: "home"
       name: "home"
     ]
   ]
-
-$ ->
-  Luca.Collection.bootstrap( window.<%= javascript_namespace %>Bootstrap )
-  window.<%= javascript_namespace %>App = new <%= javascript_namespace %>.Application()
-  <%= javascript_namespace %>App.boot()
