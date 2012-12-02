@@ -11,4 +11,4 @@
 #= require_self
 
 <%= javascript_namespace %>.onReady ->
-  (window.<%= javascript_namespace %>App = new <%= javascript_namespace %>Application()).boot();
+  (window.<%= javascript_namespace %>App = new <%= javascript_namespace %>.Application()).boot();
