@@ -1357,18 +1357,25 @@
       this.optionsSources || (this.optionsSources = []);
       this.query || (this.query = {});
       this.queryOptions || (this.queryOptions = {});
-      this.querySources.push((function() {
-        return filter.toQuery();
+      this.querySources.push((function(options) {
+        if (options == null) options = {};
+        return _this.getFilterState().toQuery();
       }));
-      this.optionsSources.push((function() {
-        return filter.toOptions();
+      this.optionsSources.push((function(options) {
+        if (options == null) options = {};
+        return _this.getFilterState().toOptions();
       }));
       filter.on("change", function() {
-        var merged;
+        var options;
+        filter = _.clone(_this.getQuery());
+        options = _.clone(_this.getQueryOptions());
+        if (options.limit != null) filter.limit = options.limit;
+        if (options.page != null) filter.page = options.page;
+        if (options.sortBy != null) filter.sortBy = options.sortBy;
         if (_this.isRemote()) {
-          merged = _.extend(_this.getQuery(), _this.getQueryOptions());
-          merged = _(merged).omit('pager', 'remote', 'changes');
-          return _this.collection.applyFilter(merged, _this.getQueryOptions());
+          return _this.collection.applyFilter(filter, {
+            remote: true
+          });
         } else {
           return _this.trigger("refresh");
         }
@@ -1714,10 +1721,13 @@
         });
       });
       paginationState.on("change:page", function(state) {
-        var filter;
+        var filter, options;
+        filter = _.clone(_this.getQuery());
+        options = _.clone(_this.getQueryOptions());
+        if (options.limit != null) filter.limit = options.limit;
+        if (options.page != null) filter.page = options.page;
+        if (options.sortBy != null) filter.sortBy = options.sortBy;
         if (_this.isRemote()) {
-          filter = _.extend(_this.toQuery(), _this.toQueryOptions());
-          filter = _(filter).omit('pager', 'remote');
           return _this.collection.applyFilter(filter, {
             remote: true
           });
@@ -1814,13 +1824,14 @@
       }
       return query;
     },
-    getQueryOptions: function() {
-      var optionSource, options, _i, _len, _ref;
+    getQueryOptions: function(options) {
+      var optionSource, _i, _len, _ref;
+      if (options == null) options = {};
       options = this.queryOptions || (this.queryOptions = {});
       _ref = _(this.optionsSources || []).compact();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         optionSource = _ref[_i];
-        options = _.extend(options, optionSource() || {});
+        options = _.extend(options, optionSource(options) || {});
       }
       return options;
     },
@@ -3018,11 +3029,23 @@
     components: [],
     componentEvents: {},
     initialize: function(options) {
+      var component, _i, _len, _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
+      this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
+      _ref = this.components;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        component = _ref[_i];
+        if (_.isString(component)) {
+          component = {
+            type: component,
+            role: component,
+            name: component
+          };
+        }
+      }
       _.bindAll(this, "beforeRender");
       this.setupHooks(Luca.core.Container.prototype.hooks);
-      this.components || (this.components = this.fields || (this.fields = this.pages || (this.pages = this.cards || (this.cards = this.views))));
       validateContainerConfiguration(this);
       return Luca.View.prototype.initialize.apply(this, arguments);
     },
@@ -3042,21 +3065,11 @@
       });
     },
     prepareComponents: function() {
-      var component, _i, _len, _ref,
-        _this = this;
+      var _this = this;
       container = this;
-      _ref = this.components;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        component = _ref[_i];
-        if (_.isString(component)) {
-          component = {
-            type: component
-          };
-        }
-      }
       return _(this.components).each(function(component, index) {
-        var ce, componentContainerElement, componentExtension, panel, _ref2, _ref3;
-        ce = componentContainerElement = (_ref2 = _this.componentContainers) != null ? _ref2[index] : void 0;
+        var ce, componentContainerElement, componentExtension, panel, _ref, _ref2;
+        ce = componentContainerElement = (_ref = _this.componentContainers) != null ? _ref[index] : void 0;
         ce["class"] = ce["class"] || ce.className || ce.classes;
         if (_this.generateComponentElements) {
           panel = _this.make(_this.componentTag, componentContainerElement, '');
@@ -3065,7 +3078,7 @@
         if (container.defaults != null) {
           component = _.defaults(component, container.defaults || {});
         }
-        if (_.isArray(container.extensions) && _.isObject((_ref3 = container.extensions) != null ? _ref3[index] : void 0)) {
+        if (_.isArray(container.extensions) && _.isObject((_ref2 = container.extensions) != null ? _ref2[index] : void 0)) {
           componentExtension = container.extensions[index];
           component = _.extend(component, componentExtension);
         }
@@ -4894,6 +4907,7 @@
   });
 
   buttonField.privateConfiguration({
+    isButton: true,
     template: "fields/button_field",
     events: {
       "click input": "click_handler"
@@ -5621,7 +5635,7 @@
         if (options.debug) {
           console.log("" + key + " Options", options, "Value", value, "Value Is Blank?", valueIsBlank, "Allow Blanks?", allowBlankValues);
         }
-        if (options.skip_buttons && field.ctype === "button_field") {
+        if (options.skip_buttons && field.isButton) {
           skip = true;
         } else {
           if (valueIsBlank && allowBlankValues === false) skip = true;
@@ -6463,22 +6477,25 @@
     itemTagName: "tr",
     stateful: true,
     observeChanges: true,
+    widths: [],
     columns: [],
     emptyText: "There are no results to display",
     itemRenderer: function(item, model) {
       return Luca.components.TableView.rowRenderer.call(this, item, model);
     },
     initialize: function(options) {
-      var column,
+      var column, index, width,
         _this = this;
       this.options = options != null ? options : {};
       Luca.components.CollectionView.prototype.initialize.apply(this, arguments);
+      index = 0;
       this.columns = (function() {
         var _i, _len, _ref, _results;
         _ref = this.columns;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           column = _ref[_i];
+          if (width = this.widths[index]) column.width = width;
           if (_.isString(column)) {
             column = {
               reader: column
@@ -6487,6 +6504,7 @@
           if (!(column.header != null)) {
             column.header = _.str.titleize(_.str.humanize(column.reader));
           }
+          index++;
           _results.push(column);
         }
         return _results;

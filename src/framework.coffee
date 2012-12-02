@@ -30,7 +30,7 @@ lucaUtilityHelper = (payload, args...)->
 (window || global).Luca = ()-> lucaUtilityHelper.apply(@, arguments)
 
 _.extend Luca,
-  VERSION: "0.9.75"
+  VERSION: "0.9.76"
   core: {}
   collections: {}
   containers: {}

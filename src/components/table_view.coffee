@@ -9,6 +9,8 @@ _.def("Luca.components.TableView").extends("Luca.components.CollectionView").wit
   stateful: true
   observeChanges: true
 
+  widths: []
+  
   columns:[]
 
   emptyText: "There are no results to display"
@@ -19,13 +21,18 @@ _.def("Luca.components.TableView").extends("Luca.components.CollectionView").wit
   initialize: (@options={})->
     Luca.components.CollectionView::initialize.apply(@, arguments)
 
+    index = 0
     @columns = for column in @columns
+      if width = @widths[ index ]
+        column.width = width
+
       if _.isString(column)
         column = reader: column
 
       if !column.header?
         column.header = _.str.titleize(_.str.humanize(column.reader))
 
+      index++
       column
 
     @defer ()=> 

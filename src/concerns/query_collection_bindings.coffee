@@ -15,17 +15,19 @@ Luca.concerns.QueryCollectionBindings =
   # accepts the same options as Luca.Collection.query's initial query option.
   getQuery: (options={})-> 
     query = @query ||= {}
+
     for querySource in _( @querySources || [] ).compact()
       query = _.extend(query, (querySource(options)||{}) ) 
+      
     query
 
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
-  getQueryOptions: ()-> 
+  getQueryOptions: (options={})-> 
     options = @queryOptions ||= {}
 
     for optionSource in _( @optionsSources || [] ).compact()
-      options = _.extend(options, (optionSource()||{}) ) 
+      options = _.extend(options, (optionSource(options)||{}) ) 
 
     options
 

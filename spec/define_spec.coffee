@@ -69,11 +69,14 @@ describe 'The Component Definition System', ->
   it "should default to Luca.View for the extends portion", ->
     expect( Luca.parentClasses(Luca.components.SampleComponentDefinition) ).toContain 'Luca.View'
   
-  it "should build a components property", -> 
-
   it "should define class methods ", ->  
     test = Luca.components.SampleComponentDefinition.classMethod()
     expect( test ).toEqual 'classMethod'
+
+  it "should inherit class methods when extending", ->
+    Luca.register("Luca.components.ExtendedSampleComponent").extends("Luca.components.SampleComponentDefinition").register()
+    test = Luca.components.ExtendedSampleComponent.classMethod()
+    expect( test ).toEqual('classMethod')
 
   it "should define class configuration ", ->  
     test = Luca.components.SampleComponentDefinition.classAttribute

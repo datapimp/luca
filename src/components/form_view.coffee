@@ -183,7 +183,7 @@ formView.defines
       if options.debug
         console.log "#{ key } Options", options, "Value", value, "Value Is Blank?", valueIsBlank, "Allow Blanks?", allowBlankValues
 
-      if options.skip_buttons and field.ctype is "button_field"
+      if options.skip_buttons and field.isButton
         skip = true
       else
         if valueIsBlank and allowBlankValues is false

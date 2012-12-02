@@ -42,12 +42,18 @@ container.defines
   initialize: (@options={})->
     _.extend @, @options
 
+    # aliases for the components property
+    @components ||= @fields ||= @pages ||= @cards ||= @views
+    
+    # accept components as an array of strings representing
+    # the luca component type
+    for component in @components when _.isString(component)
+      component = (type: component, role: component, name: component)
+
     _.bindAll(@, "beforeRender")
 
     @setupHooks( Luca.core.Container::hooks )
 
-    # aliases for the components property
-    @components ||= @fields ||= @pages ||= @cards ||= @views
 
     validateContainerConfiguration(@)
 
@@ -119,10 +125,6 @@ container.defines
   prepareComponents: ()->
     container = @
 
-    # accept components as an array of strings representing
-    # the luca component type
-    for component in @components when _.isString(component)
-      component = (type: component)
 
     _( @components ).each (component, index)=>
       ce = componentContainerElement = @componentContainers?[index]

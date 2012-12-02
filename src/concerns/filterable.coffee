@@ -24,17 +24,21 @@ Luca.concerns.Filterable =
     @query ||= {}
     @queryOptions ||= {}
 
-    @querySources.push (()=> filter.toQuery())
-    @optionsSources.push (()=> filter.toOptions())
+    @querySources.push ((options={})=> @getFilterState().toQuery())
+    @optionsSources.push ((options={})=> @getFilterState().toOptions())
 
     filter.on "change", ()=> 
+      filter = _.clone( @getQuery() )
+      options = _.clone( @getQueryOptions() )
+
+      filter.limit = options.limit if options.limit?
+      filter.page = options.page if options.page?
+      filter.sortBy = options.sortBy if options.sortBy?
+
       if @isRemote()  
-        merged = _.extend(@getQuery(), @getQueryOptions())
-        merged = _( merged ).omit('pager','remote','changes')
-        @collection.applyFilter(merged, @getQueryOptions())
+        @collection.applyFilter(filter, remote: true)
       else
         @trigger "refresh" 
-
     module
 
   isRemote: ()->

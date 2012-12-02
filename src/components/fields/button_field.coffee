@@ -13,6 +13,7 @@ buttonField.publicConfiguration
   white:        undefined
 
 buttonField.privateConfiguration
+  isButton: true
   template: "fields/button_field"
   events:
     "click input" : "click_handler"
