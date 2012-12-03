@@ -2,15 +2,15 @@ application = <%= javascript_namespace %>.register      "<%= javascript_namespac
 
 application.extends                                     "Luca.Application" 
 
-application.contains
-  type: 'controller'
-  name: 'pages'
-  components:[
-    name: "home"
-    template: "pages/home"
-  ]
-
 application.defines
+  components:[
+    type: 'controller'
+    name: 'pages'
+    components:[
+      name: "home"
+      template: "pages/home"
+    ]
+  ]
   el: '#viewport'
   autoBoot: false
   name: '<%= javascript_namespace %>App'
