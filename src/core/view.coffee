@@ -101,6 +101,14 @@ view.defines
 
 Luca.View._originalExtend = Backbone.View.extend
 
+# Note:
+#
+# I will be removing this prior to 1.0.  Optimizing for collection based
+# views does not belong in here, so the deferrable / collection binding stuff
+# needs to go.  
+#
+# Being able to defer rendering until the firing of an event on another object
+# is something that does ask for some syntactic sugar though, so need to rethink.
 Luca.View.renderWrapper = (definition)->
   _base = definition.render
 

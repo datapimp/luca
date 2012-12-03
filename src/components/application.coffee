@@ -366,4 +366,7 @@ application.classInterface
   startHistory: ()->
     Backbone.history.start()
 
+application.afterDefinition ()->
+  Luca.routeHelper = Luca.Application.routeTo
+
 application.register()

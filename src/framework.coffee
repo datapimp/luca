@@ -1,3 +1,8 @@
+# Idea:
+#
+# I want to be able to work with applications who come rendered on page load.
+
+
 # the Luca() browser utility function is meant to be a smart wrapper around various
 # types of input which will return what the developer would expect given the
 # context it is used.
@@ -122,6 +127,7 @@ Luca.initialize = (namespace, options={})->
       Luca.getApplication?.apply(@, arguments)
     getCollectionManager: ()->
       Luca.CollectionManager.get?.apply(@, arguments)
+    route: Luca.routeHelper
 
 
   object = {}
@@ -135,10 +141,10 @@ Luca.initialize = (namespace, options={})->
   Luca.Collection.namespace "#{ namespace }.collections"
 
   Luca.on "ready", ()->
-    Luca.define.close()
     Luca.setupCollectionSpace(options)
 
 Luca.onReady = (callback)->
+  Luca.define.close()
   Luca.trigger("ready")
 
   $ -> callback.apply(@, arguments)

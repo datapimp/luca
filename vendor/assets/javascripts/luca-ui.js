@@ -29,7 +29,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.75",
+    VERSION: "0.9.76",
     core: {},
     collections: {},
     containers: {},
@@ -124,7 +124,8 @@
       getCollectionManager: function() {
         var _ref;
         return (_ref = Luca.CollectionManager.get) != null ? _ref.apply(this, arguments) : void 0;
-      }
+      },
+      route: Luca.routeHelper
     };
     object = {};
     object[namespace] = _.extend(Luca.getHelper(), defaults);
@@ -134,12 +135,12 @@
     Luca.registry.namespace("" + namespace + ".views");
     Luca.Collection.namespace("" + namespace + ".collections");
     return Luca.on("ready", function() {
-      Luca.define.close();
       return Luca.setupCollectionSpace(options);
     });
   };
 
   Luca.onReady = function(callback) {
+    Luca.define.close();
     Luca.trigger("ready");
     return $(function() {
       return callback.apply(this, arguments);
@@ -4563,6 +4564,10 @@
     startHistory: function() {
       return Backbone.history.start();
     }
+  });
+
+  application.afterDefinition(function() {
+    return Luca.routeHelper = Luca.Application.routeTo;
   });
 
   application.register();
