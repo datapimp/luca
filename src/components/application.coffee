@@ -240,7 +240,7 @@ application.privateInterface
     # any time the card switches on one of the sub controllers
     # then we should track the active sub section on the global state chart
     @getMainController()?.each (component)=>
-      type = component.type || component.type
+      type = component.type || component.ctype
       if type.match(/controller$/)
         component.bind "after:card:switch", (previous,current)=>
           @state.set(active_sub_section:current.name)

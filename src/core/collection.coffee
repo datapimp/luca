@@ -36,7 +36,7 @@ collection.defines
       console.log 'The @cached property of Luca.Collection is being deprecated.  Please change to cache_key'
 
     if @cache_key ||= @cached
-      @bootstrap_cache_key = if _.isFunction( @cache_key ) then @cache_key() else @cache_key
+      @bootstrap_cache_key = Luca.util.read(@cache_key) 
 
     if @registerAs or @registerWith
       console.log "This configuration API is deprecated.  use @name and @manager properties instead"
@@ -57,8 +57,8 @@ collection.defines
     # to be scoped with some sort of unique id, as say some sort of belongsTo relationship
     # then you can specify @registerAs as a method()
     if @manager
-      @name ||= @cache_key()
-      @name = if _.isFunction( @name ) then @name() else @name
+      @name ||= Luca.util.read(@cache_key) 
+      @name = Luca.util.read(@name) 
 
       unless @private or @anonymous
         @bind "after:initialize", ()=>
@@ -69,7 +69,7 @@ collection.defines
     # locally in localStorage
     if @useLocalStorage is true and window.localStorage?
       table = @bootstrap_cache_key || @name
-      throw "Must specify either a cached or registerAs property to use localStorage"
+      throw "Must specify a cache_key property or method to use localStorage"
       @localStorage = new Luca.LocalStore( table )
 
     # Populating a collection with local data
@@ -152,7 +152,7 @@ collection.defines
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified
   applyParams: (params)->
-    @base_params = _( Luca.Collection.baseParams() ).clone()
+    @base_params = _( Luca.Collection.baseParams() ).clone() || {}
     _.extend @base_params, params
 
     @
@@ -373,6 +373,9 @@ Luca.Collection.baseParams = (obj)->
 
   Luca.util.read( Luca.Collection._baseParams )
 
+Luca.Collection.resetBaseParams = ()->
+  Luca.Collection._baseParams = {}
+  
 # In order to make our Backbone Apps super fast it is a good practice
 # to pre-populate your collections by what is referred to as bootstrapping
 #

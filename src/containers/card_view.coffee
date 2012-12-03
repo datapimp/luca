@@ -80,7 +80,7 @@ component.defaults
   find: (name)-> Luca(name)
 
   firstActivation: ()->
-    @activeComponent().trigger "first:activation", @, @activeComponent()
+    @activeComponent()?.trigger "first:activation", @, @activeComponent()
 
   activate: (index, silent=false, callback)->
     if _.isFunction(silent)

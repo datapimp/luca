@@ -2546,7 +2546,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         console.log('The @cached property of Luca.Collection is being deprecated.  Please change to cache_key');
       }
       if (this.cache_key || (this.cache_key = this.cached)) {
-        this.bootstrap_cache_key = _.isFunction(this.cache_key) ? this.cache_key() : this.cache_key;
+        this.bootstrap_cache_key = Luca.util.read(this.cache_key);
       }
       if (this.registerAs || this.registerWith) {
         console.log("This configuration API is deprecated.  use @name and @manager properties instead");
@@ -2556,8 +2556,8 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       this.manager = _.isFunction(this.manager) ? this.manager() : this.manager;
       if (this.name && !this.manager) this.manager = Luca.CollectionManager.get();
       if (this.manager) {
-        this.name || (this.name = this.cache_key());
-        this.name = _.isFunction(this.name) ? this.name() : this.name;
+        this.name || (this.name = Luca.util.read(this.cache_key));
+        this.name = Luca.util.read(this.name);
         if (!(this.private || this.anonymous)) {
           this.bind("after:initialize", function() {
             return _this.register(_this.manager, _this.name, _this);
@@ -2566,7 +2566,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       }
       if (this.useLocalStorage === true && (window.localStorage != null)) {
         table = this.bootstrap_cache_key || this.name;
-        throw "Must specify either a cached or registerAs property to use localStorage";
+        throw "Must specify a cache_key property or method to use localStorage";
         this.localStorage = new Luca.LocalStore(table);
       }
       if (_.isArray(this.data) && this.data.length > 0) {
@@ -2637,7 +2637,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       }
     },
     applyParams: function(params) {
-      this.base_params = _(Luca.Collection.baseParams()).clone();
+      this.base_params = _(Luca.Collection.baseParams()).clone() || {};
       _.extend(this.base_params, params);
       return this;
     },
@@ -2860,6 +2860,10 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     if (_.isString(obj)) obj = Luca.util.resolve(obj);
     if (obj) Luca.Collection._baseParams = obj;
     return Luca.util.read(Luca.Collection._baseParams);
+  };
+
+  Luca.Collection.resetBaseParams = function() {
+    return Luca.Collection._baseParams = {};
   };
 
   Luca.Collection._bootstrapped_models = {};
@@ -3865,7 +3869,8 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       return Luca(name);
     },
     firstActivation: function() {
-      return this.activeComponent().trigger("first:activation", this, this.activeComponent());
+      var _ref;
+      return (_ref = this.activeComponent()) != null ? _ref.trigger("first:activation", this, this.activeComponent()) : void 0;
     },
     activate: function(index, silent, callback) {
       var activationContext, current, previous,
@@ -4501,7 +4506,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       }
       return (_ref2 = this.getMainController()) != null ? _ref2.each(function(component) {
         var type;
-        type = component.type || component.type;
+        type = component.type || component.ctype;
         if (type.match(/controller$/)) {
           return component.bind("after:card:switch", function(previous, current) {
             _this.state.set({
