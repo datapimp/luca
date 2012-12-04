@@ -41,3 +41,6 @@ buttonField.privateInterface
     @icon_class += " icon-white" if @white
 
   setValue: ()-> true
+
+
+buttonField.register()

@@ -3075,7 +3075,7 @@
       });
       componentsWithClassBasedAssignment = this._().select(function(component) {
         var _ref;
-        return ((_ref = component.container) != null ? _ref.match('.') : void 0) && container.$(component.container).length > 0;
+        return _.isString(component.container) && ((_ref = component.container) != null ? _ref.match('.') : void 0) && container.$(component.container).length > 0;
       });
       if (componentsWithClassBasedAssignment.length > 0) {
         _results = [];
@@ -5001,9 +5001,7 @@
     }
   });
 
-  buttonField.defines({
-    version: 1
-  });
+  buttonField.register();
 
 }).call(this);
 (function() {
