@@ -147,6 +147,7 @@ application.publicInterface
         window[ appName ] = app
         app.boot()
 
+    Luca.trigger "application:available", @
   # @activeView() returns a reference to the instance of the view
   # which is currently monopolizing the viewport.
   #
@@ -235,7 +236,7 @@ application.privateInterface
     # the active card on the global state chart
     @getMainController()?.bind "after:card:switch", (previous,current)=>
       @state.set(active_section:current.name)
-      app.trigger "controller:change"
+      app.trigger "controller:change", previous.name, current.name
 
     # any time the card switches on one of the sub controllers
     # then we should track the active sub section on the global state chart
@@ -244,7 +245,7 @@ application.privateInterface
       if type.match(/controller$/)
         component.bind "after:card:switch", (previous,current)=>
           @state.set(active_sub_section:current.name)
-          app.trigger "action:change"
+          app.trigger "action:change", previous.name, current.name
 
   setupMainController: ()->
     if @useController is true
@@ -294,11 +295,23 @@ application.privateInterface
       @collectionManager = new @collectionManagerClass( collectionManagerOptions )
 
   setupRouter: ()->
-    app = @
+    return if not @router? and not @routes?
 
-    if _.isString( @router )
-      routerClass = Luca.util.resolve(@router)
-      @router = new routerClass({app})
+    routerClass = Luca.Router
+    routerClass = Luca.util.resolve(@router) if _.isString(@router)
+
+    routerConfig = routerClass.prototype
+    routerConfig.routes ||= {}
+    routerConfig.app = @
+
+    if _.isObject( @routes )
+      for routePattern, endpoint of @routes
+        [page, action] = endpoint.split(' ')
+        fn = _.uniqueId(page)
+        routerConfig[fn] = Luca.Application.routeTo(page).action(action)
+        routerConfig.routes[ routePattern ] = fn
+
+    @router = new routerClass(routerConfig) 
 
     # if this application has a router associated with it
     # then we need to start backbone history on a certain event.
@@ -331,37 +344,38 @@ application.classInterface
     callback = undefined    
     specifiedAction = undefined
 
+    console.log "Generating Route To", pages
+
     routeHelper = (args...)->
       path = @app || Luca()
       index = 0
 
+      # we can specify a page by name, and not have to know its full path
       if pages.length is 1 and target = Luca(first)
         pages = target.controllerPath()
 
+      # when we do know the full path
       for page in pages when _.isString(page)
         nextItem = pages[++index]
-        action = undefined
+        target = Luca(page)
+
+        if page is last and target.routeHandler?
+          callback = target.routeHandler  
 
         if _.isFunction(nextItem)
-          action = nextItem
-        else if _.isObject(nextItem) and nextItem.action?
-          action = nextItem.action
-        else if page is last and routeHandler = Luca(last)?.routeHandler
-          action = Luca.util.read(routeHandler)
-
-        if _.isString( action )
-          callback = ()-> 
-            @[ action ].apply(@, args)
-
-        if _.isFunction( action )
           callback = nextItem
 
-        path = path.navigate_to(page, callback)
+        if _.isObject(nextItem) and action = nextItem.action and target[action]?
+          callback = _.bind(target[action], target)
 
-      routeHelper.action = (action)->
-        pages.push(action: action)
+        path = path.navigate_to page, ()->
+          callback?.apply(target, args)
 
-      return routeHelper
+    routeHelper.action = (action)->
+      pages.push(action:(specifiedAction = action)) if action?
+      routeHelper
+
+    routeHelper
 
   startHistory: ()->
     Backbone.history.start()

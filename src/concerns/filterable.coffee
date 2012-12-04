@@ -1,4 +1,5 @@
 Luca.concerns.Filterable = 
+
   __included: (component, module)->
     _.extend(Luca.Collection::, __filters:{})
 
@@ -31,15 +32,21 @@ Luca.concerns.Filterable =
       filter = _.clone( @getQuery() )
       options = _.clone( @getQueryOptions() )
 
-      filter.limit = options.limit if options.limit?
-      filter.page = options.page if options.page?
-      filter.sortBy = options.sortBy if options.sortBy?
+      prepared = @prepareRemoteFilter(filter, options)
 
       if @isRemote()  
-        @collection.applyFilter(filter, remote: true)
+        @collection.applyFilter(prepared, remote: true)
       else
         @trigger "refresh" 
+
     module
+
+  prepareRemoteFilter: (filter={}, options={})->
+    filter.limit = options.limit if options.limit?
+    filter.page = options.page if options.page?
+    filter.sortBy = options.sortBy if options.sortBy?
+    
+    filter
 
   isRemote: ()->
     @getQueryOptions().remote is true    

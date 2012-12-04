@@ -5,7 +5,7 @@
   lucaUtilityHelper = function() {
     var args, definition, fallback, inheritsFrom, payload, result, _ref;
     payload = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    if (payload == null) {
+    if (arguments.length === 0) {
       return (_ref = _(Luca.Application.instances).values()) != null ? _ref[0] : void 0;
     }
     if (_.isString(payload) && (result = Luca.cache(payload))) return result;
@@ -1235,7 +1235,7 @@
       if (_.isString(this.collection) && (collectionManager = (_ref = Luca.CollectionManager) != null ? _ref.get() : void 0)) {
         this.collection = collectionManager.getOrCreate(this.collection);
       }
-      if (!(this.collection && _.isFunction(this.collection.fetch) && _.isFunction(this.collection.reset))) {
+      if (_.isObject(this.collection) && !Luca.isBackboneCollection(this.collection)) {
         this.collection = new Luca.Collection(this.collection.initial_set, this.collection);
       }
       if ((_ref2 = this.collection) != null ? _ref2.deferrable_trigger : void 0) {
@@ -1367,14 +1367,12 @@
         return _this.getFilterState().toOptions();
       }));
       filter.on("change", function() {
-        var options;
+        var options, prepared;
         filter = _.clone(_this.getQuery());
         options = _.clone(_this.getQueryOptions());
-        if (options.limit != null) filter.limit = options.limit;
-        if (options.page != null) filter.page = options.page;
-        if (options.sortBy != null) filter.sortBy = options.sortBy;
+        prepared = _this.prepareRemoteFilter(filter, options);
         if (_this.isRemote()) {
-          return _this.collection.applyFilter(filter, {
+          return _this.collection.applyFilter(prepared, {
             remote: true
           });
         } else {
@@ -1382,6 +1380,14 @@
         }
       });
       return module;
+    },
+    prepareRemoteFilter: function(filter, options) {
+      if (filter == null) filter = {};
+      if (options == null) options = {};
+      if (options.limit != null) filter.limit = options.limit;
+      if (options.page != null) filter.page = options.page;
+      if (options.sortBy != null) filter.sortBy = options.sortBy;
+      return filter;
     },
     isRemote: function() {
       return this.getQueryOptions().remote === true;
@@ -1722,14 +1728,12 @@
         });
       });
       paginationState.on("change:page", function(state) {
-        var filter, options;
+        var filter, options, prepared;
         filter = _.clone(_this.getQuery());
         options = _.clone(_this.getQueryOptions());
-        if (options.limit != null) filter.limit = options.limit;
-        if (options.page != null) filter.page = options.page;
-        if (options.sortBy != null) filter.sortBy = options.sortBy;
+        prepared = _this.prepareRemoteFilter(filter, options);
         if (_this.isRemote()) {
-          return _this.collection.applyFilter(filter, {
+          return _this.collection.applyFilter(prepared, {
             remote: true
           });
         } else {
@@ -3064,10 +3068,30 @@
       return containerEl;
     },
     prepareLayout: function() {
+      var componentsWithClassBasedAssignment, containerAssignment, specialComponent, targetEl, _i, _len, _results;
       container = this;
-      return this.componentContainers = _(this.components).map(function(component, index) {
+      this.componentContainers = _(this.components).map(function(component, index) {
         return applyDOMConfig.call(container, component, index);
       });
+      componentsWithClassBasedAssignment = this._().select(function(component) {
+        var _ref;
+        return ((_ref = component.container) != null ? _ref.match('.') : void 0) && container.$(component.container).length > 0;
+      });
+      if (componentsWithClassBasedAssignment.length > 0) {
+        _results = [];
+        for (_i = 0, _len = componentsWithClassBasedAssignment.length; _i < _len; _i++) {
+          specialComponent = componentsWithClassBasedAssignment[_i];
+          containerAssignment = _.uniqueId('container');
+          targetEl = container.$(specialComponent.container);
+          if (targetEl.length > 0) {
+            $(targetEl).attr('data-container-assignment', containerAssignment);
+            _results.push(specialComponent.container += "[data-container-assignment='" + containerAssignment + "']");
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
     },
     prepareComponents: function() {
       var _this = this;
@@ -3750,7 +3774,15 @@
       this.options = options;
       this.components || (this.components = this.pages || (this.pages = this.cards));
       Luca.core.Container.prototype.initialize.apply(this, arguments);
-      return this.setupHooks(this.hooks);
+      this.setupHooks(this.hooks);
+      return this.defer(this.simulateActivationEvent, this).until("after:render");
+    },
+    simulateActivationEvent: function() {
+      var c;
+      c = this.activeComponent();
+      if ((c != null) && this.$el.is(":visible")) {
+        return c != null ? c.trigger("activation", this, c, c) : void 0;
+      }
     },
     prepareComponents: function() {
       var _ref;
@@ -4348,11 +4380,12 @@
         if (Luca.util.resolve(this.name)) {
           throw "Attempting to override window." + this.name + " when it already exists";
         }
-        return $(function() {
+        $(function() {
           window[appName] = app;
           return app.boot();
         });
       }
+      return Luca.trigger("application:available", this);
     },
     activeView: function() {
       var active;
@@ -4425,7 +4458,7 @@
           _this.state.set({
             active_section: current.name
           });
-          return app.trigger("controller:change");
+          return app.trigger("controller:change", previous.name, current.name);
         });
       }
       return (_ref2 = this.getMainController()) != null ? _ref2.each(function(component) {
@@ -4436,7 +4469,7 @@
             _this.state.set({
               active_sub_section: current.name
             });
-            return app.trigger("action:change");
+            return app.trigger("action:change", previous.name, current.name);
           });
         }
       }) : void 0;
@@ -4485,14 +4518,24 @@
       }
     },
     setupRouter: function() {
-      var app, routerClass;
-      app = this;
-      if (_.isString(this.router)) {
-        routerClass = Luca.util.resolve(this.router);
-        this.router = new routerClass({
-          app: app
-        });
+      var action, endpoint, fn, page, routePattern, routerClass, routerConfig, _ref, _ref2;
+      if (!(this.router != null) && !(this.routes != null)) return;
+      routerClass = Luca.Router;
+      if (_.isString(this.router)) routerClass = Luca.util.resolve(this.router);
+      routerConfig = routerClass.prototype;
+      routerConfig.routes || (routerConfig.routes = {});
+      routerConfig.app = this;
+      if (_.isObject(this.routes)) {
+        _ref = this.routes;
+        for (routePattern in _ref) {
+          endpoint = _ref[routePattern];
+          _ref2 = endpoint.split(' '), page = _ref2[0], action = _ref2[1];
+          fn = _.uniqueId(page);
+          routerConfig[fn] = Luca.Application.routeTo(page).action(action);
+          routerConfig.routes[routePattern] = fn;
+        }
       }
+      this.router = new routerClass(routerConfig);
       if (this.router && this.autoStartHistory) {
         if (this.autoStartHistory === true) {
           this.autoStartHistory = "before:render";
@@ -4530,41 +4573,43 @@
       first = _(pages).first();
       callback = void 0;
       specifiedAction = void 0;
-      return routeHelper = function() {
-        var action, args, index, nextItem, page, path, routeHandler, target, _i, _len, _ref;
+      console.log("Generating Route To", pages);
+      routeHelper = function() {
+        var action, args, index, nextItem, page, path, target, _i, _len, _results;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         path = this.app || Luca();
         index = 0;
         if (pages.length === 1 && (target = Luca(first))) {
           pages = target.controllerPath();
         }
+        _results = [];
         for (_i = 0, _len = pages.length; _i < _len; _i++) {
           page = pages[_i];
           if (!(_.isString(page))) continue;
           nextItem = pages[++index];
-          action = void 0;
-          if (_.isFunction(nextItem)) {
-            action = nextItem;
-          } else if (_.isObject(nextItem) && (nextItem.action != null)) {
-            action = nextItem.action;
-          } else if (page === last && (routeHandler = (_ref = Luca(last)) != null ? _ref.routeHandler : void 0)) {
-            action = Luca.util.read(routeHandler);
+          target = Luca(page);
+          if (page === last && (target.routeHandler != null)) {
+            callback = target.routeHandler;
           }
-          if (_.isString(action)) {
-            callback = function() {
-              return this[action].apply(this, args);
-            };
+          if (_.isFunction(nextItem)) callback = nextItem;
+          if (_.isObject(nextItem) && (action = nextItem.action && (target[action] != null))) {
+            callback = _.bind(target[action], target);
           }
-          if (_.isFunction(action)) callback = nextItem;
-          path = path.navigate_to(page, callback);
+          _results.push(path = path.navigate_to(page, function() {
+            return callback != null ? callback.apply(target, args) : void 0;
+          }));
         }
-        routeHelper.action = function(action) {
-          return pages.push({
-            action: action
+        return _results;
+      };
+      routeHelper.action = function(action) {
+        if (action != null) {
+          pages.push({
+            action: (specifiedAction = action)
           });
-        };
+        }
         return routeHelper;
       };
+      return routeHelper;
     },
     startHistory: function() {
       return Backbone.history.start();
@@ -4811,7 +4856,7 @@
         _this.state.set({
           active_section: current.name
         });
-        if (_.isFunction(callback)) return callback.apply(current);
+        if (_.isFunction(callback)) return callback.call(current);
       });
       return this.find(section);
     }
@@ -5239,19 +5284,21 @@
       if (_.isUndefined(this.retainValue)) return this.retainValue = true;
     },
     afterInitialize: function() {
-      var _ref;
+      var _ref, _ref2, _ref3;
       if ((_ref = this.collection) != null ? _ref.data : void 0) {
         this.valueField || (this.valueField = "id");
         this.displayField || (this.displayField = "name");
         this.parseData();
       }
       try {
-        this.configure_collection();
+        this.configure_collection(this.setAsDeferrable);
       } catch (e) {
         console.log("Error Configuring Collection", this, e.message);
       }
-      this.collection.bind("before:fetch", this.beforeFetch);
-      return this.collection.bind("reset", this.populateOptions);
+      if ((_ref2 = this.collection) != null) {
+        _ref2.bind("before:fetch", this.beforeFetch);
+      }
+      return (_ref3 = this.collection) != null ? _ref3.bind("reset", this.populateOptions) : void 0;
     },
     parseData: function() {
       var _this = this;
@@ -5268,11 +5315,11 @@
       return this.input || (this.input = this.$('select').eq(0));
     },
     afterRender: function() {
-      var _ref, _ref2;
+      var _ref, _ref2, _ref3;
       if (((_ref = this.collection) != null ? (_ref2 = _ref.models) != null ? _ref2.length : void 0 : void 0) > 0) {
         return this.populateOptions();
       } else {
-        return this.collection.trigger("reset");
+        return (_ref3 = this.collection) != null ? _ref3.trigger("reset") : void 0;
       }
     },
     setValue: function(value) {

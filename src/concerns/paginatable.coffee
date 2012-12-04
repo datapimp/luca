@@ -38,12 +38,10 @@ Luca.concerns.Paginatable =
       filter = _.clone( @getQuery() )
       options = _.clone( @getQueryOptions() )
 
-      filter.limit = options.limit if options.limit?
-      filter.page = options.page if options.page?
-      filter.sortBy = options.sortBy if options.sortBy?
+      prepared = @prepareRemoteFilter(filter, options)
 
       if @isRemote()  
-        @collection.applyFilter(filter, remote: true)
+        @collection.applyFilter(prepared, remote: true)
       else
         @trigger "refresh" 
 

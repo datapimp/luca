@@ -214,3 +214,7 @@
   - Luca.onReady is now the preferred way of launching the application.
   - Added Luca.Application.routeTo, Luca.Application.controller 
     route building helpers
+
+0.9.8
+  - Added experimental ability to integrate router into the application itself, via the @routes property
+  - Temporary fix for double rendering bug in containers which had css class based assignments on their containers.

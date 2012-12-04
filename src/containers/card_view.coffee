@@ -43,6 +43,14 @@ component.defaults
     Luca.core.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
 
+    @defer( @simulateActivationEvent, @ ).until("after:render")
+
+  simulateActivationEvent: ()->
+    c = @activeComponent()
+
+    if c? and @$el.is(":visible")
+      c?.trigger "activation", @, c, c 
+
   prepareComponents: ()->
     Luca.core.Container::prepareComponents?.apply(@, arguments)
     @componentElements().hide()

@@ -54,7 +54,6 @@ container.defines
 
     @setupHooks( Luca.core.Container::hooks )
 
-
     validateContainerConfiguration(@)
 
     Luca.View::initialize.apply @, arguments
@@ -121,6 +120,24 @@ container.defines
     container = @
     @componentContainers = _( @components ).map (component, index)->
       applyDOMConfig.call(container, component, index)
+
+    componentsWithClassBasedAssignment = @_().select (component)->
+      component.container?.match('.') and container.$( component.container ).length > 0
+
+    # TEMP / HACK / Workaround
+    #
+    # Containers with components assigned to .class-based-containers
+    # seem to get double rendered in the renderComponents() method.
+    #
+    # So here I am uniquely identifying the containers in a way that is not possible
+    # in the templates ( since we want to be able to inherit templates and component assignments )
+    if componentsWithClassBasedAssignment.length > 0
+      for specialComponent in componentsWithClassBasedAssignment
+        containerAssignment = _.uniqueId('container')
+        targetEl = container.$( specialComponent.container )
+        if targetEl.length > 0
+          $(targetEl).attr('data-container-assignment', containerAssignment)
+          specialComponent.container += "[data-container-assignment='#{ containerAssignment }']"
 
   prepareComponents: ()->
     container = @

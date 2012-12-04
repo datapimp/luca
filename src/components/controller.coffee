@@ -26,7 +26,7 @@ controller.publicInterface
     @activate section, false, (activator, previous,current)=>
       @state.set(active_section: current.name )
       if _.isFunction( callback )
-        callback.apply(current)
+        callback.call(current)
 
     # return the section we are navigating to
     @find(section)

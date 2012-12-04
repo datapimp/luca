@@ -8,8 +8,7 @@ Luca.concerns.Deferrable =
     if _.isString( @collection ) and collectionManager = Luca.CollectionManager?.get()
       @collection = collectionManager.getOrCreate(@collection)
 
-    # if there is already an instantiated backbone collection don't do anything
-    unless @collection and _.isFunction( @collection.fetch ) and _.isFunction( @collection.reset )
+    if _.isObject(@collection) and not Luca.isBackboneCollection(@collection) 
       @collection = new Luca.Collection( @collection.initial_set, @collection )
     
     if @collection?.deferrable_trigger

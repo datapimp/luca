@@ -35,12 +35,12 @@ selectField.defines
       @parseData()
 
     try
-      @configure_collection()
+      @configure_collection( @setAsDeferrable )
     catch e
       console.log "Error Configuring Collection", @, e.message
 
-    @collection.bind "before:fetch", @beforeFetch
-    @collection.bind "reset", @populateOptions
+    @collection?.bind "before:fetch", @beforeFetch
+    @collection?.bind "reset", @populateOptions
 
   # if the select field is configured with a data property
   # then parse that data into the proper format.  either
@@ -63,7 +63,7 @@ selectField.defines
     if @collection?.models?.length > 0
       @populateOptions()
     else
-      @collection.trigger("reset")
+      @collection?.trigger("reset")
 
   setValue: (value)->
     @currentValue = value

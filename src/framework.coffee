@@ -7,7 +7,7 @@
 # types of input which will return what the developer would expect given the
 # context it is used.
 lucaUtilityHelper = (payload, args...)->
-  unless payload?
+  if arguments.length is 0 
     return _( Luca.Application.instances ).values()?[0]
 
   if _.isString(payload) and result = Luca.cache(payload)
