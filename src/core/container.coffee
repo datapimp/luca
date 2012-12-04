@@ -122,7 +122,7 @@ container.defines
       applyDOMConfig.call(container, component, index)
 
     componentsWithClassBasedAssignment = @_().select (component)->
-      component.container?.match('.') and container.$( component.container ).length > 0
+      _.isString(component.container) and component.container?.match('.') and container.$( component.container ).length > 0
 
     # TEMP / HACK / Workaround
     #
