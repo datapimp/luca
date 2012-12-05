@@ -218,3 +218,4 @@
 0.9.8
   - Added experimental ability to integrate router into the application itself, via the @routes property
   - Temporary fix for double rendering bug in containers which had css class based assignments on their containers.
+  - Added experimental support for Luca.SocketManager

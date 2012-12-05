@@ -1,3 +1,47 @@
+# In order to maintain backward compatibility with older apps,
+# I feel compelled to keep around the old deferrable hack job that is in place.
+#
+# However, selectively, I will go through and upgrade the way 
+# render() gets wrapped on luca components, so that the API is easier 
+# to understand.
+
+describe 'Rendering Strategies', ->
+  Luca.View.renderStrategies.spy = sinon.spy()
+  Luca.View.renderStrategies.spec = (_userSpecified)->
+    _userSpecified.call(@)
+    @trigger "strategy:trigger"
+    @  
+
+  window.AlternativeRenderingStrategy = Luca.View.extend
+    renderStrategy: "spec"
+    render: ( window.strategySpy = sinon.spy() )
+
+  it "should use a different strategy", ->
+    view = new AlternativeRenderingStrategy(renderStrategy: "spy")
+    view.render()
+    expect( Luca.View.renderStrategies.spy ).toHaveBeenCalled()
+
+  it "should use a different strategy", ->
+    view = new AlternativeRenderingStrategy()
+    view.render()
+    expect( view ).toHaveTriggered("strategy:trigger")
+
+  it "should call the user specified method", ->
+    view = new AlternativeRenderingStrategy()
+    view.render()
+    expect( window.strategySpy ).toHaveBeenCalled()
+
+# The improved rendering strategy is just that a view should be able
+# to get rendered(), fire its beforeRender hooks, and then defer the
+# 'expensive' part of the render 
+
+describe 'The Improved Rendering Strategy', ->
+  window.ImprovedRenderer = Luca.View.extend 
+    renderStrategy: "improved"    
+
+  it "should pause rendering if configured to be deferrable", ->
+    view = new ImprovedRenderer()
+
 describe "Luca.View", ->
   it "should be defined", ->
     expect(Luca.View).toBeDefined()

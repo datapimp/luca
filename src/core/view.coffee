@@ -109,12 +109,9 @@ Luca.View._originalExtend = Backbone.View.extend
 #
 # Being able to defer rendering until the firing of an event on another object
 # is something that does ask for some syntactic sugar though, so need to rethink.
-Luca.View.renderWrapper = (definition)->
-  _base = definition.render
 
-  _base ||= Luca.View::$attach
-
-  definition.render = ()->
+Luca.View.renderStrategies = 
+  legacy: ( _userSpecifiedMethod )->
     view = @
     # if a view has a deferrable property set
 
@@ -128,7 +125,7 @@ Luca.View.renderWrapper = (definition)->
       trigger = if @deferrable_event then @deferrable_event else Luca.View.deferrableEvent 
 
       deferred = ()->
-        _base.call(view)
+        _userSpecifiedMethod.call(view)
         view.trigger("after:render", view)
 
       view.defer(deferred).until(target, trigger)
@@ -147,10 +144,44 @@ Luca.View.renderWrapper = (definition)->
 
     else
       @trigger "before:render", @
-      _base.apply(@, arguments)
+      _userSpecifiedMethod.apply(@, arguments)
       @trigger "after:render", @
 
       return @
+
+  improved: (_userSpecifiedMethod)->
+    @trigger "before:render", @
+
+    deferred = ()->
+      _userSpecifiedMethod.apply(@, arguments)
+      @trigger "after:render", @            
+
+    if @deferrable
+      listenForEvent = if _.isString(@deferrable)
+        @deferrable
+      else if @deferrable is true
+        "collection:reset"
+
+      view.defer(deferred).until(@, listenForEvent)  
+    else
+      deferred.call(@)
+
+
+
+Luca.View.renderWrapper = (definition)->
+  _userSpecifiedMethod = definition.render
+
+  _userSpecifiedMethod ||= ()-> @trigger "empty:render"
+
+  definition.render = ()->
+    strategy = Luca.View.renderStrategies[ @renderStrategy ||= "legacy" ]
+
+    unless _.isFunction(strategy)
+      throw "Invalid rendering strategy.  Please see Luca.View.renderStrategies"
+
+    strategy.call(@, _userSpecifiedMethod)
+
+    @
 
   definition
 

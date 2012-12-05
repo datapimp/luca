@@ -245,7 +245,9 @@ container.defines
 
     _(@components).each (component)->
       try
+        component.trigger "before:attach"
         @$( component.container ).eq(0).append( component.el )
+        component.trigger "after:attach"
         component.render()
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component

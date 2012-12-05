@@ -105,7 +105,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.76",
+    VERSION: "0.9.77",
     core: {},
     collections: {},
     containers: {},
@@ -2359,11 +2359,8 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
   Luca.View._originalExtend = Backbone.View.extend;
 
-  Luca.View.renderWrapper = function(definition) {
-    var _base;
-    _base = definition.render;
-    _base || (_base = Luca.View.prototype.$attach);
-    definition.render = function() {
+  Luca.View.renderStrategies = {
+    legacy: function(_userSpecifiedMethod) {
       var autoTrigger, deferred, fn, target, trigger,
         _this = this;
       view = this;
@@ -2375,7 +2372,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         target || (target = this.deferrable);
         trigger = this.deferrable_event ? this.deferrable_event : Luca.View.deferrableEvent;
         deferred = function() {
-          _base.call(view);
+          _userSpecifiedMethod.call(view);
           return view.trigger("after:render", view);
         };
         view.defer(deferred).until(target, trigger);
@@ -2385,18 +2382,49 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
           target[this.deferrable_method || "fetch"].call(target);
         } else {
           fn = _.once(function() {
-            var _base2, _name;
-            return typeof (_base2 = _this.deferrable)[_name = _this.deferrable_method || "fetch"] === "function" ? _base2[_name]() : void 0;
+            var _base, _name;
+            return typeof (_base = _this.deferrable)[_name = _this.deferrable_method || "fetch"] === "function" ? _base[_name]() : void 0;
           });
           (this.deferrable_target || this).bind(this.deferrable_trigger, fn);
         }
         return this;
       } else {
         this.trigger("before:render", this);
-        _base.apply(this, arguments);
+        _userSpecifiedMethod.apply(this, arguments);
         this.trigger("after:render", this);
         return this;
       }
+    },
+    improved: function(_userSpecifiedMethod) {
+      var deferred, listenForEvent;
+      this.trigger("before:render", this);
+      deferred = function() {
+        _userSpecifiedMethod.apply(this, arguments);
+        return this.trigger("after:render", this);
+      };
+      if (this.deferrable) {
+        listenForEvent = _.isString(this.deferrable) ? this.deferrable : this.deferrable === true ? "collection:reset" : void 0;
+        return view.defer(deferred).until(this, listenForEvent);
+      } else {
+        return deferred.call(this);
+      }
+    }
+  };
+
+  Luca.View.renderWrapper = function(definition) {
+    var _userSpecifiedMethod;
+    _userSpecifiedMethod = definition.render;
+    _userSpecifiedMethod || (_userSpecifiedMethod = function() {
+      return this.trigger("empty:render");
+    });
+    definition.render = function() {
+      var strategy;
+      strategy = Luca.View.renderStrategies[this.renderStrategy || (this.renderStrategy = "legacy")];
+      if (!_.isFunction(strategy)) {
+        throw "Invalid rendering strategy.  Please see Luca.View.renderStrategies";
+      }
+      strategy.call(this, _userSpecifiedMethod);
+      return this;
     };
     return definition;
   };
@@ -3229,13 +3257,16 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       return map;
     },
     renderComponents: function(debugMode) {
+      var _this = this;
       this.debugMode = debugMode != null ? debugMode : "";
       this.debug("container render components");
       container = this;
       return _(this.components).each(function(component) {
         try {
-          this.$(component.container).eq(0).append(component.el);
-          return component.render();
+          component.trigger("before:attach");
+          _this.$(component.container).eq(0).append(component.el);
+          component.trigger("after:attach");
+          return component.render.call(component);
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
           if (_.isObject(e)) {
@@ -3732,41 +3763,41 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     function SocketManager(options) {
       this.options = options != null ? options : {};
       _.extend(Backbone.Events);
-      this.loadTransport();
+      this.loadProviderSource();
     }
 
     SocketManager.prototype.connect = function() {
       switch (this.options.provider) {
         case "socket.io":
-          return this.socket = io.connect(this.options.socket_host);
+          return this.socket = io.connect(this.options.host);
         case "faye.js":
-          return this.socket = new Faye.Client(this.options.socket_host);
+          return this.socket = new Faye.Client(this.options.host);
       }
     };
 
-    SocketManager.prototype.transportLoaded = function() {
+    SocketManager.prototype.providerSourceLoaded = function() {
       return this.connect();
     };
 
-    SocketManager.prototype.transport_script = function() {
+    SocketManager.prototype.providerSourceUrl = function() {
       switch (this.options.provider) {
         case "socket.io":
-          return "" + this.options.transport_host + "/socket.io/socket.io.js";
+          return "" + this.options.host + "/socket.io/socket.io.js";
         case "faye.js":
-          return "" + this.options.transport_host + "/faye.js";
+          return "" + this.options.host + "/faye.js";
       }
     };
 
-    SocketManager.prototype.loadTransport = function() {
+    SocketManager.prototype.loadProviderSource = function() {
       var script,
         _this = this;
       script = document.createElement('script');
       script.setAttribute("type", "text/javascript");
-      script.setAttribute("src", this.transport_script());
-      script.onload = this.transportLoaded;
+      script.setAttribute("src", this.providerSourceUrl());
+      script.onload = _.bind(this.providerSourceLoaded, this);
       if (Luca.util.isIE()) {
         script.onreadystatechange = function() {
-          if (script.readyState === "loaded") return _this.transportLoaded();
+          if (script.readyState === "loaded") return _this.providerSourceLoaded();
         };
       }
       return document.getElementsByTagName('head')[0].appendChild(script);
@@ -4424,6 +4455,8 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         templateContainer: "Luca.templates"
       }
     ],
+    useSocketManager: false,
+    socketManagerOptions: {},
     initialize: function(options) {
       var alreadyRunning, app, appName,
         _this = this;
@@ -4432,10 +4465,11 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       appName = this.name;
       alreadyRunning = typeof Luca.getApplication === "function" ? Luca.getApplication() : void 0;
       Luca.Application.registerInstance(this);
-      Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
       this.state = new Luca.Model(this.defaultState);
-      if (this.useController === true) this.setupMainController();
       this.setupCollectionManager();
+      this.setupSocketManager();
+      Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
+      if (this.useController === true) this.setupMainController();
       this.defer(function() {
         return app.render();
       }).until(this, "ready");
@@ -4593,6 +4627,9 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
       }
     },
+    setupSocketManager: function() {
+      return this.socket = new Luca.SocketManager(this.socketManagerOptions);
+    },
     setupRouter: function() {
       var action, endpoint, fn, page, routePattern, routerClass, routerConfig, _ref, _ref2;
       if (!(this.router != null) && !(this.routes != null)) return;
@@ -4649,7 +4686,6 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       first = _(pages).first();
       callback = void 0;
       specifiedAction = void 0;
-      console.log("Generating Route To", pages);
       routeHelper = function() {
         var action, args, index, nextItem, page, path, target, _i, _len, _results;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -4664,13 +4700,10 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
           if (!(_.isString(page))) continue;
           nextItem = pages[++index];
           target = Luca(page);
-          if (page === last && (target.routeHandler != null)) {
-            callback = target.routeHandler;
+          if (page === last) {
+            callback = (specifiedAction != null) && (target[specifiedAction] != null) ? _.bind(target[specifiedAction], target) : target.routeHandler != null ? target.routeHandler : void 0;
           }
-          if (_.isFunction(nextItem)) callback = nextItem;
-          if (_.isObject(nextItem) && (action = nextItem.action && (target[action] != null))) {
-            callback = _.bind(target[action], target);
-          }
+          callback || (callback = _.isFunction(nextItem) ? _.bind(nextItem, target) : _.isObject(nextItem) ? (action = nextItem.action && (target[action] != null)) ? _.bind(target[action], target) : void 0 : void 0);
           _results.push(path = path.navigate_to(page, function() {
             return callback != null ? callback.apply(target, args) : void 0;
           }));
@@ -4678,11 +4711,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         return _results;
       };
       routeHelper.action = function(action) {
-        if (action != null) {
-          pages.push({
-            action: (specifiedAction = action)
-          });
-        }
+        specifiedAction = action;
         return routeHelper;
       };
       return routeHelper;
@@ -5076,8 +5105,6 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       return true;
     }
   });
-
-  buttonField.register();
 
 }).call(this);
 (function() {

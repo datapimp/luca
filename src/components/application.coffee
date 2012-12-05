@@ -41,6 +41,7 @@ application.publicInterface
   # just pass a reference to the class you would like to use.
   collectionManagerClass: "Luca.CollectionManager"
 
+
   # Luca plugin apps are apps which mount onto existing
   # luca apps, and will not have the behavior of a main
   # app which acts as a singleton
@@ -88,6 +89,10 @@ application.publicInterface
     templateContainer: "Luca.templates"
   ]
 
+  # DOCUMENT
+  useSocketManager: false
+  socketManagerOptions: {}
+
   initialize: (@options={})->
     app             = @
     appName         = @name
@@ -95,20 +100,27 @@ application.publicInterface
 
     Luca.Application.registerInstance(@)
 
-    Luca.containers.Viewport::initialize.apply @, arguments
 
     @state = new Luca.Model( @defaultState )
+
+    # The Collection Manager is responsible for managing instances 
+    # of collections, usually to guarantee only a single collection is
+    # instantiated for a given resource, to maintain 'authoritative' 
+    # representations of models.
+    @setupCollectionManager()
+
+    # Socket Manager provides a bridge between remote pub/sub providers and 
+    # the backbone.events interface on various components in the system.
+    @setupSocketManager()
+
+    Luca.containers.Viewport::initialize.apply @, arguments
 
     # The Controller is the piece of the application that handles showing
     # and hiding 'pages' of the app.  The Application has a navigate_to
     # method which delegates to the controller, and allows you to navigate
     # to a given page, or component, by its name.  The controller integrates
     # with the state machine of the application
-    @setupMainController() if @useController is true
-
-    # The Collection Manager is responsible
-    @setupCollectionManager()
-
+    @setupMainController() if @useController is true 
     # we will render when all of the various components
     # which handle our data dependencies determine that
     # we are ready
@@ -148,6 +160,7 @@ application.publicInterface
         app.boot()
 
     Luca.trigger "application:available", @
+
   # @activeView() returns a reference to the instance of the view
   # which is currently monopolizing the viewport.
   #
@@ -293,6 +306,9 @@ application.privateInterface
     # if we can't, then we will have to create one ourselves
     unless _.isFunction(@collectionManager?.get)
       @collectionManager = new @collectionManagerClass( collectionManagerOptions )
+
+  setupSocketManager: ()->
+    @socket = new Luca.SocketManager(@socketManagerOptions)
 
   setupRouter: ()->
     return if not @router? and not @routes?

@@ -43,6 +43,8 @@ describe 'The Luca Container', ->
         ]
       ]
 
+    @container.on "before:attach", ()->
+      console.log "before attach", @, arguments
     @container.render()
 
   it "should create getter methods on the for components with roles", ->
