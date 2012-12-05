@@ -50,6 +50,9 @@ controller.classMethods
 
     list.reverse()
 
+controller.afterDefinition ()->
+  Luca.View::hooks.push "on:controller:activation"
+
 controller.defines
   additionalClassNames: 'luca-ui-controller'
   activeAttribute: "active-section"
@@ -70,6 +73,8 @@ controller.defines
 
     @_().each (component)->
       component.controllerPath = Luca.components.Controller.controllerPath
+
+    @on "after:render", @default, @
 
   each: (fn)->
     _( @components ).each (component)=> fn.call(@,component)

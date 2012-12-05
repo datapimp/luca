@@ -25,10 +25,6 @@ lucaUtilityHelper = (payload, args...)->
   if _.isObject(payload) and payload.ctype?
     return Luca.util.lazyComponent( payload )
 
-  if _.isObject(payload) and payload.defines and payload.extends
-    definition = payload.defines
-    inheritsFrom = payload.extends
-
   if _.isFunction( fallback = _(args).last() )
     return fallback()
 
@@ -47,6 +43,11 @@ _.extend Luca,
   registry:{}
   options: {}
   config: {}
+  logger: (trackerMessage)->
+    (args...)->
+      args.unshift( trackerMessage )
+      console.log(@, args)
+
   getHelper: ()->
     ()-> lucaUtilityHelper.apply(@, arguments)
 

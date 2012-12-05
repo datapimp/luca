@@ -188,11 +188,12 @@ Luca.util.launchers.developmentConsole = (name="luca-development-console")->
   @_lucaDevConsole = Luca name, ()=>
     @$el.append Backbone.View::make("div", id: "#{ name }-wrapper", class: "modal fade large")
 
-    console = new Luca.tools.DevelopmentConsole
+    dconsole = new Luca.tools.DevelopmentConsole
       name: name
       container: "##{ name }-wrapper"
 
-    console.render()
-    console.getCodeMirror().setHeight(602)
+    dconsole.render()
+    dconsole.getCodeMirror().setHeight(602)
 
   @_lucaDevConsole.show()
+  Luca(name)

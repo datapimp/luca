@@ -3,7 +3,7 @@
     __slice = Array.prototype.slice;
 
   lucaUtilityHelper = function() {
-    var args, definition, fallback, inheritsFrom, payload, result, _ref;
+    var args, fallback, payload, result, _ref;
     payload = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     if (arguments.length === 0) {
       return (_ref = _(Luca.Application.instances).values()) != null ? _ref[0] : void 0;
@@ -16,10 +16,6 @@
     if (payload instanceof jQuery && (result = Luca.find(payload))) return result;
     if (_.isObject(payload) && (payload.ctype != null)) {
       return Luca.util.lazyComponent(payload);
-    }
-    if (_.isObject(payload) && payload.defines && payload["extends"]) {
-      definition = payload.defines;
-      inheritsFrom = payload["extends"];
     }
     if (_.isFunction(fallback = _(args).last())) return fallback();
   };
@@ -41,6 +37,14 @@
     registry: {},
     options: {},
     config: {},
+    logger: function(trackerMessage) {
+      return function() {
+        var args;
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        args.unshift(trackerMessage);
+        return console.log(this, args);
+      };
+    },
     getHelper: function() {
       return function() {
         return lucaUtilityHelper.apply(this, arguments);
@@ -651,10 +655,9 @@
 
 }).call(this);
 (function() {
-  var DeferredBindingProxy,
-    __slice = Array.prototype.slice;
+  var __slice = Array.prototype.slice;
 
-  DeferredBindingProxy = (function() {
+  Luca.DeferredBindingProxy = (function() {
 
     function DeferredBindingProxy(object, operation, wrapWithUnderscore) {
       var fn;
@@ -691,10 +694,67 @@
 
   })();
 
+  Luca.EventRelayer = (function() {
+
+    function EventRelayer(options) {
+      if (options == null) options = {};
+      this.target = options.target, this.events = options.events, this.prefix = options.prefix, this.source = options.source;
+      if (this.events.length > 0 && this.target && this.source) this.setup();
+      this;
+    }
+
+    EventRelayer.prototype.prefixedBy = function(prefix) {
+      this.prefix = prefix != null ? prefix : "";
+      return this;
+    };
+
+    EventRelayer.prototype.from = function(source) {
+      this.source = source;
+      return this;
+    };
+
+    EventRelayer.prototype.to = function(target) {
+      this.target = target;
+      return this;
+    };
+
+    EventRelayer.prototype.setup = function(target) {
+      var eventId, prefix, _i, _len, _ref, _results;
+      this.target = target;
+      prefix = this.prefix;
+      target = this.target;
+      _ref = this.events;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        eventId = _ref[_i];
+        console.log("Binding to ", eventId, prefix, this.target.name, this.source.name);
+        _results.push(this.source.on(eventId, function() {
+          var args, trigger;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          trigger = _([prefix, eventId]).compact().join(':');
+          args.unshift(trigger);
+          return this.trigger.apply(this, args);
+        }, target));
+      }
+      return _results;
+    };
+
+    return EventRelayer;
+
+  })();
+
   Luca.Events = {
+    relays: function() {
+      var events;
+      events = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return new Luca.EventRelayer({
+        relayer: this,
+        events: events
+      });
+    },
     defer: function(operation, wrapWithUnderscore) {
       if (wrapWithUnderscore == null) wrapWithUnderscore = true;
-      return new DeferredBindingProxy(this, operation, wrapWithUnderscore);
+      return new Luca.DeferredBindingProxy(this, operation, wrapWithUnderscore);
     },
     once: function(trigger, callback, context) {
       var onceFn;
@@ -1198,9 +1258,20 @@
 
 }).call(this);
 (function() {
+  var relayAs,
+    __slice = Array.prototype.slice;
 
   Luca.concerns.CollectionEventBindings = {
     __initializer: function() {
+      Luca.concerns.CollectionEventBindings.__setup.call(this);
+      if (Luca.isBackboneCollection(this.collection)) {
+        this.collection.on("reset", relayAs("collection:reset"), this);
+        this.collection.on("add", relayAs("collection:add"), this);
+        this.collection.on("remove", relayAs("collection:remove"), this);
+        return this.collection.on("change", relayAs("collection:change"), this);
+      }
+    },
+    __setup: function() {
       var collection, eventTrigger, handler, key, manager, signature, _ref, _ref2, _results;
       if (_.isEmpty(this.collectionEvents)) return;
       manager = this.collectionManager || Luca.CollectionManager.get();
@@ -1222,6 +1293,15 @@
       }
       return _results;
     }
+  };
+
+  relayAs = function(eventName) {
+    return function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      args.unshift(eventName);
+      return this.trigger.apply(this, args);
+    };
   };
 
 }).call(this);
@@ -2320,15 +2400,24 @@
       }
     },
     improved: function(_userSpecifiedMethod) {
-      var deferred, listenForEvent;
+      var deferred,
+        _this = this;
       this.trigger("before:render", this);
       deferred = function() {
-        _userSpecifiedMethod.apply(this, arguments);
-        return this.trigger("after:render", this);
+        _userSpecifiedMethod.apply(_this, arguments);
+        return _this.trigger("after:render", _this);
       };
-      if (this.deferrable) {
-        listenForEvent = _.isString(this.deferrable) ? this.deferrable : this.deferrable === true ? "collection:reset" : void 0;
-        return view.defer(deferred).until(this, listenForEvent);
+      console.log("doing the improved one", this.deferrable);
+      if ((this.deferrable != null) && !_.isString(this.deferrable)) {
+        throw "Deferrable property is expected to be a event id";
+      }
+      if (_.isString(this.deferrable)) {
+        console.log("binding to " + this.deferrable + " on " + this.cid);
+        return view.on(this.deferrable, function() {
+          console.log("did the improved one");
+          deferred.call(view);
+          return view.unbind(listenForEvent, this);
+        });
       } else {
         return deferred.call(this);
       }
@@ -3181,16 +3270,15 @@
       return map;
     },
     renderComponents: function(debugMode) {
-      var _this = this;
       this.debugMode = debugMode != null ? debugMode : "";
       this.debug("container render components");
       container = this;
       return _(this.components).each(function(component) {
         try {
           component.trigger("before:attach");
-          _this.$(component.container).eq(0).append(component.el);
+          this.$(component.container).eq(0).append(component.el);
           component.trigger("after:attach");
-          return component.render.call(component);
+          return component.render();
         } catch (e) {
           console.log("Error Rendering Component " + (component.name || component.cid), component);
           if (_.isObject(e)) {
@@ -3422,7 +3510,6 @@
     return _(childrenWithGetter).each(function(component) {
       var _name;
       return container[_name = component.getter] || (container[_name] = function() {
-        console.log(component.getter, component, container);
         return component;
       });
     });
@@ -3695,7 +3782,7 @@
         case "socket.io":
           return this.socket = io.connect(this.options.host);
         case "faye.js":
-          return this.socket = new Faye.Client(this.options.host);
+          return this.socket = new Faye.Client(this.options.host + (this.options.namespace || ""));
       }
     };
 
@@ -4882,6 +4969,10 @@
       var _this = this;
       section || (section = this.defaultCard);
       this.activate(section, false, function(activator, previous, current) {
+        if (current.activatedByController !== true) {
+          current.trigger("controller:activation");
+          current.activatedByController = true;
+        }
         _this.state.set({
           active_section: current.name
         });
@@ -4908,6 +4999,10 @@
     }
   });
 
+  controller.afterDefinition(function() {
+    return Luca.View.prototype.hooks.push("on:controller:activation");
+  });
+
   controller.defines({
     additionalClassNames: 'luca-ui-controller',
     activeAttribute: "active-section",
@@ -4924,9 +5019,10 @@
       if (this.defaultCard == null) {
         throw "Controllers must specify a defaultCard property and/or the first component must have a name";
       }
-      return this._().each(function(component) {
+      this._().each(function(component) {
         return component.controllerPath = Luca.components.Controller.controllerPath;
       });
+      return this.on("after:render", this["default"], this);
     },
     each: function(fn) {
       var _this = this;

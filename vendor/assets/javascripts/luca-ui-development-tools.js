@@ -17608,6 +17608,7 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     },
     afterRender: function() {
       this.instance = CodeMirror(this.$bodyEl()[0], this.codemirrorOptions());
+      console.log("After Render On Code Mirror Field");
       this.setMaxHeight();
       return this.setHeight();
     },
@@ -18498,19 +18499,20 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/css"))
     var _this = this;
     if (name == null) name = "luca-development-console";
     this._lucaDevConsole = Luca(name, function() {
-      var console;
+      var dconsole;
       _this.$el.append(Backbone.View.prototype.make("div", {
         id: "" + name + "-wrapper",
         "class": "modal fade large"
       }));
-      console = new Luca.tools.DevelopmentConsole({
+      dconsole = new Luca.tools.DevelopmentConsole({
         name: name,
         container: "#" + name + "-wrapper"
       });
-      console.render();
-      return console.getCodeMirror().setHeight(602);
+      dconsole.render();
+      return dconsole.getCodeMirror().setHeight(602);
     });
-    return this._lucaDevConsole.show();
+    this._lucaDevConsole.show();
+    return Luca(name);
   };
 
 }).call(this);
