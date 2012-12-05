@@ -453,7 +453,6 @@ createGetterMethods = ()->
 
   _( childrenWithGetter ).each (component)->
     container[ component.getter ] ||= ()->
-      console.log component.getter, component, container
       component
 
 createMethodsToGetComponentsByRole = ()->

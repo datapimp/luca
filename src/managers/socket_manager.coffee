@@ -22,7 +22,7 @@ class Luca.SocketManager
       when "socket.io"
         @socket = io.connect( @options.host )
       when "faye.js"
-        @socket = new Faye.Client( @options.host )
+        @socket = new Faye.Client( @options.host + (@options.namespace || "") )
 
   providerSourceLoaded: ()-> 
     @connect()

@@ -50,6 +50,10 @@ describe 'The Controller Component', ->
     @controller.navigate_to("two")
     expect( @controller.activePage() ).toEqual 'two'
 
+  it "should track controller activation events", ->
+    two = @controller.navigate_to("two")
+    expect( two.activatedByController ).toBeTruthy()
+
   it "should define a controllerPath method on each page", ->
     expect( @controller.activeComponent().controllerPath ).toBeDefined()
 

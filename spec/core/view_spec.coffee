@@ -38,9 +38,29 @@ describe 'Rendering Strategies', ->
 describe 'The Improved Rendering Strategy', ->
   window.ImprovedRenderer = Luca.View.extend 
     renderStrategy: "improved"    
+    render: ()->
+      window.improvedRenderSpy.call(@)
 
-  it "should pause rendering if configured to be deferrable", ->
-    view = new ImprovedRenderer()
+  beforeEach ->
+    window.improvedRenderSpy = sinon.spy()
+
+  xit "should pause rendering if configured to be deferrable", ->
+    view = new ImprovedRenderer(deferrable:"wait:for:this")
+    view.render()
+    expect( view ).not.toHaveTriggered "after:render"
+
+  xit "should render normally if not configured to be deferrable", ->
+    view = new Luca.View(renderStrategy:"improved")
+    view.render()
+    expect( view ).toHaveTriggered("after:render")
+
+  xit "should resume rendering if configured to be deferrable", ->
+    view = new ImprovedRenderer(deferrable:"wait:for:this")
+    view.render()
+    view.trigger "wait:for:this"
+    expect( view ).toHaveTriggered("after:render")
+
+
 
 describe "Luca.View", ->
   it "should be defined", ->

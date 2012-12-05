@@ -24,7 +24,12 @@ controller.publicInterface
     # it triggers a first:activation event which gets relayed to all
     # child components in that view
     @activate section, false, (activator, previous,current)=>
+      unless current.activatedByController is true
+        current.trigger("controller:activation")
+        current.activatedByController = true
+
       @state.set(active_section: current.name )
+
       if _.isFunction( callback )
         callback.call(current)
 

@@ -152,17 +152,23 @@ Luca.View.renderStrategies =
   improved: (_userSpecifiedMethod)->
     @trigger "before:render", @
 
-    deferred = ()->
+
+    deferred = ()=>
       _userSpecifiedMethod.apply(@, arguments)
       @trigger "after:render", @            
 
-    if @deferrable
-      listenForEvent = if _.isString(@deferrable)
-        @deferrable
-      else if @deferrable is true
-        "collection:reset"
+    console.log "doing the improved one", @deferrable
 
-      view.defer(deferred).until(@, listenForEvent)  
+    if @deferrable? and not _.isString(@deferrable)
+      throw "Deferrable property is expected to be a event id"
+
+    if _.isString(@deferrable)
+      console.log "binding to #{ @deferrable } on #{ @cid }"
+      view.on @deferrable, ()->
+        console.log "did the improved one"
+        deferred.call(view)
+        view.unbind(listenForEvent, @)
+
     else
       deferred.call(@)
 
