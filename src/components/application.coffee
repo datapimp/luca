@@ -337,14 +337,14 @@ application.classInterface
   instances: {}
   registerInstance: (app)->
     Luca.Application.instances[ app.name ] = app
+
+  # Public: Luca.Application
   routeTo: (pages...)->
     last = _( pages ).last()
     first = _( pages ).first()
 
     callback = undefined    
     specifiedAction = undefined
-
-    console.log "Generating Route To", pages
 
     routeHelper = (args...)->
       path = @app || Luca()
@@ -359,20 +359,23 @@ application.classInterface
         nextItem = pages[++index]
         target = Luca(page)
 
-        if page is last and target.routeHandler?
-          callback = target.routeHandler  
+        if page is last 
+          callback = if specifiedAction? and target[ specifiedAction ]?
+            _.bind(target[ specifiedAction ], target)
+          else if target.routeHandler?
+            target.routeHandler  
 
-        if _.isFunction(nextItem)
-          callback = nextItem
-
-        if _.isObject(nextItem) and action = nextItem.action and target[action]?
-          callback = _.bind(target[action], target)
+        callback ||= if _.isFunction(nextItem)
+          _.bind(nextItem, target)
+        else if _.isObject(nextItem) 
+          if action = nextItem.action and target[action]?
+            _.bind(target[action], target)
 
         path = path.navigate_to page, ()->
           callback?.apply(target, args)
 
     routeHelper.action = (action)->
-      pages.push(action:(specifiedAction = action)) if action?
+      specifiedAction = action
       routeHelper
 
     routeHelper
