@@ -42,5 +42,3 @@ buttonField.privateInterface
 
   setValue: ()-> true
 
-
-buttonField.register()
