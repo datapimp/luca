@@ -8,24 +8,12 @@ controller.publicInterface
   activePage: ()-> 
     @activeSection()
 
-  # switch the active card of this controller
-  # optionally passing an onActivation callback
-  # will fire this callback in the context of
-  # the currently active card
   navigate_to: (section, callback)->
     section ||= @defaultCard
 
-    # activate is a method on Luca.containers.CardView which
-    # selects a component and makes it visible, hiding any
-    # other component which may be monopolizing the view at that time.
-
-    # after activation it triggers a after:card:switch event
-    # and if it is the first time that view is being activated,
-    # it triggers a first:activation event which gets relayed to all
-    # child components in that view
     @activate section, false, (activator, previous,current)=>
       unless current.activatedByController is true
-        current.trigger("controller:activation")
+        current.trigger("on:controller:activation")
         current.activatedByController = true
 
       @state.set(active_section: current.name )
