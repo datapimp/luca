@@ -1,6 +1,8 @@
-
 require 'rubygems'
 require 'bundler'
+require 'rails'
+require 'sprockets'
+
 Bundler.require
 
 require 'faker'
