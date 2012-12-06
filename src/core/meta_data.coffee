@@ -13,6 +13,7 @@ class MetaDataProxy
     _.defaults @meta, 
       "super class name" : ""
       "display name" : ""
+      "descendants": []
       "public interface" : []
       "public configuration" : [] 
       "private interface" : []
@@ -75,6 +76,8 @@ class MetaDataProxy
   hooks: ()->
     @meta["hooks"]
 
+  descendants: ()->
+    @meta["descendants"] 
   styleHierarchy: ()->
     list = _( @classHierarchy() ).map (cls)->
       Luca.util.toCssClass(cls, 'views', 'components', 'core','fields','containers')

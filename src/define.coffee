@@ -232,7 +232,7 @@ cd.defaultsTo = cd.enhance = cd.with = cd.definePrototype
 
 cd.publicMethods = cd.publicInterface
 cd.privateMethods = cd.privateInterface
-cd.classMethods = cd.classInterface
+cd.classProperites = cd.classMethods = cd.classInterface
 
 _.extend (Luca.define = ComponentDefinition.create),
   __definitions: []
@@ -263,6 +263,9 @@ Luca.extend = (superClassName, childName, properties={})->
 
   unless _.isFunction(superClass?.extend)
     throw "Error defining #{ childName }. #{ superClassName } is not a valid component to extend from"
+
+  superMetaData = Luca.registry.getMetaDataFor(superClassName)
+  superMetaData.descendants().push(childName)
 
   properties.displayName = childName
 
