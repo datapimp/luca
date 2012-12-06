@@ -125,6 +125,11 @@ class ComponentDefinition
     _.defaults((@_classProperties||={}), properties)
     @
 
+  configuration: (properties={})->
+    @meta("public configuration", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+    @
+
   publicConfiguration: (properties={})->
     @meta("public configuration", _.keys(properties) )
     _.defaults((@properties||={}), properties)
@@ -140,8 +145,23 @@ class ComponentDefinition
     _.defaults((@_classProperties||={}), properties)
     @
 
+  methods: (properties={})->
+    @meta("public interface", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+    @
+
+  public: (properties={})->
+    @meta("public interface", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+    @
+
   publicInterface: (properties={})->
     @meta("public interface", _.keys(properties) )
+    _.defaults((@properties||={}), properties)
+    @
+
+  private: (properties={})->
+    @meta("private interface", _.keys(properties) )
     _.defaults((@properties||={}), properties)
     @
 

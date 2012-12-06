@@ -29,7 +29,7 @@ setupComputedProperties = ()->
 
   for attr, dependencies of @computed
     @on "change:#{attr}", ()=>
-      @_computed[attr] = @[attr].call @
+      @_computed[attr] = @read(attr) 
 
     dependencies = dependencies.split(',') if _.isString(dependencies)
 

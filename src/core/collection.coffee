@@ -24,7 +24,6 @@ collection.defines
 
   initialize: (models=[], @options)->
     _.extend @, @options
-    @setupMethodCaching()
     @_reset()
 
     # By specifying a @cache_key property or method, you can instruct
@@ -93,6 +92,8 @@ collection.defines
     Luca.concern.setup.call(@)
     Luca.util.setupHooks.call(@, @hooks)
 
+    @setupMethodCaching()
+
     @trigger "after:initialize"
 
   # Luca.Collections will append a query string to the URL
@@ -157,29 +158,27 @@ collection.defines
 
     @
 
-  # If this collection is to be registered with some global collection
-  # tracker such as new Luca.CollectionManager() then we will register
-  # ourselves automatically
-  #
-  # To automatically register a collection with the registry, instantiate
-  # it with the registerWith property, which can either be a reference to
-  # the manager itself, or a string in case the manager isn't available
-  # at compile time
-  register: (collectionManager=Luca.CollectionManager.get(), key="", collection)->
-    throw "Can not register with a collection manager without a key" unless key.length >= 1
-    throw "Can not register with a collection manager without a valid collection manager" unless collectionManager?
+  register: (collectionManager, key="", collection)->
+    collectionManager ||= Luca.CollectionManager.get()
+
+    unless key.length >= 1
+      throw "Attempt to register a collection without specifying a key." 
+
 
     # by passing a string instead of a reference to an object, we can look up
     # that object only when necessary.  this prevents us from having to create
     # the manager instance before we can define our collections
     if _.isString( collectionManager )
-      collectionManager = Luca.util.nestedValue( collectionManager, (window || global) )
+      collectionManager = Luca.util.resolve( collectionManager )
 
-    throw "Could not register with collection manager" unless collectionManager
+    unless collectionManager?
+      throw "Attempt to register with a non existent collection manager." 
 
     if _.isFunction( collectionManager.add )
       return collectionManager.add(key, collection)
 
+    # If we don't want to use the CollectionManager class, and just want
+    # to cache collection instances on an object, we can do that too.
     if _.isObject( collectionManager )
       collectionManager[ key ] = collection
 
@@ -296,6 +295,8 @@ collection.defines
       @clearMethodCache(name)
 
   setupMethodCaching: ()->
+    return unless @cachedMethods?.length > 0 
+
     collection = @
     membershipEvents = ["reset","add","remove"]
     cache = @_methodCache = {}
@@ -310,7 +311,7 @@ collection.defines
 
       # wrap the collection method with a basic memoize operation
       collection[ method ] = ()->
-        cache[method].value ||= cache[method].original.apply collection, arguments
+        cache[method].value ||= cache[method].original.apply(collection, arguments)
 
       # bind to events on the collection, which once triggered, will
       # invalidate the cached value.  causing us to have to restore it
@@ -321,7 +322,9 @@ collection.defines
       dependencies = method.split(':')[1]
 
       if dependencies
-        for dependency in dependencies.split(",")
+        watchForChangesOn = dependencies.split(",")
+
+        _( watchForChangesOn ).each (dependency)->
           collection.bind "change:#{dependency}", ()->
             collection.clearMethodCache(method: method)
 
