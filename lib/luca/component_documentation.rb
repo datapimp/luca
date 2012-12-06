@@ -1,3 +1,9 @@
+#!/usr/bin/env ruby
+
+if __FILE__==$0
+  require 'pry'
+end
+
 class ComponentDocumentation
   attr_accessor :comments
   attr_accessor :arguments
@@ -18,7 +24,7 @@ class ComponentDocumentation
                 'src/components/fields']
 
   def initialize component_name
-    @component_class_path = component_name.split('.').map { |el| el.downcase! }
+    @component_class_path = component_name.split('.')
     read_file
   end
 
@@ -54,25 +60,36 @@ class ComponentDocumentation
 
   def read_file
     file_path = find_file
+    puts file_path
     @file_contents = File.open(file_path).read()
   end
 
   def find_file
-    FILE_PATHS.each do |path|
-      if File.exists?("#{base_path}/#{path}/#{@component_class_path.last}.coffee")
-        return "#{base_path}/#{path}/#{@component_class_path.last}.coffee"
-      end
+    path_elements = @component_class_path.inject(['']) do |memo, path|
+      memo.push underscore path
     end
-    nil
+    "#{base_path}/" + path_elements.join('/').gsub(/luca/,'src') + '.coffee'
   end
 
   def base_path
     "/Users/alexsmith/Development/luca"
   end
-  
+
+  def underscore string
+    string.gsub(/::/, '/').
+    gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+    gsub(/([a-z\d])([A-Z])/,'\1_\2').
+    tr("-", "_").
+    downcase
+  end
+
   def load_section
     @relevent_section = @file_contents.match(/(^\s*#.*$\n)*(\s*#{@method}\s*:\s*\(.*\)\s*-\>.*$)/)
   end
 
 
+end
+
+if __FILE__==$0
+  pry
 end
