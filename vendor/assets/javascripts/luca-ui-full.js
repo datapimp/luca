@@ -2044,8 +2044,11 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     __initializer: function() {
       var attribute, fn, handler, _ref,
         _this = this;
-      if (this.stateful !== true) return;
+      if (this.stateful == null) return;
       if ((this.state != null) && !Luca.isBackboneModel(this.state)) return;
+      if (_.isObject(this.stateful) && !(this.defaultState != null)) {
+        this.defaultState = this.stateful;
+      }
       this.state = new Backbone.Model(this.defaultState || {});
       this.set || (this.set = function() {
         return _this.state.set.apply(_this.state, arguments);

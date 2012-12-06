@@ -1,8 +1,11 @@
 Luca.concerns.StateModel =
   __initializer: ()->
-    return unless @stateful is true
+    return unless @stateful?
     return if @state? and not Luca.isBackboneModel(@state)
     
+    if _.isObject(@stateful) and not @defaultState?
+      @defaultState = @stateful 
+      
     @state = new Backbone.Model(@defaultState || {})
 
     @set ||= ()=> @state.set.apply(@state, arguments)
