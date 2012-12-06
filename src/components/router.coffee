@@ -1,4 +1,7 @@
-_.def("Luca.Router").extends("Backbone.Router").with
+#_.def("Luca.Router").extends("Backbone.Router").with
+router = Luca.register  "Luca.Router"
+router.extends          "Backbone.Router"
+router.defines
   routes:
     "" : "default"
 
