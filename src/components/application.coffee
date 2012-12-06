@@ -350,11 +350,38 @@ application.privateInterface
       $( document ).on( keyEvent, handler )
 
 application.classInterface
-  instances: {}
+  instances:{}
+
+  # Public: For purely informational purposes, describes the structure
+  # of the Application's controller views, and their nested controllers views.
+  pageHierarchy: ()->
+    app = Luca()
+    mainController = app.getMainController()
+
+    getTree = (node)->  
+      return {} unless node.components? or node.pages?
+
+      _( node.components || node.pages ).reduce (memo, page)->
+        memo[ page.name ] = page.name
+        memo[ page.name ] = getTree(page) if page.navigate_to?
+        memo
+      , {}
+
+    getTree( mainController )
+
+  # Private: registers the instance of the Luca.Appliction
+  # so that it is available via the Luca() helper, or through
+  # a call to Luca.Application.get() or Luca.getAppliction()
   registerInstance: (app)->
     Luca.Application.instances[ app.name ] = app
 
-  # Public: Luca.Application
+  # Private: Recursively navigates down the controller page hierarchy
+  # to the page you specify by name.  You can specify the 
+  # method which is to be called at the end of the chain.
+  # 
+  # This is used internally by the Application as it sets up
+  # the @routes property and uses it to configure the Luca.Router
+  # instance for your app.
   routeTo: (pages...)->
     last = _( pages ).last()
     first = _( pages ).first()
@@ -396,8 +423,13 @@ application.classInterface
 
     routeHelper
 
+  # Public: you can override Luca.Application.startHistory to 
+  # modify how Backbone.history.start is called.  This will get called
+  # by the Application instance in response to the @autoStartHistory property.
   startHistory: ()->
     Backbone.history.start()
+
+
 
 application.afterDefinition ()->
   Luca.routeHelper = Luca.Application.routeTo

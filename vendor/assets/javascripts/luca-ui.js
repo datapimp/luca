@@ -24,8 +24,9 @@
     return lucaUtilityHelper.apply(this, arguments);
   };
 
+  Luca.VERSION = '0.9.78';
+
   _.extend(Luca, {
-    VERSION: "0.9.78",
     core: {},
     collections: {},
     containers: {},
@@ -80,6 +81,8 @@
     SPACEBAR: 32,
     FORWARDSLASH: 191
   };
+
+  Luca.config.toolbarContainerClass = "toolbar-container";
 
   Luca.keyMap = Luca.config.keyMap = _(Luca.keys).inject(function(memo, value, symbol) {
     memo[value] = symbol.toLowerCase();
@@ -416,15 +419,16 @@
   var currentNamespace,
     __slice = Array.prototype.slice;
 
-  Luca.util.resolve = function(accessor, source_object) {
+  Luca.util.resolve = function(propertyReference, source_object) {
     var resolved;
+    if (!_.isString(propertyReference)) return propertyReference;
     try {
       source_object || (source_object = window || global);
-      resolved = _(accessor.split(/\./)).inject(function(obj, key) {
+      resolved = _(propertyReference.split(/\./)).inject(function(obj, key) {
         return obj = obj != null ? obj[key] : void 0;
       }, source_object);
     } catch (e) {
-      console.log("Error resolving", accessor, source_object);
+      console.log("Error resolving", propertyReference, source_object);
       throw e;
     }
     return resolved;
@@ -1278,7 +1282,7 @@
         if (!_.isFunction(handler)) {
           throw "Error registering application event " + eventTrigger + " on " + (this.name || this.cid);
         }
-        _results.push(app.on(eventTrigger, handler));
+        _results.push(app.on(eventTrigger, handler, this));
       }
       return _results;
     }
@@ -1313,7 +1317,7 @@
         if (_.isString(handler)) handler = this[handler];
         if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
         try {
-          _results.push(collection.on(eventTrigger, handler, collection));
+          _results.push(collection.on(eventTrigger, handler, this));
         } catch (e) {
           console.log("Error Binding To Collection in registerCollectionEvents", this);
           throw e;
@@ -1358,16 +1362,18 @@
 
   Luca.concerns.DomHelpers = {
     __initializer: function() {
-      var additional, additionalClasses, classes, cssClass, _i, _j, _len, _len2, _ref, _results;
+      var additional, additionalClasses, classes, cssClass, offset, span, _i, _j, _len, _len2, _ref, _results;
       additionalClasses = _(this.additionalClassNames || []).clone();
       if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
       if (_.isString(additionalClasses)) {
         additionalClasses = additionalClasses.split(" ");
       }
-      if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
-      if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
-      if (this.gridRowFluid) additionalClasses.push("row-fluid");
-      if (this.gridRow) additionalClasses.push("row");
+      if (span = this.gridSpan || this.span) additionalClasses.push("span" + span);
+      if (offset = this.gridOffset || this.offset) {
+        additionalClasses.push("offset" + offset);
+      }
+      if (this.gridRowFluid || this.rowFluid) additionalClasses.push("row-fluid");
+      if (this.gridRow || this.row) additionalClasses.push("row");
       if (additionalClasses == null) return;
       for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
         additional = additionalClasses[_i];
@@ -1967,8 +1973,11 @@
     __initializer: function() {
       var attribute, fn, handler, _ref,
         _this = this;
-      if (this.stateful !== true) return;
+      if (this.stateful == null) return;
       if ((this.state != null) && !Luca.isBackboneModel(this.state)) return;
+      if (_.isObject(this.stateful) && !(this.defaultState != null)) {
+        this.defaultState = this.stateful;
+      }
       this.state = new Backbone.Model(this.defaultState || {});
       this.set || (this.set = function() {
         return _this.state.set.apply(_this.state, arguments);
@@ -1995,7 +2004,7 @@
         _results = [];
         for (changed in _ref2) {
           value = _ref2[changed];
-          _results.push(_this.trigger("state:change:" + changed, value, state.previous(changed)));
+          _results.push(_this.trigger("state:change:" + changed, state, value, state.previous(changed)));
         }
         return _results;
       });
@@ -2961,53 +2970,23 @@
 
 }).call(this);
 (function() {
-  var attachToolbar;
+  var panel;
 
-  attachToolbar = function(config, targetEl) {
-    var action, container, hasBody, id, toolbar;
-    if (config == null) config = {};
-    config.orientation || (config.orientation = "top");
-    config.ctype || (config.ctype = this.toolbarType || "panel_toolbar");
-    id = "" + this.cid + "-tbc-" + config.orientation;
-    toolbar = Luca.util.lazyComponent(config);
-    container = this.make("div", {
-      "class": "toolbar-container " + config.orientation,
-      id: id
-    }, toolbar.render().el);
-    hasBody = this.bodyClassName || this.bodyTagName;
-    action = (function() {
-      switch (config.orientation) {
-        case "top":
-        case "left":
-          if (hasBody) {
-            return "before";
-          } else {
-            return "prepend";
-          }
-          break;
-        case "bottom":
-        case "right":
-          if (hasBody) {
-            return "after";
-          } else {
-            return "append";
-          }
-      }
-    })();
-    return (targetEl || this.$bodyEl())[action](container);
-  };
+  panel = Luca.register("Luca.components.Panel");
 
-  _.def("Luca.components.Panel")["extends"]("Luca.View")["with"]({
+  panel["extends"]("Luca.View");
+
+  panel.mixesIn("LoadMaskable");
+
+  panel.configuration({
     topToolbar: void 0,
     bottomToolbar: void 0,
     loadMask: false,
-    loadMaskTemplate: ["components/load_mask"],
-    loadMaskTimeout: 3000,
-    mixins: ["LoadMaskable"],
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.View.prototype.initialize.apply(this, arguments);
-    },
+    loadMaskTemplate: "components/load_mask",
+    loadMaskTimeout: 3000
+  });
+
+  panel.publicMethods({
     applyStyles: function(styles, body) {
       var setting, target, value;
       if (styles == null) styles = {};
@@ -3018,15 +2997,6 @@
         target.css(setting, value);
       }
       return this;
-    },
-    beforeRender: function() {
-      var _ref;
-      if ((_ref = Luca.View.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      if (this.styles != null) this.applyStyles(this.styles);
-      if (this.bodyStyles != null) this.applyStyles(this.bodyStyles, true);
-      return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
     },
     $bodyEl: function() {
       var bodyEl, className, element, newElement;
@@ -3040,10 +3010,10 @@
           "class": className,
           "data-auto-appended": true
         });
-        $(this.el).append(newElement);
+        this.$el.append(newElement);
         return this.$(this.bodyEl);
       }
-      return $(this.el);
+      return this.$el;
     },
     $wrap: function(wrapper) {
       if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
@@ -3065,6 +3035,18 @@
     },
     $append: function(content) {
       return this.$bodyEl().append(content);
+    }
+  });
+
+  panel.privateMethods({
+    beforeRender: function() {
+      var _ref;
+      if ((_ref = Luca.View.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (this.styles != null) this.applyStyles(this.styles);
+      if (this.bodyStyles != null) this.applyStyles(this.bodyStyles, true);
+      return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
     },
     renderToolbars: function() {
       var _this = this;
@@ -3080,8 +3062,46 @@
       if (config == null) config = {};
       config.parent = this;
       config.orientation = orientation;
-      return attachToolbar.call(this, config, config.targetEl);
+      return Luca.components.Panel.attachToolbar.call(this, config, config.targetEl || config.container);
     }
+  });
+
+  panel.classMethods({
+    attachToolbar: function(config, targetEl) {
+      var action, hasBody, toolbar, toolbarEl;
+      if (config == null) config = {};
+      config.orientation || (config.orientation = "top");
+      config.type || (config.type = config.ctype || (config.ctype = this.toolbarType || "panel_toolbar"));
+      config.id = "" + this.cid + "-tbc-" + config.orientation;
+      config.additionalClassNames = "" + Luca.config.toolbarContainerClass + " " + config.orientation;
+      toolbar = Luca.util.lazyComponent(config);
+      hasBody = this.bodyClassName || this.bodyTagName;
+      action = (function() {
+        switch (config.orientation) {
+          case "top":
+          case "left":
+            if (hasBody && !(targetEl != null ? targetEl.length : void 0) > 0) {
+              return "before";
+            } else {
+              return "prepend";
+            }
+            break;
+          case "bottom":
+          case "right":
+            if (hasBody && !(targetEl != null ? targetEl.length : void 0) > 0) {
+              return "after";
+            } else {
+              return "append";
+            }
+        }
+      })();
+      toolbarEl = (targetEl != null ? targetEl.length : void 0) > 0 ? this.$(targetEl) : this.$bodyEl();
+      return toolbarEl[action](toolbar.render().el);
+    }
+  });
+
+  panel.defines({
+    version: 2
   });
 
 }).call(this);
@@ -4724,6 +4744,20 @@
 
   application.classInterface({
     instances: {},
+    pageHierarchy: function() {
+      var app, getTree, mainController;
+      app = Luca();
+      mainController = app.getMainController();
+      getTree = function(node) {
+        if (!((node.components != null) || (node.pages != null))) return {};
+        return _(node.components || node.pages).reduce(function(memo, page) {
+          memo[page.name] = page.name;
+          if (page.navigate_to != null) memo[page.name] = getTree(page);
+          return memo;
+        }, {});
+      };
+      return getTree(mainController);
+    },
     registerInstance: function(app) {
       return Luca.Application.instances[app.name] = app;
     },
@@ -5685,39 +5719,49 @@
 
   formView["extends"]("Luca.core.Container");
 
+  formView.mixesIn("LoadMaskable");
+
   formView.triggers("before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error");
 
-  formView.defines({
+  formView.publicConfiguration({
+    labelAlign: void 0,
+    fieldLayoutClass: void 0,
+    legend: "",
+    toolbar: true,
+    toolbarConfig: void 0,
+    defaultToolbar: "Luca.components.FormView.defaultToolbar",
+    loadMask: true,
+    well: false,
+    searchForm: false,
+    horizontalForm: false,
+    inlineForm: false
+  });
+
+  formView.privateConfiguration({
     tagName: 'form',
-    className: 'luca-ui-form-view',
+    stateful: true,
     events: {
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
     },
-    toolbar: true,
-    legend: "",
-    bodyClassName: "form-view-body",
-    version: 1,
+    bodyClassName: "form-view-body"
+  });
+
+  formView.privateMethods({
     initialize: function(options) {
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.config.enableBoostrap;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       this.components || (this.components = this.fields);
       _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
-      this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
       this.applyStyleClasses();
-      if (this.toolbar !== false && (!this.topToolbar && !this.bottomToolbar)) {
-        if (this.toolbar === "both" || this.toolbar === "top") {
-          this.topToolbar = this.getDefaultToolbar();
-        }
-        if (this.toolbar !== "top") {
-          return this.bottomToolbar = this.getDefaultToolbar();
-        }
-      }
+      return Luca.components.FormView.setupToolbar.call(this);
     },
     getDefaultToolbar: function() {
-      return Luca.components.FormView.defaultFormViewToolbar;
+      var config;
+      config = this.toolbarConfig || this.defaultToolbar;
+      return Luca.util.resolve(Luca.util.read(config));
     },
     applyStyleClasses: function() {
       if (Luca.config.enableBoostrap) this.applyBootstrapStyleClasses();
@@ -5746,17 +5790,18 @@
       if (this.hasModel()) return this.submit();
     },
     afterComponents: function() {
-      var _ref,
-        _this = this;
+      var form, _ref;
       if ((_ref = Luca.core.Container.prototype.afterComponents) != null) {
         _ref.apply(this, arguments);
       }
+      form = this;
       return this.eachField(function(field) {
+        var _this = this;
         field.getForm = function() {
-          return _this;
+          return form;
         };
         return field.getModel = function() {
-          return _this.currentModel();
+          return form.currentModel();
         };
       });
     },
@@ -5931,25 +5976,41 @@
     }
   });
 
-  Luca.components.FormView.defaultFormViewToolbar = {
-    buttons: [
-      {
-        icon: "remove-sign",
-        label: "Reset",
-        eventId: "click:reset",
-        className: "reset-button",
-        align: 'right'
-      }, {
-        icon: "ok-sign",
-        white: true,
-        label: "Save Changes",
-        eventId: "click:submit",
-        color: "success",
-        className: 'submit-button',
-        align: 'right'
+  formView.classInterface({
+    setupToolbar: function() {
+      if (this.toolbar !== false && (!this.topToolbar && !this.bottomToolbar)) {
+        if (this.toolbar === "both" || this.toolbar === "top") {
+          this.topToolbar = _.clone(this.getDefaultToolbar());
+        }
+        if (this.toolbar !== "top") {
+          return this.bottomToolbar = _.clone(this.getDefaultToolbar());
+        }
       }
-    ]
-  };
+    },
+    defaultToolbar: {
+      buttons: [
+        {
+          icon: "remove-sign",
+          label: "Reset",
+          eventId: "click:reset",
+          className: "reset-button",
+          align: 'right'
+        }, {
+          icon: "ok-sign",
+          white: true,
+          label: "Save Changes",
+          eventId: "click:submit",
+          color: "success",
+          className: 'submit-button',
+          align: 'right'
+        }
+      ]
+    }
+  });
+
+  formView.defines({
+    version: 2
+  });
 
 }).call(this);
 (function() {
@@ -6195,8 +6256,13 @@
 
 }).call(this);
 (function() {
+  var loadMask;
 
-  _.def("Luca.components.LoadMask")["extends"]("Luca.View")["with"]({
+  loadMask = Luca.register("Luca.components.LoadMask");
+
+  loadMask["extends"]("Luca.View");
+
+  loadMask.defines({
     className: "luca-ui-load-mask",
     bodyTemplate: "components/load_mask"
   });
@@ -6279,8 +6345,13 @@
 
 }).call(this);
 (function() {
+  var navBar;
 
-  _.def("Luca.components.NavBar")["extends"]("Luca.View")["with"]({
+  navBar = Luca.register("Luca.components.NavBar");
+
+  navBar["extends"]("Luca.View");
+
+  navBar.defines({
     fixed: true,
     position: 'top',
     className: 'navbar',
@@ -6306,8 +6377,13 @@
 
 }).call(this);
 (function() {
+  var pageController;
 
-  _.def("Luca.PageController")["extends"]("Luca.components.Controller")["with"]({
+  pageController = Luca.register("Luca.PageController");
+
+  pageController["extends"]("Luca.components.Controller");
+
+  pageController.defines({
     version: 2
   });
 
@@ -6643,8 +6719,13 @@
 
 }).call(this);
 (function() {
+  var router;
 
-  _.def("Luca.Router")["extends"]("Backbone.Router")["with"]({
+  router = Luca.register("Luca.Router");
+
+  router["extends"]("Backbone.Router");
+
+  router.defines({
     routes: {
       "": "default"
     },
@@ -6681,20 +6762,30 @@
 
 }).call(this);
 (function() {
-  var make;
+  var tableView;
 
-  _.def("Luca.components.TableView")["extends"]("Luca.components.CollectionView")["with"]({
+  tableView = Luca.register("Luca.components.TableView");
+
+  tableView["extends"]("Luca.components.CollectionView");
+
+  tableView.publicConfiguration({
+    widths: [],
+    columns: [],
+    emptyText: "There are no results to display"
+  });
+
+  tableView.privateConfiguration({
     additionalClassNames: "table",
     tagName: "table",
     bodyTemplate: "table_view",
     bodyTagName: "tbody",
     bodyClassName: "table-body",
-    itemTagName: "tr",
     stateful: true,
-    observeChanges: true,
-    widths: [],
-    columns: [],
-    emptyText: "There are no results to display",
+    itemTagName: "tr",
+    observeChanges: true
+  });
+
+  tableView.privateMethods({
     itemRenderer: function(item, model) {
       return Luca.components.TableView.rowRenderer.call(this, item, model);
     },
@@ -6730,54 +6821,54 @@
     }
   });
 
-  make = Backbone.View.prototype.make;
-
-  Luca.components.TableView.renderHeader = function(columns, targetElement) {
-    var column, content, index, th, _i, _len, _results;
-    index = 0;
-    content = (function() {
-      var _i, _len, _results;
+  tableView.classMethods({
+    renderHeader: function(columns, targetElement) {
+      var column, content, index, th, _i, _len, _results;
+      index = 0;
+      content = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = columns.length; _i < _len; _i++) {
+          column = columns[_i];
+          _results.push("<th data-col-index='" + (index++) + "'>" + column.header + "</th>");
+        }
+        return _results;
+      })();
+      this.$(targetElement).append("<tr>" + (content.join('')) + "</tr>");
+      index = 0;
       _results = [];
       for (_i = 0, _len = columns.length; _i < _len; _i++) {
         column = columns[_i];
-        _results.push("<th data-col-index='" + (index++) + "'>" + column.header + "</th>");
+        if (!(column.width != null)) continue;
+        th = this.$("th[data-col-index='" + (index++) + "']", targetElement);
+        _results.push(th.css('width', column.width));
       }
       return _results;
-    })();
-    this.$(targetElement).append("<tr>" + (content.join('')) + "</tr>");
-    index = 0;
-    _results = [];
-    for (_i = 0, _len = columns.length; _i < _len; _i++) {
-      column = columns[_i];
-      if (!(column.width != null)) continue;
-      th = this.$("th[data-col-index='" + (index++) + "']", targetElement);
-      _results.push(th.css('width', column.width));
+    },
+    rowRenderer: function(item, model, index) {
+      var colIndex, columnConfig, _i, _len, _ref, _results;
+      colIndex = 0;
+      _ref = this.columns;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        columnConfig = _ref[_i];
+        _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, colIndex++));
+      }
+      return _results;
+    },
+    renderColumn: function(column, item, model, index) {
+      var cellValue;
+      cellValue = model.read(column.reader);
+      if (_.isFunction(column.renderer)) {
+        cellValue = column.renderer.call(this, cellValue, model, column);
+      }
+      return Backbone.View.prototype.make("td", {
+        "data-col-index": index
+      }, cellValue);
     }
-    return _results;
-  };
+  });
 
-  Luca.components.TableView.rowRenderer = function(item, model, index) {
-    var colIndex, columnConfig, _i, _len, _ref, _results;
-    colIndex = 0;
-    _ref = this.columns;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      columnConfig = _ref[_i];
-      _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, colIndex++));
-    }
-    return _results;
-  };
-
-  Luca.components.TableView.renderColumn = function(column, item, model, index) {
-    var cellValue;
-    cellValue = model.read(column.reader);
-    if (_.isFunction(column.renderer)) {
-      cellValue = column.renderer.call(this, cellValue, model, column);
-    }
-    return make("td", {
-      "data-col-index": index
-    }, cellValue);
-  };
+  tableView.register();
 
 }).call(this);
 (function() {

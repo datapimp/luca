@@ -89,6 +89,8 @@ Luca.keys = Luca.config.keys =
   SPACEBAR: 32
   FORWARDSLASH: 191
 
+Luca.config.toolbarContainerClass = "toolbar-container"
+
 # build a reverse map
 Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo[value] = symbol.toLowerCase()

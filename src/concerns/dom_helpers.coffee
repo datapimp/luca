@@ -7,16 +7,16 @@ Luca.concerns.DomHelpers =
     if _.isString additionalClasses
       additionalClasses = additionalClasses.split(" ")
 
-    if @gridSpan
-      additionalClasses.push "span#{ @gridSpan }"
+    if span = @gridSpan || @span
+      additionalClasses.push "span#{ span }"
 
-    if @gridOffset
-      additionalClasses.push "offset#{ @gridOffset }"
+    if offset = @gridOffset || @offset
+      additionalClasses.push "offset#{ offset }"
 
-    if @gridRowFluid
+    if @gridRowFluid || @rowFluid
       additionalClasses.push "row-fluid"
 
-    if @gridRow
+    if @gridRow || @row
       additionalClasses.push "row"
 
     return unless additionalClasses?

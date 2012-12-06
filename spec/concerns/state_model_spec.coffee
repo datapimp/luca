@@ -3,8 +3,7 @@ describe 'The State Model Concern', ->
   view.extends          "Luca.View"
   view.mixesIn          "StateModel"
   view.defines
-    stateful: true
-    defaultState:
+    stateful:
       key1: "val1"
       key2: "val2"
 

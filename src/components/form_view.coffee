@@ -1,7 +1,14 @@
-#_.def("Luca.components.FormView").extends('Luca.core.Container').with
-
+# The FormView component is a special container which provides functionality
+# around the components inside which extend from the Luca.core.Field class.
+#
+# The FormView component integrates well with Luca.Models and can control
+# the attributes on that model, respond to validations, and submit changes
+# to an API. 
 formView = Luca.register        "Luca.components.FormView"
+
 formView.extends                "Luca.core.Container"
+
+formView.mixesIn                "LoadMaskable"
 
 formView.triggers               "before:submit",
                                 "before:reset",
@@ -18,23 +25,67 @@ formView.triggers               "before:submit",
                                 "after:submit:error"
 
 
-formView.defines
+
+formView.publicConfiguration
+  # should the label display above, or to the
+  # side of the fields
+  labelAlign: undefined
+
+  # specifying this class gives you the ability
+  # to layout the nested fields accordingly.
+  fieldLayoutClass: undefined
+
+  # should this form have a legend?
+  legend: ""
+
+  # available options are true, false, "top", "bottom", or "both"
+  # the component configuration for the toolbar can be controlled
+  # by specifying a name of a property that contains a valid
+  # component reference ( either hash w/ type reference )
+  toolbar: true
+
+  # the name of the property which contains the configuration
+  # for the buttons that will go in this toolbar.  Specify
+  # a string so it can be lazily evaluated at initialization.
+  toolbarConfig: undefined
+
+  # the default toolbar definition that will be created if
+  # the form is configured to have a toolbar on it.  this value
+  # will be resolved at initialization, so pass a string identifying
+  # an object in memory.
+  defaultToolbar: "Luca.components.FormView.defaultToolbar"
+
+  # if this form will be submitting values to a RESTful API and you
+  # want to show a loading indicator or progress bar, configure the
+  # @loadMask property.
+  loadMask: true
+
+  # Applies the twitter bootstrap well class to this form.
+  # @$el.addClass('well') if @well
+  well: false 
+
+  # Applies the twitter bootstrap form-search class to this form.
+  # @$el.addClass('form-search') if @searchForm
+  searchForm: false
+
+  # Applies the twitter bootstrap horizontal form class to this form.
+  # @$el.addClass('form-horizontal') if @horizontalForm
+  horizontalForm: false
+
+  # Applies the twitter bootstrap inline form class to this form.
+  # @$el.addClass('form-inline') if @inlineForm
+  inlineForm: false
+
+formView.privateConfiguration
   tagName: 'form'
-
-  className: 'luca-ui-form-view'
-
+  stateful: true
   events:
     "click .submit-button" : "submitHandler"
     "click .reset-button" : "resetHandler"
 
-  toolbar: true
-
-  legend: ""
-
   bodyClassName: "form-view-body"
 
-  version: 1 
-
+formView.privateMethods
   initialize: (@options={})->
     @loadMask = Luca.config.enableBoostrap unless @loadMask?
 
@@ -43,18 +94,17 @@ formView.defines
     @components ||= @fields
 
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
-    @state ||= new Backbone.Model
 
     @setupHooks( @hooks )
 
     @applyStyleClasses()
 
-    if @toolbar isnt false and (not @topToolbar and not @bottomToolbar)
-      @topToolbar = @getDefaultToolbar() if @toolbar is "both" or @toolbar is "top"
-      @bottomToolbar = @getDefaultToolbar() unless @toolbar is "top"
+    Luca.components.FormView.setupToolbar.call(@)
+
 
   getDefaultToolbar: ()->
-    Luca.components.FormView.defaultFormViewToolbar
+    config = @toolbarConfig || @defaultToolbar
+    Luca.util.resolve( Luca.util.read(config) )
 
   applyStyleClasses: ()->
     if Luca.config.enableBoostrap
@@ -86,9 +136,10 @@ formView.defines
   afterComponents: ()->
     Luca.core.Container::afterComponents?.apply(@, arguments)
 
-    @eachField (field)=>
-      field.getForm = ()=> @
-      field.getModel = ()=> @currentModel()
+    form = @
+    @eachField (field)->
+      field.getForm = ()=> form 
+      field.getModel = ()=> form.currentModel()
 
   eachField: (iterator)->
     _( @getFields() ).map( iterator )
@@ -261,22 +312,32 @@ formView.defines
     @$('.alert.alert-error').remove()
     @flash Luca.template("components/form_alert", className:"alert alert-error", message: message)
 
+formView.classInterface
+  setupToolbar: ()->
+    if @toolbar isnt false and (not @topToolbar and not @bottomToolbar)
+      if @toolbar is "both" or @toolbar is "top"
+        @topToolbar = _.clone( @getDefaultToolbar() )
 
-Luca.components.FormView.defaultFormViewToolbar =
-  buttons:[
-    icon:"remove-sign"
-    label: "Reset"
-    eventId: "click:reset"
-    className:"reset-button"
-    align: 'right'
-  ,
-    icon:"ok-sign"
-    white: true
-    label: "Save Changes"
-    eventId: "click:submit"
-    color: "success"
-    className: 'submit-button'
-    align: 'right'
-  ]
+      unless @toolbar is "top"
+        @bottomToolbar = _.clone( @getDefaultToolbar() )
 
+  defaultToolbar:
+    buttons:[
+      icon:"remove-sign"
+      label: "Reset"
+      eventId: "click:reset"
+      className:"reset-button"
+      align: 'right'
+    ,
+      icon:"ok-sign"
+      white: true
+      label: "Save Changes"
+      eventId: "click:submit"
+      color: "success"
+      className: 'submit-button'
+      align: 'right'
+    ]
+
+formView.defines
+  version: 2
 
