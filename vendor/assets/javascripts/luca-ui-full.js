@@ -100,8 +100,9 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     return lucaUtilityHelper.apply(this, arguments);
   };
 
+  Luca.VERSION = '0.9.78';
+
   _.extend(Luca, {
-    VERSION: "0.9.78",
     core: {},
     collections: {},
     containers: {},
@@ -1354,7 +1355,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         if (!_.isFunction(handler)) {
           throw "Error registering application event " + eventTrigger + " on " + (this.name || this.cid);
         }
-        _results.push(app.on(eventTrigger, handler));
+        _results.push(app.on(eventTrigger, handler, this));
       }
       return _results;
     }
@@ -1389,7 +1390,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         if (_.isString(handler)) handler = this[handler];
         if (!_.isFunction(handler)) throw "invalid collectionEvents configuration";
         try {
-          _results.push(collection.on(eventTrigger, handler, collection));
+          _results.push(collection.on(eventTrigger, handler, this));
         } catch (e) {
           console.log("Error Binding To Collection in registerCollectionEvents", this);
           throw e;
@@ -4800,6 +4801,20 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
   application.classInterface({
     instances: {},
+    pageHierarchy: function() {
+      var app, getTree, mainController;
+      app = Luca();
+      mainController = app.getMainController();
+      getTree = function(node) {
+        if (!((node.components != null) || (node.pages != null))) return {};
+        return _(node.components || node.pages).reduce(function(memo, page) {
+          memo[page.name] = page.name;
+          if (page.navigate_to != null) memo[page.name] = getTree(page);
+          return memo;
+        }, {});
+      };
+      return getTree(mainController);
+    },
     registerInstance: function(app) {
       return Luca.Application.instances[app.name] = app;
     },
@@ -6271,8 +6286,13 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
 }).call(this);
 (function() {
+  var loadMask;
 
-  _.def("Luca.components.LoadMask")["extends"]("Luca.View")["with"]({
+  loadMask = Luca.register("Luca.components.LoadMask");
+
+  loadMask["extends"]("Luca.View");
+
+  loadMask.defines({
     className: "luca-ui-load-mask",
     bodyTemplate: "components/load_mask"
   });
@@ -6355,8 +6375,13 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
 }).call(this);
 (function() {
+  var navBar;
 
-  _.def("Luca.components.NavBar")["extends"]("Luca.View")["with"]({
+  navBar = Luca.register("Luca.components.NavBar");
+
+  navBar["extends"]("Luca.View");
+
+  navBar.defines({
     fixed: true,
     position: 'top',
     className: 'navbar',
@@ -6382,8 +6407,13 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
 }).call(this);
 (function() {
+  var pageController;
 
-  _.def("Luca.PageController")["extends"]("Luca.components.Controller")["with"]({
+  pageController = Luca.register("Luca.PageController");
+
+  pageController["extends"]("Luca.components.Controller");
+
+  pageController.defines({
     version: 2
   });
 
@@ -6719,8 +6749,13 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
 }).call(this);
 (function() {
+  var router;
 
-  _.def("Luca.Router")["extends"]("Backbone.Router")["with"]({
+  router = Luca.register("Luca.Router");
+
+  router["extends"]("Backbone.Router");
+
+  router.defines({
     routes: {
       "": "default"
     },
@@ -6757,20 +6792,30 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
 }).call(this);
 (function() {
-  var make;
+  var tableView;
 
-  _.def("Luca.components.TableView")["extends"]("Luca.components.CollectionView")["with"]({
+  tableView = Luca.register("Luca.components.TableView");
+
+  tableView["extends"]("Luca.components.CollectionView");
+
+  tableView.publicConfiguration({
+    widths: [],
+    columns: [],
+    emptyText: "There are no results to display"
+  });
+
+  tableView.privateConfiguration({
     additionalClassNames: "table",
     tagName: "table",
     bodyTemplate: "table_view",
     bodyTagName: "tbody",
     bodyClassName: "table-body",
-    itemTagName: "tr",
     stateful: true,
-    observeChanges: true,
-    widths: [],
-    columns: [],
-    emptyText: "There are no results to display",
+    itemTagName: "tr",
+    observeChanges: true
+  });
+
+  tableView.privateMethods({
     itemRenderer: function(item, model) {
       return Luca.components.TableView.rowRenderer.call(this, item, model);
     },
@@ -6806,54 +6851,54 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     }
   });
 
-  make = Backbone.View.prototype.make;
-
-  Luca.components.TableView.renderHeader = function(columns, targetElement) {
-    var column, content, index, th, _i, _len, _results;
-    index = 0;
-    content = (function() {
-      var _i, _len, _results;
+  tableView.classMethods({
+    renderHeader: function(columns, targetElement) {
+      var column, content, index, th, _i, _len, _results;
+      index = 0;
+      content = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = columns.length; _i < _len; _i++) {
+          column = columns[_i];
+          _results.push("<th data-col-index='" + (index++) + "'>" + column.header + "</th>");
+        }
+        return _results;
+      })();
+      this.$(targetElement).append("<tr>" + (content.join('')) + "</tr>");
+      index = 0;
       _results = [];
       for (_i = 0, _len = columns.length; _i < _len; _i++) {
         column = columns[_i];
-        _results.push("<th data-col-index='" + (index++) + "'>" + column.header + "</th>");
+        if (!(column.width != null)) continue;
+        th = this.$("th[data-col-index='" + (index++) + "']", targetElement);
+        _results.push(th.css('width', column.width));
       }
       return _results;
-    })();
-    this.$(targetElement).append("<tr>" + (content.join('')) + "</tr>");
-    index = 0;
-    _results = [];
-    for (_i = 0, _len = columns.length; _i < _len; _i++) {
-      column = columns[_i];
-      if (!(column.width != null)) continue;
-      th = this.$("th[data-col-index='" + (index++) + "']", targetElement);
-      _results.push(th.css('width', column.width));
+    },
+    rowRenderer: function(item, model, index) {
+      var colIndex, columnConfig, _i, _len, _ref, _results;
+      colIndex = 0;
+      _ref = this.columns;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        columnConfig = _ref[_i];
+        _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, colIndex++));
+      }
+      return _results;
+    },
+    renderColumn: function(column, item, model, index) {
+      var cellValue;
+      cellValue = model.read(column.reader);
+      if (_.isFunction(column.renderer)) {
+        cellValue = column.renderer.call(this, cellValue, model, column);
+      }
+      return Backbone.View.prototype.make("td", {
+        "data-col-index": index
+      }, cellValue);
     }
-    return _results;
-  };
+  });
 
-  Luca.components.TableView.rowRenderer = function(item, model, index) {
-    var colIndex, columnConfig, _i, _len, _ref, _results;
-    colIndex = 0;
-    _ref = this.columns;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      columnConfig = _ref[_i];
-      _results.push(Luca.components.TableView.renderColumn.call(this, columnConfig, item, model, colIndex++));
-    }
-    return _results;
-  };
-
-  Luca.components.TableView.renderColumn = function(column, item, model, index) {
-    var cellValue;
-    cellValue = model.read(column.reader);
-    if (_.isFunction(column.renderer)) {
-      cellValue = column.renderer.call(this, cellValue, model, column);
-    }
-    return make("td", {
-      "data-col-index": index
-    }, cellValue);
-  };
+  tableView.register();
 
 }).call(this);
 (function() {
