@@ -1,9 +1,3 @@
-#!/usr/bin/env ruby
-
-if __FILE__==$0
-  require 'pry'
-end
-
 class ComponentDocumentation
   attr_accessor :comments
   attr_accessor :arguments
@@ -81,8 +75,4 @@ class ComponentDocumentation
   end
 
 
-end
-
-if __FILE__==$0
-  pry
 end
