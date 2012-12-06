@@ -2,16 +2,16 @@
 # and returns the value of window.deep.nested.value.  useful for defining
 # references on objects which don't yet exist, as strings, which get
 # evaluated at runtime when such references will be available
-Luca.util.resolve = (accessor, source_object)->
-  return accessor unless _.isString(accessor)
-  
+Luca.util.resolve = (propertyReference, source_object)->
+  return propertyReference unless _.isString(propertyReference)
+
   try
     source_object ||= (window || global)
-    resolved = _( accessor.split(/\./) ).inject (obj,key)->
+    resolved = _( propertyReference.split(/\./) ).inject (obj,key)->
       obj = obj?[key]
     , source_object
   catch e
-    console.log "Error resolving", accessor, source_object
+    console.log "Error resolving", propertyReference, source_object
     throw e
     
   resolved

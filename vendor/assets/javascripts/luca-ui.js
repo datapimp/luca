@@ -417,15 +417,16 @@
   var currentNamespace,
     __slice = Array.prototype.slice;
 
-  Luca.util.resolve = function(accessor, source_object) {
+  Luca.util.resolve = function(propertyReference, source_object) {
     var resolved;
+    if (!_.isString(propertyReference)) return propertyReference;
     try {
       source_object || (source_object = window || global);
-      resolved = _(accessor.split(/\./)).inject(function(obj, key) {
+      resolved = _(propertyReference.split(/\./)).inject(function(obj, key) {
         return obj = obj != null ? obj[key] : void 0;
       }, source_object);
     } catch (e) {
-      console.log("Error resolving", accessor, source_object);
+      console.log("Error resolving", propertyReference, source_object);
       throw e;
     }
     return resolved;
@@ -1359,16 +1360,18 @@
 
   Luca.concerns.DomHelpers = {
     __initializer: function() {
-      var additional, additionalClasses, classes, cssClass, _i, _j, _len, _len2, _ref, _results;
+      var additional, additionalClasses, classes, cssClass, offset, span, _i, _j, _len, _len2, _ref, _results;
       additionalClasses = _(this.additionalClassNames || []).clone();
       if (this.wrapperClass != null) this.$wrap(this.wrapperClass);
       if (_.isString(additionalClasses)) {
         additionalClasses = additionalClasses.split(" ");
       }
-      if (this.gridSpan) additionalClasses.push("span" + this.gridSpan);
-      if (this.gridOffset) additionalClasses.push("offset" + this.gridOffset);
-      if (this.gridRowFluid) additionalClasses.push("row-fluid");
-      if (this.gridRow) additionalClasses.push("row");
+      if (span = this.gridSpan || this.span) additionalClasses.push("span" + span);
+      if (offset = this.gridOffset || this.offset) {
+        additionalClasses.push("offset" + offset);
+      }
+      if (this.gridRowFluid || this.rowFluid) additionalClasses.push("row-fluid");
+      if (this.gridRow || this.row) additionalClasses.push("row");
       if (additionalClasses == null) return;
       for (_i = 0, _len = additionalClasses.length; _i < _len; _i++) {
         additional = additionalClasses[_i];
@@ -2965,53 +2968,23 @@
 
 }).call(this);
 (function() {
-  var attachToolbar;
+  var panel;
 
-  attachToolbar = function(config, targetEl) {
-    var action, container, hasBody, id, toolbar;
-    if (config == null) config = {};
-    config.orientation || (config.orientation = "top");
-    config.ctype || (config.ctype = this.toolbarType || "panel_toolbar");
-    id = "" + this.cid + "-tbc-" + config.orientation;
-    toolbar = Luca.util.lazyComponent(config);
-    container = this.make("div", {
-      "class": "toolbar-container " + config.orientation,
-      id: id
-    }, toolbar.render().el);
-    hasBody = this.bodyClassName || this.bodyTagName;
-    action = (function() {
-      switch (config.orientation) {
-        case "top":
-        case "left":
-          if (hasBody) {
-            return "before";
-          } else {
-            return "prepend";
-          }
-          break;
-        case "bottom":
-        case "right":
-          if (hasBody) {
-            return "after";
-          } else {
-            return "append";
-          }
-      }
-    })();
-    return (targetEl || this.$bodyEl())[action](container);
-  };
+  panel = Luca.register("Luca.components.Panel");
 
-  _.def("Luca.components.Panel")["extends"]("Luca.View")["with"]({
+  panel["extends"]("Luca.View");
+
+  panel.mixesIn("LoadMaskable");
+
+  panel.configuration({
     topToolbar: void 0,
     bottomToolbar: void 0,
     loadMask: false,
-    loadMaskTemplate: ["components/load_mask"],
-    loadMaskTimeout: 3000,
-    mixins: ["LoadMaskable"],
-    initialize: function(options) {
-      this.options = options != null ? options : {};
-      return Luca.View.prototype.initialize.apply(this, arguments);
-    },
+    loadMaskTemplate: "components/load_mask",
+    loadMaskTimeout: 3000
+  });
+
+  panel.publicMethods({
     applyStyles: function(styles, body) {
       var setting, target, value;
       if (styles == null) styles = {};
@@ -3022,15 +2995,6 @@
         target.css(setting, value);
       }
       return this;
-    },
-    beforeRender: function() {
-      var _ref;
-      if ((_ref = Luca.View.prototype.beforeRender) != null) {
-        _ref.apply(this, arguments);
-      }
-      if (this.styles != null) this.applyStyles(this.styles);
-      if (this.bodyStyles != null) this.applyStyles(this.bodyStyles, true);
-      return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
     },
     $bodyEl: function() {
       var bodyEl, className, element, newElement;
@@ -3044,10 +3008,10 @@
           "class": className,
           "data-auto-appended": true
         });
-        $(this.el).append(newElement);
+        this.$el.append(newElement);
         return this.$(this.bodyEl);
       }
-      return $(this.el);
+      return this.$el;
     },
     $wrap: function(wrapper) {
       if (_.isString(wrapper) && !wrapper.match(/[<>]/)) {
@@ -3069,6 +3033,18 @@
     },
     $append: function(content) {
       return this.$bodyEl().append(content);
+    }
+  });
+
+  panel.privateMethods({
+    beforeRender: function() {
+      var _ref;
+      if ((_ref = Luca.View.prototype.beforeRender) != null) {
+        _ref.apply(this, arguments);
+      }
+      if (this.styles != null) this.applyStyles(this.styles);
+      if (this.bodyStyles != null) this.applyStyles(this.bodyStyles, true);
+      return typeof this.renderToolbars === "function" ? this.renderToolbars() : void 0;
     },
     renderToolbars: function() {
       var _this = this;
@@ -3084,8 +3060,49 @@
       if (config == null) config = {};
       config.parent = this;
       config.orientation = orientation;
-      return attachToolbar.call(this, config, config.targetEl);
+      return Luca.components.Panel.attachToolbar.call(this, config, config.targetEl);
     }
+  });
+
+  panel.classMethods({
+    attachToolbar: function(config, targetEl) {
+      var action, container, containerClass, hasBody, id, toolbar;
+      if (config == null) config = {};
+      config.orientation || (config.orientation = "top");
+      config.ctype || (config.ctype = this.toolbarType || "panel_toolbar");
+      id = "" + this.cid + "-tbc-" + config.orientation;
+      toolbar = Luca.util.lazyComponent(config);
+      containerClass = "toolbar-container " + config.orientation;
+      container = this.make("div", {
+        "class": containerClass,
+        id: id
+      }, toolbar.render().el);
+      hasBody = this.bodyClassName || this.bodyTagName;
+      action = (function() {
+        switch (config.orientation) {
+          case "top":
+          case "left":
+            if (hasBody) {
+              return "before";
+            } else {
+              return "prepend";
+            }
+            break;
+          case "bottom":
+          case "right":
+            if (hasBody) {
+              return "after";
+            } else {
+              return "append";
+            }
+        }
+      })();
+      return (targetEl || this.$bodyEl())[action](container);
+    }
+  });
+
+  panel.defines({
+    version: 2
   });
 
 }).call(this);
@@ -5703,39 +5720,49 @@
 
   formView["extends"]("Luca.core.Container");
 
+  formView.mixesIn("LoadMaskable");
+
   formView.triggers("before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error");
 
-  formView.defines({
+  formView.publicConfiguration({
+    labelAlign: void 0,
+    fieldLayoutClass: void 0,
+    legend: "",
+    toolbar: true,
+    toolbarConfig: void 0,
+    defaultToolbar: "Luca.components.FormView.defaultToolbar",
+    loadMask: true,
+    well: false,
+    searchForm: false,
+    horizontalForm: false,
+    inlineForm: false
+  });
+
+  formView.privateConfiguration({
     tagName: 'form',
-    className: 'luca-ui-form-view',
+    stateful: true,
     events: {
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
     },
-    toolbar: true,
-    legend: "",
-    bodyClassName: "form-view-body",
-    version: 1,
+    bodyClassName: "form-view-body"
+  });
+
+  formView.privateMethods({
     initialize: function(options) {
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.config.enableBoostrap;
       Luca.core.Container.prototype.initialize.apply(this, arguments);
       this.components || (this.components = this.fields);
       _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
-      this.state || (this.state = new Backbone.Model);
       this.setupHooks(this.hooks);
       this.applyStyleClasses();
-      if (this.toolbar !== false && (!this.topToolbar && !this.bottomToolbar)) {
-        if (this.toolbar === "both" || this.toolbar === "top") {
-          this.topToolbar = this.getDefaultToolbar();
-        }
-        if (this.toolbar !== "top") {
-          return this.bottomToolbar = this.getDefaultToolbar();
-        }
-      }
+      return Luca.components.FormView.setupToolbar.call(this);
     },
     getDefaultToolbar: function() {
-      return Luca.components.FormView.defaultFormViewToolbar;
+      var config;
+      config = this.toolbarConfig || this.defaultToolbar;
+      return Luca.util.resolve(Luca.util.read(config));
     },
     applyStyleClasses: function() {
       if (Luca.config.enableBoostrap) this.applyBootstrapStyleClasses();
@@ -5764,17 +5791,18 @@
       if (this.hasModel()) return this.submit();
     },
     afterComponents: function() {
-      var _ref,
-        _this = this;
+      var form, _ref;
       if ((_ref = Luca.core.Container.prototype.afterComponents) != null) {
         _ref.apply(this, arguments);
       }
+      form = this;
       return this.eachField(function(field) {
+        var _this = this;
         field.getForm = function() {
-          return _this;
+          return form;
         };
         return field.getModel = function() {
-          return _this.currentModel();
+          return form.currentModel();
         };
       });
     },
@@ -5949,25 +5977,41 @@
     }
   });
 
-  Luca.components.FormView.defaultFormViewToolbar = {
-    buttons: [
-      {
-        icon: "remove-sign",
-        label: "Reset",
-        eventId: "click:reset",
-        className: "reset-button",
-        align: 'right'
-      }, {
-        icon: "ok-sign",
-        white: true,
-        label: "Save Changes",
-        eventId: "click:submit",
-        color: "success",
-        className: 'submit-button',
-        align: 'right'
+  formView.classInterface({
+    setupToolbar: function() {
+      if (this.toolbar !== false && (!this.topToolbar && !this.bottomToolbar)) {
+        if (this.toolbar === "both" || this.toolbar === "top") {
+          this.topToolbar = this.getDefaultToolbar();
+        }
+        if (this.toolbar !== "top") {
+          return this.bottomToolbar = this.getDefaultToolbar();
+        }
       }
-    ]
-  };
+    },
+    defaultToolbar: {
+      buttons: [
+        {
+          icon: "remove-sign",
+          label: "Reset",
+          eventId: "click:reset",
+          className: "reset-button",
+          align: 'right'
+        }, {
+          icon: "ok-sign",
+          white: true,
+          label: "Save Changes",
+          eventId: "click:submit",
+          color: "success",
+          className: 'submit-button',
+          align: 'right'
+        }
+      ]
+    }
+  });
+
+  formView.defines({
+    version: 2
+  });
 
 }).call(this);
 (function() {
