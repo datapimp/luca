@@ -5,7 +5,7 @@ Luca.concerns.StateModel =
     
     if _.isObject(@stateful) and not @defaultState?
       @defaultState = @stateful 
-      
+
     @state = new Backbone.Model(@defaultState || {})
 
     @set ||= ()=> @state.set.apply(@state, arguments)
@@ -24,5 +24,5 @@ Luca.concerns.StateModel =
       @trigger "state:change", state
 
       for changed, value of state.changedAttributes()
-        @trigger "state:change:#{ changed }", value, state.previous(changed)
+        @trigger "state:change:#{ changed }", state, value, state.previous(changed)
 

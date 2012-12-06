@@ -1999,7 +1999,7 @@
         _results = [];
         for (changed in _ref2) {
           value = _ref2[changed];
-          _results.push(_this.trigger("state:change:" + changed, value, state.previous(changed)));
+          _results.push(_this.trigger("state:change:" + changed, state, value, state.previous(changed)));
         }
         return _results;
       });
