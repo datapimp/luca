@@ -1,5 +1,8 @@
 # Public: TableView renders collection data into an HTML table.
-_.def("Luca.components.TableView").extends("Luca.components.CollectionView").with
+#_.def("Luca.components.TableView").extends("Luca.components.CollectionView").with
+tableView = Luca.register "Luca.components.TableView"
+tableView.extends         "Luca.components.CollectionView"
+tableView.defines
   additionalClassNames: "table"
   tagName: "table"
   bodyTemplate: "table_view"
