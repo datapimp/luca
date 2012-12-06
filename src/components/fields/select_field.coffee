@@ -25,7 +25,7 @@ selectField.defines
 
     @input_id ||= _.uniqueId('field')
     @input_name ||= @name
-    @valueType ||= "integer" if @valueField is "id"
+    @valueType ||= Luca.config.idAttributeType if @valueField is "id"
     @label ||= @name
     @retainValue = true if _.isUndefined @retainValue
 

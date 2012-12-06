@@ -59,6 +59,8 @@ Luca.config.maintainStyleHierarchy = true
 Luca.config.maintainClassHierarchy = true
 Luca.config.autoApplyClassHierarchyAsCssClasses = true
 
+Luca.config.idAttributeType = "integer"
+
 # When using Luca.define() should we automatically register
 # the component with the registry?
 Luca.autoRegister = Luca.config.autoRegister = true
