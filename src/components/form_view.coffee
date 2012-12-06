@@ -316,11 +316,11 @@ formView.classInterface
   setupToolbar: ()->
     if @toolbar isnt false and (not @topToolbar and not @bottomToolbar)
       if @toolbar is "both" or @toolbar is "top"
-        @topToolbar = @getDefaultToolbar() 
+        @topToolbar = _.clone( @getDefaultToolbar() )
 
       unless @toolbar is "top"
-        @bottomToolbar = @getDefaultToolbar()     
-        
+        @bottomToolbar = _.clone( @getDefaultToolbar() )
+
   defaultToolbar:
     buttons:[
       icon:"remove-sign"

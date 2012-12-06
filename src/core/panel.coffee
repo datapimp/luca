@@ -75,24 +75,17 @@ panel.privateMethods
     config.parent = @
     config.orientation = orientation
 
-    Luca.components.Panel.attachToolbar.call(@, config, config.targetEl )
+    Luca.components.Panel.attachToolbar.call(@, config, config.targetEl || config.container )
 
 panel.classMethods
   attachToolbar: (config={}, targetEl)->
     config.orientation ||= "top"
-    config.ctype ||= @toolbarType || "panel_toolbar"
+    config.type ||= config.ctype ||= @toolbarType || "panel_toolbar"
 
-    id = "#{ @cid }-tbc-#{ config.orientation }"
-
+    config.id = "#{ @cid }-tbc-#{ config.orientation }"
+    config.additionalClassNames = "#{ Luca.config.toolbarContainerClass } #{ config.orientation }"
+     
     toolbar = Luca.util.lazyComponent( config )
-
-    containerClass = "toolbar-container #{ config.orientation }"
-
-    container = @make "div",
-      class: containerClass,
-      id: id
-    ,
-      toolbar.render().el
 
     hasBody = @bodyClassName or @bodyTagName
 
@@ -100,12 +93,16 @@ panel.classMethods
     # so just place the toolbar before, or after the body
     action = switch config.orientation
       when "top", "left"
-        if hasBody then "before" else "prepend"
+        if hasBody and not targetEl?.length > 0 then "before" else "prepend"
       when "bottom", "right"
-        if hasBody then "after" else "append"
+        if hasBody and not targetEl?.length > 0 then "after" else "append"
 
-    (targetEl || @$bodyEl() )[action]( container )
+    toolbarEl = if targetEl?.length > 0
+      @$(targetEl)
+    else
+      @$bodyEl()
 
+    toolbarEl[action]( toolbar.render().el )
 
 panel.defines
   version: 2

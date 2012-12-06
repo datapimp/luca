@@ -158,6 +158,8 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     FORWARDSLASH: 191
   };
 
+  Luca.config.toolbarContainerClass = "toolbar-container";
+
   Luca.keyMap = Luca.config.keyMap = _(Luca.keys).inject(function(memo, value, symbol) {
     memo[value] = symbol.toLowerCase();
     return memo;
@@ -3136,29 +3138,25 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       if (config == null) config = {};
       config.parent = this;
       config.orientation = orientation;
-      return Luca.components.Panel.attachToolbar.call(this, config, config.targetEl);
+      return Luca.components.Panel.attachToolbar.call(this, config, config.targetEl || config.container);
     }
   });
 
   panel.classMethods({
     attachToolbar: function(config, targetEl) {
-      var action, container, containerClass, hasBody, id, toolbar;
+      var action, hasBody, toolbar, toolbarEl;
       if (config == null) config = {};
       config.orientation || (config.orientation = "top");
-      config.ctype || (config.ctype = this.toolbarType || "panel_toolbar");
-      id = "" + this.cid + "-tbc-" + config.orientation;
+      config.type || (config.type = config.ctype || (config.ctype = this.toolbarType || "panel_toolbar"));
+      config.id = "" + this.cid + "-tbc-" + config.orientation;
+      config.additionalClassNames = "" + Luca.config.toolbarContainerClass + " " + config.orientation;
       toolbar = Luca.util.lazyComponent(config);
-      containerClass = "toolbar-container " + config.orientation;
-      container = this.make("div", {
-        "class": containerClass,
-        id: id
-      }, toolbar.render().el);
       hasBody = this.bodyClassName || this.bodyTagName;
       action = (function() {
         switch (config.orientation) {
           case "top":
           case "left":
-            if (hasBody) {
+            if (hasBody && !(targetEl != null ? targetEl.length : void 0) > 0) {
               return "before";
             } else {
               return "prepend";
@@ -3166,14 +3164,15 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
             break;
           case "bottom":
           case "right":
-            if (hasBody) {
+            if (hasBody && !(targetEl != null ? targetEl.length : void 0) > 0) {
               return "after";
             } else {
               return "append";
             }
         }
       })();
-      return (targetEl || this.$bodyEl())[action](container);
+      toolbarEl = (targetEl != null ? targetEl.length : void 0) > 0 ? this.$(targetEl) : this.$bodyEl();
+      return toolbarEl[action](toolbar.render().el);
     }
   });
 
@@ -6057,10 +6056,10 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     setupToolbar: function() {
       if (this.toolbar !== false && (!this.topToolbar && !this.bottomToolbar)) {
         if (this.toolbar === "both" || this.toolbar === "top") {
-          this.topToolbar = this.getDefaultToolbar();
+          this.topToolbar = _.clone(this.getDefaultToolbar());
         }
         if (this.toolbar !== "top") {
-          return this.bottomToolbar = this.getDefaultToolbar();
+          return this.bottomToolbar = _.clone(this.getDefaultToolbar());
         }
       }
     },
