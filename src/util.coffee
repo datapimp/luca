@@ -3,6 +3,8 @@
 # references on objects which don't yet exist, as strings, which get
 # evaluated at runtime when such references will be available
 Luca.util.resolve = (accessor, source_object)->
+  return accessor unless _.isString(accessor)
+  
   try
     source_object ||= (window || global)
     resolved = _( accessor.split(/\./) ).inject (obj,key)->
