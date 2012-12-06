@@ -1,23 +1,22 @@
-# Public: TableView renders collection data into an HTML table.
-#_.def("Luca.components.TableView").extends("Luca.components.CollectionView").with
 tableView = Luca.register "Luca.components.TableView"
 tableView.extends         "Luca.components.CollectionView"
-tableView.defines
+
+tableView.publicConfiguration
+  widths: []
+  columns:[]
+  emptyText: "There are no results to display"
+
+tableView.privateConfiguration
   additionalClassNames: "table"
   tagName: "table"
   bodyTemplate: "table_view"
   bodyTagName: "tbody"
   bodyClassName: "table-body"
-  itemTagName: "tr"
   stateful: true
+  itemTagName: "tr"
   observeChanges: true
 
-  widths: []
-  
-  columns:[]
-
-  emptyText: "There are no results to display"
-
+tableView.privateMethods
   itemRenderer: (item, model)->
     Luca.components.TableView.rowRenderer.call(@, item, model)
 
@@ -42,32 +41,31 @@ tableView.defines
       Luca.components.TableView.renderHeader.call(@, @columns, @$('thead') )
     .until("after:render")
 
-make = Backbone.View::make
+tableView.classMethods
+  renderHeader : (columns, targetElement)->
+    index = 0
 
-Luca.components.TableView.renderHeader = (columns, targetElement)->
-  index = 0
+    content = for column in columns
+      "<th data-col-index='#{ index++ }'>#{ column.header }</th>"
 
-  content = for column in columns
-    "<th data-col-index='#{ index++ }'>#{ column.header }</th>"
+    @$( targetElement ).append("<tr>#{ content.join('') }</tr>")
 
-  @$( targetElement ).append("<tr>#{ content.join('') }</tr>")
+    index = 0
 
-  index = 0
-
-  for column in columns when column.width?
-    th = @$("th[data-col-index='#{ index++ }']",targetElement)
-    th.css('width', column.width)
+    for column in columns when column.width?
+      th = @$("th[data-col-index='#{ index++ }']",targetElement)
+      th.css('width', column.width)
 
 
-Luca.components.TableView.rowRenderer = (item, model, index)->
-  colIndex = 0
-  for columnConfig in @columns
-    Luca.components.TableView.renderColumn.call(@, columnConfig, item, model, colIndex++) 
+  rowRenderer: (item, model, index)->
+    colIndex = 0
+    for columnConfig in @columns
+      Luca.components.TableView.renderColumn.call(@, columnConfig, item, model, colIndex++) 
 
-Luca.components.TableView.renderColumn = (column, item, model, index)->
-  cellValue = model.read( column.reader )
+  renderColumn : (column, item, model, index)->
+    cellValue = model.read( column.reader )
 
-  if _.isFunction( column.renderer )
-    cellValue = column.renderer.call @, cellValue, model, column 
+    if _.isFunction( column.renderer )
+      cellValue = column.renderer.call @, cellValue, model, column 
 
-  make("td", {"data-col-index":index}, cellValue)
+    Backbone.View::make("td", {"data-col-index":index}, cellValue)

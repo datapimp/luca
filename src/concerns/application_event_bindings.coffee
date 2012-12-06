@@ -16,4 +16,4 @@ Luca.concerns.ApplicationEventBindings =
       unless _.isFunction(handler)
         throw "Error registering application event #{ eventTrigger } on #{ @name || @cid }"
 
-      app.on(eventTrigger, handler)
+      app.on(eventTrigger, handler, @)

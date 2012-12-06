@@ -28,7 +28,7 @@ Luca.concerns.CollectionEventBindings =
         throw "invalid collectionEvents configuration"
 
       try
-        collection.on(eventTrigger, handler, collection)
+        collection.on(eventTrigger, handler, @)
       catch e
         console.log "Error Binding To Collection in registerCollectionEvents", @
         throw e
