@@ -7,7 +7,6 @@ end
 class ComponentDocumentation
   attr_accessor :comments
   attr_accessor :arguments
-  attr_accessor :method_signature
   attr_accessor :method
 
   COMMENTS_REGEX =  /(^\s*#.*$\n)*/
@@ -34,12 +33,11 @@ class ComponentDocumentation
     load_section
     load_comments
     load_arguments
-    load_method_signature
     self
   end
 
   def all
-    { comments:@comments, arguments:@arguments, method_signature:@method_signature, method:@method }
+    { comments:@comments, arguments:@arguments, method:@method }
   end
 
   private
@@ -58,10 +56,6 @@ class ComponentDocumentation
       end
       memo
     end
-  end
-
-  def load_method_signature
-    @method_signature = @relevent_section[0].match(/^\s*(#{@method})\s*(:)\s*(\(.*\)\-\>)/)[0].strip()
   end
 
   def read_file
