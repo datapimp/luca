@@ -18,7 +18,7 @@ class ComponentDocumentation
                 'src/components/fields']
 
   def initialize component_name
-    @component_class_path = component_name.split('.').map { |el| el.downcase! }
+    @component_class_path = component_name.split('.')
     read_file
   end
 
@@ -37,7 +37,9 @@ class ComponentDocumentation
   private
 
   def load_comments
-    @comments = @relevent_section[0].match(COMMENTS_REGEX)[0]
+    unless @relevent_section.nil?
+      @comments = @relevent_section[0].match(COMMENTS_REGEX)[0]
+    end
   end
 
   def load_arguments
@@ -58,12 +60,22 @@ class ComponentDocumentation
   end
 
   def find_file
+    search_path = []
     FILE_PATHS.each do |path|
-      if File.exists?("#{base_path}/#{path}/#{@component_class_path.last}.coffee")
-        return "#{base_path}/#{path}/#{@component_class_path.last}.coffee"
+      search_path.push "#{base_path}/#{path}/#{underscore(@component_class_path.last)}.coffee"
+      if File.exists?("#{base_path}/#{path}/#{underscore(@component_class_path.last)}.coffee")
+        return "#{base_path}/#{path}/#{underscore(@component_class_path.last)}.coffee"
       end
     end
-    nil
+    raise "Couldn't find file: #{underscore(@component_class_path.last)}\n Search Path: #{search_path.join("\n")}"
+  end
+
+  def underscore string
+    string.gsub(/::/, '/').
+    gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+    gsub(/([a-z\d])([A-Z])/,'\1_\2').
+    tr("-", "_").
+    downcase
   end
 
   def base_path
