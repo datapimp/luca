@@ -1,3 +1,5 @@
+require 'rails'
+require 'sprockets'
 require './app'
 
 assets_path = Dir.pwd + '/vendor/assets'
