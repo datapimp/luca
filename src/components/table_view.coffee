@@ -55,7 +55,8 @@ Luca.components.TableView.renderHeader = (columns, targetElement)->
   index = 0
 
   for column in columns when column.width?
-    @$("th[data-col-index='#{ index++ }']",targetElement).css('width', column.width)
+    th = @$("th[data-col-index='#{ index++ }']",targetElement)
+    th.css('width', column.width)
 
 
 Luca.components.TableView.rowRenderer = (item, model, index)->

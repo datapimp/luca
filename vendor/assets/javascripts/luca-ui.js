@@ -25,7 +25,7 @@
   };
 
   _.extend(Luca, {
-    VERSION: "0.9.77",
+    VERSION: "0.9.78",
     core: {},
     collections: {},
     containers: {},
@@ -1071,6 +1071,13 @@
       return this;
     };
 
+    ComponentDefinition.prototype.configuration = function(properties) {
+      if (properties == null) properties = {};
+      this.meta("public configuration", _.keys(properties));
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
+    };
+
     ComponentDefinition.prototype.publicConfiguration = function(properties) {
       if (properties == null) properties = {};
       this.meta("public configuration", _.keys(properties));
@@ -1092,9 +1099,30 @@
       return this;
     };
 
+    ComponentDefinition.prototype.methods = function(properties) {
+      if (properties == null) properties = {};
+      this.meta("public interface", _.keys(properties));
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
+    };
+
+    ComponentDefinition.prototype.public = function(properties) {
+      if (properties == null) properties = {};
+      this.meta("public interface", _.keys(properties));
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
+    };
+
     ComponentDefinition.prototype.publicInterface = function(properties) {
       if (properties == null) properties = {};
       this.meta("public interface", _.keys(properties));
+      _.defaults((this.properties || (this.properties = {})), properties);
+      return this;
+    };
+
+    ComponentDefinition.prototype.private = function(properties) {
+      if (properties == null) properties = {};
+      this.meta("private interface", _.keys(properties));
       _.defaults((this.properties || (this.properties = {})), properties);
       return this;
     };
@@ -1937,7 +1965,8 @@
 
   Luca.concerns.StateModel = {
     __initializer: function() {
-      var _this = this;
+      var attribute, fn, handler, _ref,
+        _this = this;
       if (this.stateful !== true) return;
       if ((this.state != null) && !Luca.isBackboneModel(this.state)) return;
       this.state = new Backbone.Model(this.defaultState || {});
@@ -1947,14 +1976,25 @@
       this.get || (this.get = function() {
         return _this.state.get.apply(_this.state, arguments);
       });
+      if (!_.isEmpty(this.stateChangeEvents)) {
+        _ref = this.stateChangeEvents;
+        for (attribute in _ref) {
+          handler = _ref[attribute];
+          fn = _.isString(handler) ? this[handler] : handler;
+          if (attribute === "*") {
+            this.on("state:change", fn, this);
+          } else {
+            this.on("state:change:" + attribute, fn, this);
+          }
+        }
+      }
       return this.state.on("change", function(state) {
-        var changed, previousValues, value, _len, _ref, _results;
+        var changed, value, _ref2, _results;
         _this.trigger("state:change", state);
-        previousValues = state.previousAttributes();
-        _ref = state.changedAttributes;
+        _ref2 = state.changedAttributes();
         _results = [];
-        for (value = 0, _len = _ref.length; value < _len; value++) {
-          changed = _ref[value];
+        for (changed in _ref2) {
+          value = _ref2[changed];
           _results.push(_this.trigger("state:change:" + changed, value, state.previous(changed)));
         }
         return _results;
@@ -2531,7 +2571,7 @@
     for (attr in _ref) {
       dependencies = _ref[attr];
       this.on("change:" + attr, function() {
-        return _this._computed[attr] = _this[attr].call(_this);
+        return _this._computed[attr] = _this.read(attr);
       });
       if (_.isString(dependencies)) dependencies = dependencies.split(',');
       _results.push(_(dependencies).each(function(dep) {
@@ -2585,7 +2625,6 @@
       if (models == null) models = [];
       this.options = options;
       _.extend(this, this.options);
-      this.setupMethodCaching();
       this._reset();
       if (this.cached) {
         console.log('The @cached property of Luca.Collection is being deprecated.  Please change to cache_key');
@@ -2627,6 +2666,7 @@
       }
       Luca.concern.setup.call(this);
       Luca.util.setupHooks.call(this, this.hooks);
+      this.setupMethodCaching();
       return this.trigger("after:initialize");
     },
     __wrapUrl: function() {
@@ -2687,20 +2727,17 @@
       return this;
     },
     register: function(collectionManager, key, collection) {
-      if (collectionManager == null) {
-        collectionManager = Luca.CollectionManager.get();
-      }
       if (key == null) key = "";
+      collectionManager || (collectionManager = Luca.CollectionManager.get());
       if (!(key.length >= 1)) {
-        throw "Can not register with a collection manager without a key";
-      }
-      if (collectionManager == null) {
-        throw "Can not register with a collection manager without a valid collection manager";
+        throw "Attempt to register a collection without specifying a key.";
       }
       if (_.isString(collectionManager)) {
-        collectionManager = Luca.util.nestedValue(collectionManager, window || global);
+        collectionManager = Luca.util.resolve(collectionManager);
       }
-      if (!collectionManager) throw "Could not register with collection manager";
+      if (collectionManager == null) {
+        throw "Attempt to register with a non existent collection manager.";
+      }
       if (_.isFunction(collectionManager.add)) {
         return collectionManager.add(key, collection);
       }
@@ -2814,12 +2851,15 @@
       return _results;
     },
     setupMethodCaching: function() {
-      var cache, membershipEvents;
+      var cache, membershipEvents, _ref;
+      if (!(((_ref = this.cachedMethods) != null ? _ref.length : void 0) > 0)) {
+        return;
+      }
       collection = this;
       membershipEvents = ["reset", "add", "remove"];
       cache = this._methodCache = {};
       return _(this.cachedMethods).each(function(method) {
-        var dependencies, dependency, membershipEvent, _i, _j, _len, _len2, _ref, _results;
+        var dependencies, membershipEvent, watchForChangesOn, _i, _len;
         cache[method] = {
           name: method,
           original: collection[method],
@@ -2837,17 +2877,14 @@
         }
         dependencies = method.split(':')[1];
         if (dependencies) {
-          _ref = dependencies.split(",");
-          _results = [];
-          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
-            dependency = _ref[_j];
-            _results.push(collection.bind("change:" + dependency, function() {
+          watchForChangesOn = dependencies.split(",");
+          return _(watchForChangesOn).each(function(dependency) {
+            return collection.bind("change:" + dependency, function() {
               return collection.clearMethodCache({
                 method: method
               });
-            }));
-          }
-          return _results;
+            });
+          });
         }
       });
     },
@@ -4970,7 +5007,7 @@
       section || (section = this.defaultCard);
       this.activate(section, false, function(activator, previous, current) {
         if (current.activatedByController !== true) {
-          current.trigger("controller:activation");
+          current.trigger("on:controller:activation");
           current.activatedByController = true;
         }
         _this.state.set({
@@ -6696,7 +6733,7 @@
   make = Backbone.View.prototype.make;
 
   Luca.components.TableView.renderHeader = function(columns, targetElement) {
-    var column, content, index, _i, _len, _results;
+    var column, content, index, th, _i, _len, _results;
     index = 0;
     content = (function() {
       var _i, _len, _results;
@@ -6712,9 +6749,9 @@
     _results = [];
     for (_i = 0, _len = columns.length; _i < _len; _i++) {
       column = columns[_i];
-      if (column.width != null) {
-        _results.push(this.$("th[data-col-index='" + (index++) + "']", targetElement).css('width', column.width));
-      }
+      if (!(column.width != null)) continue;
+      th = this.$("th[data-col-index='" + (index++) + "']", targetElement);
+      _results.push(th.css('width', column.width));
     }
     return _results;
   };
