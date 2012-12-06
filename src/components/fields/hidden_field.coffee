@@ -1,9 +1,8 @@
-_.def('Luca.fields.HiddenField').extends('Luca.core.Field').with
+hiddenField = Luca.register       "Luca.fields.HiddenField"
+hiddenField.extends               "Luca.core.Field"
 
+hiddenField.defines
   template: 'fields/hidden_field'
-
-  initialize: (@options={})->
-    Luca.core.Field::initialize.apply @, arguments
 
   afterInitialize: ()->
     @input_id ||= _.uniqueId('field')

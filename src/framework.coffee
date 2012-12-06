@@ -1,37 +1,65 @@
+# Idea:
+#
+# I want to be able to work with applications who come rendered on page load.
+
+
 # the Luca() browser utility function is meant to be a smart wrapper around various
 # types of input which will return what the developer would expect given the
 # context it is used.
-(window || global).Luca = (payload, args...)->
+lucaUtilityHelper = (payload, args...)->
+  if arguments.length is 0 
+    return _( Luca.Application.instances ).values()?[0]
+
   if _.isString(payload) and result = Luca.cache(payload)
     return result
 
   if _.isString(payload) and result = Luca.find(payload)
     return result
 
+  if _.isString(payload) and result = Luca.registry.find(payload)
+    return result
+
+  if payload instanceof jQuery and result = Luca.find(payload)
+    return result
+
   if _.isObject(payload) and payload.ctype?
     return Luca.util.lazyComponent( payload )
-
-  if _.isObject(payload) and payload.defines and payload.extends
-    definition = payload.defines
-    inheritsFrom = payload.extends
 
   if _.isFunction( fallback = _(args).last() )
     return fallback()
 
+(window || global).Luca = ()-> lucaUtilityHelper.apply(@, arguments)
+
+Luca.VERSION = '0.9.78'
+
 _.extend Luca,
-  VERSION: "0.9.45"
   core: {}
+  collections: {}
   containers: {}
   components: {}
-  modules: {}
+  models: {}
+  concerns: {}
   util: {}
   fields: {}
   registry:{}
   options: {}
   config: {}
+  logger: (trackerMessage)->
+    (args...)->
+      args.unshift( trackerMessage )
+      console.log(@, args)
+
+  getHelper: ()->
+    ()-> lucaUtilityHelper.apply(@, arguments)
 
 # for triggering / binding to component definitions
 _.extend Luca, Backbone.Events
+
+Luca.config.maintainStyleHierarchy = true
+Luca.config.maintainClassHierarchy = true
+Luca.config.autoApplyClassHierarchyAsCssClasses = true
+
+Luca.config.idAttributeType = "integer"
 
 # When using Luca.define() should we automatically register
 # the component with the registry?
@@ -49,11 +77,11 @@ Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false
 # let's use the Twitter 2.0 Bootstrap Framework
 # for what it is best at, and not try to solve this
 # problem on our own!
-Luca.enableBootstrap = Luca.config.enableBootstrap = true
+Luca.config.enableBoostrap = Luca.config.enableBootstrap = true
 
 Luca.config.enhancedViewProperties = true
 
-Luca.keys =
+Luca.keys = Luca.config.keys =
   ENTER: 13
   ESCAPE: 27
   KEYLEFT: 37
@@ -63,11 +91,72 @@ Luca.keys =
   SPACEBAR: 32
   FORWARDSLASH: 191
 
+Luca.config.toolbarContainerClass = "toolbar-container"
+
 # build a reverse map
-Luca.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
+Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
   memo[value] = symbol.toLowerCase()
   memo
 , {}
+
+Luca.config.showWarnings = true
+
+Luca.setupCollectionSpace = (options={})->
+  {baseParams, modelBootstrap} = options
+
+  if baseParams? 
+    Luca.Collection.baseParams( baseParams )
+  else
+    Luca.warn('You should remember to set the base params for Luca.Collection class.  You can do this by defining a property or function on Luca.config.baseParams')
+
+  if modelBootstrap?
+    Luca.Collection.bootstrap( modelBootstrap )
+  else
+    Luca.warn("You should remember to set the model bootstrap location for Luca.Collection.  You can do this by defining a property or function on Luca.config.modelBootstrap")
+
+# Creates a basic Namespace for you to begin defining
+# your application and all of its components.
+Luca.initialize = (namespace, options={})->
+  defaults = 
+    views: {}
+    collections: {}
+    models: {}
+    components: {}
+    lib: {}
+    util: {}
+    concerns: {}
+    register: ()->
+      Luca.register.apply(@, arguments)
+    onReady: ()-> 
+      Luca.onReady.apply(@, arguments)
+    getApplication: ()->
+      Luca.getApplication?.apply(@, arguments)
+    getCollectionManager: ()->
+      Luca.CollectionManager.get?.apply(@, arguments)
+    route: Luca.routeHelper
+
+
+  object = {}
+  object[ namespace ] = _.extend(Luca.getHelper(), defaults)
+
+  _.extend(Luca.config, options)
+  _.extend (window || global), object
+
+  Luca.concern.namespace "#{ namespace }.concerns"
+  Luca.registry.namespace "#{ namespace }.views"
+  Luca.Collection.namespace "#{ namespace }.collections"
+
+  Luca.on "ready", ()->
+    Luca.setupCollectionSpace(options)
+
+Luca.onReady = (callback)->
+  Luca.define.close()
+  Luca.trigger("ready")
+
+  $ -> callback.apply(@, arguments)
+
+Luca.warn = (message)->
+  console.log(message) if Luca.config.showWarnings is true
 
 Luca.find = (el)->
   Luca( $(el).data('luca-id') )
@@ -106,34 +195,30 @@ Luca.isCollectionPrototype = (obj)->
   obj? and obj::? and !Luca.isModelPrototype(obj) and obj::reset? and obj::select? and obj::reject?
 
 Luca.inheritanceChain = (obj)->
-  _( Luca.parentClasses(obj) ).map (className)-> Luca.util.resolve(className)
-    
+  Luca.parentClasses(obj)
+
 Luca.parentClasses = (obj)->
   list = []
 
   if _.isString(obj)
     obj = Luca.util.resolve(obj)
 
-  list.push( obj.displayName || obj::?.displayName || Luca.parentClass(obj) )
+  metaData = obj.componentMetaData?()
+  metaData ||= obj::componentMetaData?()
 
-  classes = until not Luca.parentClass(obj)?
-    obj = Luca.parentClass(obj)
+  list = metaData?.classHierarchy() || [obj.displayName || obj::displayName]
 
-  list = list.concat(classes)
-
-  _.uniq list
-
-Luca.parentClass = (obj)->
-  list = []
-
+Luca.parentClass = (obj, resolve=true)->
   if _.isString( obj )
     obj = Luca.util.resolve(obj)
 
-  if Luca.isComponent(obj)
-    obj.displayName
+  parent = obj.componentMetaData?()?.meta["super class name"]
+  parent ||= obj::componentMetaData?()?.meta["super class name"]
 
-  else if Luca.isComponentPrototype(obj)
-    obj::_superClass?()?.displayName
+  parent || obj.displayName || obj.prototype?.displayName
+
+  if resolve then Luca.util.resolve(parent) else parent
+
 
 # This is a convenience method for accessing the templates
 # available to the client side app, either the ones which ship with Luca
@@ -191,6 +276,9 @@ UnderscoreExtensions =
   # this function will ensure a function gets called at least once
   # afrer x delay.  by setting defaults, we can use this on backbone
   # view definitions
+  #
+  # Note:  I am not sure if this is the same as _.debounce or not.  I will need
+  # to look into it
   idle: (code, delay=1000)->
     delay = 0 if window.DISABLE_IDLE
     handle = undefined

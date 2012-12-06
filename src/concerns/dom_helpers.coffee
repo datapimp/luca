@@ -1,5 +1,5 @@
-Luca.modules.DomHelpers = 
-  setupClassHelpers: ()->
+Luca.concerns.DomHelpers = 
+  __initializer: ()->
     additionalClasses = _( @additionalClassNames || [] ).clone()
 
     @$wrap( @wrapperClass ) if @wrapperClass?
@@ -7,16 +7,16 @@ Luca.modules.DomHelpers =
     if _.isString additionalClasses
       additionalClasses = additionalClasses.split(" ")
 
-    if @gridSpan
-      additionalClasses.push "span#{ @gridSpan }"
+    if span = @gridSpan || @span
+      additionalClasses.push "span#{ span }"
 
-    if @gridOffset
-      additionalClasses.push "offset#{ @gridOffset }"
+    if offset = @gridOffset || @offset
+      additionalClasses.push "offset#{ offset }"
 
-    if @gridRowFluid
+    if @gridRowFluid || @rowFluid
       additionalClasses.push "row-fluid"
 
-    if @gridRow
+    if @gridRow || @row
       additionalClasses.push "row"
 
     return unless additionalClasses?
@@ -24,11 +24,20 @@ Luca.modules.DomHelpers =
     for additional in additionalClasses
       @$el.addClass( additional )     
 
+    if Luca.config.autoApplyClassHierarchyAsCssClasses is true
+      classes = @componentMetaData?()?.styleHierarchy() || []
+
+      for cssClass in classes when (cssClass isnt "luca-view" and cssClass isnt "backbone-view")
+        @$el.addClass(cssClass)
+
   $wrap: (wrapper)->
     if _.isString(wrapper) and not wrapper.match(/[<>]/)
-      wrapper = @make("div",class:wrapper)
+      wrapper = @make("div",class:wrapper,"data-wrapper":true)
 
     @$el.wrap( wrapper )
+
+  $wrapper: ()->
+    @$el.parent('[data-wrapper="true"]')  
 
   $template: (template, variables={})->
     @$el.html( Luca.template(template,variables) )

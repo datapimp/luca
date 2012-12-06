@@ -1,10 +1,27 @@
-view = Luca.define      "Luca.View"
+view = Luca.register    "Luca.View"
 
 view.extends            "Backbone.View"
 
+# includes are extensions to the prototype, and have no special behavior
 view.includes           "Luca.Events",
-                        "Luca.modules.DomHelpers"
+                        "Luca.concerns.DomHelpers"
 
+# concerns are includes with special property / method conventions
+# which customize the components through the use of __initializer and
+# __included method names.  These will be called every time an instance
+# is created, and the first time the mixin is used to enhance a component.
+view.mixesIn            "DomHelpers", 
+                        "Templating",
+                        "EnhancedProperties",
+                        "CollectionEventBindings",
+                        "ApplicationEventBindings",
+                        "StateModel"
+
+# Luca.View classes have the concept of special events called hooks
+# which allow you to tap into the lifecycle events of your view to 
+# customize their behavior.  This is especially useful in subclasses.
+#
+# You can utilize a @hook method by camelcasing the triggers defined below: 
 view.triggers           "before:initialize",
                         "after:initialize",
                         "before:render",
@@ -12,7 +29,8 @@ view.triggers           "before:initialize",
                         "first:activation",
                         "activation",
                         "deactivation"
-                        
+
+# Luca.View decorates Backbone.View with some patterns and conventions.
 view.defines
   initialize: (@options={})->
     @trigger "before:initialize", @, @options
@@ -22,36 +40,18 @@ view.defines
     if @autoBindEventHandlers is true or @bindAllEvents is true
       bindAllEventHandlers.call(@) 
 
-    setupBodyTemplate.call(@)
-
     @cid = _.uniqueId(@name) if @name?
 
     @$el.attr("data-luca-id", @name || @cid)
     
-    Luca.cache( @cid, @ )
+    Luca.cacheInstance( @cid, @ )
 
-    # FIXME:
-    # Does this prevent inheritance of hooks all the way up the chain?
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 
-    @setupClassHelpers()
-
-    setupStateMachine.call(@) if @stateful is true and not @state?
-
-    registerCollectionEvents.call(@)
-    registerApplicationEvents.call( @)
-
-    setupTemplate.call(@) if @template and not @isField
-
-    if Luca.config.enhancedViewProperties is true and not @isField
-      Luca.View.handleEnhancedProperties.call(@)
-
-    if @mixins?.length > 0
-      for module in @mixins 
-        Luca.mixin(module)?.__initializer?.call(@, @, module)
+    Luca.concern.setup.call(@)
 
     @delegateEvents()
-
+        
     @trigger "after:initialize", @
 
   #### Hooks or Auto Event Binding
@@ -67,18 +67,7 @@ view.defines
   # after:render      : afterRender()
   # after:initialize  : afterInitialize()
   # first:activation  : firstActivation()
-  setupHooks: (set)->
-    set ||= @hooks
-
-    _(set).each (eventId)=>
-      fn = Luca.util.hook( eventId )
-
-      callback = ()=>
-        @[fn]?.apply @, arguments
-
-      callback = _.once(callback) if eventId?.match(/once:/)
-
-      @bind eventId, callback
+  setupHooks: Luca.util.setupHooks
 
   registerEvent: (selector, handler)->
     @events ||= {}
@@ -88,13 +77,18 @@ view.defines
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
 
-  collections: ()-> Luca.util.selectProperties( Luca.isBackboneCollection, @ )
-  models: ()-> Luca.util.selectProperties( Luca.isBackboneModel, @ )
-  views: ()-> Luca.util.selectProperties( Luca.isBackboneView, @ )
+  collections: ()-> 
+    Luca.util.selectProperties( Luca.isBackboneCollection, @ )
 
-  debug: ()->
+  models: ()-> 
+    Luca.util.selectProperties( Luca.isBackboneModel, @ )
+
+  views: ()-> 
+    Luca.util.selectProperties( Luca.isBackboneView, @ )
+
+  debug: (args...)->
     return unless @debugMode or window.LucaDebugMode?
-    console.log [(@name || @cid),message] for message in arguments
+    console.log [(@name || @cid), args...] 
 
   trigger: ()->
     if Luca.enableGlobalObserver
@@ -107,12 +101,17 @@ view.defines
 
 Luca.View._originalExtend = Backbone.View.extend
 
-Luca.View.renderWrapper = (definition)->
-  _base = definition.render
+# Note:
+#
+# I will be removing this prior to 1.0.  Optimizing for collection based
+# views does not belong in here, so the deferrable / collection binding stuff
+# needs to go.  
+#
+# Being able to defer rendering until the firing of an event on another object
+# is something that does ask for some syntactic sugar though, so need to rethink.
 
-  _base ||= Luca.View::$attach
-
-  definition.render = ()->
+Luca.View.renderStrategies = 
+  legacy: ( _userSpecifiedMethod )->
     view = @
     # if a view has a deferrable property set
 
@@ -126,7 +125,7 @@ Luca.View.renderWrapper = (definition)->
       trigger = if @deferrable_event then @deferrable_event else Luca.View.deferrableEvent 
 
       deferred = ()->
-        _base.call(view)
+        _userSpecifiedMethod.call(view)
         view.trigger("after:render", view)
 
       view.defer(deferred).until(target, trigger)
@@ -145,98 +144,74 @@ Luca.View.renderWrapper = (definition)->
 
     else
       @trigger "before:render", @
-      _base.apply(@, arguments)
+      _userSpecifiedMethod.apply(@, arguments)
       @trigger "after:render", @
 
       return @
 
+  improved: (_userSpecifiedMethod)->
+    @trigger "before:render", @
+
+
+    deferred = ()=>
+      _userSpecifiedMethod.apply(@, arguments)
+      @trigger "after:render", @            
+
+    console.log "doing the improved one", @deferrable
+
+    if @deferrable? and not _.isString(@deferrable)
+      throw "Deferrable property is expected to be a event id"
+
+    if _.isString(@deferrable)
+      console.log "binding to #{ @deferrable } on #{ @cid }"
+      view.on @deferrable, ()->
+        console.log "did the improved one"
+        deferred.call(view)
+        view.unbind(listenForEvent, @)
+
+    else
+      deferred.call(@)
+
+
+
+Luca.View.renderWrapper = (definition)->
+  _userSpecifiedMethod = definition.render
+
+  _userSpecifiedMethod ||= ()-> @trigger "empty:render"
+
+  definition.render = ()->
+    strategy = Luca.View.renderStrategies[ @renderStrategy ||= "legacy" ]
+
+    unless _.isFunction(strategy)
+      throw "Invalid rendering strategy.  Please see Luca.View.renderStrategies"
+
+    strategy.call(@, _userSpecifiedMethod)
+
+    @
+
   definition
 
 bindAllEventHandlers = ()->
-  _( @events ).each (handler,event)=>
+  for config in [@events, @componentEvents, @collectionEvents, @applicationEvents] when not _.isEmpty(config)
+    bindEventHandlers.call(@, config)    
+
+bindEventHandlers = (events={})->
+  for eventSignature, handler of events
     if _.isString(handler)
       _.bindAll @, handler
 
-registerApplicationEvents = ()->
-  return if _.isEmpty(@applicationEvents)
-
-  app = @app
-
-  if _.isString( app ) or _.isUndefined( app )
-    app = Luca.Application?.get?(app)
-
-  unless Luca.supportsEvents( app )
-    throw "Error binding to the application object on #{ @name || @cid }"
-
-  for eventTrigger, handler in @applicationEvents
-    handler = @[handler] if _.isString(handler) 
-
-    unless _.isFunction(handler)
-      throw "Error registering application event #{ eventTrigger } on #{ @name || @cid }"
-
-    app.on(eventTrigger, handler)
-
-registerCollectionEvents = ()->
-  return if _.isEmpty( @collectionEvents )
-
-  manager = @collectionManager
-
-  if _.isString( manager ) or _.isUndefined( manager )
-    manager = Luca.CollectionManager.get( manager )
-
-  for signature, handler of @collectionEvents
-    [key,eventTrigger] = signature.split(" ")
-
-    collection = manager.getOrCreate( key )
-
-    if !collection
-      throw "Could not find collection specified by #{ key }"
-
-    if _.isString(handler)
-      handler = @[handler]
-
-    unless _.isFunction(handler)
-      throw "invalid collectionEvents configuration"
-
-    try
-      collection.bind(eventTrigger, handler)
-    catch e
-      console.log "Error Binding To Collection in registerCollectionEvents", @
-      throw e
-
-setupStateMachine = ()->
-  @state = new Backbone.Model(@defaultState || {})
-  @set ||= ()=> @state.set.apply(@state, arguments)
-  @get ||= ()=> @state.get.apply(@state, arguments)  
-
-setupBodyTemplate = ()->
-  templateVars = if @bodyTemplateVars
-    @bodyTemplateVars.call(@)
-  else
-    @
-
-  if template = @bodyTemplate
-    @$el.empty()
-    Luca.View::$html.call(@, Luca.template(template, templateVars ) )
-
-setupTemplate = ()->
-  if @template?
-    @defer ()=>
-      @$template(@template, @)
-    .until("before:render")      
-
-Luca.View.extend = (definition)->
-  definition = Luca.View.renderWrapper( definition )
-
-  if definition.mixins? and _.isArray( definition.mixins )
-    for module in definition.mixins
-      Luca.decorate( definition ).with( module )
-
-  Luca.View._originalExtend.call(@, definition)
-
-
 Luca.View.deferrableEvent = "reset"
 
-Luca.View.handleEnhancedProperties = ()->
-  if _.isString(@collection) and Luca.CollectionManager.get()
-    @collection = Luca.CollectionManager.get().getOrCreate(@collection)  
+Luca.View.extend = (definition={})->
+  definition = Luca.View.renderWrapper( definition )
+  # for backward compatibility
+  definition.concerns ||= definition.concerns if definition.concerns?
+
+  componentClass = Luca.View._originalExtend.call(@, definition)
+
+  if definition.concerns? and _.isArray( definition.concerns )
+    for module in definition.concerns
+      Luca.decorate( componentClass ).with( module )
+
+  componentClass
+

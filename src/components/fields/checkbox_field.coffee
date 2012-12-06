@@ -1,13 +1,20 @@
-_.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
+checkboxField = Luca.register         "Luca.fields.CheckboxField"
 
+checkboxField.extends                 "Luca.core.Field"
+
+checkboxField.triggers                "checked",
+                                      "unchecked"
+
+checkboxField.publicConfiguration
+  send_blanks: true
+  input_value: 1
+
+checkboxField.privateConfiguration
+  template: 'fields/checkbox_field'
   events:
     "change input" : "change_handler"
 
-  className: 'luca-ui-checkbox-field luca-ui-field'
-  template: 'fields/checkbox_field'
-  hooks: ["checked","unchecked"]
-  send_blanks: true
-
+checkboxField.privateInterface
   change_handler: (e)->
     me = my = $(e.target)
 
@@ -24,14 +31,16 @@ _.def('Luca.fields.CheckboxField').extends('Luca.core.Field').with
 
     Luca.core.Field::initialize.apply @, arguments
 
-  afterInitialize: ()->
     @input_id ||= _.uniqueId('field')
     @input_name ||= @name
-    @input_value ||= 1
     @label ||= @name
 
+checkboxField.publicInterface
   setValue: (checked)->
-    @input.attr('checked', checked)
+    @getInputElement().attr('checked', checked)
 
   getValue:()->
-    @input.is(":checked")
+    @getInputElement().is(":checked")
+
+checkboxField.defines
+  version: 1

@@ -1,4 +1,4 @@
-Luca.modules.LoadMaskable = 
+Luca.concerns.LoadMaskable = 
   __initializer: ()->
     return unless @loadMask is true
 

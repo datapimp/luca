@@ -1,6 +1,9 @@
 make = Luca.View::make
 
-_.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
+checkboxArray = Luca.register     "Luca.fields.CheckboxArray"
+checkboxArray.extends             "Luca.core.Field"
+
+checkboxArray.defines
   version: 2
 
   template: "fields/checkbox_array"
@@ -14,7 +17,7 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
 
   initialize: (@options={})->
     _.extend @, @options
-    _.extend @, Luca.modules.Deferrable
+    _.extend @, Luca.concerns.Deferrable
     _.bindAll @, "renderCheckboxes", "clickHandler", "checkSelected"
 
     Luca.core.Field::initialize.apply @, arguments
@@ -33,6 +36,9 @@ _.def('Luca.fields.CheckboxArray').extends('Luca.core.Field').with
 
     cbArray = @
 
+    unless Luca.isBackboneCollection(@collection)
+      throw "Checkbox Array Fields must specify a @collection property"
+      
     if @collection.length > 0
       @renderCheckboxes()
     else

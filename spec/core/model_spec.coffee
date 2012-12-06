@@ -50,13 +50,14 @@ describe "Luca.Model with computed attribute", ->
     expect(model.get("fullName")).toEqual('Nickolay Schwarz')
 
 
-describe 'The Read Method', ->
 
+describe 'The Read Method', ->
   ModelClass = Luca.Model.extend
     defaults:
       attribute: "attribute"
     reader: ()-> 
       "reader"
+    property: true
 
   it "should read an attribute", ->
     model = new ModelClass()
@@ -66,3 +67,7 @@ describe 'The Read Method', ->
     model = new ModelClass()
     expect( model.read('attribute') ).toEqual "attribute"
     expect( model.read('reader') ).toEqual 'reader'
+
+  it "should read model object attributes as a fallback", ->
+    model = new ModelClass()
+    expect( model.read('property') ).toEqual true

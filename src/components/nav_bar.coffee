@@ -1,4 +1,8 @@
-_.def("Luca.components.NavBar").extends("Luca.View").with
+navBar = Luca.register "Luca.components.NavBar"
+
+navBar.extends         "Luca.View"
+
+navBar.defines
   fixed: true
   position: 'top'
   className: 'navbar'

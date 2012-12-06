@@ -1,4 +1,4 @@
-.luca-ui-form-view-wrapper {
+.luca-form-view {
   width: 100%;
   float: left;
   display: block;
@@ -7,7 +7,7 @@
 }
 
 
-.luca-ui-form-view {
+.luca-form-view {
   .luca-ui-field {
     margin: 5px;
     padding: 5px;
@@ -19,7 +19,7 @@
   }
 }
 
-.luca-ui-form-view.label-align-top {
+.luca-form-view.label-align-top {
   .luca-ui-field {
     label, input, select, textarea {
       margin: 5px 0px;
@@ -28,13 +28,13 @@
   }
 }
 
-.luca-ui-form-view.column-layout {
+.luca-form-view.column-layout {
   .luca-ui-field {
     float: left;
   }
 }
 
-.luca-ui-form-view {
+.luca-form-view {
   .toolbar-container {
     padding-right: 12px;
   }

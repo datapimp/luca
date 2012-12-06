@@ -1,11 +1,10 @@
 collection = Luca.define            'Luca.Collection'
-
-if Backbone.QueryCollection?
-  collection.extends                'Backbone.QueryCollection'
-else
-  collection.extends                'Backbone.Collection'
-
+collection.extends                  'Backbone.QueryCollection'
 collection.includes                 'Luca.Events'
+
+collection.triggers                 "after:initialize",  
+                                    "before:fetch",
+                                    "after:response"
 
 collection.defines    
   model: Luca.Model
@@ -25,7 +24,6 @@ collection.defines
 
   initialize: (models=[], @options)->
     _.extend @, @options
-    @setupMethodCaching()
     @_reset()
 
     # By specifying a @cache_key property or method, you can instruct
@@ -37,7 +35,7 @@ collection.defines
       console.log 'The @cached property of Luca.Collection is being deprecated.  Please change to cache_key'
 
     if @cache_key ||= @cached
-      @bootstrap_cache_key = if _.isFunction( @cache_key ) then @cache_key() else @cache_key
+      @bootstrap_cache_key = Luca.util.read(@cache_key) 
 
     if @registerAs or @registerWith
       console.log "This configuration API is deprecated.  use @name and @manager properties instead"
@@ -58,8 +56,8 @@ collection.defines
     # to be scoped with some sort of unique id, as say some sort of belongsTo relationship
     # then you can specify @registerAs as a method()
     if @manager
-      @name ||= @cache_key()
-      @name = if _.isFunction( @name ) then @name() else @name
+      @name ||= Luca.util.read(@cache_key) 
+      @name = Luca.util.read(@name) 
 
       unless @private or @anonymous
         @bind "after:initialize", ()=>
@@ -70,7 +68,7 @@ collection.defines
     # locally in localStorage
     if @useLocalStorage is true and window.localStorage?
       table = @bootstrap_cache_key || @name
-      throw "Must specify either a cached or registerAs property to use localStorage"
+      throw "Must specify a cache_key property or method to use localStorage"
       @localStorage = new Luca.LocalStore( table )
 
     # Populating a collection with local data
@@ -90,6 +88,11 @@ collection.defines
 
     if models
       @reset models, silent: true, parse: options?.parse
+
+    Luca.concern.setup.call(@)
+    Luca.util.setupHooks.call(@, @hooks)
+
+    @setupMethodCaching()
 
     @trigger "after:initialize"
 
@@ -139,43 +142,43 @@ collection.defines
     @
 
   applyFilter: (filter={}, options={})->
+    options = _( options ).clone()
+
     if options.remote? is true or @remoteFilter is true
       @applyParams(filter)
-      @fetch _.extend(options,refresh:true)
+      @fetch _.extend(options,refresh:true,remote:true)
     else
-      @reset @query filter
+      @reset @query(filter, options)
 
   # You can apply params to a collection, so that any upcoming requests
   # made to the REST API are made with the key values specified
   applyParams: (params)->
-    @base_params = _( Luca.Collection.baseParams() ).clone()
+    @base_params = _( Luca.Collection.baseParams() ).clone() || {}
     _.extend @base_params, params
 
     @
 
-  # If this collection is to be registered with some global collection
-  # tracker such as new Luca.CollectionManager() then we will register
-  # ourselves automatically
-  #
-  # To automatically register a collection with the registry, instantiate
-  # it with the registerWith property, which can either be a reference to
-  # the manager itself, or a string in case the manager isn't available
-  # at compile time
-  register: (collectionManager=Luca.CollectionManager.get(), key="", collection)->
-    throw "Can not register with a collection manager without a key" unless key.length >= 1
-    throw "Can not register with a collection manager without a valid collection manager" unless collectionManager?
+  register: (collectionManager, key="", collection)->
+    collectionManager ||= Luca.CollectionManager.get()
+
+    unless key.length >= 1
+      throw "Attempt to register a collection without specifying a key." 
+
 
     # by passing a string instead of a reference to an object, we can look up
     # that object only when necessary.  this prevents us from having to create
     # the manager instance before we can define our collections
     if _.isString( collectionManager )
-      collectionManager = Luca.util.nestedValue( collectionManager, (window || global) )
+      collectionManager = Luca.util.resolve( collectionManager )
 
-    throw "Could not register with collection manager" unless collectionManager
+    unless collectionManager?
+      throw "Attempt to register with a non existent collection manager." 
 
     if _.isFunction( collectionManager.add )
       return collectionManager.add(key, collection)
 
+    # If we don't want to use the CollectionManager class, and just want
+    # to cache collection instances on an object, we can do that too.
     if _.isObject( collectionManager )
       collectionManager[ key ] = collection
 
@@ -211,7 +214,7 @@ collection.defines
     # fetch will try to pull from the bootstrap if it is setup to do so
     # you can actually make the roundtrip to the server anyway if you pass
     # refresh = true in the options hash
-    return @bootstrap() if @cached_models().length and not options.refresh
+    return @bootstrap() if @cached_models().length and not (options.refresh is true or options.remote is true)
 
     url = if _.isFunction(@url) then @url() else @url
 
@@ -230,10 +233,11 @@ collection.defines
   # reset trigger with a function wrapped in _.once
   # so that it only gets run...ahem...once.
   #
-  # that being said, if the collection already has models
   # it won't even bother fetching it it will just run
   # as if reset was already triggered
-  onceLoaded: (fn, options={autoFetch:true})->
+  onceLoaded: (fn, options={})->
+    _.defaults(options, autoFetch: true)
+
     if @length > 0 and not @fetching
       fn.apply @, [@]
       return
@@ -262,17 +266,6 @@ collection.defines
     unless @fetching is true or !options.autoFetch or @length > 0
       @fetch()
 
-  # parse is very close to the stock Backbone.Collection parse, which
-  # just returns the response.  However, it also triggers a callback
-  # after:response, and automatically parses responses which contain
-  # a JSON root like you would see in rails, if you specify the @root
-  # property.
-  #
-  # it will also update the Luca.Collection.cache with the models from
-  # the response, so that any subsequent calls to fetch() on a bootstrapped
-  # collection, will have updated models from the server.  Really only
-  # useful if you call fetch(refresh:true) manually on any bootstrapped
-  # collection
   parse: (response)->
     @fetching = false
     @trigger "after:response", response
@@ -302,6 +295,8 @@ collection.defines
       @clearMethodCache(name)
 
   setupMethodCaching: ()->
+    return unless @cachedMethods?.length > 0 
+
     collection = @
     membershipEvents = ["reset","add","remove"]
     cache = @_methodCache = {}
@@ -316,7 +311,7 @@ collection.defines
 
       # wrap the collection method with a basic memoize operation
       collection[ method ] = ()->
-        cache[method].value ||= cache[method].original.apply collection, arguments
+        cache[method].value ||= cache[method].original.apply(collection, arguments)
 
       # bind to events on the collection, which once triggered, will
       # invalidate the cached value.  causing us to have to restore it
@@ -327,7 +322,9 @@ collection.defines
       dependencies = method.split(':')[1]
 
       if dependencies
-        for dependency in dependencies.split(",")
+        watchForChangesOn = dependencies.split(",")
+
+        _( watchForChangesOn ).each (dependency)->
           collection.bind "change:#{dependency}", ()->
             collection.clearMethodCache(method: method)
 
@@ -350,18 +347,38 @@ _.extend Luca.Collection.prototype,
 
     Backbone.View.prototype.trigger.apply @, arguments
 
+Luca.Collection._originalExtend = Backbone.Collection.extend
+
+Luca.Collection.extend = (definition={})->
+  # for backward compatibility
+  definition.concerns ||= definition.concerns if definition.concerns?
+
+  componentClass = Luca.Collection._originalExtend.call(@, definition)
+
+  if definition.concerns? and _.isArray( definition.concerns )
+    for module in definition.concerns
+      Luca.decorate( componentClass ).with( module )
+
+  componentClass
+
+Luca.Collection.namespace = (namespace)->
+  namespace = Luca.util.resolve(namespace) if _.isString(namespace)
+  Luca.Collection.__defaultNamespace = namespace if namespace?
+  Luca.Collection.__defaultNamespace ||= (window || global)
+  Luca.util.read( Luca.Collection.__defaultNamespace )
+  
 # Always include these parameters in every request to your REST API.
 #
 # either specify a function which returns a hash, or just a normal hash
 Luca.Collection.baseParams = (obj)->
-  return Luca.Collection._baseParams = obj if obj
+  obj = Luca.util.resolve(obj) if _.isString(obj)
+  Luca.Collection._baseParams = obj if obj
 
-  if _.isFunction( Luca.Collection._baseParams )
-    return Luca.Collection._baseParams()
+  Luca.util.read( Luca.Collection._baseParams )
 
-  if _.isObject( Luca.Collection._baseParams )
-    Luca.Collection._baseParams
-
+Luca.Collection.resetBaseParams = ()->
+  Luca.Collection._baseParams = {}
+  
 # In order to make our Backbone Apps super fast it is a good practice
 # to pre-populate your collections by what is referred to as bootstrapping
 #

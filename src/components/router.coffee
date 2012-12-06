@@ -1,4 +1,7 @@
-_.def("Luca.Router").extends("Backbone.Router").with
+#_.def("Luca.Router").extends("Backbone.Router").with
+router = Luca.register  "Luca.Router"
+router.extends          "Backbone.Router"
+router.defines
   routes:
     "" : "default"
 
@@ -13,6 +16,8 @@ _.def("Luca.Router").extends("Backbone.Router").with
     _( @routeHandlers ).each (route_id) =>
       @bind "route:#{ route_id }", ()=>
         @trigger.apply @, ["change:navigation", route_id  ].concat( _( arguments ).flatten() )
+
+    Backbone.Router.initialize?.apply(@, arguments)
 
   #### Router Functions
 

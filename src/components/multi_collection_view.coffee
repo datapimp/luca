@@ -1,4 +1,5 @@
-multiView = Luca.define     "Luca.components.MultiCollectionView"
+multiView = Luca.register     "Luca.components.MultiCollectionView"
+
 # The CollectionMultiView is a collection view with multiple renderings
 # of the list.  ( e.g. Icons, Table, List ).  It works by maintaining
 # a current view, and rendering that view.  It refreshes the views
@@ -23,13 +24,17 @@ multiView = Luca.define     "Luca.components.MultiCollectionView"
 #     ]
 multiView.extends           "Luca.containers.CardView"
 
-multiView.behavesAs         "LoadMaskable",
+multiView.mixesIn           "QueryCollectionBindings", 
+                            "LoadMaskable",
                             "Filterable",
                             "Paginatable"
 
-multiView.triggers
+multiView.triggers          "before:refresh",
+                            "after:refresh",
+                            "refresh",
+                            "empty:results"
 
-multiView.defaultsTo
+multiView.defines
   version: 1
 
   stateful: true
@@ -42,62 +47,46 @@ multiView.defaultsTo
   initialize: (@options={})->
     @components ||= @views
 
-    Luca.containers.CardView::initialize.apply(@, arguments) 
-
     validateComponent( view ) for view in @components    
 
-    @on "collection:change", @refresh, @
+    Luca.containers.CardView::initialize.apply(@, arguments) 
+
+    @on "refresh", @refresh, @
     @on "after:card:switch", @refresh, @
-    @on "before:components", propagateCollectionComponents, @
-    @on "before:components", bubbleCollectionEvents, @
+    @on "after:components", propagateCollectionComponents, @
+
+  relayAfterRefresh: (models,query,options)->
+    @trigger "after:refresh", models, query, options
 
   refresh: ()->
     @activeComponent()?.trigger("refresh")
 
-  getQuery: Luca.components.CollectionView::getQuery
-  getQueryOptions: Luca.components.CollectionView::getQueryOptions
-  getCollection: Luca.components.CollectionView::getCollection
-#### Private Helpers
+propagateCollectionComponents = ()->
+  container = @
 
-  bubbleCollectionEvents = ()->
-    container = @
-    container.eachComponent (component)->
-      for eventId in ['refresh','before:refresh','after:refresh','empty:results']
-        component.on eventId, ()->
-          if component is container.activeComponent()
-            container.trigger(eventId)
+  # in the multi view will share the same
+  # collection, filter state, pagination options, etc
+  for component in @components
 
-  propagateCollectionComponents = ()->
-    container = @
+    component.on "after:refresh", (models,query,options)=> 
+      @debug "collection member after refresh"
+      @trigger("after:refresh",models,query,options)
 
-    # in the multi view will share the same
-    # collection, filter state, pagination options, etc
-    for component in @components
-      _.extend component, 
-        collection: container.getCollection?() || @collection 
-        getQuery: container.getQuery
-        getQueryOptions: container.getQueryOptions
+    _.extend component, 
+      collection: container.getCollection()
 
-  validateComponent = (component)->
-    type = (component.type || component.ctype)
+      getQuery: ()->
+        container.getQuery.call(container)
 
-    return if  type is "collection" or 
-               type is "collection_view" or
-               type is "table" or
-               type is "table_view" 
+      getQueryOptions: ()->
+        container.getQueryOptions.call(container) 
 
-    throw "The MultiCollectionView expects to contain multiple collection views" 
+validateComponent = (component)->
+  type = (component.type || component.ctype)
 
+  return if  type is "collection" or 
+             type is "collection_view" or
+             type is "table" or
+             type is "table_view" 
 
-Luca.components.MultiCollectionView.defaultTopToolbar = 
-  group: true
-  selectable: true
-  buttons:[
-    icon: "list-alt"
-    label: "Table View"
-    eventId: "toggle:table:view"
-  ,
-    icon: "th"
-    label: "Icon View"
-    eventId: "toggle:icon:view"
-  ]  
+  throw "The MultiCollectionView expects to contain multiple collection views" 

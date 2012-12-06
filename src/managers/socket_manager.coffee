@@ -15,40 +15,32 @@ class Luca.SocketManager
   constructor: (@options={})->
     _.extend Backbone.Events
 
-    @loadTransport()
+    @loadProviderSource()
 
   connect: ()->
     switch @options.provider
       when "socket.io"
-        @socket = io.connect( @options.socket_host )
+        @socket = io.connect( @options.host )
       when "faye.js"
-        @socket = new Faye.Client( @options.socket_host )
+        @socket = new Faye.Client( @options.host + (@options.namespace || "") )
 
-  #### Transport Loading and Configuration
-  #
-  # Luca wraps several popular client side socket abstractions
-  # such as socket.io or faye.js ( more coming soon )
-  #
-  # it provides a common interface on top of these and just
-  # treats them as Backbone.Events which you bind to like you
-  # would on any other Backbone class
+  providerSourceLoaded: ()-> 
+    @connect()
 
-  transportLoaded: ()-> @connect()
-
-  transport_script: ()->
+  providerSourceUrl: ()->
     switch @options.provider
-      when "socket.io" then "#{ @options.transport_host }/socket.io/socket.io.js"
-      when "faye.js" then "#{ @options.transport_host }/faye.js"
+      when "socket.io" then "#{ @options.host }/socket.io/socket.io.js"
+      when "faye.js" then "#{ @options.host }/faye.js"
 
-  loadTransport: ()->
+  loadProviderSource: ()->
     script = document.createElement 'script'
     script.setAttribute "type", "text/javascript"
-    script.setAttribute "src", @transport_script()
-    script.onload = @transportLoaded
+    script.setAttribute "src", @providerSourceUrl()
+    script.onload = _.bind(@providerSourceLoaded,@)
 
     if Luca.util.isIE()
       script.onreadystatechange = ()=>
         if script.readyState is "loaded"
-          @transportLoaded()
+          @providerSourceLoaded()
 
     document.getElementsByTagName('head')[0].appendChild script

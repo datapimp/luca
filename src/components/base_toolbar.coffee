@@ -1,11 +1,12 @@
 _.def('Luca.components.Toolbar').extends('Luca.core.Container').with
 
+toolbar = Luca.register     "Luca.components.Toolbar"
+toolbar.extends             "Luca.core.Container"
+
+toolbar.defines
   className: 'luca-ui-toolbar toolbar'
 
   position: 'bottom'
-
-  initialize: (@options={})->
-    Luca.core.Container::initialize.apply @, arguments
 
   prepareComponents: ()->
     _( @components ).each (component)=>
@@ -13,3 +14,4 @@ _.def('Luca.components.Toolbar').extends('Luca.core.Container').with
 
   render: ()->
     $(@container).append(@el)
+    @

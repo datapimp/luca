@@ -260,6 +260,31 @@ describe "The Model Bootstrap", ->
     expect( spy.called ).toBeTruthy()
 
 
+describe "Base Params on the URL Method", ->
+  beforeEach ->
+    @collection = new Luca.Collection [],
+      url: ()-> "/url/to/endpoint"    
+
+  afterEach ->
+    Luca.Collection.resetBaseParams()
+
+  it "should work with strings too", ->
+    collection = new Luca.Collection [], url: "/string/based/url"
+    expect( collection.url ).toEqual "/string/based/url"
+
+  it "should include base params in the url", ->
+    Luca.Collection.baseParams(base:"value")
+    expect( @collection.url() ).toEqual '/url/to/endpoint?base=value'
+    
+  it "should include params in the url", ->
+    @collection.applyParams(param:"value")
+    expect( @collection.url() ).toEqual '/url/to/endpoint?param=value'
+
+  it "should include one time params, in addition to base params", ->
+    Luca.Collection.baseParams(base:"value")
+    @collection.applyParams(one:"time")
+    expect( @collection.url() ).toEqual "/url/to/endpoint?base=value&one=time"
+
 
 
 

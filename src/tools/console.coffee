@@ -1,26 +1,25 @@
-codeMirrorOptions =
-  readOnly: true
-  autoFocus: false
-  theme: "monokai"
-  mode: "javascript"
+developmentConsole = Luca.register    "Luca.tools.DevelopmentConsole"
 
-Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
+developmentConsole.extends            "Luca.core.Container"
+
+developmentConsole.defines
   className: "luca-ui-console"
   name: "console"
   history: []
   historyIndex: 0
   width: 1000
+
   componentEvents:
-    "code_input key:keyup" : "historyUp"
-    "code_input key:keydown" : "historyDown"
-    "code_input key:enter" : "runCommand"
+    "input key:keyup"    : "historyUp"
+    "input key:keydown"  : "historyDown"
+    "input key:enter"    : "runCommand"
 
   compileOptions:
     bare: true
 
   components:[
     type: "code_mirror_field"
-    getter: "getCodeMirror"
+    role: "code_mirror"
     additionalClassNames: "clearfix"
     name: "code_output"
     readOnly: true
@@ -31,7 +30,7 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
   ,
     type: "text_field"
     name: "code_input"
-    getter: "getInput"
+    role: "input"
     lineNumbers: false
     height: '30px'
     maxHeight: '30px'
@@ -152,8 +151,13 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
 
     try
       result = evaluator.call( @getContext() )
+
+      # capture luca objects for special inspection 
       if Luca.isComponent( result )
         result = Luca.util.inspectComponent( result )
+      else if Luca.isComponentPrototype( result )
+        result = Luca.util.inspectComponentPrototype( result )
+
       @onSuccess(result, code, raw) unless raw.match(/^console\.log/)
     catch error
       @onError(error, code, raw)
@@ -167,15 +171,29 @@ Luca.define("Luca.tools.DevelopmentConsole").extends("Luca.core.Container").with
 
 Luca.util.launchers ||= {}
 
+Luca.util.inspectComponentPrototype = (componentPrototype)->
+  liveInstances = Luca.registry.findInstancesByClass( componentPrototype )
+
+Luca.util.inspectComponent = (component)->
+  component = Luca(component) if _.isString(component)
+
+  {
+    name:         component.name  
+    instanceOf:   component.displayName 
+    subclassOf:   component._superClass()::displayName
+    inheritsFrom: Luca.parentClasses( component )
+  }
+
 Luca.util.launchers.developmentConsole = (name="luca-development-console")->
   @_lucaDevConsole = Luca name, ()=>
     @$el.append Backbone.View::make("div", id: "#{ name }-wrapper", class: "modal fade large")
 
-    console = new Luca.tools.DevelopmentConsole
+    dconsole = new Luca.tools.DevelopmentConsole
       name: name
       container: "##{ name }-wrapper"
 
-    console.render()
-    console.getCodeMirror().setHeight(602)
+    dconsole.render()
+    dconsole.getCodeMirror().setHeight(602)
 
   @_lucaDevConsole.show()
+  Luca(name)

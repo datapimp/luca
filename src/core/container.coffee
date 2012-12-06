@@ -1,39 +1,58 @@
-_.def('Luca.core.Container').extends('Luca.components.Panel').with
+container = Luca.register         "Luca.core.Container"
 
+container.extends                 "Luca.components.Panel"
+
+container.triggers                "before:components",
+                                  "before:render:components",
+                                  "before:layout",
+                                  "after:components",
+                                  "after:layout",
+                                  "first:activation"
+
+container.defines
   className: 'luca-ui-container'
 
   componentTag: 'div'
+
   componentClass: 'luca-ui-panel'
 
   isContainer: true
-
-  hooks:[
-    "before:components"
-    "before:render:components"
-    "before:layout"
-    "after:components"
-    "after:layout"
-    "first:activation"
-  ]
 
   rendered: false
 
   components: []
 
+  # @componentEvents provides declarative syntax for responding to events on
+  # the components in this container.  the format of the syntax is very similar
+  # to the other event binding helpers:
+  #
+  #   component_accessor component:trigger
+  #
+  # where component_accessor is either the name of the role, or a method on the container
+  # which will find the component in question.
+  #
+  # myContainer = new Luca.core.Container
+  #   componentEvents:
+  #     "name component:trigger"    : "handler"
+  #     "role component:trigger"    : "handler"
+  #     "getter component:trigger"  : "handler"
+  #
+  componentEvents: {}
+
   initialize: (@options={})->
     _.extend @, @options
 
-    @setupHooks [
-      "before:components"
-      "before:render:components"
-      "before:layout"
-      "after:components"
-      "after:layout"
-      "first:activation"
-    ]
-
     # aliases for the components property
     @components ||= @fields ||= @pages ||= @cards ||= @views
+    
+    # accept components as an array of strings representing
+    # the luca component type
+    for component in @components when _.isString(component)
+      component = (type: component, role: component, name: component)
+
+    _.bindAll(@, "beforeRender")
+
+    @setupHooks( Luca.core.Container::hooks )
 
     validateContainerConfiguration(@)
 
@@ -102,11 +121,27 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     @componentContainers = _( @components ).map (component, index)->
       applyDOMConfig.call(container, component, index)
 
+    componentsWithClassBasedAssignment = @_().select (component)->
+      _.isString(component.container) and component.container?.match('.') and container.$( component.container ).length > 0
+
+    # TEMP / HACK / Workaround
+    #
+    # Containers with components assigned to .class-based-containers
+    # seem to get double rendered in the renderComponents() method.
+    #
+    # So here I am uniquely identifying the containers in a way that is not possible
+    # in the templates ( since we want to be able to inherit templates and component assignments )
+    if componentsWithClassBasedAssignment.length > 0
+      for specialComponent in componentsWithClassBasedAssignment
+        containerAssignment = _.uniqueId('container')
+        targetEl = container.$( specialComponent.container )
+        if targetEl.length > 0
+          $(targetEl).attr('data-container-assignment', containerAssignment)
+          specialComponent.container += "[data-container-assignment='#{ containerAssignment }']"
+
   prepareComponents: ()->
-    # accept components as an array of strings representing
-    # the luca component type
-    for component in @components when _.isString(component)
-      component = (type: component)
+    container = @
+
 
     _( @components ).each (component, index)=>
       ce = componentContainerElement = @componentContainers?[index]
@@ -118,6 +153,26 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
         panel = @make(@componentTag, componentContainerElement, '')
         @$append( panel )
 
+      # if the container defines a @defaults property
+      # then we should make sure our child components inherit
+      # these values unless specifically defined
+      if container.defaults?
+        component = _.defaults(component, (container.defaults || {}))
+
+      # if the container defines an @extensions property as an array of
+      # configuration objects, then we will extend the component config with
+      # the object in the matching position of the @extensions array.
+      if _.isArray(container.extensions) and _.isObject(container.extensions?[ index ])
+        componentExtension = container.extensions[index]
+        component = _.extend(component, componentExtension)
+
+      # if the container defines an @extensions property as an object of nested hashes,
+      # then extensions is a key/value pair whose key represents the role of the component
+      # that we wish to extend / customize 
+      if component.role? and _.isObject(container.extensions) and _.isObject(container.extensions[component.role])
+        componentExtension = container.extensions[component.role]
+        component = _.extend(component, componentExtension)
+        
       unless component.container?
         component.container = "##{ componentContainerElement.id }" if @generateComponentElements
         component.container ||= @$bodyEl()
@@ -134,6 +189,7 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     map = @componentIndex =
       name_index: {}
       cid_index: {}
+      role_index: {}
 
     container   = @
 
@@ -144,45 +200,39 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
       # adding the views @$el to the appropriate @container.
 
       # you can also just pass a string representing the component_type
-      component = if Luca.isBackboneView( object )
+      component = if Luca.isComponent( object )
         object
       else
         object.type ||= object.ctype
 
         if !object.type?
+          # TODO
+          # Add support for all of the various components property aliases
           if object.components?
             object.type = object.ctype = 'container'
           else
             object.type = object.ctype = Luca.defaultComponentType
 
-        object = _.defaults(object, (container.defaults || {}))
-
+        object._parentCid ||= container.cid
         created = Luca.util.lazyComponent( object )
-
-
-      # if you define a @getter property as a string on your component
-      # we will create a function with that name on this container that
-      # allows you to access this component
-      if _.isString( component.getter )
-        container[ component.getter ] = (()-> component) 
 
       # if we're using base backbone views, then they don't extend themselves
       # with their passed options, so this is a workaround to get them to
       # pick up the container config property
-      if !component.container and component.options.container
+      if !component.container and component.options?.container
         component.container = component.options.container
 
-      if map and component.cid?
-        map.cid_index[ component.cid ] = index
+      component.getParent ||= ()-> Luca( component._parentCid )
 
-      if map and component.name?
-        map.name_index[ component.name ] = index
+      if not component.container?
+        console.log component,index,@
+        console.error "could not assign container property to component on container #{ @name || @cid }"
+
+      indexComponent( component ).at(index).in( @componentIndex )
 
       component
 
     @componentsCreated = true
-
-    @registerComponentEvents() unless _.isEmpty(@componentEvents)
 
     map
 
@@ -191,14 +241,14 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
   renderComponents: (@debugMode="")->
     @debug "container render components"
 
-    container = @ 
-    _(@components).each (component)->
-      component.getParent = ()-> 
-        container 
+    container = @
 
+    _(@components).each (component)->
       try
-        $( component.container ).append( component.el )
-        component.render() 
+        component.trigger "before:attach"
+        @$( component.container ).eq(0).append( component.el )
+        component.trigger "after:attach"
+        component.render()
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
 
@@ -227,32 +277,74 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
         component.previously_activated = true
 
   #### Underscore Methods For Working with Components
-  pluck: (attribute)-> 
-    _( @components ).pluck attribute
+  _: ()-> _( @components )
+
+  pluck: (attribute)->
+    @_().pluck(attribute)
 
   invoke: (method)->
-    _( @components ).invoke method
+    @_().invoke(method)
+
+  select: (fn)->
+    @_().select(fn)
+
+  detect: (fn)->
+    @_().detect(attribute)
+
+  reject: (fn)->
+    @_().reject(fn)
 
   map: (fn)->
-    _( @components ).map(fn)
-    
-  # event binding sugar for nested components
-  #
-  # you can define events like:
+    @_().map(fn)
 
-  # _.def("MyContainer").extends("Luca.View").with
-  #   componentEvents:
-  #     "component_name before:load" : "mySpecialHandler"
-  componentEvents: {}
+  registerComponentEvents: (eventList)->
+    container = @
 
-  registerComponentEvents: ()->
-    for listener, handler of @componentEvents
-      [componentName,trigger] = listener.split(' ')
-      component = @findComponentByName(componentName)
-      component?.bind trigger, @[handler]
+    for listener, handler of (eventList || @componentEvents||{})
+      [componentNameOrRole,eventId] = listener.split(' ')
+
+      unless _.isFunction( @[handler] )
+        console.log "Error registering component event", listener, componentNameOrRole, eventId
+        throw "Invalid component event definition #{ listener }. Specified handler is not a method on the container"
+
+      if componentNameOrRole is "*"
+        @eachComponent (component)=> component.on(eventId, @[handler], container)
+      else
+        component = @findComponentForEventBinding( componentNameOrRole )
+
+        unless component? and Luca.isComponent(component)
+          console.log "Error registering component event", listener, componentNameOrRole, eventId
+          throw "Invalid component event definition: #{ componentNameOrRole }"
+
+        component?.bind eventId, @[handler], container
+
+
+  subContainers: ()->
+    @select (component)->
+      component.isContainer is true
+
+  roles: ()->
+    _( @allChildren() ).pluck('role')
+
+  allChildren: ()->
+    children = @components
+    grandchildren = _( @subContainers() ).invoke('allChildren')
+    _([children,grandchildren]).chain().compact().flatten().value()
+
+  findComponentForEventBinding: (nameRoleOrGetter, deep=true)->
+    @findComponentByName(nameRoleOrGetter, deep) || @findComponentByGetter( nameRoleOrGetter, deep ) || @findComponentByRole( nameRoleOrGetter, deep )
+
+  findComponentByGetter: (getter, deep=false)->
+    _( @allChildren() ).detect (component)->
+      component.getter is getter
+
+  findComponentByRole: (role,deep=false)->
+    _( @allChildren() ).detect (component)->
+      component.role is role or component.type is role or component.ctype is role
 
   findComponentByName: (name, deep=false)->
-    @findComponent(name, "name_index", deep)
+    _( @allChildren() ).detect (component)->
+      component.name is name
 
   findComponentById: (id, deep=false)->
     @findComponent(id, "cid_index", deep)
@@ -261,12 +353,14 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     @createComponents() unless @componentsCreated is true
 
     position = @componentIndex?[ haystack ][ needle ]
-    component = @components?[ position ]
+    component = @components[ position ]
 
     return component if component
 
     if deep is true
-      sub_container = _( @components ).detect (component)-> component?.findComponent?(needle, haystack, true)
+      sub_container = _( @components ).detect (component)->
+        component?.findComponent?(needle, haystack, true)
+
       sub_container?.findComponent?(needle, haystack, true)
 
   each: (fn)->
@@ -295,17 +389,18 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
     @components[ needle ]
 
   isRootComponent:()->
-    !@getParent?
+    @rootComponent is true || !@getParent?
 
   getRootComponent: ()->
     if @isRootComponent() then @ else @getParent().getRootComponent()
-    
-  selectByAttribute: (attribute, value, deep=false)->
+
+
+  selectByAttribute: (attribute, value=undefined, deep=false)->
     components = _( @components ).map (component)->
       matches = []
       test = component[ attribute ]
 
-      matches.push( component ) if test is value
+      matches.push( component ) if test is value or (not value? and test?)
 
       # recursively traverse our components
       matches.push component.selectByAttribute?(attribute, value, true) if deep is true
@@ -314,13 +409,10 @@ _.def('Luca.core.Container').extends('Luca.components.Panel').with
 
     _.flatten( components )
 
-  select: (attribute, value, deep=false)->
-    console.log "Container.select will be replaced by selectByAttribute in 1.0"
-    Luca.core.Container::selectByAttribute.apply(@, arguments)
 
 # This is the method by which a container injects the rendered child views
 # into the DOM.  It will get passed the container object, and the component
-# that is being rendered.  
+# that is being rendered.
 Luca.core.Container.componentRenderer = (container, component)->
   attachMethod = $( component.container )[ component.attachWith || "append" ]
   attachMethod( component.render().el )
@@ -351,6 +443,29 @@ applyDOMConfig = (panel, panelIndex)->
 
   config
 
+
+
+createGetterMethods = ()->
+  container = @
+
+  childrenWithGetter = _( @allChildren() ).select (component)->
+    component.getter?
+
+  _( childrenWithGetter ).each (component)->
+    container[ component.getter ] ||= ()->
+      component
+
+createMethodsToGetComponentsByRole = ()->
+  container = @
+
+  childrenWithRole = _( @allChildren() ).select (component)->
+    component.role?
+
+  _( childrenWithRole ).each (component)->
+    getter = _.str.camelize( "get_" + component.role )
+    container[ getter ] ||= ()->
+      component
+
 doComponents = ()->
   @trigger "before:components", @, @components
   @prepareComponents()
@@ -359,5 +474,25 @@ doComponents = ()->
   @renderComponents()
   @trigger "after:components", @, @components
 
+  unless @skipGetterMethods is true
+    createGetterMethods.call(@)
+    createMethodsToGetComponentsByRole.call(@)
+
+  @registerComponentEvents()
+
 validateContainerConfiguration = ()->
-  
+  true
+
+
+# Private Helpers
+#
+# indexComponent( component ).at( index ).in( componentsInternalIndexMap )
+indexComponent = (component)->
+  at: (index)->
+    in: (map)->
+      if component.cid?
+        map.cid_index[ component.cid ] = index
+      if component.role?
+        map.role_index[ component.role ] = index
+      if component.name?
+        map.name_index[ component.name ] = index

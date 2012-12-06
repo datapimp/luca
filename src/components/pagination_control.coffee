@@ -1,22 +1,24 @@
 paginationControl = Luca.register   "Luca.components.PaginationControl"
 
-paginationControl.extends         "Luca.View"
+paginationControl.extends           "Luca.View"
 
 paginationControl.defines
-
   template: "components/pagination"
 
   stateful: true
 
   autoBindEventHandlers: true
 
-  events: 
+  events:
     "click a[data-page-number]" : "selectPage"
     "click a.next"              : "nextPage"
-    "click a.prev"              : "previousPage"  
+    "click a.prev"              : "previousPage"
 
   afterInitialize: ()->
-    @state.on("change", @refresh, @)
+    _.bindAll @, "updateWithPageCount"
+
+    @state?.on "change", (state, numberOfPages)=>
+      @updateWithPageCount( state.get('numberOfPages') )
 
   limit: ()->
     parseInt (@state.get('limit') || @collection?.length)
@@ -34,7 +36,7 @@ paginationControl.defines
 
   selectPage: (e)->
     me = my = @$( e.target )
-    me = my = my.closest('a.page') unless me.is('a.page') 
+    me = my = my.closest('a.page') unless me.is('a.page')
 
     my.siblings().removeClass('is-selected')
     me.addClass('is-selected')
@@ -49,9 +51,9 @@ paginationControl.defines
 
   pageButtonContainer: ()->
     @$ '.group'
-  
+
   previousEnabled: ()->
-    @page() > 1  
+    @page() > 1
 
   nextEnabled: ()->
     @page() < @totalPages()
@@ -63,17 +65,22 @@ paginationControl.defines
     @$ 'a.page.next'
 
   pageButtons: ()->
-    @$ 'a[data-page-number]', @pageButtonContainer()  
+    @$ 'a[data-page-number]', @pageButtonContainer()
 
-  refresh: ()->
+  updateWithPageCount: (@pageCount, models=[])->
+    modelCount = models.length
+
     @pageButtonContainer().empty()
 
-    for page in [1..@totalPages()]
+    _( @pageCount ).times (index)=>
+      page = index + 1
       button = @make("a","data-page-number":page, class:"page", page )
-      @pageButtonContainer().append(button) 
+      @pageButtonContainer().append(button)
 
     @toggleNavigationButtons()
     @selectActivePageButton()
+
+    @
 
   toggleNavigationButtons: ()->
     @$('a.next, a.prev').addClass('disabled')
@@ -87,11 +94,11 @@ paginationControl.defines
     @pageButtons().filter("[data-page-number='#{ @page() }']")
 
   totalPages: ()->
-    parseInt( Math.ceil(@totalItems() / @itemsPerPage()) )
+    @pageCount
 
   totalItems: ()->
     parseInt @collection?.length || 0
 
-  itemsPerPage: (value, options={})-> 
+  itemsPerPage: (value, options={})->
     @state.set("limit", value, options) if value?
     parseInt @state.get("limit")

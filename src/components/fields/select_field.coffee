@@ -1,13 +1,12 @@
-_.def('Luca.fields.SelectField').extends('Luca.core.Field').with
+selectField = Luca.register   "Luca.fields.SelectField"
 
+selectField.extends           "Luca.core.Field"
+
+selectField.triggers          "after:select"
+
+selectField.defines
   events:
     "change select" : "change_handler"
-
-  hooks:[
-    "after:select"
-  ]
-
-  className: 'luca-ui-select-field luca-ui-field'
 
   template: "fields/select_field"
 
@@ -19,13 +18,14 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
 
   initialize: (@options={})->
     _.extend @, @options
-    _.extend @, Luca.modules.Deferrable
+    _.extend @, Luca.concerns.Deferrable
     _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
     Luca.core.Field::initialize.apply @, arguments
 
     @input_id ||= _.uniqueId('field')
     @input_name ||= @name
+    @valueType ||= Luca.config.idAttributeType if @valueField is "id"
     @label ||= @name
     @retainValue = true if _.isUndefined @retainValue
 
@@ -36,12 +36,12 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
       @parseData()
 
     try
-      @configure_collection()
+      @configure_collection( @setAsDeferrable )
     catch e
       console.log "Error Configuring Collection", @, e.message
 
-    @collection.bind "before:fetch", @beforeFetch
-    @collection.bind "reset", @populateOptions
+    @collection?.bind "before:fetch", @beforeFetch
+    @collection?.bind "reset", @populateOptions
 
   # if the select field is configured with a data property
   # then parse that data into the proper format.  either
@@ -57,13 +57,14 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
 
       hash
 
-  afterRender: ()->
-    @input = $('select', @el)
+  getInputElement: ()->
+    @input ||= @$('select').eq(0)
 
+  afterRender: ()->
     if @collection?.models?.length > 0
       @populateOptions()
     else
-      @collection.trigger("reset")
+      @collection?.trigger("reset")
 
   setValue: (value)->
     @currentValue = value
@@ -76,11 +77,10 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
     @trigger "on:change", @, e
 
   resetOptions: ()->
-    @input.html('')
+    @getInputElement().html('')
 
     if @includeBlank
-      @input.append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
-
+      @getInputElement().append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
   populateOptions: ()->
     @resetOptions()
@@ -91,7 +91,7 @@ _.def('Luca.fields.SelectField').extends('Luca.core.Field').with
         display = model.get( @displayField )
         selected = "selected" if @selected and value is @selected
         option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
-        @input.append( option )
+        @getInputElement().append( option )
 
     @trigger "after:populate:options", @
     @setValue( @currentValue )

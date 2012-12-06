@@ -2,14 +2,16 @@
 # and returns the value of window.deep.nested.value.  useful for defining
 # references on objects which don't yet exist, as strings, which get
 # evaluated at runtime when such references will be available
-Luca.util.resolve = (accessor, source_object)->
+Luca.util.resolve = (propertyReference, source_object)->
+  return propertyReference unless _.isString(propertyReference)
+
   try
     source_object ||= (window || global)
-    resolved = _( accessor.split(/\./) ).inject (obj,key)->
+    resolved = _( propertyReference.split(/\./) ).inject (obj,key)->
       obj = obj?[key]
     , source_object
   catch e
-    console.log "Error resolving", accessor, source_object
+    console.log "Error resolving", propertyReference, source_object
     throw e
     
   resolved
@@ -20,6 +22,8 @@ Luca.util.nestedValue = Luca.util.resolve
 Luca.util.argumentsLogger = (prompt)->
   ()-> console.log prompt, arguments
 
+Luca.util.read = (property, args...)->
+  if _.isFunction(property) then property.apply(@, args) else property
 
 # turns a word like form_view into FormView
 Luca.util.classify = (string="")->
@@ -33,6 +37,16 @@ Luca.util.hook = (eventId="")->
 
   parts = _( parts ).map (p)-> _.string.capitalize(p)
   fn = prefix + parts.join('')
+
+Luca.util.toCssClass = (componentName, exclusions...)->
+  parts = componentName.split('.')
+
+  transformed = for part in parts when _( exclusions ).indexOf(part) is -1
+    part = _.str.underscored(part)
+    part = part.replace(/_/g,'-')
+    part
+
+  transformed.join '-'
 
 Luca.util.isIE = ()->
   try
@@ -116,10 +130,40 @@ Luca.util.badge = (contents="", type, baseClass="badge")->
   cssClass += " #{ baseClass }-#{ type }" if type?
   Luca.util.make("span",{class:cssClass},contents)
 
-Luca.util.inspectComponent = (component)->
-  {
-    name:         component.name  
-    instanceOf:   component.displayName 
-    subclassOf:   component._superClass()::displayName
-    inheritsFrom: Luca.parentClasses( component )
-  }
+Luca.util.setupHooks = (set)->
+  set ||= @hooks
+
+  _(set).each (eventId)=>
+    fn = Luca.util.hook( eventId )
+
+    callback = ()->
+      @[fn]?.apply @, arguments
+
+    callback = _.once(callback) if eventId?.match(/once:/)
+
+    @on eventId, callback, @
+
+Luca.util.setupHooksAdvanced = (set)->
+  set ||= @hooks
+
+  _(set).each (eventId)=>
+    hookSetup = @[ Luca.util.hook( eventId ) ]
+
+    unless _.isArray(hookSetup)
+      hookSetup = [hookSetup]
+    
+    for entry in hookSetup      
+      fn = if _.isString(entry)
+        @[ entry ]
+
+      if _.isFunction(entry)
+        fn = entry
+
+      callback = ()-> 
+        @[fn]?.apply @, arguments
+
+      if eventId?.match(/once:/)
+        callback = _.once(callback) 
+
+      @on eventId, callback, @
+

@@ -10,16 +10,16 @@ module Luca
       argument :application_name, :type => :string, :default => "luca_app"
 
       def generate_controller
-        template "controller.rb", "app/controllers/#{application_name}_controller.rb"
+        template "controller.rb", "app/controllers/#{application_name.gsub(/-/,'_')}_controller.rb"
       end
 
       def generate_view
-        template "index.html.#{template_extension}", "app/views/#{application_name}/index.html.#{template_extension}"
+        template "index.html.#{template_extension}", "app/views/#{application_name.gsub(/-/,'_')}/index.html.#{template_extension}"
       end
 
       def generate_route
         sentinel = /\.routes\.draw do(?:\s*\|map\|)?\s*$/
-        routing_code = "get '/#{application_name}', :to => '#{application_name}#index'"
+        routing_code = "get '/#{application_name}', :to => '#{application_name.gsub(/-/,'_')}#index'"
 
         in_root do
           inject_into_file 'config/routes.rb', "\n  #{routing_code}\n", { :after => sentinel, :verbose => false }
@@ -27,18 +27,22 @@ module Luca
       end
 
       def generate_javascript
-        file_extension = javascript_extension == :coffee ? "js.coffee" : "js"
-        template "javascripts/application.#{file_extension}", "app/assets/javascripts/#{application_name}/application.#{file_extension}"
+        file_extension = "coffee"
+        template "javascripts/application.#{file_extension}", "app/assets/javascripts/#{application_name}/#{ application_name }_application.#{file_extension}"
         template "javascripts/dependencies.#{file_extension}", "app/assets/javascripts/#{application_name}/dependencies.#{file_extension}"
         template "javascripts/index.#{file_extension}", "app/assets/javascripts/#{application_name}/index.#{file_extension}"
-        template "javascripts/router.#{file_extension}", "app/assets/javascripts/#{application_name}/router.#{file_extension}"
-        template "javascripts/main.#{file_extension}", "app/assets/javascripts/#{application_name}/views/main.#{file_extension}"
+        template "javascripts/router.#{file_extension}", "app/assets/javascripts/#{application_name}/lib/router.#{file_extension}"
+        template "javascripts/collection_manager.#{file_extension}", "app/assets/javascripts/#{application_name}/lib/collection_manager.#{file_extension}"
         template "javascripts/config.#{file_extension}", "app/assets/javascripts/#{application_name}/config.#{file_extension}"
-        template "javascripts/main.jst.ejs", "app/assets/javascripts/#{application_name}/templates/main.jst.ejs"
+        template "javascripts/home.jst.ejs", "app/assets/javascripts/#{application_name}/templates/pages/home.jst.ejs"
         
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/models")
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/collections")
+        empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/views")
+        empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/lib")
         empty_directory_with_gitkeep("app/assets/javascripts/#{application_name}/util")
+
+        empty_directory_with_gitkeep("app/assets/stylesheets/#{application_name}")
       end
 
       private

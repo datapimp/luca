@@ -1,4 +1,4 @@
-Luca.modules.GridLayout = 
+Luca.concerns.GridLayout = 
   _initializer: ()->
     if @gridSpan
       @$el.addClass "span#{ @gridSpan }"

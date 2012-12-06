@@ -44,6 +44,7 @@ Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
 
   afterRender: ()->
     @instance = CodeMirror( @$bodyEl()[0], @codemirrorOptions() )
+    console.log "After Render On Code Mirror Field"
     @setMaxHeight()
     @setHeight()
 

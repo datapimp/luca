@@ -1,5 +1,7 @@
+textField = Luca.register     'Luca.fields.TextField'
+textField.extends             'Luca.core.Field'
 
-_.def('Luca.fields.TextField').extends('Luca.core.Field').with
+textField.defines
   events:
     "blur input" : "blur_handler"
     "focus input" : "focus_handler"
@@ -22,7 +24,7 @@ _.def('Luca.fields.TextField').extends('Luca.core.Field').with
     @label ||= @name
     @input_class ||= @class
     @input_value ||= @value || "" 
-
+    
     if @prepend
       @$el.addClass('input-prepend')
       @addOn = @prepend
@@ -30,6 +32,8 @@ _.def('Luca.fields.TextField').extends('Luca.core.Field').with
     if @append
       @$el.addClass('input-append')
       @addOn = @append
+
+    @placeHolder ||= ""
 
     Luca.core.Field::initialize.apply @, arguments
 

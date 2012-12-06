@@ -1,4 +1,4 @@
-collectionView = Luca.define      "Luca.components.CollectionView"
+collectionView = Luca.register      "Luca.components.CollectionView"
 # The CollectionView facilitates the rendering of a Collection
 # of models into a group of many rendered templates
 # 
@@ -16,7 +16,8 @@ collectionView = Luca.define      "Luca.components.CollectionView"
 #
 collectionView.extends            "Luca.components.Panel"
 
-collectionView.behavesAs          "LoadMaskable", 
+collectionView.mixesIn            "QueryCollectionBindings", 
+                                  "LoadMaskable", 
                                   "Filterable", 
                                   "Paginatable"
 
@@ -25,65 +26,72 @@ collectionView.triggers           "before:refresh",
                                   "refresh",
                                   "empty:results"
 
-collectionView.defaults
-
+# IDEA:
+# 
+# For validation of component configuration,
+# we could define a convention like:
+#
+# collectionView.validatesConfigurationWith
+#   requiresValidCollectionAt: "collection"
+#   requiresPresenceOf: 
+#     either: ["itemTemplate", "itemRenderer", "itemProperty"]
+#
+#
+collectionView.publicConfiguration
   tagName: "ol"
-
-  className: "luca-ui-collection-view"
-
   bodyClassName: "collection-ui-panel"
-
-  # A collection view can pass a model through to a template
-  itemTemplate: undefined
-
-  # A collection view can pass a model through a function which should return a string
-  itemRenderer: undefined
-
   itemTagName: 'li'
-
   itemClassName: 'collection-item'
+  itemTemplate: undefined
+  itemRenderer: undefined
+  itemProperty: undefined
 
+collectionView.defines
   initialize: (@options={})->
     _.extend(@, @options)
-
     _.bindAll @, "refresh"
 
+    # IDEA:
+    #
+    # This type of code could be moved into a re-usable concern
+    # which higher order components can mixin to make it easier
+    # to extend them, instantiate them, etc.
     unless @collection? or @options.collection
+      console.log "Error on initialize of collection view", @
       throw "Collection Views must specify a collection"
 
     unless @itemTemplate? || @itemRenderer? || @itemProperty?
       throw "Collection Views must specify an item template or item renderer function"
 
-    Luca.components.Panel::initialize.apply(@, arguments)
-
-    if _.isString(@collection) and Luca.CollectionManager.get()
-      @collection = Luca.CollectionManager.get().getOrCreate(@collection)
+    if _.isString(@collection) 
+      if Luca.CollectionManager.get()
+        @collection = Luca.CollectionManager.get().getOrCreate(@collection)
+      else
+        console.log "String Collection but no collection manager"
 
     unless Luca.isBackboneCollection(@collection)
+      console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
-      @collection.on "before:fetch", ()=>
-        @trigger "enable:loadmask"
-        
-      @collection.bind "reset", ()=>
-        @refresh()
-        @trigger "disable:loadmask"
+    @collection.on "before:fetch", ()=>
+      @trigger "enable:loadmask"
+      
+    @collection.bind "reset", ()=>
+      @refresh()
+      @trigger "disable:loadmask"
 
-      @collection.bind "remove", ()=>
-        @refresh()
+    @collection.bind "remove", ()=>
+      @refresh()
 
-      @collection.bind "add", ()=>
-        @refresh()
+    @collection.bind "add", ()=>
+      @refresh()
 
-      if @observeChanges is true
-        @collection.on "change", @refreshModel, @
+    if @observeChanges is true
+      @collection.on "change", @refreshModel, @
 
-    unless @autoRefreshOnModelsPresent is false
-      @defer ()=> 
-        @refresh() if @collection.length > 0
-      .until("after:render")
+    Luca.components.Panel::initialize.apply(@, arguments)
 
-    @on "collection:change", @refresh, @
+    @on "refresh", @refresh, @
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
@@ -112,30 +120,6 @@ collectionView.defaults
       console.log "Error generating DOM element for CollectionView", @, model, index
       #no op
 
-  getCollection: ()->
-    @collection
-
-  # Private: returns the query that is applied to the underlying collection.
-  # accepts the same options as Luca.Collection.query's initial query option.
-  getQuery: ()-> 
-    @query ||= {}
-
-  # Private: returns the query that is applied to the underlying collection.
-  # accepts the same options as Luca.Collection.query's initial query option.
-  getQueryOptions: ()-> 
-    @queryOptions ||= {}
-
-  # Private: returns the models to be rendered.  If the underlying collection
-  # responds to @query() then it will use that interface. 
-  getModels: (query,options)->
-    if @collection?.query
-      query ||= @getQuery()
-      options ||= @getQueryOptions()
-      
-      @collection.query(query, options)
-    else
-      @collection.models
-
   locateItemElement: (id)->
     @$(".#{ @itemClassName }[data-model-id='#{ id }']")
 
@@ -144,12 +128,12 @@ collectionView.defaults
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
     @trigger("model:refreshed", index, model)
 
-  refresh: (query,options)->
-    query ||= @getQuery()
+  refresh: (query,options,models)->
+    query   ||= @getQuery()
     options ||= @getQueryOptions()
+    models  ||= @getModels(query, options)
 
     @$bodyEl().empty()
-    models = @getModels(query, options)
 
     @trigger("before:refresh", models, query, options)
 
@@ -157,7 +141,6 @@ collectionView.defaults
       @trigger("empty:results")
 
     index = 0
-
     for model in models
       @$append @makeItem(model, index++)
 

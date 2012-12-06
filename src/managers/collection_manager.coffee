@@ -1,8 +1,6 @@
 class Luca.CollectionManager
   name: "primary"
 
-  collectionNamespace: Luca.Collection.namespace
-
   __collections: {}
 
   relayEvents: true 
@@ -15,6 +13,8 @@ class Luca.CollectionManager
     if existing = Luca.CollectionManager.get?(@name)
       throw 'Attempt to create a collection manager with a name which already exists'
 
+    @collectionNamespace ||= Luca.util.read( Luca.Collection.namespace )  
+    
     Luca.CollectionManager.instances ||= {}
 
     _.extend @, Backbone.Events
@@ -45,7 +45,11 @@ class Luca.CollectionManager
     CollectionClass ||= guessCollectionClass.call(@, key)
     collectionOptions.name = "" if collectionOptions.private
 
-    collection = new CollectionClass(initialModels,collectionOptions)
+    try  
+      collection = new CollectionClass(initialModels,collectionOptions)
+    catch e
+      console.log "Error creating collection", CollectionClass, collectionOptions, key
+      throw(e)
 
     @add(key, collection)
 
@@ -97,13 +101,31 @@ class Luca.CollectionManager
   private: (key, collectionOptions={}, initialModels=[])->
     @create(key,collectionOptions,initialModels,true)
 
+#### Helpers
+
+Luca.CollectionManager.isRunning = ()->
+  _.isEmpty( Luca.CollectionManager.instances ) isnt true
+
 Luca.CollectionManager.destroyAll = ()-> 
   Luca.CollectionManager.instances = {} 
 
+Luca.CollectionManager.loadCollectionsByName = (set, callback)->
+  for name in set 
+    collection = @getOrCreate(name)
+    collection.once "reset", ()->
+      callback(collection)
+    collection.fetch()  
+
+#### Private Methods
 guessCollectionClass = (key)->
   classified = Luca.util.classify( key )
+
+  if _.isString( @collectionNamespace )
+    @collectionNamespace = Luca.util.resolve(@collectionNamespace)
+
   # support our naming convention of Books
   guess = (@collectionNamespace || (window || global) )[ classified ]
+
   # support naming covention like BooksCollection
   guess ||= (@collectionNamespace || (window || global) )[ "#{classified}Collection" ]
 
@@ -120,16 +142,13 @@ guessCollectionClass = (key)->
 loadInitialCollections = ()->
   collectionDidLoad = (collection) =>
     current = @state.get("loaded_collections_count")
-
     @state.set("loaded_collections_count", current + 1)
     @trigger "collection_loaded", collection.name
     collection.unbind "reset"
 
-  _(@initialCollections).each (name) =>
-    collection = @getOrCreate(name)
-    collection.once "reset", ()->
-      collectionDidLoad(collection)
-    collection.fetch()
+  set = @initialCollections
+  Luca.CollectionManager.loadCollectionsByName.call(@, set, collectionDidLoad)
+
 
 handleInitialCollections = ()->
   @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
@@ -140,4 +159,5 @@ handleInitialCollections = ()->
 
   loadInitialCollections.call(@)
 
+  @initialCollectionsLoadedu
   @

@@ -1,55 +1,20 @@
-# This is a helper for creating the DOM element that go along with
-# a given component, if it is configured to use one via the topToolbar
-# and bottomToolbar properties
-attachToolbar = (config={}, targetEl)->
-  config.orientation ||= "top"
-  config.ctype ||= @toolbarType || "panel_toolbar"
+# Luca.components.Panel is a low level Luca.View component which is used 
+# to build components which have toolbar areas, and a body area for the main
+# contents of the view.
+panel = Luca.register           "Luca.components.Panel"
 
-  id = "#{ @cid }-tbc-#{ config.orientation }"
+panel.extends                   "Luca.View"
 
-  toolbar = Luca.util.lazyComponent( config )
+panel.mixesIn                   "LoadMaskable"
 
-  container = @make "div",
-    class:"toolbar-container #{ config.orientation }",
-    id: id
-  ,
-    toolbar.render().el
-
-  hasBody = @bodyClassName or @bodyTagName
-
-  # there will be a body panel inside of the views $el
-  # so just place the toolbar before, or after the body
-  action = switch config.orientation
-    when "top", "left"
-      if hasBody then "before" else "prepend"
-    when "bottom", "right"
-      if hasBody then "after" else "append"
-
-  (targetEl || @$bodyEl() )[action]( container )
-
-# A Panel is a basic Luca.View but with Toolbar extensions
-#
-# In general other components should inherit from the panel class.
-
-_.def("Luca.components.Panel").extends("Luca.View").with
-
+panel.configuration
   topToolbar: undefined
-
   bottomToolbar: undefined
-
-  # Load Mask will apply a transparent overlay over the form
-  # upon submission, with a moving progress bar which will be
-  # hidden upon successful response
   loadMask: false
-  loadMaskTemplate: ["components/load_mask"]
+  loadMaskTemplate: "components/load_mask"
   loadMaskTimeout: 3000
-  
-  mixins:["LoadMaskable"]
 
-  initialize: (@options={})->
-    Luca.View::initialize.apply(@, arguments)
-    
-
+panel.publicMethods
   applyStyles: (styles={},body=false)->
 
     target = if body then @$bodyEl() else @$el
@@ -58,12 +23,6 @@ _.def("Luca.components.Panel").extends("Luca.View").with
       target.css(setting,value)
 
     @
-
-  beforeRender: ()->
-    Luca.View::beforeRender?.apply(@, arguments)
-    @applyStyles( @styles ) if @styles?
-    @applyStyles( @bodyStyles, true ) if @bodyStyles?
-    @renderToolbars?()
 
   $bodyEl: ()->
     element = @bodyTagName || "div"
@@ -75,15 +34,12 @@ _.def("Luca.components.Panel").extends("Luca.View").with
 
     return bodyEl if bodyEl.length > 0
 
-    # if we've been configured to have one, and it doesn't exist
-    # then we should append it to ourselves
     if bodyEl.length is 0 and (@bodyClassName? || @bodyTagName?)
       newElement = @make(element,class:className,"data-auto-appended":true)
-      $(@el).append( newElement )
+      @$el.append( newElement )
       return @$(@bodyEl)
 
-
-    $(@el)
+    @$el
 
   $wrap: (wrapper)->
     if _.isString(wrapper) and not wrapper.match(/[<>]/)
@@ -103,9 +59,13 @@ _.def("Luca.components.Panel").extends("Luca.View").with
   $append: (content)->
     @$bodyEl().append(content)
 
-  # Luca containers can have toolbars,
-  # these will get injected before or after the bodyEl, or at the top
-  # or bottom of the $el
+panel.privateMethods
+  beforeRender: ()->
+    Luca.View::beforeRender?.apply(@, arguments)
+    @applyStyles( @styles ) if @styles?
+    @applyStyles( @bodyStyles, true ) if @bodyStyles?
+    @renderToolbars?()
+
   renderToolbars: ()->
     _( ["top","left","right","bottom"] ).each (orientation)=>
       if config = @["#{ orientation }Toolbar"]
@@ -115,4 +75,34 @@ _.def("Luca.components.Panel").extends("Luca.View").with
     config.parent = @
     config.orientation = orientation
 
-    attachToolbar.call(@, config, config.targetEl )
+    Luca.components.Panel.attachToolbar.call(@, config, config.targetEl || config.container )
+
+panel.classMethods
+  attachToolbar: (config={}, targetEl)->
+    config.orientation ||= "top"
+    config.type ||= config.ctype ||= @toolbarType || "panel_toolbar"
+
+    config.id = "#{ @cid }-tbc-#{ config.orientation }"
+    config.additionalClassNames = "#{ Luca.config.toolbarContainerClass } #{ config.orientation }"
+     
+    toolbar = Luca.util.lazyComponent( config )
+
+    hasBody = @bodyClassName or @bodyTagName
+
+    # there will be a body panel inside of the views $el
+    # so just place the toolbar before, or after the body
+    action = switch config.orientation
+      when "top", "left"
+        if hasBody and not targetEl?.length > 0 then "before" else "prepend"
+      when "bottom", "right"
+        if hasBody and not targetEl?.length > 0 then "after" else "append"
+
+    toolbarEl = if targetEl?.length > 0
+      @$(targetEl)
+    else
+      @$bodyEl()
+
+    toolbarEl[action]( toolbar.render().el )
+
+panel.defines
+  version: 2
