@@ -69,3 +69,5 @@ tableView.classMethods
       cellValue = column.renderer.call @, cellValue, model, column 
 
     Backbone.View::make("td", {"data-col-index":index}, cellValue)
+
+tableView.register()
