@@ -61,6 +61,8 @@
 
   Luca.config.autoApplyClassHierarchyAsCssClasses = true;
 
+  Luca.config.idAttributeType = "integer";
+
   Luca.autoRegister = Luca.config.autoRegister = true;
 
   Luca.developmentMode = Luca.config.developmentMode = false;
@@ -1197,7 +1199,7 @@
 
   cd.privateMethods = cd.privateInterface;
 
-  cd.classMethods = cd.classInterface;
+  cd.classProperites = cd.classMethods = cd.classInterface;
 
   _.extend((Luca.define = ComponentDefinition.create), {
     __definitions: [],
@@ -1231,12 +1233,14 @@
   });
 
   Luca.extend = function(superClassName, childName, properties) {
-    var definition, include, superClass, _i, _len, _ref;
+    var definition, include, superClass, superMetaData, _i, _len, _ref;
     if (properties == null) properties = {};
     superClass = Luca.util.resolve(superClassName, window || global);
     if (!_.isFunction(superClass != null ? superClass.extend : void 0)) {
       throw "Error defining " + childName + ". " + superClassName + " is not a valid component to extend from";
     }
+    superMetaData = Luca.registry.getMetaDataFor(superClassName);
+    superMetaData.descendants().push(childName);
     properties.displayName = childName;
     properties._superClass = function() {
       superClass.displayName || (superClass.displayName = superClassName);
@@ -2193,6 +2197,7 @@
       _.defaults(this.meta, {
         "super class name": "",
         "display name": "",
+        "descendants": [],
         "public interface": [],
         "public configuration": [],
         "private interface": [],
@@ -2275,6 +2280,10 @@
 
     MetaDataProxy.prototype.hooks = function() {
       return this.meta["hooks"];
+    };
+
+    MetaDataProxy.prototype.descendants = function() {
+      return this.meta["descendants"];
     };
 
     MetaDataProxy.prototype.styleHierarchy = function() {
@@ -5472,6 +5481,9 @@
       Luca.core.Field.prototype.initialize.apply(this, arguments);
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
+      if (this.valueField === "id") {
+        this.valueType || (this.valueType = Luca.config.idAttributeType);
+      }
       this.label || (this.label = this.name);
       if (_.isUndefined(this.retainValue)) return this.retainValue = true;
     },

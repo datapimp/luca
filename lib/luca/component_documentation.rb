@@ -81,10 +81,9 @@ class ComponentDocumentation
   def base_path
     "/Users/alexsmith/Development/luca"
   end
-  
+
   def load_section
     @relevent_section = @file_contents.match(/(^\s*#.*$\n)*(\s*#{@method}\s*:\s*\(.*\)\s*-\>.*$)/)
   end
-
 
 end

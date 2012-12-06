@@ -227,3 +227,5 @@
   - Added experimental support for Luca.SocketManager
   - Introducing @stateChangeEvents property for views which mixin the StateModel concern. 
   - Added additional ComponentDefinition methods: public, private, configuration, methods
+  - Component MetaData tracks descendants()
+  - SelectField defaults to valueType integer when valueField is "id"
