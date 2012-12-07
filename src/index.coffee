@@ -17,8 +17,6 @@
 
 #= require_tree ./managers
 
-#= require ./containers/split_view
-#= require ./containers/column_view
 #= require_tree ./containers
 
 #= require ./components/template
