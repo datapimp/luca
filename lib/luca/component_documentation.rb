@@ -1,3 +1,9 @@
+#!/usr/bin/env ruby
+
+if __FILE__==$0
+  require 'pry'
+end
+
 class ComponentDocumentation
   attr_accessor :comments
   attr_accessor :arguments
@@ -5,17 +11,6 @@ class ComponentDocumentation
 
   COMMENTS_REGEX =  /(^\s*#.*$\n)*/
   ARGUMENTS_REGEX = /^(.*)=(.+)/
-  FILE_PATHS = ['src/components',
-                'src/concerns',
-                'src/containers',
-                'src/core',
-                'src/managers',
-                'src/plugins',
-                'src/samples',
-                'src/templates',
-                'src/tools',
-                'src',
-                'src/components/fields']
 
   def initialize component_name
     @component_class_path = component_name.split('.')
@@ -60,14 +55,7 @@ class ComponentDocumentation
   end
 
   def find_file
-    search_path = []
-    FILE_PATHS.each do |path|
-      search_path.push "#{base_path}/#{path}/#{underscore(@component_class_path.last)}.coffee"
-      if File.exists?("#{base_path}/#{path}/#{underscore(@component_class_path.last)}.coffee")
-        return "#{base_path}/#{path}/#{underscore(@component_class_path.last)}.coffee"
-      end
-    end
-    raise "Couldn't find file: #{underscore(@component_class_path.last)}\n Search Path: #{search_path.join("\n")}"
+    file = Dir.glob("#{ App.root }/src/**/#{underscore(@component_class_path.last)}.coffee")[0]
   end
 
   def underscore string
@@ -78,12 +66,13 @@ class ComponentDocumentation
     downcase
   end
 
-  def base_path
-    "/Users/alexsmith/Development/luca"
-  end
-
   def load_section
     @relevent_section = @file_contents.match(/(^\s*#.*$\n)*(\s*#{@method}\s*:\s*\(.*\)\s*-\>.*$)/)
   end
 
+end
+
+
+if __FILE__==$0
+  pry
 end
