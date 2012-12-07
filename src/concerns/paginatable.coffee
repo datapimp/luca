@@ -9,9 +9,8 @@ Luca.concerns.Paginatable =
     if @paginatable is false
       return
 
-    # TEMP HACK
-    unless Luca.isBackboneCollection(@collection)
-      @collection = Luca.CollectionManager.get?()?.getOrCreate(@collection)
+    if _.isNumber(@paginatable) or _.isString(@paginatable)
+      @paginatable = limit: parseInt(@paginatable)
 
     unless Luca.isBackboneCollection(@collection)
       @debug "Skipping Paginatable due to no collection being present on #{ @name || @cid }"
@@ -20,10 +19,7 @@ Luca.concerns.Paginatable =
 
     _.bindAll @, "paginationControl", "pager"
 
-    @getCollection ||= ()-> 
-      @collection
-
-    collection = @getCollection()
+    collection = (@getCollection ||= ()-> @collection)()
 
     paginationState = @getPaginationState()
 
@@ -34,17 +30,9 @@ Luca.concerns.Paginatable =
       options = _( paginationState.toJSON() ).pick('limit','page','sortBy')
       _.extend(options, pager: @pager)
 
-    paginationState.on "change:page", (state)=> 
-      filter = _.clone( @getQuery() )
-      options = _.clone( @getQueryOptions() )
+    paginationState.on "change:page", ()=> @trigger "pagination:change"
 
-      prepared = @prepareRemoteFilter(filter, options)
-
-      if @isRemote()  
-        @collection.applyFilter(prepared, remote: true)
-      else
-        @trigger "refresh" 
-
+    @on "pagination:change",  Luca.concerns.Filterable.classMethods.prepare, @
     @on "before:render", @renderPaginationControl, @
 
   pager: (numberOfPages, models)->

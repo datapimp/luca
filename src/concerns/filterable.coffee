@@ -1,11 +1,24 @@
 Luca.concerns.Filterable = 
+  classMethods:
+    prepare: ()->
+      filter = _.clone( @getQuery() )
+      options = _.clone( @getQueryOptions() )
 
+      prepared = @prepareRemoteFilter(filter, options)
+
+      if @isRemote()  
+        @collection.applyFilter(prepared, remote: true)
+      else
+        @trigger "data:refresh" 
+  
   __included: (component, module)->
     _.extend(Luca.Collection::, __filters:{})
 
   __initializer: (component, module)->
     if @filterable is false
       return
+
+    @filterable = {} if @filterable is true
 
     # TEMP HACK
     unless Luca.isBackboneCollection(@collection)
@@ -28,39 +41,38 @@ Luca.concerns.Filterable =
     @querySources.push ((options={})=> @getFilterState().toQuery())
     @optionsSources.push ((options={})=> @getFilterState().toOptions())
 
-    filter.on "change", ()=> 
-      filter = _.clone( @getQuery() )
-      options = _.clone( @getQueryOptions() )
+    filter.on "change", _.debounce (()=> @trigger "filter:change"), 15
 
-      prepared = @prepareRemoteFilter(filter, options)
-
-      if @isRemote()  
-        @collection.applyFilter(prepared, remote: true)
-      else
-        @trigger "refresh" 
+    @on "filter:change", Luca.concerns.Filterable.classMethods.prepare, @
 
     module
 
   prepareRemoteFilter: (filter={}, options={})->
-    filter.limit = options.limit if options.limit?
-    filter.page = options.page if options.page?
-    filter.sortBy = options.sortBy if options.sortBy?
+    filter[ Luca.config.apiLimitParameter ] = options.limit if options.limit?
+    filter[ Luca.config.apiPageParameter ] = options.page if options.page?
+    filter[ Luca.config.apiSortByParameter ] = options.sortBy if options.sortBy?
     
     filter
 
   isRemote: ()->
-    @getQueryOptions().remote is true    
+    return true if @getQueryOptions().remote is true
+    return true if @remoteFilterFallback is true and @getCollection()?.length is 0
 
   getFilterState: ()->
-    @collection.__filters[ @cid ] ||= new FilterModel(@filterable)
+    {options,query} = config = @filterable || {}
+
+    if !_.isEmpty(config) and (_.isEmpty(query) and _.isEmpty(options))
+      _.extend(options, _( config ).pluck('sortBy','page','limit') )
+
+    @collection.__filters[ @cid ] ||= new FilterModel({query,options})
 
   setSortBy: (sortBy, options={})->
-   @getFilterState().setOption('sortBy', sortBy, options)
+    @getFilterState().setOption('sortBy', sortBy, options)
 
   applyFilter: (query={}, options={})->
     options = _.defaults(options, @getQueryOptions())
     query = _.defaults(query, @getQuery())
-
+    @getFilterState().clear(silent:false)
     @getFilterState().set({query,options}, options)
 
 class FilterModel extends Backbone.Model
@@ -79,11 +91,10 @@ class FilterModel extends Backbone.Model
     @set 'query', _.extend(@toQuery(), payload), options
 
   toOptions: ()->
-    @toJSON().options
+    _.clone(@toJSON().options)
 
   toQuery: ()->
-    @toJSON().query
+    _.clone(@toJSON().query)
 
   toRemote: ()->
-    options = @toOptions() 
-    _.extend( @toQuery(), limit: options.limit, page: options.page, sortBy: options.sortBy )
+    Luca.concerns.Filterable.prepareRemoteFilter.call(@, @toQuery(), @toOptions())

@@ -1,25 +1,14 @@
+# The CollectionView handles rendering a set of models from a 
+# collection
 collectionView = Luca.register      "Luca.components.CollectionView"
-# The CollectionView facilitates the rendering of a Collection
-# of models into a group of many rendered templates
-# 
-# Example:
-#
-#   new Luca.components.CollectionView 
-#     itemTemplate: "template_name"
-#     collection:   "collection_class_name"
-#     pagination:
-#       page: 1
-#       limit: 15
-#     filterable:
-#       query:
-#         default: 'value'     
-#
+
 collectionView.extends            "Luca.components.Panel"
 
 collectionView.mixesIn            "QueryCollectionBindings", 
                                   "LoadMaskable", 
                                   "Filterable", 
-                                  "Paginatable"
+                                  "Paginatable",
+                                  "Sortable"
 
 collectionView.triggers           "before:refresh",
                                   "after:refresh",
@@ -73,25 +62,15 @@ collectionView.defines
       console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
-    @collection.on "before:fetch", ()=>
-      @trigger "enable:loadmask"
-      
-    @collection.bind "reset", ()=>
-      @refresh()
-      @trigger "disable:loadmask"
+    @on "collection:reset", @refresh, @
+    @on "collection:remove", @refresh, @
+    @on "collection:add", @refresh, @
+    @on "collection:change", @refreshModel, @ if @observeChanges is true
 
-    @collection.bind "remove", ()=>
-      @refresh()
-
-    @collection.bind "add", ()=>
-      @refresh()
-
-    if @observeChanges is true
-      @collection.on "change", @refreshModel, @
 
     Luca.components.Panel::initialize.apply(@, arguments)
 
-    @on "refresh", @refresh, @
+    @on "data:refresh", @refresh, @
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')

@@ -61,6 +61,10 @@ Luca.config.autoApplyClassHierarchyAsCssClasses = true
 
 Luca.config.idAttributeType = "integer"
 
+Luca.config.apiSortByParameter  = 'sortBy'
+Luca.config.apiPageParameter    = 'page'
+Luca.config.apiLimitParameter   = 'limit'
+
 # When using Luca.define() should we automatically register
 # the component with the registry?
 Luca.autoRegister = Luca.config.autoRegister = true

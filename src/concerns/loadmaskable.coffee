@@ -1,18 +1,24 @@
 Luca.concerns.LoadMaskable = 
   __initializer: ()->
-    return unless @loadMask is true
+    return if @loadMask is false or not @loadMask?
 
     if @loadMask is true
-      @defer ()=>
-        @$el.addClass('with-mask')
+      @loadMask = 
+        enableEvent: "enable:loadmask"
+        disableEvent: "disable:loadmask"
 
-        if @$('.load-mask').length is 0
-          @loadMaskTarget().prepend Luca.template(@loadMaskTemplate, @)
-          @$('.load-mask').hide()
-      .until("after:render")
+    @on "collection:fetch", ()=> @trigger "enable:loadmask"
+    @on "collection:reset", ()=> @trigger "disable:loadmask"
 
-      @on (@loadmaskEnableEvent || "enable:loadmask"), @applyLoadMask, @
-      @on (@loadmaskDisableEvent || "disable:loadmask"), @applyLoadMask, @
+    @on "after:render", ()->
+      @$el.addClass('with-mask')
+      if @$('.load-mask').length is 0
+        @loadMaskTarget().prepend Luca.template(@loadMaskTemplate, @)
+        @$('.load-mask').hide()
+    , @
+
+    @on(@loadMask.enableEvent, @applyLoadMask, @)
+    @on(@loadMask.disableEvent, @applyLoadMask, @)
 
   showLoadMask: ()->
     @trigger("enable:loadmask")

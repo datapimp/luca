@@ -72,6 +72,10 @@ view.defines
   registerEvent: (selector, handler)->
     @events ||= {}
     @events[ selector ] = handler
+
+    if _.isObject(selector)
+      _.extend(@events, selector)
+      
     @delegateEvents()
 
   definitionClass: ()->

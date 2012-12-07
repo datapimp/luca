@@ -222,6 +222,7 @@ formView.privateMethods
     options.reject_blank = true unless options.reject_blank?
     options.skip_buttons = true unless options.skip_buttons?
     options.reject_blank = true if options.blanks is false
+    options.reject_blank = false if options.blanks is true
 
     values = _( @getFields() ).inject (memo,field)=>
       value   = field.getValue()
@@ -287,8 +288,8 @@ formView.privateMethods
 
     @current_model
 
-  syncFormWithModel: ()->
-    @current_model?.set( @getValues() )
+  syncFormWithModel: (options)->
+    @current_model?.set( @getValues(), options )
 
   setLegend: (@legend)->
     $('fieldset legend', @el).first().html(@legend)

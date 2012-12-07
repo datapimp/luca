@@ -27,7 +27,8 @@ multiView.extends           "Luca.containers.CardView"
 multiView.mixesIn           "QueryCollectionBindings", 
                             "LoadMaskable",
                             "Filterable",
-                            "Paginatable"
+                            "Paginatable",
+                            "Sortable"
 
 multiView.triggers          "before:refresh",
                             "after:refresh",
@@ -51,7 +52,7 @@ multiView.defines
 
     Luca.containers.CardView::initialize.apply(@, arguments) 
 
-    @on "refresh", @refresh, @
+    @on "data:refresh", @refresh, @
     @on "after:card:switch", @refresh, @
     @on "after:components", propagateCollectionComponents, @
 
@@ -59,7 +60,7 @@ multiView.defines
     @trigger "after:refresh", models, query, options
 
   refresh: ()->
-    @activeComponent()?.trigger("refresh")
+    @activeComponent()?.refresh()
 
 propagateCollectionComponents = ()->
   container = @
@@ -73,13 +74,9 @@ propagateCollectionComponents = ()->
       @trigger("after:refresh",models,query,options)
 
     _.extend component, 
-      collection: container.getCollection()
-
-      getQuery: ()->
-        container.getQuery.call(container)
-
-      getQueryOptions: ()->
-        container.getQueryOptions.call(container) 
+      collection: container.getCollection() 
+      getQuery: _.bind(container.getQuery, container)
+      getQueryOptions: _.bind(container.getQueryOptions, container)
 
 validateComponent = (component)->
   type = (component.type || component.ctype)

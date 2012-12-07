@@ -1,12 +1,13 @@
 Luca.concerns.CollectionEventBindings = 
   __initializer: ()->
     Luca.concerns.CollectionEventBindings.__setup.call(@)
-  
+
     if Luca.isBackboneCollection(@collection)
-      @collection.on "reset", relayAs("collection:reset"), @
-      @collection.on "add", relayAs("collection:add"), @
-      @collection.on "remove", relayAs("collection:remove"), @
-      @collection.on "change", relayAs("collection:change"), @
+      @collection.on "reset",         relayAs("collection:reset"), @
+      @collection.on "add",           relayAs("collection:add"), @
+      @collection.on "remove",        relayAs("collection:remove"), @
+      @collection.on "change",        relayAs("collection:change"), @
+      @collection.on "before:fetch",  relayAs("collection:fetch"), @
 
   __setup: ()->
     return if _.isEmpty( @collectionEvents )

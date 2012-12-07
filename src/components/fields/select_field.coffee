@@ -21,6 +21,9 @@ selectField.defines
     _.extend @, Luca.concerns.Deferrable
     _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
+    if _.isArray(@collection)
+      @collection = data: @collection
+      
     Luca.core.Field::initialize.apply @, arguments
 
     @input_id ||= _.uniqueId('field')

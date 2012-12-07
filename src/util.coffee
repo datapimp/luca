@@ -25,6 +25,13 @@ Luca.util.argumentsLogger = (prompt)->
 Luca.util.read = (property, args...)->
   if _.isFunction(property) then property.apply(@, args) else property
 
+Luca.util.readAll = (object={})->
+  processed = {}
+  for key, value of object
+    processed[key] = Luca.util.read(value)
+
+  processed  
+
 # turns a word like form_view into FormView
 Luca.util.classify = (string="")->
   _.string.camelize( _.string.capitalize( string ) )

@@ -1,33 +1,10 @@
-Framework
----------
-Extract hooks into module
+Luca.Collection.query
+  - add function pipeline to run filter, and options 
+    objects through.  anything can inject itself
+    into the pipeline.  
 
-General
--------
-- Make development mode options easily disabled
-- Integrate with requireJs or some other AMD system
-- Move to node.js for build / testing
-- Replace .luca template with standard jst
-- Eliminate underscore-string dependency.  just copy necessary functions.
-- Eliminate pointless CSS selectors
+    basically, remove this from the view.
 
-- Rely on data attributes for functionality instead of css selectors
-- BUT in general don't tie views to the DOM anyway
+  - write a backbone-query -> squeel -> activerecord bridge
 
-Luca.View
----------
-- Add StateMachine model to all instances of Luca.View
 
-Containers
-----------
-- Luca.core.Container should relay all activation events to @components
-
-Luca.CollectionManager
-----------------------
-- Add concept of base params for a given scope of the collection manager
-
-Luca.Application
-----------------
-- Modify boot sequence so that rendering can happen on DOM ready, but all other
-  operations, such as fetching collections, etc, can happen immediately upon
-  initialization

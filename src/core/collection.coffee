@@ -332,9 +332,16 @@ collection.defines
   # make sure the querying interface from backbone.query is present
   # in the case backbone-query isn't loaded.  without it, it will
   # just return the models
+  #
+  # TODO:
+  # 
+  # Currently the View mixins: Filterable, Sortable, and Paginatable
+  # implement a lot of logic that belongs in this interface.
   query: (filter={},options={})->
     if Backbone.QueryCollection?
-      return Backbone.QueryCollection::query.apply(@, arguments)
+      filter = options.prepare(filter) if _.isFunction(options.prepare)
+
+      return Backbone.QueryCollection::query.call(@, filter, options)
     else
       @models
 

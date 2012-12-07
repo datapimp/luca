@@ -18,18 +18,22 @@ Luca.concerns.QueryCollectionBindings =
 
     for querySource in _( @querySources || [] ).compact()
       query = _.extend(query, (querySource(options)||{}) ) 
-      
-    query
+          
+    Luca.util.readAll(query)
 
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
   getQueryOptions: (options={})-> 
-    options = @queryOptions ||= {}
+    queryOptions = @queryOptions ||= {}
 
     for optionSource in _( @optionsSources || [] ).compact()
-      options = _.extend(options, (optionSource(options)||{}) ) 
+      queryOptions = _.extend(queryOptions, (optionSource(options)||{}) ) 
 
-    options
+    processed = {}
+    for key, value of queryOptions when key isnt "pager"
+      processed[key] = Luca.util.read(value)
+
+    processed
 
   # Private: returns the models to be rendered.  If the underlying collection
   # responds to @query() then it will use that interface. 
@@ -37,7 +41,10 @@ Luca.concerns.QueryCollectionBindings =
     if @collection?.query
       query ||= @getQuery()
       options ||= @getQueryOptions()
+      options.prepare ||= @processFilter
       
+      # TODO
+      # Need to write specs for this  
       @collection.query(query, options)
     else
       @collection.models
