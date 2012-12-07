@@ -55,7 +55,7 @@ class ComponentDocumentation
   end
 
   def find_file
-    file = Dir.glob("#{ App.root }/src/**/#{underscore(@component_class_path.last)}.coffee")[0]
+    file = Dir.glob("#{ File.expand_path '../../..', __FILE__ }/src/**/#{underscore(@component_class_path.last)}.coffee")[0]
   end
 
   def underscore string
