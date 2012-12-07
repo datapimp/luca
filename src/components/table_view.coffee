@@ -17,6 +17,11 @@ tableView.privateConfiguration
   observeChanges: true
 
 tableView.privateMethods
+  eachColumn: (fn, scope=@)->
+    index = 0
+    for col in @columns  
+      fn.call(scope, col, index++, @)
+
   itemRenderer: (item, model)->
     Luca.components.TableView.rowRenderer.call(@, item, model)
 
@@ -45,10 +50,21 @@ tableView.classMethods
   renderHeader : (columns, targetElement)->
     index = 0
 
-    content = for column in columns
-      "<th data-col-index='#{ index++ }'>#{ column.header }</th>"
+    @$( targetElement ).append("<tr></tr>")
 
-    @$( targetElement ).append("<tr>#{ content.join('') }</tr>")
+    for column in columns
+      attrs = "data-col-index": index++
+
+      if column.sortable
+        attrs.class = "sortable-toggle"
+        attrs["data-sortable-sort-by"] = column.sortBy || column.sortable
+        attrs["data-sortable-order"] = column.order
+
+      content = column.header 
+      content = "<a class='link'>#{ column.header }</a>" if column.sortable
+
+      @$(targetElement).append( Backbone.View::make "th", attrs, content )
+
 
     index = 0
 

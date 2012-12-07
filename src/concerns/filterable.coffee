@@ -6,6 +6,8 @@ Luca.concerns.Filterable =
 
       prepared = @prepareRemoteFilter(filter, options)
 
+      @debug "Preparing filterable call", prepared, @isRemote()
+
       if @isRemote()  
         @collection.applyFilter(prepared, remote: true)
       else
@@ -41,7 +43,7 @@ Luca.concerns.Filterable =
     @querySources.push ((options={})=> @getFilterState().toQuery())
     @optionsSources.push ((options={})=> @getFilterState().toOptions())
 
-    filter.on "change", _.debounce (()=> @trigger "filter:change"), 15
+    filter.on "change", ()=> @trigger "filter:change"
 
     @on "filter:change", Luca.concerns.Filterable.classMethods.prepare, @
 
@@ -64,7 +66,9 @@ Luca.concerns.Filterable =
     if !_.isEmpty(config) and (_.isEmpty(query) and _.isEmpty(options))
       _.extend(options, _( config ).pluck('sortBy','page','limit') )
 
-    @collection.__filters[ @cid ] ||= new FilterModel({query,options})
+    @collection.__filters[ @cid ] ||= new FilterModel
+      query: query || {}
+      options: options || {}
 
   setSortBy: (sortBy, options={})->
     @getFilterState().setOption('sortBy', sortBy, options)

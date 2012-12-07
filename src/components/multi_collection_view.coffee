@@ -35,26 +35,21 @@ multiView.triggers          "before:refresh",
                             "refresh",
                             "empty:results"
 
-multiView.defines
-  version: 1
-
-  stateful: true
-
-  defaultState:
+multiView.private
+  stateful:
     activeView: 0
-
-  viewContainerClass: "luca-ui-multi-view-container"
 
   initialize: (@options={})->
     @components ||= @views
 
-    validateComponent( view ) for view in @components    
+    for view in @components    
+      Luca.components.MultiCollectionView.validateComponent( view ) 
 
     Luca.containers.CardView::initialize.apply(@, arguments) 
 
     @on "data:refresh", @refresh, @
     @on "after:card:switch", @refresh, @
-    @on "after:components", propagateCollectionComponents, @
+    @on "after:components", Luca.components.MultiCollectionView.propagateCollectionComponents, @
 
   relayAfterRefresh: (models,query,options)->
     @trigger "after:refresh", models, query, options
@@ -62,28 +57,33 @@ multiView.defines
   refresh: ()->
     @activeComponent()?.refresh()
 
-propagateCollectionComponents = ()->
-  container = @
+multiView.classMethods
+  propagateCollectionComponents: ()->
+    container = @
 
-  # in the multi view will share the same
-  # collection, filter state, pagination options, etc
-  for component in @components
+    # in the multi view will share the same
+    # collection, filter state, pagination options, etc
+    for component in @components
 
-    component.on "after:refresh", (models,query,options)=> 
-      @debug "collection member after refresh"
-      @trigger("after:refresh",models,query,options)
+      component.on "after:refresh", (models,query,options)=> 
+        @debug "collection member after refresh"
+        @trigger("after:refresh",models,query,options)
 
-    _.extend component, 
-      collection: container.getCollection() 
-      getQuery: _.bind(container.getQuery, container)
-      getQueryOptions: _.bind(container.getQueryOptions, container)
+      _.extend component, 
+        collection: container.getCollection() 
+        getQuery: _.bind(container.getQuery, container)
+        getQueryOptions: _.bind(container.getQueryOptions, container)
 
-validateComponent = (component)->
-  type = (component.type || component.ctype)
+      if container.prepareQuery?
+        _.extend component,
+          prepareQuery: _.bind(container.prepareQuery, container)
 
-  return if  type is "collection" or 
-             type is "collection_view" or
-             type is "table" or
-             type is "table_view" 
+  validateComponent: (component)->
+    type = (component.type || component.ctype)
 
-  throw "The MultiCollectionView expects to contain multiple collection views" 
+    return if  type is "collection" or 
+               type is "collection_view" or
+               type is "table" or
+               type is "table_view" 
+
+    throw "The MultiCollectionView expects to contain multiple collection views" 

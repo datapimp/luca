@@ -7,6 +7,9 @@ paginationControl.defines
 
   stateful: true
 
+  stateChangeEvents:
+    "numberOfPages" : "onPageCountChange"
+
   autoBindEventHandlers: true
 
   events:
@@ -14,25 +17,22 @@ paginationControl.defines
     "click a.next"              : "nextPage"
     "click a.prev"              : "previousPage"
 
-  afterInitialize: ()->
-    _.bindAll @, "updateWithPageCount"
-
-    @state?.on "change", (state, numberOfPages)=>
-      @updateWithPageCount( state.get('numberOfPages') )
+  onPageCountChange: ()->
+    @updateWithPageCount( @get('numberOfPages') )
 
   limit: ()->
-    parseInt (@state.get('limit') || @collection?.length)
+    parseInt (@get('limit') || @collection?.length)
 
   page: ()->
-    parseInt (@state.get('page') || 1)
+    parseInt (@get('page') || 1)
 
   nextPage: ()->
     return unless @nextEnabled()
-    @state.set('page', @page() + 1 )
+    @set('page', @page() + 1 )
 
   previousPage: ()->
     return unless @previousEnabled()
-    @state.set('page', @page() - 1 )
+    @set('page', @page() - 1 )
 
   selectPage: (e)->
     me = my = @$( e.target )
@@ -44,10 +44,10 @@ paginationControl.defines
     @setPage( my.data('page-number') )
 
   setPage: (page=1,options={})->
-    @state.set('page', page, options)
+    @set('page', page, options)
 
   setLimit: (limit=1,options={})->
-    @state.set('limit', limit, options)
+    @set('limit', limit, options)
 
   pageButtonContainer: ()->
     @$ '.group'
@@ -100,5 +100,5 @@ paginationControl.defines
     parseInt @collection?.length || 0
 
   itemsPerPage: (value, options={})->
-    @state.set("limit", value, options) if value?
-    parseInt @state.get("limit")
+    @set("limit", value, options) if value?
+    parseInt @get("limit")

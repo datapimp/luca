@@ -76,6 +76,10 @@ formView.publicConfiguration
   # @$el.addClass('form-inline') if @inlineForm
   inlineForm: false
 
+  # if we should always include blank values
+  # regardless of how the field is configured
+  includeBlankValues: undefined
+
 formView.privateConfiguration
   tagName: 'form'
   stateful: true
@@ -222,7 +226,6 @@ formView.privateMethods
     options.reject_blank = true unless options.reject_blank?
     options.skip_buttons = true unless options.skip_buttons?
     options.reject_blank = true if options.blanks is false
-    options.reject_blank = false if options.blanks is true
 
     values = _( @getFields() ).inject (memo,field)=>
       value   = field.getValue()
@@ -231,6 +234,8 @@ formView.privateMethods
       valueIsBlank      = !!(_.str.isBlank( value ) || _.isUndefined( value ))
 
       allowBlankValues  = not options.reject_blank and not field.send_blanks
+      allowBlankValues = true if field.includeBlank is true or @includeBlankValues is true
+
 
       if options.debug
         console.log "#{ key } Options", options, "Value", value, "Value Is Blank?", valueIsBlank, "Allow Blanks?", allowBlankValues

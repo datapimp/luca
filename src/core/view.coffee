@@ -32,6 +32,9 @@ view.triggers           "before:initialize",
 
 # Luca.View decorates Backbone.View with some patterns and conventions.
 view.defines
+  identifier: ()->
+    (@displayName || @type ) + ":" + (@name || @role || @cid)
+
   initialize: (@options={})->
     @trigger "before:initialize", @, @options
 
@@ -53,6 +56,8 @@ view.defines
     @delegateEvents()
         
     @trigger "after:initialize", @
+
+    _.bindAll(@, @bindMethods...) if @bindMethods?.legth > 0
 
   #### Hooks or Auto Event Binding
   #
@@ -91,8 +96,9 @@ view.defines
     Luca.util.selectProperties( Luca.isBackboneView, @ )
 
   debug: (args...)->
-    return unless @debugMode or window.LucaDebugMode?
-    console.log [(@name || @cid), args...] 
+    if @debugMode is true or window.LucaDebugMode is true
+      args.unshift @identifier()
+      console.log args...
 
   trigger: ()->
     if Luca.enableGlobalObserver

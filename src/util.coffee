@@ -20,7 +20,7 @@ Luca.util.resolve = (propertyReference, source_object)->
 Luca.util.nestedValue = Luca.util.resolve
 
 Luca.util.argumentsLogger = (prompt)->
-  ()-> console.log prompt, arguments
+  ()-> console.log "#{ prompt } #{ @identifier?() }", arguments
 
 Luca.util.read = (property, args...)->
   if _.isFunction(property) then property.apply(@, args) else property
@@ -174,3 +174,10 @@ Luca.util.setupHooksAdvanced = (set)->
 
       @on eventId, callback, @
 
+Luca.util.rejectBlanks = (object)->
+  processed = {}
+
+  for key, value of object when _.isBlank(value) isnt true
+    processed[key] = value 
+
+  processed

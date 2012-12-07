@@ -74,15 +74,17 @@ panel.privateMethods
   renderToolbar: (orientation="top", config={})->
     config.parent = @
     config.orientation = orientation
+    el = Luca.util.read( config.container )
+    el ||= Luca.util.read( config.targetEl )
 
-    Luca.components.Panel.attachToolbar.call(@, config, config.targetEl || config.container )
+    console.log "Rendering toolbar to", config, el 
+    Luca.components.Panel.attachToolbar.call(@, config, el )
 
 panel.classMethods
   attachToolbar: (config={}, targetEl)->
     config.orientation ||= "top"
     config.type ||= config.ctype ||= @toolbarType || "panel_toolbar"
 
-    config.id = "#{ @cid }-tbc-#{ config.orientation }"
     config.additionalClassNames = "#{ Luca.config.toolbarContainerClass } #{ config.orientation }"
      
     toolbar = Luca.util.lazyComponent( config )

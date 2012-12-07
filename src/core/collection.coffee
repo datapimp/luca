@@ -339,7 +339,8 @@ collection.defines
   # implement a lot of logic that belongs in this interface.
   query: (filter={},options={})->
     if Backbone.QueryCollection?
-      filter = options.prepare(filter) if _.isFunction(options.prepare)
+      if _.isFunction(prepare = options.prepare || @prepareQuery)
+        filter = prepare(filter) 
 
       return Backbone.QueryCollection::query.call(@, filter, options)
     else

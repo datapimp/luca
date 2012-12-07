@@ -1,6 +1,6 @@
 Luca.concerns.Paginatable = 
   paginatorViewClass: 'Luca.components.PaginationControl'
-  paginationSelector: ".toolbar.bottom"
+  paginationSelector: ".toolbar.bottom.pagination-container"
 
   __included: ()->
     _.extend(Luca.Collection::, __paginators: {})
@@ -10,7 +10,7 @@ Luca.concerns.Paginatable =
       return
 
     if _.isNumber(@paginatable) or _.isString(@paginatable)
-      @paginatable = limit: parseInt(@paginatable)
+      @paginatable = limit: parseInt(@paginatable), page: 1
 
     unless Luca.isBackboneCollection(@collection)
       @debug "Skipping Paginatable due to no collection being present on #{ @name || @cid }"

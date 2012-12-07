@@ -26,6 +26,14 @@ Luca.concerns.Sortable =
 
     sortableState.on "change", ()=> @trigger "sortable:change"
 
+    @defer ()=>
+      @$(".sortable-toggle").on "click", (e)=>
+        me = my = @$( e.target )
+        me = my = my.closest('.sortable-toggle') 
+        @toggleSortOrderDirection( my.data('sortableSortBy') )
+
+    .until "after:render"
+
     @on "sortable:change", Luca.concerns.Filterable.classMethods.prepare, @
 
   isRemote: ()->
@@ -44,8 +52,18 @@ Luca.concerns.Sortable =
     @getSortableState().set('sortBy', field, options)
     @
 
+  toggleSortOrderDirection: (sortBy)->
+    current = @getSortableState().get('order') || "ASC"
+    changeTo = if current is "ASC" then "DESC" else "ASC"  
+    sortBy ||= @getSortableState().get('sortBy')
+    @sortBy(sortBy, changeTo)
+
   setOrder: (order, options={})->
     @getSortableState().set('order', order, options)
     @
+
+Luca.util.makeSortableToggleElement = (el, sortBy, order)->
+  $(el).attr('data-sortable-sort-by', sortBy ).attr('data-sortable-order', order)
+  $(el)
 
 SortableState = Backbone.Model.extend()

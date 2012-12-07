@@ -62,15 +62,15 @@ collectionView.defines
       console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
+    @on "data:refresh", @refresh, @
+
     @on "collection:reset", @refresh, @
     @on "collection:remove", @refresh, @
     @on "collection:add", @refresh, @
     @on "collection:change", @refreshModel, @ if @observeChanges is true
 
-
     Luca.components.Panel::initialize.apply(@, arguments)
 
-    @on "data:refresh", @refresh, @
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
