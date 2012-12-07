@@ -136,8 +136,7 @@ collectionView.defines
     Luca.View::registerEvent(eventTrigger,handler)
 
   render: ()->
-    @refresh()
-    @$attach() if @$el.parent().length > 0 and @container?
+    @getCollection()?.onceLoaded(@refresh)
     @
 
 # Private Helpers

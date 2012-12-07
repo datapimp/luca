@@ -1,5 +1,5 @@
-tableView = Luca.register "Luca.components.TableView"
-tableView.extends         "Luca.components.CollectionView"
+tableView = Luca.register     "Luca.components.TableView"
+tableView.extends             "Luca.components.CollectionView"
 
 tableView.publicConfiguration
   widths: []

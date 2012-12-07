@@ -5115,8 +5115,8 @@
       return Luca.View.prototype.registerEvent(eventTrigger, handler);
     },
     render: function() {
-      this.refresh();
-      if (this.$el.parent().length > 0 && (this.container != null)) this.$attach();
+      var _ref;
+      if ((_ref = this.getCollection()) != null) _ref.onceLoaded(this.refresh);
       return this;
     }
   });
