@@ -208,7 +208,10 @@ bindAllEventHandlers = ()->
 bindEventHandlers = (events={})->
   for eventSignature, handler of events
     if _.isString(handler)
-      _.bindAll @, handler
+      try
+        _.bindAll @, handler
+      catch e
+        console.log "Error binding to handler - #{handler} = #{e} #{@identifier()}"
 
 Luca.View.deferrableEvent = "reset"
 
