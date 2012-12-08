@@ -3,6 +3,7 @@ class Luca.CollectionManager
 
   __collections: {}
 
+  autoStart: true
   relayEvents: true 
 
   constructor: (@options={})->
@@ -29,7 +30,9 @@ class Luca.CollectionManager
     @state = new Luca.Model()
 
     if @initialCollections
-      handleInitialCollections.call(@)
+      @on "ready", handleInitialCollections, @
+
+    @trigger "ready" if @autoStart is true
 
   add: (key, collection)->
     @currentScope()[ key ] ||= collection

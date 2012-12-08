@@ -90,9 +90,12 @@ application.publicInterface
   ]
 
   # DOCUMENT
+  createRoleBasedGetters: false
   useSocketManager: false
   socketManagerOptions: {}
 
+  # Don't create getters on this component
+  # for the nested components
   initialize: (@options={})->
     app             = @
     appName         = @name
@@ -100,8 +103,7 @@ application.publicInterface
 
     Luca.Application.registerInstance(@)
 
-
-    @state = new Luca.Model( @defaultState )
+    Luca.concerns.StateModel.__initializer.call(@)
 
     # The Collection Manager is responsible for managing instances 
     # of collections, usually to guarantee only a single collection is
@@ -196,6 +198,9 @@ application.publicInterface
   # of the views
   boot: ()->
     @trigger "ready"
+    for service in [@collectionManager, @socket, @router]
+      console.log "Trigggering Ready On", service
+      service?.trigger("ready")
 
   # delegate to the collection manager's get or create function.
   # use App.collection() to create or access existing collections
@@ -300,15 +305,20 @@ application.privateInterface
       collectionManagerOptions =
         name: @collectionManager
 
+
     # let's try and get the collection manager by name if we can
     @collectionManager = Luca.CollectionManager.get?( collectionManagerOptions.name )
 
     # if we can't, then we will have to create one ourselves
     unless _.isFunction(@collectionManager?.get)
+      collectionManagerOptions.autoStart = false
       @collectionManager = new @collectionManagerClass( collectionManagerOptions )
 
   setupSocketManager: ()->
-    @socket = new Luca.SocketManager(@socketManagerOptions)
+    return if _.isEmpty(@socketManagerOptions)
+    _.extend(@socketManagerOptions, autoStart: false)
+
+    @socket = new Luca.SocketManager(@socketManagerOptions) 
 
   setupRouter: ()->
     return if not @router? and not @routes?

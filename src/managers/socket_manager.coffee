@@ -1,36 +1,56 @@
-# Luca.SocketManager is an abstraction
-# around various websocket services such as
-# faye.js, socket.io, now.js, etc.
-#
-# It provides a common interface for adding
-# push / async functionality to Collections,
-# Models, and the like, regardless of the
-# transport mechanism used.
-#
-# Simply bind to it, and any message that comes
-# across the channel you subscribe to, will be
-# bubbled up as a Backbone.Event with the message
-# contents as your argument
-class Luca.SocketManager
-  constructor: (@options={})->
-    _.extend Backbone.Events
+# The SocketManager provides communication between a Websocket / Pubsub
+# system and routes messages through the application to instances
+# of the 
+class Luca.SocketManager extends Luca.Model
+  defaults:
+    autoStart: true  
+    providerAvailable: false
+    ready: false
+    provider: "faye.js"
 
-    @loadProviderSource()
+  initialize: (@attributes={})->
+    @loadProviderSource() unless @providerAvailable() is true
+
+    Luca.Model::initialize?.apply(@, arguments)
+
+    model = @
+
+    connectOnReady = ()=> @connect() if @isReady()
+
+    model.on "change", ()->
+      connectOnReady()
+      model.unbind("change", @)
+
+    @on "ready", _.once ()=> @set('ready', true)
+
+    @trigger "change"
+
+  isReady: ()->
+    @get("ready") is true and @get("providerAvailable") is true
+
+  providerAvailable: ()->
+    providerTest = switch @get('provider')
+      when "socket.io"
+        "io"
+      when "faye.js"
+        "Faye.Client"
+
+    !!(Luca.util.resolve(providerTest)?)
 
   connect: ()->
-    switch @options.provider
+    switch @get('provider')
       when "socket.io"
-        @socket = io.connect( @options.host )
+        @client = io.connect( @get('host') )
       when "faye.js"
-        @socket = new Faye.Client( @options.host + (@options.namespace || "") )
+        @client = new Faye.Client( @get('host')  + ( @get('namespace')  || "") )
 
   providerSourceLoaded: ()-> 
-    @connect()
+    @set "providerAvailable", true
 
   providerSourceUrl: ()->
-    switch @options.provider
-      when "socket.io" then "#{ @options.host }/socket.io/socket.io.js"
-      when "faye.js" then "#{ @options.host }/faye.js"
+    switch @get('provider')
+      when "socket.io" then "#{  @get('host')  }/socket.io/socket.io.js"
+      when "faye.js" then "#{  @get('host')  }/faye.js"
 
   loadProviderSource: ()->
     script = document.createElement 'script'
