@@ -1,6 +1,6 @@
-container = Luca.register         "Luca.core.Container"
+container = Luca.register         "Luca.Container"
 
-container.extends                 "Luca.components.Panel"
+container.extends                 "Luca.Panel"
 
 container.triggers                "before:components",
                                   "before:render:components",
@@ -8,6 +8,8 @@ container.triggers                "before:components",
                                   "after:components",
                                   "after:layout",
                                   "first:activation"
+
+container.replaces                "Luca.core.Container"
 
 container.defines
   className: 'luca-ui-container'

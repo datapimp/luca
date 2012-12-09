@@ -1,7 +1,9 @@
 # Luca.components.Panel is a low level Luca.View component which is used 
 # to build components which have toolbar areas, and a body area for the main
 # contents of the view.
-panel = Luca.register           "Luca.components.Panel"
+panel = Luca.register           "Luca.Panel"
+
+panel.replaces                  "Luca.components.Panel"
 
 panel.extends                   "Luca.View"
 
