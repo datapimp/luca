@@ -13,7 +13,10 @@ componentCacheStore =
 Luca.config.defaultComponentClass = Luca.defaultComponentClass  = 'Luca.View'
 Luca.config.defaultComponentType  = Luca.defaultComponentType   = 'view'
 
-Luca.registry.aliases = 
+Luca.registry.deprecatedComponents = {}
+Luca.registry.componentAliases = {}
+
+Luca.registry.typeAliases = 
   grid:         "grid_view"
   form:         "form_view"
   text:         "text_field"
@@ -80,7 +83,7 @@ Luca.registry.namespaces = (resolve=true)->
 # by it's type identifier.  If it doesn't exist,
 # check any other registered namespace
 Luca.registry.lookup = (ctype)->
-  if alias = Luca.registry.aliases[ ctype ] 
+  if alias = Luca.registry.typeAliases[ ctype ] 
     ctype = alias
     
   c = registry.classes[ctype]

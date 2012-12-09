@@ -1,10 +1,17 @@
 # For when I want to change the name of a component
 Luca.util.deprecateComponent = (previous, newName)-> 
+  msg = _.template "#{ previous } has been renamed to #{ newName }.  Please update your definitions."
+
+  Luca.registry.componentAliases[ newName ] ||= []
+  Luca.registry.componentAliases[ newName ].push( previous )
+
   Luca.registry.deprecatedComponents[ previous ] = 
-    message: Luca.registry.deprecationMessages.default({previous,changed}) 
+    message: msg({previous,newName}) 
     newName: newName
 
 Luca.util.checkDeprecationStatusOf = (componentName)->
   if replacement = Luca.registry.deprecatedComponents[ componentName ]
-    newName = replacement.newName
     Luca.log( replacement.message )
+    return replacement.newName
+
+  componentName

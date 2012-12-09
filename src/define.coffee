@@ -73,15 +73,24 @@ class ComponentDefinition
   in: (@namespace)-> @
 
   # allow for multiple ways of saying the same thing for readability purposes
-  from: (@superClassName)-> @
-  extends: (@superClassName)-> @
-  extend: (@superClassName)-> @
+  from: (@superClassName)-> 
+    @
+  extends: (@superClassName)-> 
+    @
+  extend: (@superClassName)-> 
+    @
+
+  replaces: (@aliases...)->
+    for old in @aliases
+      Luca.util.deprecateComponent(old, @componentName)
 
   triggers: (hooks...)->
     _.defaults(@properties ||= {}, hooks: []) 
     for hook in hooks
       @properties.hooks.push(hook) 
+
     @properties.hooks = _.uniq(@properties.hooks)
+
     @meta("hooks", @properties.hooks)
     @
 
@@ -197,6 +206,10 @@ class ComponentDefinition
 
     definition = at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
 
+    if @aliases?
+      for alias in @aliases
+        eval("#{ alias } = definition;")
+
     if @autoRegister is true 
       componentType = "view" if Luca.isViewPrototype( definition )
 
@@ -259,7 +272,8 @@ _.mixin def: Luca.define
 # and references to the classes and their prototypes, mainly for the purposes
 # of introspection and development tools
 Luca.extend = (superClassName, childName, properties={})->
-  superClass = Luca.util.resolve( superClassName, (window || global) )
+  superClassName  = Luca.util.checkDeprecationStatusOf(superClassName)
+  superClass      = Luca.util.resolve( superClassName, (window || global) )
 
   unless _.isFunction(superClass?.extend)
     throw "Error defining #{ childName }. #{ superClassName } is not a valid component to extend from"
@@ -280,8 +294,6 @@ Luca.extend = (superClassName, childName, properties={})->
 
   definition = superClass.extend(properties)
 
-  # _.def("MyView").extends("View").with
-  #   include: ['Luca.Events']
   if _.isArray( properties?.include )
     for include in properties.include
       include = Luca.util.resolve(include) if _.isString(include)
