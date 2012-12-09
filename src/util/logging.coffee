@@ -1,4 +1,4 @@
-Luca.log = (args...)
+Luca.log = (args...)->
   if Luca.isComponent(@)
     args.unshift( @identifier() )
 
