@@ -2193,24 +2193,29 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
   Luca.concerns.StateModel = {
     __initializer: function() {
-      var attribute, fn, handler, _ref,
+      var attribute, fn, getter, handler, hook, key, value, _ref, _ref2,
         _this = this;
+      if (this.stateAttributes != null) this.stateful = this.stateAttributes;
       if (this.stateful == null) return;
-      if ((this.state != null) && !Luca.isBackboneModel(this.state)) return;
+      if (this.state != null) return;
       if (_.isObject(this.stateful) && !(this.defaultState != null)) {
         this.defaultState = this.stateful;
       }
       this.state = new Backbone.Model(this.defaultState || {});
-      this.set || (this.set = function() {
-        return _this.state.set.apply(_this.state, arguments);
-      });
-      this.get || (this.get = function() {
-        return _this.state.get.apply(_this.state, arguments);
-      });
+      this.set = _.bind(this.state.set, this.state);
+      this.get = _.bind(this.state.get, this.state);
+      _ref = this.state.toJSON();
+      for (key in _ref) {
+        value = _ref[key];
+        hook = "on" + _.str.capitalize(key) + "Change";
+        getter = "get" + _.str.capitalize(key);
+        if (!_.isFunction(this[getter])) 1;
+        if (_.isFunction(this[hook])) 1;
+      }
       if (!_.isEmpty(this.stateChangeEvents)) {
-        _ref = this.stateChangeEvents;
-        for (attribute in _ref) {
-          handler = _ref[attribute];
+        _ref2 = this.stateChangeEvents;
+        for (attribute in _ref2) {
+          handler = _ref2[attribute];
           fn = _.isString(handler) ? this[handler] : handler;
           if (attribute === "*") {
             this.on("state:change", fn, this);
@@ -2220,12 +2225,12 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         }
       }
       return this.state.on("change", function(state) {
-        var changed, value, _ref2, _results;
+        var changed, value, _ref3, _results;
         _this.trigger("state:change", state);
-        _ref2 = state.changedAttributes();
+        _ref3 = state.changedAttributes();
         _results = [];
-        for (changed in _ref2) {
-          value = _ref2[changed];
+        for (changed in _ref3) {
+          value = _ref3[changed];
           _results.push(_this.trigger("state:change:" + changed, state, value, state.previous(changed)));
         }
         return _results;
@@ -2746,7 +2751,11 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
     for (eventSignature in events) {
       handler = events[eventSignature];
       if (_.isString(handler)) {
-        _results.push(_.bindAll(this, handler));
+        try {
+          _results.push(_.bindAll(this, handler));
+        } catch (e) {
+          _results.push(console.log("Error binding to handler - " + handler + " = " + e + " " + (this.identifier())));
+        }
       } else {
         _results.push(void 0);
       }
@@ -3493,7 +3502,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       });
       componentsWithClassBasedAssignment = this._().select(function(component) {
         var _ref;
-        return _.isString(component.container) && ((_ref = component.container) != null ? _ref.match('.') : void 0) && container.$(component.container).length > 0;
+        return _.isString(component.container) && ((_ref = component.container) != null ? _ref.match(/^\./) : void 0) && container.$(component.container).length > 0;
       });
       if (componentsWithClassBasedAssignment.length > 0) {
         _results = [];
@@ -3575,9 +3584,17 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       this.debug("container render components");
       container = this;
       return _(this.components).each(function(component) {
+        var containerElement;
         try {
           component.trigger("before:attach");
-          this.$(component.container).eq(0).append(component.el);
+          containerElement = container.$(component.container);
+          if (containerElement.length === 0) {
+            if (_.isString(component.container)) 1;
+            if (containerElement.length === 0) {
+              containerElement = this.$(component.container).eq(0);
+            }
+          }
+          containerElement.append(component.el);
           component.trigger("after:attach");
           return component.render();
         } catch (e) {
@@ -3834,6 +3851,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
   doComponents = function() {
     this.trigger("before:components", this, this.components);
     this.prepareComponents();
+    this.trigger("before:create:components", this, this.components);
     this.createComponents();
     this.trigger("before:render:components", this, this.components);
     this.renderComponents();
@@ -3875,6 +3893,8 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
     CollectionManager.prototype.__collections = {};
 
+    CollectionManager.prototype.autoStart = true;
+
     CollectionManager.prototype.relayEvents = true;
 
     function CollectionManager(options) {
@@ -3895,7 +3915,10 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         return Luca.CollectionManager.instances[name];
       };
       this.state = new Luca.Model();
-      if (this.initialCollections) handleInitialCollections.call(this);
+      if (this.initialCollections) {
+        this.on("ready", handleInitialCollections, this);
+      }
+      if (this.autoStart === true) this.trigger("ready");
     }
 
     CollectionManager.prototype.add = function(key, collection) {
@@ -4069,34 +4092,82 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
 }).call(this);
 (function() {
+  var __hasProp = Object.prototype.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-  Luca.SocketManager = (function() {
+  Luca.SocketManager = (function(_super) {
 
-    function SocketManager(options) {
-      this.options = options != null ? options : {};
-      _.extend(Backbone.Events);
-      this.loadProviderSource();
+    __extends(SocketManager, _super);
+
+    function SocketManager() {
+      SocketManager.__super__.constructor.apply(this, arguments);
     }
 
+    SocketManager.prototype.defaults = {
+      autoStart: true,
+      providerAvailable: false,
+      ready: false,
+      provider: "faye.js"
+    };
+
+    SocketManager.prototype.initialize = function(attributes) {
+      var connectOnReady, model, _ref,
+        _this = this;
+      this.attributes = attributes != null ? attributes : {};
+      if (this.providerAvailable() !== true) this.loadProviderSource();
+      if ((_ref = Luca.Model.prototype.initialize) != null) {
+        _ref.apply(this, arguments);
+      }
+      model = this;
+      connectOnReady = function() {
+        if (_this.isReady()) return _this.connect();
+      };
+      model.on("change", function() {
+        connectOnReady();
+        return model.unbind("change", this);
+      });
+      this.on("ready", _.once(function() {
+        return _this.set('ready', true);
+      }));
+      return this.trigger("change");
+    };
+
+    SocketManager.prototype.isReady = function() {
+      return this.get("ready") === true && this.get("providerAvailable") === true;
+    };
+
+    SocketManager.prototype.providerAvailable = function() {
+      var providerTest;
+      providerTest = (function() {
+        switch (this.get('provider')) {
+          case "socket.io":
+            return "io";
+          case "faye.js":
+            return "Faye.Client";
+        }
+      }).call(this);
+      return !!(Luca.util.resolve(providerTest) != null);
+    };
+
     SocketManager.prototype.connect = function() {
-      switch (this.options.provider) {
+      switch (this.get('provider')) {
         case "socket.io":
-          return this.socket = io.connect(this.options.host);
+          return this.client = io.connect(this.get('host'));
         case "faye.js":
-          return this.socket = new Faye.Client(this.options.host + (this.options.namespace || ""));
+          return this.client = new Faye.Client(this.get('host') + (this.get('namespace') || ""));
       }
     };
 
     SocketManager.prototype.providerSourceLoaded = function() {
-      return this.connect();
+      return this.set("providerAvailable", true);
     };
 
     SocketManager.prototype.providerSourceUrl = function() {
-      switch (this.options.provider) {
+      switch (this.get('provider')) {
         case "socket.io":
-          return "" + this.options.host + "/socket.io/socket.io.js";
+          return "" + (this.get('host')) + "/socket.io/socket.io.js";
         case "faye.js":
-          return "" + this.options.host + "/faye.js";
+          return "" + (this.get('host')) + "/faye.js";
       }
     };
 
@@ -4117,7 +4188,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
     return SocketManager;
 
-  })();
+  })(Luca.Model);
 
 }).call(this);
 (function() {
@@ -4712,6 +4783,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
         templateContainer: "Luca.templates"
       }
     ],
+    createRoleBasedGetters: false,
     useSocketManager: false,
     socketManagerOptions: {},
     initialize: function(options) {
@@ -4722,7 +4794,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       appName = this.name;
       alreadyRunning = typeof Luca.getApplication === "function" ? Luca.getApplication() : void 0;
       Luca.Application.registerInstance(this);
-      this.state = new Luca.Model(this.defaultState);
+      Luca.concerns.StateModel.__initializer.call(this);
       this.setupCollectionManager();
       this.setupSocketManager();
       Luca.containers.Viewport.prototype.initialize.apply(this, arguments);
@@ -4775,7 +4847,16 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       });
     },
     boot: function() {
-      return this.trigger("ready");
+      var service, _i, _len, _ref, _results;
+      this.trigger("ready");
+      _ref = [this.collectionManager, this.socket, this.router];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        service = _ref[_i];
+        console.log("Trigggering Ready On", service);
+        _results.push(service != null ? service.trigger("ready") : void 0);
+      }
+      return _results;
     },
     collection: function() {
       return this.collectionManager.getOrCreate.apply(this.collectionManager, arguments);
@@ -4881,10 +4962,15 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       }
       this.collectionManager = typeof (_base = Luca.CollectionManager).get === "function" ? _base.get(collectionManagerOptions.name) : void 0;
       if (!_.isFunction((_ref3 = this.collectionManager) != null ? _ref3.get : void 0)) {
+        collectionManagerOptions.autoStart = false;
         return this.collectionManager = new this.collectionManagerClass(collectionManagerOptions);
       }
     },
     setupSocketManager: function() {
+      if (_.isEmpty(this.socketManagerOptions)) return;
+      _.extend(this.socketManagerOptions, {
+        autoStart: false
+      });
       return this.socket = new Luca.SocketManager(this.socketManagerOptions);
     },
     setupRouter: function() {
@@ -5088,6 +5174,7 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
 
   collectionView.defines({
     initialize: function(options) {
+      var view, _ref;
       this.options = options != null ? options : {};
       _.extend(this, this.options);
       _.bindAll(this, "refresh");
@@ -5116,7 +5203,14 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       if (this.observeChanges === true) {
         this.on("collection:change", this.refreshModel, this);
       }
-      return Luca.components.Panel.prototype.initialize.apply(this, arguments);
+      Luca.components.Panel.prototype.initialize.apply(this, arguments);
+      view = this;
+      if (((_ref = this.getCollection()) != null ? _ref.length : void 0) > 0) {
+        return this.on("after:render", function() {
+          view.refresh();
+          return view.unbind("after:render", this);
+        });
+      }
     },
     attributesForItem: function(item, model) {
       return _.extend({}, {
@@ -5189,11 +5283,6 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       }
       eventTrigger = _([domEvent, "" + this.itemTagName + "." + this.itemClassName, selector]).compact().join(" ");
       return Luca.View.prototype.registerEvent(eventTrigger, handler);
-    },
-    render: function() {
-      var _ref;
-      if ((_ref = this.getCollection()) != null) _ref.onceLoaded(this.refresh);
-      return this;
     }
   });
 
@@ -6532,6 +6621,10 @@ b,c){var d;d=b&&b.hasOwnProperty("constructor")?b.constructor:function(){a.apply
       }
       throw "The MultiCollectionView expects to contain multiple collection views";
     }
+  });
+
+  multiView.defines({
+    version: 3
   });
 
 }).call(this);

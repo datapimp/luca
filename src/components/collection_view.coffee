@@ -71,6 +71,12 @@ collectionView.defines
 
     Luca.components.Panel::initialize.apply(@, arguments)
 
+    view = @
+    if @getCollection()?.length > 0
+      @on "after:render", ()->
+        view.refresh()
+        view.unbind "after:render", @
+
 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
@@ -134,10 +140,6 @@ collectionView.defines
 
     eventTrigger = _([domEvent,"#{ @itemTagName }.#{ @itemClassName }", selector]).compact().join(" ")
     Luca.View::registerEvent(eventTrigger,handler)
-
-  render: ()->
-    @getCollection()?.onceLoaded(@refresh)
-    @
 
 # Private Helpers
 

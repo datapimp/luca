@@ -87,3 +87,6 @@ multiView.classMethods
                type is "table_view" 
 
     throw "The MultiCollectionView expects to contain multiple collection views" 
+
+multiView.defines
+  version: 3

@@ -122,7 +122,7 @@ container.defines
       applyDOMConfig.call(container, component, index)
 
     componentsWithClassBasedAssignment = @_().select (component)->
-      _.isString(component.container) and component.container?.match('.') and container.$( component.container ).length > 0
+      _.isString(component.container) and component.container?.match(/^\./) and container.$( component.container ).length > 0
 
     # TEMP / HACK / Workaround
     #
@@ -246,7 +246,20 @@ container.defines
     _(@components).each (component)->
       try
         component.trigger "before:attach"
-        @$( component.container ).eq(0).append( component.el )
+
+        containerElement = container.$(component.container)
+
+        if containerElement.length is 0
+          if _.isString( component.container )
+            # the container trying to assign this component to is not in the dom
+            1
+
+          # try in the window context.  this is almost always certainly a bug
+          # so look into wtf is going on and which components are problematic
+          containerElement = @$( component.container ).eq(0) if containerElement.length is 0
+
+        containerElement.append( component.el )
+
         component.trigger "after:attach"
         component.render()
       catch e
@@ -469,6 +482,7 @@ createMethodsToGetComponentsByRole = ()->
 doComponents = ()->
   @trigger "before:components", @, @components
   @prepareComponents()
+  @trigger "before:create:components", @, @components
   @createComponents()
   @trigger "before:render:components", @, @components
   @renderComponents()
