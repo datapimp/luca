@@ -32,11 +32,12 @@ class App < Sinatra::Base
   sprockets.register_engine '.luca', Luca::Template 
 
   configure do
-    sprockets.append_path(File.join(root, 'assets', 'stylesheets'))
-    sprockets.append_path(File.join(root, 'assets', 'javascripts'))
+    sprockets.append_path(File.join(root, 'spec' ))
+    sprockets.append_path(File.join(root, 'app', 'assets', 'stylesheets'))
+    sprockets.append_path(File.join(root, 'app', 'assets', 'javascripts'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'javascripts'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'stylesheets'))
-    sprockets.append_path(File.join(root, 'assets', 'images'))
+    sprockets.append_path(File.join(root, 'app', 'assets', 'images'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'images'))
 
     sprockets.context_class.instance_eval do
