@@ -5,5 +5,4 @@
 #= require ./managers
 #= require ./core
 #= require ./containers
-#= require ./components
 #= require ./framework
