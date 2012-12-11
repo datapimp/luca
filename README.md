@@ -7,21 +7,6 @@ and clean single page applications.
 It uses twitter bootstrap compatible markup and css naming conventions, 
 making it possible to generate completely styled user interfaces with JSON alone.
 
-Luca combines the functionality of other open source libraries as well, but you are not
-required to use any of them if you don't like.
-
-### Dependencies
-
-- [Bootstrap by Twitter](https://twitter.github.com/bootstrap)
-- [Backbone-Query by David Tonge](https://github.com/davidgtonge/backbone_query)
-- [Underscore String by Esa-Matti Suuronen](https://github.com/epeli/underscore.string)
-
-### Development Tool Dependencies:
-
-- [CodeMirror IDE](https://codemirror.net)
-- [CoffeeScript Compiler](https://coffeescript.org)
-
-
 ### Using With Rails Asset Pipeline
 
 ```ruby
@@ -33,41 +18,59 @@ In your css manifest:
 
 ```css
   /*
-   *= require 'luca-ui-full'
-   *= require 'luca-ui-development-tools'
+   *= require 'luca'
   */
 ```
 
 All Javascript Dependencies:
 
 ```javascript
-   //= require 'underscore'
-   //= require 'underscore-string.min'
-   //= require 'jquery'
-   //= require 'backbone'
-   //= require 'bootstrap.min.js'
-   //= require 'luca-ui.min.js'
-   //= require 'luca-ui-development-tools.min.js'
+  //= require 'luca/dependencies'
+  //= require 'luca'
 ```
 
-Or you can just use the dependencies we rely on.  Latest backbone.js, underscore.js, underscore.string.js, twitter boostrap js and css:
+Your App:
+```javascript
+  Luca.initialize('App', {
+    // will look in window.AppBootstrap for an object
+    // keyed on your collection's cache_keys() for automatically
+    // populating collections on page load
+    modelBootstrap: true,
+    // will look in window.AppBaseParams for an object
+    // or function used to determine the query parameters to
+    // be sent on every request
+    baseParams: true
+  });
 
-```
-  //= require 'luca-ui-full.min.js'
-```
+  JST['home'] = function() {
+    // content
+  };
 
-## Standalone With Twitter Bootstrap ( development tools are optional )
-```html
-  <html>
-    <head>
-      <link rel="stylesheet" href='luca-ui-full.css' />
-      <link rel="stylesheet" href='luca-ui-development-tools.css' />
-    </head>
-    <body>
-      <script type='text/javascript' src="luca-ui-full.min.js" /> 
-      <script type='text/javascript' src="luca-ui-development-tools.min.js" /> 
-    </body>
-  </html>
+  App.register('App.views.Home').extends('Luca.View').defines({
+    template: "home",
+    events: {
+      "click .menu-handler" : "clickMenuHandler"
+    },
+    clickMenuHandler: function(e){
+
+    }
+  });
+
+  App.register('App.Application').extends('Luca.Application').defines({
+    // will use the Application classes internal controller
+    // to make the home 'page' active in the viewport
+    routes:{
+      "" : "home"  
+    }
+    components:[
+      name: "home"
+      type: "home"
+    ]
+  });
+
+  AppNamespace.onReady(function(){
+    (new AppNamespace.Application).boot()
+  })
 ```
 
 ## Rails Generator
