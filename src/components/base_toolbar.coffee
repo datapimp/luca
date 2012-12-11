@@ -1,7 +1,6 @@
-_.def('Luca.components.Toolbar').extends('Luca.core.Container').with
+toolbar = Luca.register "Luca.components.Toolbar"
 
-toolbar = Luca.register     "Luca.components.Toolbar"
-toolbar.extends             "Luca.core.Container"
+toolbar.extends         "Luca.core.Container"
 
 toolbar.defines
   className: 'luca-ui-toolbar toolbar'

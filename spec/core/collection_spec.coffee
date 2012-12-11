@@ -200,8 +200,9 @@ describe "Registering with the collection manager", ->
     manager = new Luca.CollectionManager(name:"private")
 
     registerSpy = sinon.spy()
-
-    private = new Luca.Collection [],
+    
+    # This test was broken, private is a reserved word.
+    my_privates = new Luca.Collection [],
       name: "private"
       manager: manager
       private: true
