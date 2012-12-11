@@ -37,6 +37,10 @@ module Luca
         end
       end
 
+      def find_methods
+        @file_contents.scan(/(^\s*(.+)\s*:\s*\(.*\)-\>)+/)
+      end
+
       def load_arguments
         args = @relevent_section[0].match(/^\s*#{@method}\s*:\s*\((.*)\)\s*-\>.*$/)[1].gsub(/\s/,'').split(',')
         @arguments = args.inject({}) do |memo, arg|
@@ -52,14 +56,6 @@ module Luca
       def read_file
         file_path = Luca::Documentation.find_file @component_class_path.last
         @file_contents = File.open(file_path).read()
-      end
-
-      def underscore string
-        string.gsub(/::/, '/').
-        gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
-        gsub(/([a-z\d])([A-Z])/,'\1_\2').
-        tr("-", "_").
-        downcase
       end
 
       def load_section

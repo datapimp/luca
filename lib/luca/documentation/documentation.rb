@@ -27,6 +27,12 @@ module Luca
       end
     end
 
+    def self.find_components path
+      Dir.glob("#{root}/#{path}/**/*.coffee")
+    end
+
+    private
+
     def self.underscore string
       string.gsub(/::/, '/').
       gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
