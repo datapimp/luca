@@ -3,8 +3,7 @@ view = Luca.register    "Luca.View"
 view.extends            "Backbone.View"
 
 # includes are extensions to the prototype, and have no special behavior
-view.includes           "Luca.Events",
-                        "Luca.concerns.DomHelpers"
+view.includes           "Luca.Events"
 
 # concerns are includes with special property / method conventions
 # which customize the components through the use of __initializer and
@@ -47,7 +46,7 @@ view.defines
 
     @$el.attr("data-luca-id", @name || @cid)
     
-    Luca.cacheInstance( @cid, @ )
+    Luca.registry.cacheInstance( @cid, @ )
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
 

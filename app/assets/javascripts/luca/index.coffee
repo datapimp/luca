@@ -1,9 +1,10 @@
 #= require_self
 #= require ./config
+#= require_tree ./concerns
 #= require ./templates
 #= require ./util
-#= require ./core
 #= require ./managers
+#= require ./core
 #= require ./containers
 #= require ./components
 

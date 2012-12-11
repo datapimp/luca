@@ -114,10 +114,12 @@ Luca.CollectionManager.destroyAll = ()->
 
 Luca.CollectionManager.loadCollectionsByName = (set, callback)->
   for name in set 
-    collection = @getOrCreate(name)
-    collection.once "reset", ()->
-      callback(collection)
-    collection.fetch()  
+    if collection = @getOrCreate(name)
+      collection.on "reset", ()->
+        callback(collection)
+        collection.unbind("reset", @)
+
+      collection.fetch()  
 
 #### Private Methods
 guessCollectionClass = (key)->

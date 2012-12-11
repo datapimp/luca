@@ -1,7 +1,7 @@
 # The SocketManager provides communication between a Websocket / Pubsub
 # system and routes messages through the application to instances
 # of the 
-class Luca.SocketManager extends Luca.Model
+class Luca.SocketManager extends Backbone.Model
   defaults:
     autoStart: true  
     providerAvailable: false

@@ -4,3 +4,7 @@
 #= require ./collection
 #= require ./view
 #= require ./panel
+#= require ./events
+#= require_self
+
+
