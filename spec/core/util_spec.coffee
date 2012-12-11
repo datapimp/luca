@@ -1,9 +1,9 @@
 describe 'The Luca Utilities', ->
   describe "Converting from component class to css class", ->
     it "should produce a css class from the component class name", ->
-      component = "Luca.core.Container"
+      component = "Luca.Container"
       cssClass = Luca.util.toCssClass(component)
-      expect( cssClass ).toEqual 'luca-core-container'
+      expect( cssClass ).toEqual 'luca-container'
 
     it "should produce a css class from the component class name", ->
       component = "Luca.components.MultiCollectionView"

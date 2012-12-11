@@ -1,4 +1,3 @@
-#= require luca
 #= require_self
 #= require_tree ./dependencies
 #= require_tree ./core

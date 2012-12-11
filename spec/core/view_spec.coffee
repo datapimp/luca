@@ -106,7 +106,7 @@ describe "Luca.View", ->
 describe "Development Tool Helpers", ->
   beforeEach ->
     _.def("Luca.views.IntrospectionView").extends("Luca.View").with
-      include:["Luca.DevelopmentToolHelpers"]
+      include:["Luca.concerns.DevelopmentToolHelpers"]
 
     @view = new Luca.views.IntrospectionView 
       events:

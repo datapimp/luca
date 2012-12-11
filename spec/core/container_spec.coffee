@@ -1,6 +1,6 @@
 describe 'The Luca Container', ->
   beforeEach ->
-    c = @container = new Luca.core.Container
+    c = @container = new Luca.Container
       defaults:
         defaultProperty: 'it_works'
       extensions:[
@@ -100,7 +100,7 @@ describe 'The Luca Container', ->
 
 describe 'Component Inheritance and Customization', ->
   it "should accept an array for extensions configuration and join on position/index", ->
-    container = new Luca.core.Container
+    container = new Luca.Container
       extensions:[
         undefined
       ,
@@ -119,7 +119,7 @@ describe 'Component Inheritance and Customization', ->
     expect( container.getComponentTwo().name ).toEqual "custom_two"
 
   it "should accept an object for extensions configuration and join using role", ->
-    container = new Luca.core.Container
+    container = new Luca.Container
       extensions:
         component_one:
           name: "custom_one"
@@ -137,7 +137,7 @@ describe 'Component Inheritance and Customization', ->
 
 describe 'Component Event Binding', ->
   beforeEach ->
-    @container = new Luca.core.Container
+    @container = new Luca.Container
       componentEvents:
         "haha trigger:one"                  : "one"
         "alpha trigger:two"                 : "two"
@@ -164,7 +164,7 @@ describe 'Component Event Binding', ->
         @getGamma().trigger("after:render:gamma")
 
       registerComponentEvents: ()->
-        Luca.core.Container::registerComponentEvents.apply(@, arguments)
+        Luca.Container::registerComponentEvents.apply(@, arguments)
 
       components:[
         name: "component_alpha"
@@ -239,7 +239,7 @@ describe 'Component Event Binding', ->
 
 describe 'Parent Container Tracking', ->
   nestedContainer = Luca.register("Luca.components.NestedSpec")
-  nestedContainer.extends("Luca.core.Container")
+  nestedContainer.extends("Luca.Container")
   nestedContainer.defines
     name: "nested_container"
     components:[
