@@ -27,18 +27,16 @@ end
 class App < Sinatra::Base
   set :root, File.expand_path('../', __FILE__)
   set :sprockets, Sprockets::Environment.new(root)
-  set :precompile, [ /\w+\.(?!js|css).+/, /application.(css|js)$/ ]
   set :assets_prefix, 'assets'
   set :assets_path, File.join(root, 'public', assets_prefix)
 
   sprockets.register_engine '.luca', Luca::Template 
 
   configure do
-    sprockets.append_path(File.join(root, 'assets', 'stylesheets'))
-    sprockets.append_path(File.join(root, 'assets', 'javascripts'))
+    sprockets.append_path(File.join(root, 'app', 'assets', 'stylesheets'))
+    sprockets.append_path(File.join(root, 'app', 'assets', 'javascripts'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'javascripts'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'stylesheets'))
-    sprockets.append_path(File.join(root, 'assets', 'images'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'images'))
 
     sprockets.context_class.instance_eval do
