@@ -1,2 +1,2 @@
-#= require ./base
+#= require ./container
 #= require_directory .

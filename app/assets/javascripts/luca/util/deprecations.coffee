@@ -5,9 +5,10 @@ Luca.util.deprecateComponent = (previous, newName)->
   Luca.registry.componentAliases[ newName ] ||= []
   Luca.registry.componentAliases[ newName ].push( previous )
 
-  Luca.registry.deprecatedComponents[ previous ] = 
-    message: msg({previous,newName}) 
-    newName: newName
+  unless previous is newName
+    Luca.registry.deprecatedComponents[ previous ] = 
+      message: msg({previous,newName}) 
+      newName: newName
 
 Luca.util.checkDeprecationStatusOf = (componentName)->
   if replacement = Luca.registry.deprecatedComponents[ componentName ]

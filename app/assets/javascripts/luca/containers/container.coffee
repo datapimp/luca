@@ -11,9 +11,6 @@ container.triggers                "before:components",
 
 container.replaces                "Luca.Container"
 
-container.afterDefinition ()->
-  debugger
-  
 container.defines
   className: 'luca-ui-container'
 
