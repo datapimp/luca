@@ -1,6 +1,6 @@
 developmentConsole = Luca.register    "Luca.tools.DevelopmentConsole"
 
-developmentConsole.extends            "Luca.core.Container"
+developmentConsole.extends            "Luca.Container"
 
 developmentConsole.defines
   className: "luca-ui-console"

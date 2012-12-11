@@ -1,4 +1,4 @@
-panelToolbar = Luca.register        "Luca.components.PanelToolbar"
+panelToolbar = Luca.register        "Luca.PanelToolbar"
 # The Panel Toolbar is a collection of buttons and / or dropdowns
 # which are automatically created by BasicPanel classes, or can be
 # added to any other view component.

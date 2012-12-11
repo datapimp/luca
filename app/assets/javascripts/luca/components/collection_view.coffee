@@ -2,7 +2,7 @@
 # collection
 collectionView = Luca.register      "Luca.components.CollectionView"
 
-collectionView.extends            "Luca.components.Panel"
+collectionView.extends            "Luca.Panel"
 
 collectionView.mixesIn            "QueryCollectionBindings", 
                                   "LoadMaskable", 
@@ -69,7 +69,7 @@ collectionView.defines
     @on "collection:add", @refresh, @
     @on "collection:change", @refreshModel, @ if @observeChanges is true
 
-    Luca.components.Panel::initialize.apply(@, arguments)
+    Luca.Panel::initialize.apply(@, arguments)
 
     view = @
     if @getCollection()?.length > 0

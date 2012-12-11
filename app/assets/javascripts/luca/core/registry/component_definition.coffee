@@ -212,6 +212,13 @@ class ComponentDefinition
 
     definition = at[@componentId] = Luca.extend(@superClassName,@componentName, @properties)
 
+    if _.isArray( @properties?.include )
+      for include in @properties.include
+        include = Luca.util.resolve(include) if _.isString(include)
+        if not include?
+          console.log "Attempt to include module failed. #{ include } not defined."
+        _.extend(definition::, include)
+
     if @_aliases?
       for alias in @_aliases
         eval("#{ alias } = definition;")
@@ -233,6 +240,8 @@ class ComponentDefinition
 
     unless _.isEmpty(@_classProperties)
       _.extend(definition, @_classProperties)
+
+
 
     definition?.afterDefinition?.call(definition, @)
 

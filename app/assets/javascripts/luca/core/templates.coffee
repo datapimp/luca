@@ -1,5 +1,9 @@
-#= require_tree ./luca
-#= require_self
+Luca.templates ||= {}
+
+if window.JST?
+  for templateId, templateFn of JST when templateId.match(/^luca\/templates\//)
+    Luca.templates[ templateId.replace('luca/templates/','') ] = templateFn
+    _( JST ).delete( templateId )
 
 # This is a convenience method for accessing the templates
 # available to the client side app, either the ones which ship with Luca

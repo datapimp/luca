@@ -15,7 +15,7 @@ _.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
     if Luca.config.enableBoostrap is true
       @wrapperClass = if @fluid is true then Luca.containers.Viewport.fluidWrapperClass else Luca.containers.Viewport.defaultWrapperClass 
 
-    Luca.core.Container::initialize.apply(@, arguments)
+    Luca.Container::initialize.apply(@, arguments)
 
     @enableFullscreen() if @fullscreen is true
 

@@ -1,4 +1,4 @@
-_.def('Luca.components.GridView').extend('Luca.components.Panel').with
+_.def('Luca.components.GridView').extend('Luca.Panel').with
 
   bodyTemplate: "components/grid_view"
 
@@ -62,7 +62,7 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
     @loadMask = Luca.config.enableBoostrap unless @loadMask?
     @loadMaskEl ||= ".luca-ui-g-view-body" if @loadMask is true
 
-    Luca.components.Panel::initialize.apply(@, arguments)
+    Luca.Panel::initialize.apply(@, arguments)
 
     @configure_collection(true)
 
@@ -87,7 +87,7 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
         console.log "Error in change handler for GridView.collection", error, @, model
 
   beforeRender: ()->
-    Luca.components.Panel::beforeRender?.apply(@, arguments)
+    Luca.Panel::beforeRender?.apply(@, arguments)
 
     @trigger "before:grid:render", @
 
@@ -108,7 +108,7 @@ _.def('Luca.components.GridView').extend('Luca.components.Panel').with
     $(@container).append @$el
 
   afterRender: ()->
-    Luca.components.Panel::afterRender?.apply(@, arguments)
+    Luca.Panel::afterRender?.apply(@, arguments)
 
     @rendered = true
     @refresh()

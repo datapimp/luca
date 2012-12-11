@@ -1,5 +1,5 @@
 component = Luca.define         "Luca.containers.CardView"
-component.extends               "Luca.core.Container"
+component.extends               "Luca.Container"
 
 component.aliases               "Luca.PageView"
 #
@@ -42,7 +42,7 @@ component.defaults
 
   initialize: (@options)->
     @components ||= @pages ||= @cards 
-    Luca.core.Container::initialize.apply @,arguments
+    Luca.Container::initialize.apply @,arguments
     @setupHooks(@hooks)
 
     @defer( @simulateActivationEvent, @ ).until("after:render")
@@ -54,7 +54,7 @@ component.defaults
       c?.trigger "activation", @, c, c 
 
   prepareComponents: ()->
-    Luca.core.Container::prepareComponents?.apply(@, arguments)
+    Luca.Container::prepareComponents?.apply(@, arguments)
     @componentElements().hide()
     @activeComponentElement().show()
 

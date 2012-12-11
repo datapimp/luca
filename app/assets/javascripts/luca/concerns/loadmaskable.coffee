@@ -12,7 +12,7 @@ Luca.concerns.LoadMaskable =
 
     @on "after:render", ()->
       @$el.addClass('with-mask')
-      if @$('.load-mask').length is 0
+      if @$('.load-mask').length is 0 and @loadMaskTemplate?
         @loadMaskTarget().prepend Luca.template(@loadMaskTemplate, @)
         @$('.load-mask').hide()
     , @

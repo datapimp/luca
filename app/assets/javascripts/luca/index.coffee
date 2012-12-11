@@ -1,7 +1,6 @@
+#= require_tree ./templates
 #= require_self
 #= require ./config
-#= require_tree ./concerns
-#= require ./templates
 #= require ./util
 #= require ./managers
 #= require ./core

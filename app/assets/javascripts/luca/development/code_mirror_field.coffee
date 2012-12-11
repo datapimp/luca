@@ -9,7 +9,7 @@ defaultOptions =
   tabSize: 2
   electricChars: false
 
-Luca.define("Luca.tools.CodeMirrorField").extends("Luca.components.Panel").with
+Luca.define("Luca.tools.CodeMirrorField").extends("Luca.Panel").with
   bodyClassName: "codemirror-wrapper"
   preProcessors: []
   postProcessors: []

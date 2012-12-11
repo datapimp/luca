@@ -40,7 +40,10 @@ Luca.concerns.DomHelpers =
     @$el.parent('[data-wrapper="true"]')  
 
   $template: (template, variables={})->
-    @$el.html( Luca.template(template,variables) )
+    try 
+      @$el.html( Luca.template(template,variables) )
+    catch e
+      console.log "Error in $template: #{ template } #{ @identifier?() ? @name || @cid }"
 
   $html: (content)->
     @$el.html( content )

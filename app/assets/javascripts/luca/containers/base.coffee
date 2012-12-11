@@ -9,7 +9,7 @@ container.triggers                "before:components",
                                   "after:layout",
                                   "first:activation"
 
-container.replaces                "Luca.core.Container"
+container.replaces                "Luca.Container"
 
 container.afterDefinition ()->
   debugger
@@ -36,7 +36,7 @@ container.defines
   # where component_accessor is either the name of the role, or a method on the container
   # which will find the component in question.
   #
-  # myContainer = new Luca.core.Container
+  # myContainer = new Luca.Container
   #   componentEvents:
   #     "name component:trigger"    : "handler"
   #     "role component:trigger"    : "handler"
@@ -57,7 +57,7 @@ container.defines
 
     _.bindAll(@, "beforeRender")
 
-    @setupHooks( Luca.core.Container::hooks )
+    @setupHooks( Luca.Container::hooks )
 
     validateContainerConfiguration(@)
 
@@ -112,9 +112,9 @@ container.defines
   beforeRender: ()->
     doLayout.call(@)
     doComponents.call(@)
-    Luca.components.Panel::beforeRender?.apply(@, arguments)
+    Luca.Panel::beforeRender?.apply(@, arguments)
 
-  # Components which inherit from Luca.core.Container can implement
+  # Components which inherit from Luca.Container can implement
   # their own versions of this method, if they need to apply any sort
   # of additional styling / configuration for the DOM elements that
   # are created to wrap each container.
@@ -431,7 +431,7 @@ container.defines
 # This is the method by which a container injects the rendered child views
 # into the DOM.  It will get passed the container object, and the component
 # that is being rendered.
-Luca.core.Container.componentRenderer = (container, component)->
+Luca.Container.componentRenderer = (container, component)->
   attachMethod = $( component.container )[ component.attachWith || "append" ]
   attachMethod( component.render().el )
 

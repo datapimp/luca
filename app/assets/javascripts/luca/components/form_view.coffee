@@ -6,7 +6,7 @@
 # to an API. 
 formView = Luca.register        "Luca.components.FormView"
 
-formView.extends                "Luca.core.Container"
+formView.extends                "Luca.Container"
 
 formView.mixesIn                "LoadMaskable"
 
@@ -93,7 +93,7 @@ formView.privateMethods
   initialize: (@options={})->
     @loadMask = Luca.config.enableBoostrap unless @loadMask?
 
-    Luca.core.Container::initialize.apply @, arguments
+    Luca.Container::initialize.apply @, arguments
 
     @components ||= @fields
 
@@ -138,7 +138,7 @@ formView.privateMethods
     @submit() if @hasModel()
 
   afterComponents: ()->
-    Luca.core.Container::afterComponents?.apply(@, arguments)
+    Luca.Container::afterComponents?.apply(@, arguments)
 
     form = @
     @eachField (field)->

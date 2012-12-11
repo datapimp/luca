@@ -1,9 +1,9 @@
-# Luca.components.Panel is a low level Luca.View component which is used 
+# Luca.Panel is a low level Luca.View component which is used 
 # to build components which have toolbar areas, and a body area for the main
 # contents of the view.
 panel = Luca.register           "Luca.Panel"
 
-panel.replaces                  "Luca.components.Panel"
+panel.replaces                  "Luca.Panel"
 
 panel.extends                   "Luca.View"
 
@@ -80,7 +80,7 @@ panel.privateMethods
     el ||= Luca.util.read( config.targetEl )
 
     console.log "Rendering toolbar to", config, el 
-    Luca.components.Panel.attachToolbar.call(@, config, el )
+    Luca.Panel.attachToolbar.call(@, config, el )
 
 panel.classMethods
   attachToolbar: (config={}, targetEl)->
