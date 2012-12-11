@@ -1,5 +1,7 @@
-_.def('Luca.components.GridView').extend('Luca.components.Panel').with
-
+#_.def('Luca.components.GridView').extend('Luca.components.Panel').with
+gridView = Luca.register  'Luca.components.GridView'
+gridView.extends          'Luca.components.Panel'
+gridView.defines
   bodyTemplate: "components/grid_view"
 
   autoBindEventHandlers: true
