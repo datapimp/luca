@@ -5,7 +5,7 @@ if __FILE__==$0
   require 'pry'
   require 'json'
   require "#{Dir.pwd}/lib/luca/documentation/documentation.rb"
-  require "#{Dir.pwd}lib/luca/documentation/component_documentation.rb"
+  require "#{Dir.pwd}/lib/luca/documentation/component_documentation.rb"
 end
 
 module Luca
