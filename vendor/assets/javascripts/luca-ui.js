@@ -116,7 +116,7 @@
     return lucaUtilityHelper.apply(this, arguments);
   };
 
-  Luca.VERSION = '0.9.81';
+  Luca.VERSION = '0.9.82';
 
   _.extend(Luca, {
     core: {},
@@ -375,7 +375,8 @@
     KEYRIGHT: 39,
     KEYDOWN: 40,
     SPACEBAR: 32,
-    FORWARDSLASH: 191
+    FORWARDSLASH: 191,
+    TAB: 9
   };
 
   Luca.config.toolbarContainerClass = "toolbar-container";
@@ -2396,6 +2397,33 @@
 }).call(this);
 (function() {
 
+  Luca.concerns.FormModelBindings = {
+    __initializer: function() {
+      var _this = this;
+      if (this.trackModelChanges !== true) return;
+      return this.on("state:change:currentModel", function(state, current, previous) {
+        if (Luca.isBackboneModel(previous)) _this.unbindFromModel(previous);
+        if (Luca.isBackboneModel(current)) return _this.bindToModel(current);
+      });
+    },
+    unbindFromModel: function(model) {
+      var _ref;
+      return (_ref = model || this.currentModel()) != null ? _ref.unbind("change", this.onModelChange) : void 0;
+    },
+    onModelChange: function(model) {
+      return this.setValues(model, {
+        modelChange: true
+      });
+    },
+    bindToModel: function(model) {
+      var _ref;
+      return (_ref = model || this.currentModel()) != null ? _ref.bind("change", this.onModelChange, this) : void 0;
+    }
+  };
+
+}).call(this);
+(function() {
+
   Luca.concerns.GridLayout = {
     _initializer: function() {
       if (this.gridSpan) this.$el.addClass("span" + this.gridSpan);
@@ -2911,7 +2939,7 @@
       }
       return this.state.on("change", function(state) {
         var changed, value, _ref3, _results;
-        _this.trigger("state:change", state);
+        _this.trigger("state:change", state, _this);
         _ref3 = state.changedAttributes();
         _results = [];
         for (changed in _ref3) {
@@ -3681,7 +3709,6 @@
       config.orientation = orientation;
       el = Luca.util.read(config.container);
       el || (el = Luca.util.read(config.targetEl));
-      console.log("Rendering toolbar to", config, el);
       return Luca.Panel.attachToolbar.call(this, config, el);
     }
   });
@@ -5087,9 +5114,11 @@
 (function() {
   var collectionView, make;
 
-  collectionView = Luca.register("Luca.components.CollectionView");
+  collectionView = Luca.register("Luca.CollectionView");
 
   collectionView["extends"]("Luca.Panel");
+
+  collectionView.replaces("Luca.components.CollectionView");
 
   collectionView.mixesIn("QueryCollectionBindings", "LoadMaskable", "Filterable", "Paginatable", "Sortable");
 
@@ -5443,7 +5472,8 @@
     input_type: "button",
     icon_class: void 0,
     input_name: void 0,
-    white: void 0
+    white: void 0,
+    buttonClasses: ""
   });
 
   buttonField.privateConfiguration({
@@ -5474,7 +5504,7 @@
       this.input_id || (this.input_id = _.uniqueId('button'));
       this.input_name || (this.input_name = this.name || (this.name = this.input_id));
       this.input_value || (this.input_value = this.label || (this.label = this.text));
-      this.input_class || (this.input_class = this["class"]);
+      this.input_class || (this.input_class = this["class"] || (this["class"] = this.buttonClasses));
       this.icon_class || (this.icon_class = "");
       if (this.icon_class.length && !this.icon_class.match(/^icon-/)) {
         this.icon_class = "icon-" + this.icon_class;
@@ -5743,7 +5773,7 @@
 
   selectField["extends"]("Luca.core.Field");
 
-  selectField.triggers("after:select");
+  selectField.triggers("after:select", "on:change");
 
   selectField.defines({
     events: {
@@ -5913,7 +5943,12 @@
     keyEventThrottle: 300,
     initialize: function(options) {
       this.options = options != null ? options : {};
-      if (this.enableKeyEvents) this.registerEvent("keyup input", "keyup_handler");
+      if (this.enableKeyEvents) {
+        if (this.keyEventThrottle) {
+          this.keyup_handler = _.debounce(this.keyup_handler, this.keyEventThrottle);
+        }
+        this.registerEvent("keyup input", "keyup_handler");
+      }
       this.input_id || (this.input_id = _.uniqueId('field'));
       this.input_name || (this.input_name = this.name);
       this.label || (this.label = this.name);
@@ -5931,6 +5966,7 @@
       return Luca.core.Field.prototype.initialize.apply(this, arguments);
     },
     keyup_handler: function(e) {
+      this.trigger("on:change", this, e);
       return this.trigger("on:keyup", this, e);
     },
     blur_handler: function(e) {
@@ -6016,11 +6052,13 @@
 
   formView["extends"]("Luca.Container");
 
-  formView.mixesIn("LoadMaskable");
+  formView.mixesIn("LoadMaskable", "FormModelBindings");
 
-  formView.triggers("before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error");
+  formView.triggers("before:submit", "before:reset", "before:load", "before:load:new", "before:load:existing", "after:submit", "after:reset", "after:load", "after:load:new", "after:load:existing", "after:submit:success", "after:submit:fatal_error", "after:submit:error", "state:change:dirty");
 
   formView.publicConfiguration({
+    trackDirtyState: false,
+    trackModelChanges: false,
     labelAlign: void 0,
     fieldLayoutClass: void 0,
     legend: "",
@@ -6037,24 +6075,44 @@
 
   formView.privateConfiguration({
     tagName: 'form',
-    stateful: true,
     events: {
       "click .submit-button": "submitHandler",
       "click .reset-button": "resetHandler"
     },
-    bodyClassName: "form-view-body"
+    bodyClassName: "form-view-body",
+    stateful: {
+      dirty: false,
+      currentModel: void 0
+    }
   });
 
   formView.privateMethods({
     initialize: function(options) {
+      var _this = this;
       this.options = options != null ? options : {};
       if (this.loadMask == null) this.loadMask = Luca.config.enableBoostrap;
       Luca.Container.prototype.initialize.apply(this, arguments);
       this.components || (this.components = this.fields);
       _.bindAll(this, "submitHandler", "resetHandler", "renderToolbars");
+      if (this.trackDirtyState === true) {
+        this.on("after:components", function() {
+          var field, _i, _len, _ref, _results;
+          _ref = _this.getFields();
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            field = _ref[_i];
+            _results.push(field.on("on:change", _this.onFieldChange, _this));
+          }
+          return _results;
+        });
+      }
       this.setupHooks(this.hooks);
       this.applyStyleClasses();
       return Luca.components.FormView.setupToolbar.call(this);
+    },
+    onFieldChange: function(field, e) {
+      this.trigger("field:change", field, e);
+      return this.state.set('dirty', true);
     },
     getDefaultToolbar: function() {
       var config;
@@ -6074,16 +6132,23 @@
       if (this.inlineForm) return this.$el.addClass('form-inline');
     },
     resetHandler: function(e) {
-      var me, my;
+      var me, my, result;
       me = my = $(e != null ? e.target : void 0);
-      this.trigger("before:reset", this);
+      if (this.beforeReset != null) {
+        result = this.beforeReset();
+        if (result === false) return;
+      }
       this.reset();
       return this.trigger("after:reset", this);
     },
     submitHandler: function(e) {
-      var me, my;
-      me = my = $(e != null ? e.target : void 0);
-      this.trigger("before:submit", this);
+      var result;
+      if (this.beforeSubmit != null) {
+        result = this.beforeSubmit();
+        if (result === false) return;
+      } else {
+        this.trigger("before:submit", this);
+      }
       if (this.loadMask === true) this.trigger("enable:loadmask", this);
       if (this.hasModel()) return this.submit();
     },
@@ -6125,31 +6190,30 @@
       }
       return fields;
     },
-    loadModel: function(current_model) {
+    loadModel: function(model) {
       var event, fields, form, _ref;
-      this.current_model = current_model;
       form = this;
       fields = this.getFields();
-      this.trigger("before:load", this, this.current_model);
-      if (this.current_model) {
-        if ((_ref = this.current_model.beforeFormLoad) != null) {
-          _ref.apply(this.current_model, this);
-        }
-        event = "before:load:" + (this.current_model.isNew() ? "new" : "existing");
-        this.trigger(event, this, this.current_model);
+      this.state.set('dirty', false);
+      this.trigger("before:load", this, model);
+      if (model) {
+        if ((_ref = model.beforeFormLoad) != null) _ref.apply(model, this);
+        event = "before:load:" + (model.isNew() ? "new" : "existing");
+        this.trigger(event, this, model);
       }
-      this.setValues(this.current_model);
-      this.trigger("after:load", this, this.current_model);
-      if (this.current_model) {
-        return this.trigger("after:load:" + (this.current_model.isNew() ? "new" : "existing"), this, this.current_model);
+      this.state.set('currentModel', model);
+      this.setValues(model || {});
+      this.trigger("after:load", this, model);
+      if (model) {
+        return this.trigger("after:load:" + (model.isNew() ? "new" : "existing"), this, model);
       }
     },
     reset: function() {
-      if (this.current_model != null) return this.loadModel(this.current_model);
+      return this.loadModel(this.state.get('currentModel'));
     },
     clear: function() {
       var _this = this;
-      this.current_model = this.defaultModel != null ? this.defaultModel() : void 0;
+      this.state.set('currentModel', typeof this.defaultModel === "function" ? this.defaultModel() : void 0);
       return _(this.getFields()).each(function(field) {
         try {
           return field.setValue('');
@@ -6157,6 +6221,9 @@
           return console.log("Error Clearing", _this, field);
         }
       });
+    },
+    isDirty: function() {
+      return !!this.state.get('dirty');
     },
     setValues: function(source, options) {
       var fields,
@@ -6167,15 +6234,15 @@
       _(fields).each(function(field) {
         var field_name, value;
         field_name = field.input_name || field.name;
-        if (value = source[field_name]) {
-          if (_.isFunction(value)) value = value.apply(_this);
+        if (source != null ? source[field_name] : void 0) {
+          value = Luca.util.read(source[field_name]);
         }
         if (!value && Luca.isBackboneModel(source)) value = source.get(field_name);
         if (field.readOnly !== true) {
           return field != null ? field.setValue(value) : void 0;
         }
       });
-      if ((options.silent != null) !== true) return this.syncFormWithModel();
+      if ((options.silent != null) !== true) return this.applyFormValuesToModel();
     },
     getValues: function(options) {
       var values,
@@ -6222,28 +6289,29 @@
       return this.trigger("after:submit:fatal_error", this, model, response);
     },
     submit: function(save, saveOptions) {
+      var _ref;
       if (save == null) save = true;
       if (saveOptions == null) saveOptions = {};
       _.bindAll(this, "submit_success_handler", "submit_fatal_error_handler");
       saveOptions.success || (saveOptions.success = this.submit_success_handler);
       saveOptions.error || (saveOptions.error = this.submit_fatal_error_handler);
-      this.syncFormWithModel();
+      this.applyFormValuesToModel();
       if (!save) return;
-      return this.current_model.save(this.current_model.toJSON(), saveOptions);
+      return (_ref = this.currentModel()) != null ? _ref.save(this.currentModel().toJSON(), saveOptions) : void 0;
     },
     hasModel: function() {
-      return this.current_model != null;
+      return this.currentModel() != null;
     },
     currentModel: function(options) {
       if (options == null) options = {};
       if (options === true || (options != null ? options.refresh : void 0) === true) {
-        this.syncFormWithModel();
+        this.applyFormValuesToModel();
       }
-      return this.current_model;
+      return this.state.get('currentModel');
     },
-    syncFormWithModel: function(options) {
+    applyFormValuesToModel: function(options) {
       var _ref;
-      return (_ref = this.current_model) != null ? _ref.set(this.getValues(), options) : void 0;
+      return (_ref = this.currentModel()) != null ? _ref.set(this.getValues(), options) : void 0;
     },
     setLegend: function(legend) {
       this.legend = legend;
@@ -7070,7 +7138,7 @@
 
   tableView = Luca.register("Luca.components.TableView");
 
-  tableView["extends"]("Luca.components.CollectionView");
+  tableView["extends"]("Luca.CollectionView");
 
   tableView.publicConfiguration({
     widths: [],
@@ -7090,6 +7158,9 @@
   });
 
   tableView.privateMethods({
+    lastColumn: function() {
+      return this.columns[this.columns.length - 1];
+    },
     eachColumn: function(fn, scope) {
       var col, index, _i, _len, _ref, _results;
       if (scope == null) scope = this;
@@ -7154,7 +7225,7 @@
         }
         content = column.header;
         if (column.sortable) content = "<a class='link'>" + column.header + "</a>";
-        this.$(targetElement).append(Backbone.View.prototype.make("th", attrs, content));
+        this.$(targetElement).find('tr').append(Backbone.View.prototype.make("th", attrs, content));
       }
       index = 0;
       _results = [];
@@ -7190,6 +7261,42 @@
   });
 
   tableView.register();
+
+}).call(this);
+(function() {
+  var scrollable;
+
+  scrollable = Luca.register('Luca.components.ScrollableTable');
+
+  scrollable["extends"]('Luca.components.TableView');
+
+  scrollable.replaces('Luca.components.GridView');
+
+  scrollable.publicConfiguration({
+    maxHeight: void 0
+  });
+
+  scrollable.privateMethods({
+    $scrollableWrapperEl: function() {
+      return this.$el.parent('.scrollable-wrapper');
+    },
+    setMaxHeight: function() {
+      var parent;
+      parent = this.$scrollableWrapperEl();
+      return parent.css({
+        'overflow': 'auto',
+        'max-height': this.maxHeight
+      });
+    },
+    afterRender: function() {
+      this.$wrap('scrollable-wrapper');
+      return this.setMaxHeight();
+    }
+  });
+
+  scrollable.defines({
+    version: 1
+  });
 
 }).call(this);
 (function() {

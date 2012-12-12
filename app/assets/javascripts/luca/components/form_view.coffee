@@ -150,6 +150,8 @@ formView.privateMethods
     me = my = $( e?.target )
     if @beforeReset?
       result = @beforeReset()
+      return if result is false
+
     @reset()
     @trigger "after:reset", @
 

@@ -45,6 +45,8 @@ namespace :source do
 end
 
 namespace :release do
+  desc "Compile and Minify"
+  task :all => [:assets,:minify]
   desc "Compile all the assets"
   task :assets => :environment do
     File.open( File.join(App.root,'vendor','assets','stylesheets','luca-ui.css'), 'w+' ) do |fh|
@@ -61,7 +63,7 @@ namespace :release do
   end
 
   desc "Build the gem"
-  task :gem do
+  task :gem => [:assets,:minify] do
     `gem build luca.gemspec`
   end
 
