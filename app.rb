@@ -31,6 +31,10 @@ class App < Sinatra::Base
   sprockets.register_engine '.luca', Luca::Template 
 
   configure do
+    HoganAssets::Config.configure do |config|
+      config.template_namespace = 'JST'
+    end    
+    
     sprockets.append_path(File.join(root, 'app', 'assets', 'stylesheets'))
     sprockets.append_path(File.join(root, 'app', 'assets', 'javascripts'))
     sprockets.append_path(File.join(root, 'vendor', 'assets', 'javascripts'))
@@ -40,6 +44,7 @@ class App < Sinatra::Base
     sprockets.context_class.instance_eval do
       include AssetHelpers
     end
+
   end
 
   helpers do

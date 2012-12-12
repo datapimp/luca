@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency "thor",     "~> 0.14"
   s.add_dependency "sinatra", ">= 0.9.2"
   s.add_dependency "ejs"
+  s.add_dependency "hogan_assets"
   s.add_development_dependency "bundler", "~> 1.0.0"
   s.add_development_dependency "rails",   "~> 3.1"
 

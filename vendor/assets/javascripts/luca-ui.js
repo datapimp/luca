@@ -116,7 +116,7 @@
     return lucaUtilityHelper.apply(this, arguments);
   };
 
-  Luca.VERSION = '0.9.8';
+  Luca.VERSION = '0.9.81';
 
   _.extend(Luca, {
     core: {},
@@ -1976,7 +1976,7 @@
     }
   }
 
-  Luca.template = function(template_name, variables) {
+  Luca.template = function(template_name, variables, partials) {
     var jst, luca, needle, template, _ref;
     window.JST || (window.JST = {});
     if (_.isFunction(template_name)) return template_name(variables);
@@ -1993,6 +1993,9 @@
     }
     if (!(luca || jst)) throw "Could not find template named " + template_name;
     template = luca || jst;
+    if (template instanceof Hogan.template) {
+      if (variables != null) return template.render(variables, partials);
+    }
     if (variables != null) return template(variables);
     return template;
   };

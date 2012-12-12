@@ -8,6 +8,7 @@ gem "sprockets", '>= 2.0.2'
 gem 'ejs'
 gem 'haml'
 gem 'rake'
+gem 'hogan_assets'
 
 group :test, :development do
   gem 'faker'

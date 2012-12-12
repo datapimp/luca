@@ -238,3 +238,5 @@
   - Added Sortable Concern
   - Added Luca.log()
   - Added ability to create aliases / deprecations of components with warning messages
+0.9.81
+  - Added support for HoganAssets via hogan.js and HoganAssets gem by Les Hill
