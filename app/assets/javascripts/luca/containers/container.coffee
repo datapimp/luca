@@ -13,15 +13,10 @@ container.replaces                "Luca.Container"
 
 container.defines
   className: 'luca-ui-container'
-
   componentTag: 'div'
-
   componentClass: 'luca-ui-panel'
-
   isContainer: true
-
   rendered: false
-
   components: []
 
   # @componentEvents provides declarative syntax for responding to events on
@@ -498,7 +493,6 @@ doComponents = ()->
 
 validateContainerConfiguration = ()->
   true
-
 
 # Private Helpers
 #

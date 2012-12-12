@@ -116,7 +116,7 @@ formView.privateMethods
       @on "after:components", ()=>
         for field in @getFields()
           field.on "on:change", @onFieldChange, @
-          
+
     @setupHooks( @hooks )
 
     @applyStyleClasses()
@@ -148,13 +148,18 @@ formView.privateMethods
 
   resetHandler: (e)->
     me = my = $( e?.target )
-    @trigger "before:reset", @
+    if @beforeReset?
+      result = @beforeReset()
     @reset()
     @trigger "after:reset", @
 
   submitHandler: (e)->
-    me = my = $( e?.target )
-    @trigger "before:submit", @
+    if @beforeSubmit?
+      result = @beforeSubmit()
+      return if result is false
+    else
+      @trigger "before:submit", @  
+
     @trigger "enable:loadmask", @ if @loadMask is true
     @submit() if @hasModel()
 

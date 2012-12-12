@@ -1,10 +1,8 @@
 # The CollectionView handles rendering a set of models from a 
 # collection
-collectionView = Luca.register      "Luca.CollectionView"
+collectionView = Luca.register      "Luca.components.CollectionView"
 
 collectionView.extends            "Luca.Panel"
-
-collectionView.replaces           "Luca.components.CollectionView"
 
 collectionView.mixesIn            "QueryCollectionBindings", 
                                   "LoadMaskable", 

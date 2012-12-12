@@ -41,6 +41,8 @@ textField.defines
     Luca.core.Field::initialize.apply @, arguments
 
   keyup_handler: (e)->
+    # TODO: Should ignore certain keyup events
+    # which would not indicate a change
     @trigger "on:change", @, e
     @trigger "on:keyup", @, e
 

@@ -2,7 +2,8 @@ selectField = Luca.register   "Luca.fields.SelectField"
 
 selectField.extends           "Luca.core.Field"
 
-selectField.triggers          "after:select"
+selectField.triggers          "after:select",
+                              "on:change"
 
 selectField.defines
   events:

@@ -28,6 +28,7 @@ Luca.config.enableBoostrap = Luca.config.enableBootstrap = true
 
 Luca.config.enhancedViewProperties = true
 
+# Need to replace this with something like keymaster.js
 Luca.keys = Luca.config.keys =
   ENTER: 13
   ESCAPE: 27
@@ -37,6 +38,7 @@ Luca.keys = Luca.config.keys =
   KEYDOWN: 40
   SPACEBAR: 32
   FORWARDSLASH: 191
+  TAB: 9
 
 Luca.config.toolbarContainerClass = "toolbar-container"
 

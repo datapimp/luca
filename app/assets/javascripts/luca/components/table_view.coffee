@@ -1,5 +1,5 @@
 tableView = Luca.register     "Luca.components.TableView"
-tableView.extends             "Luca.components.CollectionView"
+tableView.extends             "Luca.CollectionView"
 
 tableView.publicConfiguration
   widths: []
@@ -17,6 +17,10 @@ tableView.privateConfiguration
   observeChanges: true
 
 tableView.privateMethods
+
+  lastColumn: ()->
+    @columns[ @columns.length - 1 ]
+
   eachColumn: (fn, scope=@)->
     index = 0
     for col in @columns  
@@ -63,7 +67,7 @@ tableView.classMethods
       content = column.header 
       content = "<a class='link'>#{ column.header }</a>" if column.sortable
 
-      @$(targetElement).append( Backbone.View::make "th", attrs, content )
+      @$(targetElement).find('tr').append( Backbone.View::make "th", attrs, content )
 
 
     index = 0
