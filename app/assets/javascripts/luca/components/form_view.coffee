@@ -32,7 +32,7 @@ formView.publicConfiguration
   # track dirty state will bind to change events
   # on all of the underlying fields, and set a 
   # flag whenever one of them changes 
-  trackDirtyState: true 
+  trackDirtyState: false 
 
   # don't setup two way binding to the model
   trackModelChanges: false
@@ -112,16 +112,14 @@ formView.privateMethods
 
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
 
+    if @trackDirtyState is true
+      @on "after:components", ()=>
+        for field in @getFields()
+          field.on "on:change", @onFieldChange, @
+          
     @setupHooks( @hooks )
 
     @applyStyleClasses()
-
-    if @trackDirtyState is true
-      @defer ()=>
-        evt = {}
-        evt["* on:change"] = "onFieldChange" 
-        @registerComponentEvents(evt)
-      .until("after:render")
 
     Luca.components.FormView.setupToolbar.call(@)
 

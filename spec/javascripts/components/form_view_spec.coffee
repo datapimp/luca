@@ -84,14 +84,16 @@ describe 'The Form View', ->
     expect( @form.getValues().field1 ).toEqual "yes"
 
 describe 'Dirty Tracking', ->
-  beforeEach -> 
-    @dirtyForm = new Luca.components.FormView
-      components:[
-        type: "text"
-        name: "field"
-      ]
+  Luca.register("Luca.components.DirtyForm").extends("Luca.components.FormView").defines
+    trackDirtyState: true
+    components:[
+      type: "text"
+      name: "dirty_field"
+    ]
 
-    @dirtyForm.render()
+  beforeEach -> 
+    (@dirtyForm = new Luca.components.DirtyForm()).render()
+
 
   it "should be stateful", ->
     expect( @dirtyForm.state ).toBeDefined()
@@ -103,20 +105,20 @@ describe 'Dirty Tracking', ->
     expect( dirty ).not.toBeTruthy()
 
   it "should become dirty if a field changes", ->
-    @dirtyForm.getField('field').trigger("on:change")
+    @dirtyForm.getField('dirty_field').trigger("on:change")
     dirty = @dirtyForm.isDirty()
     expect( dirty ).toBeTruthy()
 
   it "should trigger a state change event", ->
-    @dirtyForm.getField('field').trigger("on:change")
+    @dirtyForm.getField('dirty_field').trigger("on:change")
     expect( @dirtyForm ).toHaveTriggered('state:change:dirty')
   
   it "should bubble up field change events", ->  
-    @dirtyForm.getField('field').trigger("on:change")
+    @dirtyForm.getField('dirty_field').trigger("on:change")
     expect( @dirtyForm ).toHaveTriggered('field:change')
 
   it "should become clean on a reset", ->
-    @dirtyForm.getField('field').trigger("on:change")
+    @dirtyForm.getField('dirty_field').trigger("on:change")
     @dirtyForm.reset()
     dirty = @dirtyForm.isDirty()
     expect( dirty ).not.toBeTruthy()
@@ -149,7 +151,7 @@ describe 'Model Binding', ->
 
   it "should be setup to track model changes", ->
     expect( @modelForm.trackModelChanges ).toBeTruthy()
-    
+
   it "should change the model's value when the form applies itself", ->
     @modelForm.setValues('model_field':"smooth, baby")
     @modelForm.applyFormValuesToModel()
