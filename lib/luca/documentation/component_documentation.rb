@@ -12,9 +12,13 @@ module Luca
       attr_accessor :arguments
       attr_accessor :method
 
-      def initialize component_name
-        @component_class_path = component_name.split('.')
-        read_file
+      def initialize component_name_or_path
+        if File.exists?(component_name_or_path)
+          @file_contents = File.open(component_name_or_path).read()
+        else
+          @component_class_path = component_name.split('.')
+          read_file
+        end
       end
 
       def method_data_for method
@@ -29,6 +33,13 @@ module Luca
         { comments:@comments, arguments:@arguments, method:@method }
       end
 
+      def find_methods
+        method_signatures = @file_contents.scan(Luca::Documentation::METHOD_REGEX)
+        method_signatures.inject([]) do |memo,method|
+          memo.push(method[1])
+        end
+      end
+
       private
 
       def load_comments
@@ -37,9 +48,6 @@ module Luca
         end
       end
 
-      def find_methods
-        @file_contents.scan(/(^\s*(.+)\s*:\s*\(.*\)-\>)+/)
-      end
 
       def load_arguments
         args = @relevent_section[0].match(/^\s*#{@method}\s*:\s*\((.*)\)\s*-\>.*$/)[1].gsub(/\s/,'').split(',')

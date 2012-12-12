@@ -9,6 +9,7 @@ module Luca
   module Documentation
     COMMENTS_REGEX =  /(^\s*#.*$\n)*/
     ARGUMENTS_REGEX = /^(.*)=(.+)/
+    METHOD_REGEX = /(^\s*(.+)\s*:\s*\(.*\)-\>)+/
 
 
     def self.root
