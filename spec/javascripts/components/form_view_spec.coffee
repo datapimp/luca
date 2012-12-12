@@ -82,3 +82,79 @@ describe 'The Form View', ->
     @form.loadModel(@model)
     @form.setValues(field1:"yes")
     expect( @form.getValues().field1 ).toEqual "yes"
+
+describe 'Dirty Tracking', ->
+  beforeEach -> 
+    @dirtyForm = new Luca.components.FormView
+      components:[
+        type: "text"
+        name: "field"
+      ]
+
+    @dirtyForm.render()
+
+  it "should be stateful", ->
+    expect( @dirtyForm.state ).toBeDefined()
+    expect( @dirtyForm.state.set('dirty', true) )
+    expect( @dirtyForm ).toHaveTriggered("state:change:dirty")
+
+  it "should start off in a clean state", ->
+    dirty = @dirtyForm.isDirty()
+    expect( dirty ).not.toBeTruthy()
+
+  it "should become dirty if a field changes", ->
+    @dirtyForm.getField('field').trigger("on:change")
+    dirty = @dirtyForm.isDirty()
+    expect( dirty ).toBeTruthy()
+
+  it "should trigger a state change event", ->
+    @dirtyForm.getField('field').trigger("on:change")
+    expect( @dirtyForm ).toHaveTriggered('state:change:dirty')
+  
+  it "should bubble up field change events", ->  
+    @dirtyForm.getField('field').trigger("on:change")
+    expect( @dirtyForm ).toHaveTriggered('field:change')
+
+  it "should become clean on a reset", ->
+    @dirtyForm.getField('field').trigger("on:change")
+    @dirtyForm.reset()
+    dirty = @dirtyForm.isDirty()
+    expect( dirty ).not.toBeTruthy()
+
+describe 'Model Binding', ->
+  Luca.register("Luca.FormModel").extends("Luca.Model").defines(defaults:model_field:"value")
+
+  form = Luca.register('Luca.components.ModelBoundForm')
+
+  form.extends("Luca.components.FormView")
+
+  form.defines
+    trackModelChanges: true
+    components:[
+      type: "text"
+      name: "model_field"
+    ]
+
+  beforeEach ->
+    @modelForm = new Luca.components.ModelBoundForm()
+    @formModel = new Luca.FormModel()
+    @modelForm.render()
+    @modelForm.loadModel(@formModel)
+
+  it "should trigger a state change event", ->
+    expect( @modelForm ).toHaveTriggered("state:change:currentModel")
+
+  it "should not bind to model changes by default", ->
+    expect( Luca.components.FormView::trackModelChanges ).not.toBeTruthy()
+
+  it "should be setup to track model changes", ->
+    expect( @modelForm.trackModelChanges ).toBeTruthy()
+    
+  it "should change the model's value when the form applies itself", ->
+    @modelForm.setValues('model_field':"smooth, baby")
+    @modelForm.applyFormValuesToModel()
+    expect( @modelForm.getField('model_field').getValue() ).toEqual 'smooth, baby'
+
+  it "should change the field's value when the underlying model changes", ->
+    @formModel.set('model_field', 'haha')
+    expect( @modelForm.getValues().model_field ).toEqual 'haha'

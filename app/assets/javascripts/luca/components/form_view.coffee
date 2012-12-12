@@ -8,7 +8,8 @@ formView = Luca.register        "Luca.components.FormView"
 
 formView.extends                "Luca.Container"
 
-formView.mixesIn                "LoadMaskable"
+formView.mixesIn                "LoadMaskable",
+                                "FormModelBindings"
 
 formView.triggers               "before:submit",
                                 "before:reset",
@@ -23,10 +24,19 @@ formView.triggers               "before:submit",
                                 "after:submit:success",
                                 "after:submit:fatal_error",
                                 "after:submit:error"
+                                "state:change:dirty"
 
 
 
 formView.publicConfiguration
+  # track dirty state will bind to change events
+  # on all of the underlying fields, and set a 
+  # flag whenever one of them changes 
+  trackDirtyState: true 
+
+  # don't setup two way binding to the model
+  trackModelChanges: false
+
   # should the label display above, or to the
   # side of the fields
   labelAlign: undefined
@@ -82,12 +92,15 @@ formView.publicConfiguration
 
 formView.privateConfiguration
   tagName: 'form'
-  stateful: true
   events:
     "click .submit-button" : "submitHandler"
     "click .reset-button" : "resetHandler"
 
   bodyClassName: "form-view-body"
+
+  stateful:
+    dirty: false
+    currentModel: undefined
 
 formView.privateMethods
   initialize: (@options={})->
@@ -103,8 +116,18 @@ formView.privateMethods
 
     @applyStyleClasses()
 
+    if @trackDirtyState is true
+      @defer ()=>
+        evt = {}
+        evt["* on:change"] = "onFieldChange" 
+        @registerComponentEvents(evt)
+      .until("after:render")
+
     Luca.components.FormView.setupToolbar.call(@)
 
+  onFieldChange: (field, e)->
+    @trigger "field:change", field, e
+    @state.set('dirty', true)
 
   getDefaultToolbar: ()->
     config = @toolbarConfig || @defaultToolbar
@@ -165,36 +188,42 @@ formView.privateMethods
 
     fields
 
-  loadModel: (@current_model)->
+  loadModel: (model)->
     form = @
     fields = @getFields()
 
-    @trigger "before:load", @, @current_model
+    @state.set('dirty', false)
 
-    if @current_model
-      @current_model.beforeFormLoad?.apply(@current_model, @)
+    @trigger "before:load", @, model
 
-      event = "before:load:#{ (if @current_model.isNew() then "new" else "existing")}"
-      @trigger event, @, @current_model
+    if model
+      model.beforeFormLoad?.apply(model, @)
+      event = "before:load:#{ (if model.isNew() then "new" else "existing")}"
+      @trigger event, @, model
 
-    @setValues(@current_model)
+    @state.set('currentModel', model)
 
-    @trigger "after:load", @, @current_model
+    @setValues(model || {})
 
-    if @current_model
-      @trigger "after:load:#{ (if @current_model.isNew() then "new" else "existing")}", @, @current_model
+    @trigger "after:load", @, model
+
+    if model
+      @trigger "after:load:#{ (if model.isNew() then "new" else "existing")}", @, model
 
   reset: ()->
-    @loadModel( @current_model ) if @current_model?
+    @loadModel( @state.get('currentModel') )
 
   clear: ()->
-    @current_model = if @defaultModel? then @defaultModel() else undefined
+    @state.set('currentModel', @defaultModel?() )
 
     _( @getFields() ).each (field)=>
       try
         field.setValue('')
       catch e
         console.log "Error Clearing", @, field
+
+  isDirty: ()->
+    !!@state.get('dirty')
 
   # set the values on the form
   # without syncing
@@ -205,16 +234,15 @@ formView.privateMethods
     _( fields ).each (field) =>
       field_name = field.input_name || field.name
 
-      if value = source[field_name]
-        if _.isFunction(value)
-          value = value.apply(@)
+      if source?[field_name]
+        value = Luca.util.read( source[field_name] )
 
       if !value and Luca.isBackboneModel(source)
         value = source.get(field_name)
 
       field?.setValue( value ) unless field.readOnly is true
 
-    @syncFormWithModel() unless options.silent? is true
+    @applyFormValuesToModel() unless options.silent? is true
 
   # Public: returns a hash of values for the form fields in this view.
   #
@@ -280,21 +308,21 @@ formView.privateMethods
     saveOptions.success ||= @submit_success_handler
     saveOptions.error ||= @submit_fatal_error_handler
 
-    @syncFormWithModel()
+    @applyFormValuesToModel()
     return unless save
-    @current_model.save( @current_model.toJSON(), saveOptions )
+    @currentModel()?.save( @currentModel().toJSON(), saveOptions )
 
   hasModel: ()->
-    @current_model?
+    @currentModel()?
 
   currentModel: (options={})->
     if options is true or options?.refresh is true
-      @syncFormWithModel()
+      @applyFormValuesToModel()
 
-    @current_model
+    @state.get('currentModel')
 
-  syncFormWithModel: (options)->
-    @current_model?.set( @getValues(), options )
+  applyFormValuesToModel: (options)->
+    @currentModel()?.set( @getValues(), options )
 
   setLegend: (@legend)->
     $('fieldset legend', @el).first().html(@legend)

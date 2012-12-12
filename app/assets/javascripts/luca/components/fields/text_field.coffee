@@ -17,6 +17,9 @@ textField.defines
 
   initialize: (@options={})->
     if @enableKeyEvents
+      if @keyEventThrottle
+        @keyup_handler = _.debounce(@keyup_handler, @keyEventThrottle)
+        
       @registerEvent("keyup input","keyup_handler")     
 
     @input_id ||= _.uniqueId('field')
@@ -38,6 +41,7 @@ textField.defines
     Luca.core.Field::initialize.apply @, arguments
 
   keyup_handler: (e)->
+    @trigger "on:change", @, e
     @trigger "on:keyup", @, e
 
   blur_handler: (e)->

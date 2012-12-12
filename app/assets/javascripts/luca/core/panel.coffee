@@ -79,7 +79,6 @@ panel.privateMethods
     el = Luca.util.read( config.container )
     el ||= Luca.util.read( config.targetEl )
 
-    console.log "Rendering toolbar to", config, el 
     Luca.Panel.attachToolbar.call(@, config, el )
 
 panel.classMethods

@@ -37,7 +37,7 @@ Luca.concerns.StateModel =
           @on "state:change:#{ attribute }", fn, @
 
     @state.on "change", (state)=>
-      @trigger "state:change", state
+      @trigger "state:change", state, @
 
       for changed, value of state.changedAttributes()
         @trigger "state:change:#{ changed }", state, value, state.previous(changed)
