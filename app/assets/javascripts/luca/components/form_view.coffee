@@ -208,7 +208,7 @@ formView.privateMethods
 
     @state.set('currentModel', model)
 
-    @setValues(model || {})
+    @setValues(model || {}, silent: true)
 
     @trigger "after:load", @, model
 
@@ -246,6 +246,8 @@ formView.privateMethods
         value = source.get(field_name)
 
       field?.setValue( value ) unless field.readOnly is true
+
+    @applyFormValuesToModel() unless options.silent? is true
 
   # Public: returns a hash of values for the form fields in this view.
   #
