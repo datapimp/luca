@@ -2,6 +2,8 @@ Luca.concerns.StateModel =
   __initializer: ()->
     @stateful = @stateAttributes if @stateAttributes?
 
+    statefulView = @
+
     return unless @stateful?
     return if @state? 
     
@@ -34,11 +36,13 @@ Luca.concerns.StateModel =
         if attribute is "*"
           @on "state:change", fn, @
         else
-          @on "state:change:#{ attribute }", fn, @
+          @on "state:change:#{ attribute }", _.debounce(fn,10), @
 
-    @state.on "change", (state)=>
+    @state.on "change", _.debounce (state)=>
       @trigger "state:change", state, @
 
+      console.log "State Change", state.changedAttributes()
       for changed, value of state.changedAttributes()
-        @trigger "state:change:#{ changed }", state, value, state.previous(changed)
+        @trigger "state:change:#{ changed }", state, value, state.previous(changed), statefulView
+    , 10
 

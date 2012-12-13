@@ -247,8 +247,6 @@ formView.privateMethods
 
       field?.setValue( value ) unless field.readOnly is true
 
-    @applyFormValuesToModel() unless options.silent? is true
-
   # Public: returns a hash of values for the form fields in this view.
   #
   # options - An options Hash to control the behavior of values returned (default: {}):
