@@ -5,6 +5,8 @@ Luca.concerns.StateModel =
     return unless @stateful?
     return if @state? 
     
+    statefulView = @
+
     if _.isObject(@stateful) and not @defaultState?
       @defaultState = @stateful 
 
@@ -29,16 +31,22 @@ Luca.concerns.StateModel =
 
     unless _.isEmpty(@stateChangeEvents)
       for attribute, handler of @stateChangeEvents
-        fn = if _.isString(handler) then @[handler] else handler 
+        fn = if _.isString(handler) then statefulView[handler] else handler 
         
         if attribute is "*"
-          @on "state:change", fn, @
+          statefulView.on "state:change", fn, statefulView 
         else
-          @on "state:change:#{ attribute }", fn, @
+          statefulView.on "state:change:#{ attribute }", fn, statefulView 
 
-    @state.on "change", (state)=>
-      @trigger "state:change", state, @
+    # Any time there is a model change event on the internal state machine
+    # we will trigger a general state:change event on the component as well
+    # as individual state:change:attribute events
+
+    state = statefulView.state 
+    
+    statefulView.state.on "change", (args...)=>
+      @trigger.call(statefulView, "state:change", args... )
 
       for changed, value of state.changedAttributes()
-        @trigger "state:change:#{ changed }", state, value, state.previous(changed)
+        @trigger.call statefulView, "state:change:#{ changed }", state, value, state.previous(changed)
 

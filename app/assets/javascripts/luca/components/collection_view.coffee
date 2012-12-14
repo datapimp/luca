@@ -64,9 +64,10 @@ collectionView.defines
       console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
+    # INVESTIGATE THIS BEING DOUBLE WORK
     @on "data:refresh", @refresh, @
-
     @on "collection:reset", @refresh, @
+
     @on "collection:remove", @refresh, @
     @on "collection:add", @refresh, @
     @on "collection:change", @refreshModel, @ if @observeChanges is true

@@ -7,8 +7,6 @@ panel.replaces                  "Luca.Panel"
 
 panel.extends                   "Luca.View"
 
-#panel.mixesIn                   "LoadMaskable"
-
 panel.configuration
   topToolbar: undefined
   bottomToolbar: undefined
@@ -87,8 +85,21 @@ panel.classMethods
     config.type ||= config.ctype ||= @toolbarType || "panel_toolbar"
 
     config.additionalClassNames = "#{ Luca.config.toolbarContainerClass } #{ config.orientation }"
-     
+  
     toolbar = Luca.util.lazyComponent( config )
+    # TEMP
+    # Do this properly
+    if config.orientation is "bottom"
+      @getBottomToolbar ||= ()-> toolbar   
+
+    if config.orientation is "top"
+      @getTopToolbar ||= ()-> toolbar   
+
+    if config.orientation is "right"
+      @getRightToolbar ||= ()-> toolbar   
+
+    if config.orientation is "left"
+      @getLeftToolbar ||= ()-> toolbar   
 
     hasBody = @bodyClassName or @bodyTagName
 

@@ -104,6 +104,8 @@ formView.privateConfiguration
 
 formView.privateMethods
   initialize: (@options={})->
+    form = @
+
     @loadMask = Luca.config.enableBoostrap unless @loadMask?
 
     Luca.Container::initialize.apply @, arguments
@@ -113,9 +115,10 @@ formView.privateMethods
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
 
     if @trackDirtyState is true
-      @on "after:components", ()=>
+      @on "after:components", ()->
         for field in @getFields()
-          field.on "on:change", @onFieldChange, @
+          field.on "on:change", @onFieldChange, form 
+      , form
 
     @setupHooks( @hooks )
 
