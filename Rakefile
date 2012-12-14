@@ -71,6 +71,7 @@ namespace :release do
     `uglifyjs tmp/luca.js > vendor/assets/javascripts/luca.min.js`
     `uglifyjs tmp/luca-development.js > vendor/assets/javascripts/luca-development.min.js`
     `uglifyjs tmp/luca-dependencies.js > vendor/assets/javascripts/luca-dependencies.min.js`
+    `cat vendor/assets/javascripts/luca-dependencies.min.js vendor/assets/javascripts/luca.min.js > vendor/assets/javascripts/luca.full.min.js`
     `rm tmp/*.js`
   end
 
