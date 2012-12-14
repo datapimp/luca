@@ -9,7 +9,13 @@ Luca.concerns.EnhancedProperties =
     # with the instance of the collection of that name in the main
     # Luca.CollectionManager
     if _.isString(@collection) and Luca.CollectionManager.get()
-      @collection = Luca.CollectionManager.get().getOrCreate(@collection)      
+      @collection = Luca.CollectionManager.get().getOrCreate(@collection)
+
+    if _.isArray(@collection)
+      @collection = new Luca.Collection @collection      
+
+    if _.isObject(@collection) and _.isArray(@collection.data)
+      @collection = new Luca.Collection(@collection.data)
 
     # The @template property.
     #

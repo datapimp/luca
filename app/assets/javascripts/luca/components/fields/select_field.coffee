@@ -22,9 +22,8 @@ selectField.defines
     _.extend @, Luca.concerns.Deferrable
     _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
 
-    if _.isArray(@collection)
-      @collection = data: @collection
-      
+    # here i'm trying to simplify the definition api
+    # for select fields with static data
     Luca.core.Field::initialize.apply @, arguments
 
     @input_id ||= _.uniqueId('field')
