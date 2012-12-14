@@ -2049,7 +2049,10 @@
 
   Luca.concerns.CollectionEventBindings = {
     __initializer: function() {
-      Luca.concerns.CollectionEventBindings.__setup.call(this);
+      var _this = this;
+      this.defer(function() {
+        return Luca.concerns.CollectionEventBindings.__setup.call(_this);
+      }).until("after:initialize");
       if (this.collectionEventBindingsSetup !== true) {
         if (Luca.isBackboneCollection(this.collection)) {
           this.collection.on("reset", relayAs("collection:reset"), this);
@@ -2250,7 +2253,6 @@
         filter = _.clone(this.getQuery());
         options = _.clone(this.getQueryOptions());
         prepared = this.prepareRemoteFilter(filter, options);
-        this.debug("Preparing filterable call", prepared, this.isRemote());
         if (this.isRemote()) {
           return this.collection.applyFilter(prepared, {
             remote: true
@@ -2399,12 +2401,13 @@
 
   Luca.concerns.FormModelBindings = {
     __initializer: function() {
-      var _this = this;
       if (this.trackModelChanges !== true) return;
-      return this.on("state:change:currentModel", function(state, current, previous) {
-        if (Luca.isBackboneModel(previous)) _this.unbindFromModel(previous);
-        if (Luca.isBackboneModel(current)) return _this.bindToModel(current);
-      });
+      this.on("state:change:currentModel", this.onStateChangeCurrentModel, this);
+      return _.bindAll(this, "onStateChangeCurrentModel", "unbindFromModel", "onModelChange", "bindToModel");
+    },
+    onStateChangeCurrentModel: function(state, current, previous) {
+      if (Luca.isBackboneModel(previous)) this.unbindFromModel(previous);
+      if (Luca.isBackboneModel(current)) return this.bindToModel(current);
     },
     unbindFromModel: function(model) {
       var _ref;
@@ -2903,14 +2906,16 @@
 
 }).call(this);
 (function() {
+  var __slice = Array.prototype.slice;
 
   Luca.concerns.StateModel = {
     __initializer: function() {
-      var attribute, fn, getter, handler, hook, key, value, _ref, _ref2,
+      var attribute, fn, getter, handler, hook, key, state, statefulView, value, _ref, _ref2,
         _this = this;
       if (this.stateAttributes != null) this.stateful = this.stateAttributes;
       if (this.stateful == null) return;
       if (this.state != null) return;
+      statefulView = this;
       if (_.isObject(this.stateful) && !(this.defaultState != null)) {
         this.defaultState = this.stateful;
       }
@@ -2929,22 +2934,24 @@
         _ref2 = this.stateChangeEvents;
         for (attribute in _ref2) {
           handler = _ref2[attribute];
-          fn = _.isString(handler) ? this[handler] : handler;
+          fn = _.isString(handler) ? statefulView[handler] : handler;
           if (attribute === "*") {
-            this.on("state:change", fn, this);
+            statefulView.on("state:change", fn, statefulView);
           } else {
-            this.on("state:change:" + attribute, fn, this);
+            statefulView.on("state:change:" + attribute, fn, statefulView);
           }
         }
       }
-      return this.state.on("change", function(state) {
-        var changed, value, _ref3, _results;
-        _this.trigger("state:change", state, _this);
-        _ref3 = state.changedAttributes();
+      state = statefulView.state;
+      return statefulView.state.on("change", function() {
+        var args, changed, value, _ref3, _ref4, _results;
+        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        (_ref3 = _this.trigger).call.apply(_ref3, [statefulView, "state:change"].concat(__slice.call(args)));
+        _ref4 = state.changedAttributes();
         _results = [];
-        for (changed in _ref3) {
-          value = _ref3[changed];
-          _results.push(_this.trigger("state:change:" + changed, state, value, state.previous(changed)));
+        for (changed in _ref4) {
+          value = _ref4[changed];
+          _results.push(_this.trigger.call(statefulView, "state:change:" + changed, state, value, state.previous(changed)));
         }
         return _results;
       });
@@ -3721,6 +3728,26 @@
       config.type || (config.type = config.ctype || (config.ctype = this.toolbarType || "panel_toolbar"));
       config.additionalClassNames = "" + Luca.config.toolbarContainerClass + " " + config.orientation;
       toolbar = Luca.util.lazyComponent(config);
+      if (config.orientation === "bottom") {
+        this.getBottomToolbar || (this.getBottomToolbar = function() {
+          return toolbar;
+        });
+      }
+      if (config.orientation === "top") {
+        this.getTopToolbar || (this.getTopToolbar = function() {
+          return toolbar;
+        });
+      }
+      if (config.orientation === "right") {
+        this.getRightToolbar || (this.getRightToolbar = function() {
+          return toolbar;
+        });
+      }
+      if (config.orientation === "left") {
+        this.getLeftToolbar || (this.getLeftToolbar = function() {
+          return toolbar;
+        });
+      }
       hasBody = this.bodyClassName || this.bodyTagName;
       action = (function() {
         switch (config.orientation) {
@@ -4012,6 +4039,12 @@
         return component.role === role || component.type === role || component.ctype === role;
       });
     },
+    findComponentByType: function(desired, deep) {
+      if (deep == null) deep = false;
+      return _(this.allChildren()).detect(function(component) {
+        return desired === (component.type || component.ctype);
+      });
+    },
     findComponentByName: function(name, deep) {
       if (deep == null) deep = false;
       return _(this.allChildren()).detect(function(component) {
@@ -4151,11 +4184,12 @@
       return component.role != null;
     });
     return _(childrenWithRole).each(function(component) {
-      var getter;
+      var getter, getterFn;
       getter = _.str.camelize("get_" + component.role);
-      return container[getter] || (container[getter] = function() {
+      getterFn = function() {
         return component;
-      });
+      };
+      return container[getter] || (container[getter] = _.bind(getterFn, container));
     });
   };
 
@@ -4763,9 +4797,6 @@
         return app.render();
       }).until(this, "ready");
       this.setupRouter();
-      if (this.useKeyRouter === true) {
-        console.log("The useKeyRouter property is being deprecated. switch to useKeyHandler instead");
-      }
       if ((this.useKeyHandler === true || this.useKeyRouter === true) && (this.keyEvents != null)) {
         this.setupKeyHandler();
       }
@@ -4813,7 +4844,6 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         service = _ref[_i];
-        console.log("Trigggering Ready On", service);
         _results.push(service != null ? service.trigger("ready") : void 0);
       }
       return _results;
@@ -6088,8 +6118,9 @@
 
   formView.privateMethods({
     initialize: function(options) {
-      var _this = this;
+      var form;
       this.options = options != null ? options : {};
+      form = this;
       if (this.loadMask == null) this.loadMask = Luca.config.enableBoostrap;
       Luca.Container.prototype.initialize.apply(this, arguments);
       this.components || (this.components = this.fields);
@@ -6097,14 +6128,14 @@
       if (this.trackDirtyState === true) {
         this.on("after:components", function() {
           var field, _i, _len, _ref, _results;
-          _ref = _this.getFields();
+          _ref = this.getFields();
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             field = _ref[_i];
-            _results.push(field.on("on:change", _this.onFieldChange, _this));
+            _results.push(field.on("on:change", this.onFieldChange, form));
           }
           return _results;
-        });
+        }, form);
       }
       this.setupHooks(this.hooks);
       this.applyStyleClasses();
@@ -6202,7 +6233,9 @@
         this.trigger(event, this, model);
       }
       this.state.set('currentModel', model);
-      this.setValues(model || {});
+      this.setValues(model || {}, {
+        silent: true
+      });
       this.trigger("after:load", this, model);
       if (model) {
         return this.trigger("after:load:" + (model.isNew() ? "new" : "existing"), this, model);
