@@ -4,7 +4,6 @@ module Luca
     require 'luca/test_harness'
     require 'luca/code_browser'
     require 'luca/rails/engine'
-    require 'luca/rails/version'
   end
 end
 
