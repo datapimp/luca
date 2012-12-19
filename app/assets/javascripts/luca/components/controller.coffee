@@ -15,6 +15,7 @@ controller.publicInterface
       if current.activatedByController is true
         current.trigger("on:controller:reactivation")
       else
+        current.trigger("on:controller:reactivation")
         current.trigger("on:controller:activation")
         current.activatedByController = true
 
