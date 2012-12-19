@@ -123,7 +123,10 @@ collectionView.defines
     @trigger("before:refresh", models, query, options)
 
     if models.length is 0
-      @trigger("empty:results")
+      @trigger("empty:results", query, options)
+
+    if @getCollection()?.length > 0 and models.length is 0
+      @trigger("empty:filter", query, options)
 
     index = 0
     for model in models
