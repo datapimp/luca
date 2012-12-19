@@ -103,11 +103,13 @@ panel.classMethods
 
     hasBody = @bodyClassName or @bodyTagName
 
+    action = config.attachmentAction
     # there will be a body panel inside of the views $el
     # so just place the toolbar before, or after the body
-    action = switch config.orientation
+    action ||= switch config.orientation
       when "top", "left"
         if hasBody and not targetEl?.length > 0 then "before" else "prepend"
+
       when "bottom", "right"
         if hasBody and not targetEl?.length > 0 then "after" else "append"
 
