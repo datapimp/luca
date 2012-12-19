@@ -116,17 +116,17 @@ collectionView.defines
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
     @trigger("model:refreshed", index, model)
 
-  refresh: (query,options,models)->
-    query   ||= @getQuery()
-    options ||= @getQueryOptions()
-    models  ||= @getModels(query, options)
+  refresh: ()->
+    query   = @getQuery()
+    options = @getQueryOptions()
+    models  = @getModels(query, options)
 
     @$bodyEl().empty()
 
     @trigger("before:refresh", models, query, options)
 
     if models.length is 0
-      @trigger("empty:results")
+      @trigger("empty:results", query, options)
 
     index = 0
     for model in models

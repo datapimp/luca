@@ -22,7 +22,7 @@ lucaUtilityHelper = (payload, args...)->
 
 (window || global).Luca = ()-> lucaUtilityHelper.apply(@, arguments)
 
-Luca.VERSION = '0.9.82'
+Luca.VERSION = '0.9.83'
 
 _.extend Luca,
   core: {}

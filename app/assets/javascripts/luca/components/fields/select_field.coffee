@@ -20,7 +20,7 @@ selectField.defines
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.concerns.Deferrable
-    _.bindAll @, "change_handler", "populateOptions", "beforeFetch"
+    _.bindAll @, "change_handler"
 
     if _.isArray(@collection)
       @collection = data: @collection
@@ -44,8 +44,8 @@ selectField.defines
     catch e
       console.log "Error Configuring Collection", @, e.message
 
-    @collection?.bind "before:fetch", @beforeFetch
-    @collection?.bind "reset", @populateOptions
+    @collection?.bind "before:fetch", @beforeFetch, @
+    @collection?.bind "reset", @populateOptions, @
 
   # if the select field is configured with a data property
   # then parse that data into the proper format.  either
@@ -89,12 +89,17 @@ selectField.defines
   populateOptions: ()->
     @resetOptions()
 
-    if @collection?.each?
-      @collection.each (model) =>
-        value = model.get( @valueField )
-        display = model.get( @displayField )
-        selected = "selected" if @selected and value is @selected
-        option = "<option #{ selected } value='#{ value }'>#{ display }</option>"
+    if @collection?.length > 0
+      if @sortOptionsBy?
+        models = @collection.sortBy (model)-> model.read( @sortOptionsBy )
+      else
+        models = @collection.models
+
+      for model in models 
+        v = model.read( @valueField )
+        d = model.read( @displayField )
+        selected = "selected" if @selected and v is @selected
+        option = "<option #{ selected } value='#{ v }'>#{ d }</option>"
         @getInputElement().append( option )
 
     @trigger "after:populate:options", @
