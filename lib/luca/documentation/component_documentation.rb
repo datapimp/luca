@@ -2,8 +2,10 @@
 
 if __FILE__==$0
   require 'pry'
-  require './lib/luca/documentation/documentation.rb'
 end
+
+require './lib/luca/documentation/documentation_compiler.rb'
+
 
 module Luca
   module Documentation

@@ -15,6 +15,7 @@ end
 
 require "#{ File.expand_path('../', __FILE__) }/lib/luca/template.rb"
 require "#{ File.expand_path('../', __FILE__) }/lib/luca/code_browser.rb"
+require "#{ File.expand_path('../', __FILE__) }/lib/luca/documentation/documentation_compiler.rb"
 
 module Luca
   class Template
@@ -90,6 +91,13 @@ class App < Sinatra::Base
       {className:component, source:source}.to_json
     else
       Luca::CodeBrowser.map_source
+    end
+  end
+
+  get "/documentation" do
+    if params[:path]
+      documentation = Luca::Documentation::DocumentationCompiler.documentation_for_path params[:path]
+      { pathName:params[:path], documentation:documentation }.to_json
     end
   end
 
