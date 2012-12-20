@@ -95,10 +95,19 @@ class App < Sinatra::Base
   end
 
   # /documentation?path=/app/assets/javascripts/luca/components
+  # /documentation?file=Luca.Router
   get "/documentation" do
     if params[:path]
       documentation = Luca::Documentation::DocumentationCompiler.documentation_for_path params[:path]
       { pathName:params[:path], documentation:documentation }.to_json
+    elsif params[:file]
+      documentation = Luca::Documentation::ComponentDocumentation.new params[:file]
+      component_name = params[:file].split("/").last.split('.').first()
+      c_doc = {}
+      documentation.find_methods.each do |method|
+        c_doc[method.to_sym] = documentation.method_data_for(method).all
+      end
+      { file: params[:file], documentation:c_doc }.to_json
     end
   end
 

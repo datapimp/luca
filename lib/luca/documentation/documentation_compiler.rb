@@ -17,8 +17,6 @@ module Luca
         files_to_include.inject(Hash.new) do |memo, file|
           component_documentation = Luca::Documentation::ComponentDocumentation.new file
           component_name = file.split("/").last.split('.').first()
-          puts component_name
-          puts memo.class
           memo[component_name.to_sym] = {}
           component_documentation.find_methods.each do |method|
             memo[component_name.to_sym][method.to_sym] = component_documentation.method_data_for(method).all

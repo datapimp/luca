@@ -18,7 +18,7 @@ module Luca
         if File.exists?(component_name_or_path)
           @file_contents = File.open(component_name_or_path).read()
         else
-          @component_class_path = component_name.split('.')
+          @component_class_path = component_name_or_path.split('.')
           read_file
         end
       end
