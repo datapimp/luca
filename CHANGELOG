@@ -251,3 +251,7 @@
   - setting @rendered = true on views
   - adding event on controller activation
   - Bugfix on CollectionView refresh method
+
+0.9.84
+  - Added Luca::Collection::Endpoint to provide cheap throwaway persistence 
+    

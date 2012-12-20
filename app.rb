@@ -1,7 +1,8 @@
-
+$LOAD_PATH.unshift( File.join(File.dirname(__FILE__),'lib') )
 require 'rubygems'
 require 'bundler'
-Bundler.require
+require 'luca'
+Bundler.require(:default, :development)
 
 require 'faker'
 
@@ -10,9 +11,6 @@ module AssetHelpers
     "/assets/" + settings.sprockets.find_asset(source).digest_path
   end
 end
-
-require "#{ File.expand_path('../', __FILE__) }/lib/luca/template.rb"
-require "#{ File.expand_path('../', __FILE__) }/lib/luca/code_browser.rb"
 
 module Luca
   class Template
