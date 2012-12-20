@@ -7,8 +7,6 @@ panel.replaces                  "Luca.Panel"
 
 panel.extends                   "Luca.View"
 
-#panel.mixesIn                   "LoadMaskable"
-
 panel.configuration
   topToolbar: undefined
   bottomToolbar: undefined
@@ -79,7 +77,6 @@ panel.privateMethods
     el = Luca.util.read( config.container )
     el ||= Luca.util.read( config.targetEl )
 
-    console.log "Rendering toolbar to", config, el 
     Luca.Panel.attachToolbar.call(@, config, el )
 
 panel.classMethods
@@ -88,16 +85,31 @@ panel.classMethods
     config.type ||= config.ctype ||= @toolbarType || "panel_toolbar"
 
     config.additionalClassNames = "#{ Luca.config.toolbarContainerClass } #{ config.orientation }"
-     
+  
     toolbar = Luca.util.lazyComponent( config )
+    # TEMP
+    # Do this properly
+    if config.orientation is "bottom"
+      @getBottomToolbar ||= ()-> toolbar   
+
+    if config.orientation is "top"
+      @getTopToolbar ||= ()-> toolbar   
+
+    if config.orientation is "right"
+      @getRightToolbar ||= ()-> toolbar   
+
+    if config.orientation is "left"
+      @getLeftToolbar ||= ()-> toolbar   
 
     hasBody = @bodyClassName or @bodyTagName
 
+    action = config.attachmentAction
     # there will be a body panel inside of the views $el
     # so just place the toolbar before, or after the body
-    action = switch config.orientation
+    action ||= switch config.orientation
       when "top", "left"
         if hasBody and not targetEl?.length > 0 then "before" else "prepend"
+
       when "bottom", "right"
         if hasBody and not targetEl?.length > 0 then "after" else "append"
 

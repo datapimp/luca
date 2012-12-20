@@ -1,10 +1,8 @@
 # The CollectionView handles rendering a set of models from a 
 # collection
-collectionView = Luca.register      "Luca.CollectionView"
+collectionView = Luca.register      "Luca.components.CollectionView"
 
 collectionView.extends            "Luca.Panel"
-
-collectionView.replaces           "Luca.components.CollectionView"
 
 collectionView.mixesIn            "QueryCollectionBindings", 
                                   "LoadMaskable", 
@@ -64,10 +62,9 @@ collectionView.defines
       console.log "Missing Collection on #{ @name || @cid }", @, @collection
       throw "Collection Views must have a valid backbone collection"
 
-    # INVESTIGATE THIS BEING DOUBLE WORK
     @on "data:refresh", @refresh, @
-    @on "collection:reset", @refresh, @
 
+    @on "collection:reset", @refresh, @
     @on "collection:remove", @refresh, @
     @on "collection:add", @refresh, @
     @on "collection:change", @refreshModel, @ if @observeChanges is true
@@ -116,10 +113,10 @@ collectionView.defines
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
     @trigger("model:refreshed", index, model)
 
-  refresh: ()->
-    query   = @getQuery()
-    options = @getQueryOptions()
-    models  = @getModels(query, options)
+  refresh: (query,options,models)->
+    query   ||= @getQuery()
+    options ||= @getQueryOptions()
+    models  ||= @getModels(query, options)
 
     @$bodyEl().empty()
 
@@ -127,6 +124,9 @@ collectionView.defines
 
     if models.length is 0
       @trigger("empty:results", query, options)
+
+    if @getCollection()?.length > 0 and models.length is 0
+      @trigger("empty:filter", query, options)
 
     index = 0
     for model in models

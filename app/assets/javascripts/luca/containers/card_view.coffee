@@ -120,7 +120,13 @@ component.defaults
     @componentElements().hide()
 
     unless current.previously_activated is true
-      current.trigger "first:activation"
+      if current.rendered is true
+        current.trigger "first:activation"
+      else
+        current.defer ()-> 
+          current.trigger("first:activation")
+        .until current, "after:render"
+
       current.previously_activated = true
 
     @activeCard = index
@@ -129,7 +135,9 @@ component.defaults
     unless silent is true
       @trigger "after:card:switch", previous, current
       previous?.trigger "deactivation", @, previous, current
+      current?.trigger "on:deactivation", @, previous, current
       current?.trigger "activation", @, previous, current
+      current?.trigger "on:activation", @, previous, current
 
     activationContext = @
 

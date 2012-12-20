@@ -12,7 +12,7 @@ if window.JST?
 
 # optionally, passing in variables will compile the template for you, instead
 # of returning a reference to the function which you would then call yourself
-Luca.template = (template_name, variables)->
+Luca.template = (template_name, variables, partials)->
   window.JST ||= {}
 
   if _.isFunction(template_name)
@@ -33,6 +33,10 @@ Luca.template = (template_name, variables)->
   throw "Could not find template named #{ template_name }" unless luca || jst
 
   template = luca || jst
+
+  if template instanceof Hogan.template
+    if variables?
+      return template.render(variables, partials)
 
   return template(variables) if variables?
 

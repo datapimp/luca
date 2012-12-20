@@ -136,6 +136,7 @@ Luca.View.renderStrategies =
 
       deferred = ()->
         _userSpecifiedMethod.call(view)
+        @rendered = true
         view.trigger("after:render", view)
 
       view.defer(deferred).until(target, trigger)
@@ -155,13 +156,13 @@ Luca.View.renderStrategies =
     else
       @trigger "before:render", @
       _userSpecifiedMethod.apply(@, arguments)
+      @rendered = true
       @trigger "after:render", @
 
       return @
 
   improved: (_userSpecifiedMethod)->
     @trigger "before:render", @
-
 
     deferred = ()=>
       _userSpecifiedMethod.apply(@, arguments)

@@ -238,3 +238,16 @@
   - Added Sortable Concern
   - Added Luca.log()
   - Added ability to create aliases / deprecations of components with warning messages
+
+0.9.81
+  - Added support for HoganAssets via hogan.js and HoganAssets gem by Les Hill
+  - Renamed Luca.components.CollectionView to Luca.CollectionView.  Moved CollectionView to core.
+  - beforeSubmit, and beforeReset on formView can return false to stop the action
+  - Added scrollable table component to replace ugly ass GridView 
+
+0.9.83
+  - Added sortOptionsBy property to select field.  Expects an attribute to sort by.
+  - firstActivation event will be queue'd until after:render has been fired
+  - setting @rendered = true on views
+  - adding event on controller activation
+  - Bugfix on CollectionView refresh method

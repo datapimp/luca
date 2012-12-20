@@ -1,3 +1,4 @@
+require 'hogan_assets'
 module Luca
   module Rails
     class Engine < ::Rails::Engine
@@ -10,6 +11,13 @@ module Luca
         Luca::TestHarness.set(:sprockets,app.assets)
         Luca::TestHarness.set :root, File.expand_path('../../../../', __FILE__)
       end
+
+      initializer "sprockets.hogan", :after => "sprockets.environment", :group => :all do |app|
+        HoganAssets::Config.configure do |config|
+          config.template_namespace = 'JST'
+        end        
+      end      
+
     end
   end
 end

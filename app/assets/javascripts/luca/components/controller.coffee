@@ -12,7 +12,10 @@ controller.publicInterface
     section ||= @defaultCard
 
     @activate section, false, (activator, previous,current)=>
-      unless current.activatedByController is true
+      if current.activatedByController is true
+        current.trigger("on:controller:reactivation")
+      else
+        current.trigger("on:controller:reactivation")
         current.trigger("on:controller:activation")
         current.activatedByController = true
 

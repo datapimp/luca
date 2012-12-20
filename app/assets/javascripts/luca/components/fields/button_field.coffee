@@ -5,12 +5,13 @@ buttonField.extends                 "Luca.core.Field"
 buttonField.triggers                "button:click"
 
 buttonField.publicConfiguration
-  readOnly:     true
-  input_value:  undefined 
-  input_type:   "button" 
-  icon_class:   undefined
-  input_name:   undefined
-  white:        undefined
+  readOnly:       true
+  input_value:    undefined 
+  input_type:     "button" 
+  icon_class:     undefined
+  input_name:     undefined
+  white:          undefined
+  buttonClasses:  "" 
 
 buttonField.privateConfiguration
   isButton: true
@@ -35,7 +36,7 @@ buttonField.privateInterface
     @input_id ||= _.uniqueId('button')
     @input_name ||= @name ||= @input_id
     @input_value ||= @label ||= @text
-    @input_class ||= @class
+    @input_class ||= @class ||= @buttonClasses
     @icon_class ||= ""
     @icon_class = "icon-#{ @icon_class }" if @icon_class.length and !@icon_class.match(/^icon-/)
     @icon_class += " icon-white" if @white

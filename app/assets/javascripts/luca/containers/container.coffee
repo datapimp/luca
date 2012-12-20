@@ -13,15 +13,10 @@ container.replaces                "Luca.Container"
 
 container.defines
   className: 'luca-ui-container'
-
   componentTag: 'div'
-
   componentClass: 'luca-ui-panel'
-
   isContainer: true
-
   rendered: false
-
   components: []
 
   # @componentEvents provides declarative syntax for responding to events on
@@ -357,6 +352,10 @@ container.defines
     _( @allChildren() ).detect (component)->
       component.role is role or component.type is role or component.ctype is role
 
+  findComponentByType: (desired,deep=false)->
+    _( @allChildren() ).detect (component)->
+      desired is (component.type || component.ctype)
+
   findComponentByName: (name, deep=false)->
     _( @allChildren() ).detect (component)->
       component.name is name
@@ -478,8 +477,8 @@ createMethodsToGetComponentsByRole = ()->
 
   _( childrenWithRole ).each (component)->
     getter = _.str.camelize( "get_" + component.role )
-    container[ getter ] ||= ()->
-      component
+    getterFn = ()-> component
+    container[ getter ] ||= _.bind(getterFn, container) 
 
 doComponents = ()->
   @trigger "before:components", @, @components
@@ -498,7 +497,6 @@ doComponents = ()->
 
 validateContainerConfiguration = ()->
   true
-
 
 # Private Helpers
 #

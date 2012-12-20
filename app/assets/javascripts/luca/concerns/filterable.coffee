@@ -6,8 +6,6 @@ Luca.concerns.Filterable =
 
       prepared = @prepareRemoteFilter(filter, options)
 
-      @debug "Preparing filterable call", prepared, @isRemote()
-
       if @isRemote()  
         @collection.applyFilter(prepared, remote: true)
       else

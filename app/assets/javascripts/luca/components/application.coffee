@@ -140,10 +140,8 @@ application.publicInterface
     # keyEvents:
     #   meta:
     #     forwardslash: "altSlashHandler"
-    if @useKeyRouter is true
-      console.log "The useKeyRouter property is being deprecated. switch to useKeyHandler instead"
-
-    @setupKeyHandler() if (@useKeyHandler is true or @useKeyRouter is true) and @keyEvents?
+    if (@useKeyHandler is true or @useKeyRouter is true) and @keyEvents?
+      @setupKeyHandler() 
 
     # if the application is a plugin designed to modify the behavior
     # of another app, then don't claim ownership.  otherwise the most common
@@ -199,7 +197,6 @@ application.publicInterface
   boot: ()->
     @trigger "ready"
     for service in [@collectionManager, @socket, @router]
-      console.log "Trigggering Ready On", service
       service?.trigger("ready")
 
   # delegate to the collection manager's get or create function.

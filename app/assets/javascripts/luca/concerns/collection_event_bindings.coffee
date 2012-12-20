@@ -1,6 +1,9 @@
 Luca.concerns.CollectionEventBindings = 
   __initializer: ()->
-    Luca.concerns.CollectionEventBindings.__setup.call(@)
+
+    @defer ()=>
+      Luca.concerns.CollectionEventBindings.__setup.call(@)
+    .until("after:initialize")
 
     unless @collectionEventBindingsSetup is true
       if Luca.isBackboneCollection(@collection)

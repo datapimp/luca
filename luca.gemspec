@@ -24,13 +24,14 @@ Gem::Specification.new do |s|
   s.add_dependency "haml"
   s.add_dependency "rake"
 
-  s.add_development_dependency "bundler", "~> 1.2.3"
   s.add_development_dependency "faker"
   s.add_development_dependency "guard-jasmine"
   s.add_development_dependency "guard-sprockets2"
   s.add_development_dependency "jasmine"
   s.add_development_dependency "pry"
   s.add_development_dependency "rb-fsevent", ">= 0.9.1"
+  s.add_dependency "hogan_assets"
+  s.add_development_dependency "bundler", "~> 1.2.3"
   s.add_development_dependency "rails",   "~> 3.1"
 
   s.files        = `git ls-files`.split("\n")
