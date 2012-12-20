@@ -94,6 +94,7 @@ class App < Sinatra::Base
     end
   end
 
+  # /documentation?path=/app/assets/javascripts/luca/components
   get "/documentation" do
     if params[:path]
       documentation = Luca::Documentation::DocumentationCompiler.documentation_for_path params[:path]
