@@ -86,13 +86,13 @@ view.defines
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
 
-  collections: ()-> 
+  _collections: ()-> 
     Luca.util.selectProperties( Luca.isBackboneCollection, @ )
 
-  models: ()-> 
+  _models: ()-> 
     Luca.util.selectProperties( Luca.isBackboneModel, @ )
 
-  views: ()-> 
+  _views: ()-> 
     Luca.util.selectProperties( Luca.isBackboneView, @ )
 
   debug: (args...)->
