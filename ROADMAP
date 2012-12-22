@@ -1,10 +1,16 @@
-Luca.Collection.query
-  - add function pipeline to run filter, and options 
-    objects through.  anything can inject itself
-    into the pipeline.  
+Minor Initiatives:
+  - make sure hooks and mixins are inherited properly
+  - upgrade to backbone 0.9.9
+  - remove / delegate features in luca which have been provided by backbone
+  - ComponentDefinition will become a Backbone.Model
+  - ComponentDefinition registry will become a Backbone.Collection
+  - InstanceCache will become a Backbone.Collection
+  - Make CardView less noisy in the DOM
+  - Remove component defined classNames in favor of styleHierarchy
+  - make styleHierarchy less noisy
 
-    basically, remove this from the view.
-
-  - write a backbone-query -> squeel -> activerecord bridge
-
-
+Major Initiatives:
+  - improve Panel toolbar
+  - improve FormView and Field configuration APIs
+  - implement rendering strategy for deferrable rendering
+  - provide ability to restore application / component state from DOM
