@@ -139,7 +139,6 @@ container.defines
   prepareComponents: ()->
     container = @
 
-
     _( @components ).each (component, index)=>
       ce = componentContainerElement = @componentContainers?[index]
 
@@ -200,8 +199,17 @@ container.defines
       component = if Luca.isComponent( object )
         object
       else
+        # if a component is tagged with a @component property
+        # we assume this is the kind of singleton component
+        # and set the type, role and name to the same value (if they're blank)
+        if object.component? and not (object.type || object.ctype)
+          object.type = object.component
+          object.name ||= object.component
+          object.role ||= object.component
+
         object.type ||= object.ctype
 
+        # guess the type based on the properties
         if !object.type?
           # TODO
           # Add support for all of the various components property aliases

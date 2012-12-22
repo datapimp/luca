@@ -25,9 +25,6 @@ component.aliases               "Luca.PageView"
 #   cardView.activeComponent().name # => "two"
 #
 component.defaults
-
-  className: 'luca-ui-card-view-wrapper'
-
   activeCard: 0
 
   components: []

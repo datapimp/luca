@@ -19,10 +19,6 @@ panelToolbar.defines
   # color       options are primary, info, success, warning, danger, inverse
   buttons:[]
 
-  className: "luca-ui-toolbar btn-toolbar"
-
-  well: true
-
   orientation: 'top'
 
   autoBindEventHandlers: true

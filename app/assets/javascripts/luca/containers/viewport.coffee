@@ -1,23 +1,25 @@
-_.def('Luca.containers.Viewport').extend('Luca.containers.CardView').with
+viewport = Luca.register    "Luca.containers.Viewport"
+viewport.extends            "Luca.Container"
 
-  activeItem: 0
-
-  additionalClassNames: 'luca-ui-viewport'
-
+viewport.defines
   fullscreen: true
-
   fluid: false
 
+  applyWrapper: true
 
   initialize: (@options={})->
     _.extend @, @options
 
-    if Luca.config.enableBoostrap is true
-      @wrapperClass = if @fluid is true then Luca.containers.Viewport.fluidWrapperClass else Luca.containers.Viewport.defaultWrapperClass 
+    if Luca.config.enableBoostrap is true and @applyWrapper is true
+      @wrapperClass = if @fluid is true 
+        Luca.config.fluidWrapperClass || Luca.containers.Viewport.fluidWrapperClass 
+      else 
+        Luca.containers.Viewport.defaultWrapperClass 
 
     Luca.Container::initialize.apply(@, arguments)
 
-    @enableFullscreen() if @fullscreen is true
+    if @fullscreen is true
+      @enableFullscreen() 
 
   enableFluid: ()-> @enableWrapper()
 

@@ -9,3 +9,11 @@
 .toolbar-container.bottom {
   margin-top: 0px;
 }
+
+.luca-ui-fullscreen {
+  .luca-application.fullscreen-enabled, .luca-controller, .luca-controller>.luca-ui-card {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+  }  
+}

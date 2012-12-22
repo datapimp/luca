@@ -9,6 +9,7 @@ application.triggers              "controller:change",
                                   "action:change"
 
 application.publicInterface
+  _VERSION: 1
   name: "MyApp"
 
   # The Application uses a Backbone.Model as a state machine, which
@@ -16,7 +17,7 @@ application.publicInterface
   # most importantly to bind to change events of certain attributes.
   #
   # the @defaultState property will be the default attributes
-  defaultState: {}
+  stateful: {}
 
   # if autoBoot is set to true, the application will
   # attempt to boot on document ready.
