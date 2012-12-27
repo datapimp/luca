@@ -9,7 +9,6 @@ application.triggers              "controller:change",
                                   "action:change"
 
 application.publicInterface
-  _VERSION: 1
   name: "MyApp"
 
   # The Application uses a Backbone.Model as a state machine, which

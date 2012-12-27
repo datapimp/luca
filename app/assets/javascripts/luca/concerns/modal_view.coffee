@@ -34,7 +34,7 @@ Luca.concerns.ModalView =
     @$el.modal('toggle')
 
   show: ()->
-    console.log "SHowing The Mo", @cid, @name
+    @render() unless @rendered is true
     @trigger "before:show"
     @$el.modal('show')
     @trigger "after:show"

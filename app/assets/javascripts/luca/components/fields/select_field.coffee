@@ -91,13 +91,17 @@ selectField.defines
 
     if @collection?.length > 0
       if @sortOptionsBy?
-        models = @collection.sortBy (model)-> model.read( @sortOptionsBy )
+        models = @collection.sortBy (model)-> 
+          if model.read?
+            model.read( @sortOptionsBy )
+          else
+            model.get( @sortOptionsBy )
       else
         models = @collection.models
 
       for model in models 
-        v = model.read( @valueField )
-        d = model.read( @displayField )
+        v = model.read?( @valueField ) || model.get(@valueField)
+        d = model.read?( @displayField ) || model.get(@displayField)
         selected = "selected" if @selected and v is @selected
         option = "<option #{ selected } value='#{ v }'>#{ d }</option>"
         @getInputElement().append( option )
