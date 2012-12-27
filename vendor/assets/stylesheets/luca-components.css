@@ -160,6 +160,11 @@ html.luca-ui-fullscreen, body.luca-ui-fullscreen {
 
 .toolbar-container.bottom {
   margin-top: 0px; }
+
+.luca-ui-fullscreen .luca-application.fullscreen-enabled, .luca-ui-fullscreen .luca-controller, .luca-ui-fullscreen .luca-controller > .luca-ui-card {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%; }
 .luca-ui-toolbar {
   float: left;
   clear: both;
