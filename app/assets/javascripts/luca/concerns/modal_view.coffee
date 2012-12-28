@@ -18,13 +18,12 @@ Luca.concerns.ModalView =
     @$el.addClass 'modal'
     @$el.addClass 'fade' if @fade is true
 
-    $('body').append( @$el )
-    
     @$el.modal
       backdrop: @backdrop is true
       keyboard: @closeOnEscape is true
       show: @showOnInitialize is true
 
+    @$el.css('display','none') unless @showOnInitialize is true
     @      
  
   container: ()->
