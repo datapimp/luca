@@ -37,6 +37,11 @@ collectionView.publicConfiguration
   itemRenderer: undefined
   itemProperty: undefined
 
+  # should we automatically re-render
+  # our collection items every time their
+  # model changes?
+  observeChanges: false
+
 collectionView.defines
   initialize: (@options={})->
     _.extend(@, @options)

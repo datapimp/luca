@@ -1,5 +1,6 @@
-_.def('Luca.fields.TextAreaField').extends('Luca.core.Field').with
-
+textArea = Luca.register          "Luca.fields.TextAreaField"
+textArea.extends                  "Luca.core.Field"
+textArea.defines
   events:
     "keydown input" : "keydown_handler"
     "blur input" : "blur_handler"
