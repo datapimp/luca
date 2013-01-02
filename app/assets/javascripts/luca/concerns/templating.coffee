@@ -7,5 +7,5 @@ Luca.concerns.Templating =
       try
         templateContent = Luca.template(template, templateVars)      
       catch e
-        console.log "Error Rendering #{ bodyTemplate} in View: #{ @identifier?() || @name || @cid }"
+        console.log "Error Rendering #{ template} in View: #{ @identifier?() || @name || @cid }"
       Luca.View::$html.call(@, templateContent)

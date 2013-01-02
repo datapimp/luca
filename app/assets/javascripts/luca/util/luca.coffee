@@ -181,3 +181,6 @@ Luca.util.rejectBlanks = (object)->
     processed[key] = value 
 
   processed
+
+Luca.util.enableDropdowns = (selector=".dropdown-toggle")->
+  $(selector).dropdown?()

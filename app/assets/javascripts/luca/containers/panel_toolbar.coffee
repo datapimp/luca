@@ -130,7 +130,10 @@ buildButton = (config, wrap=true)->
       buttonAttributes["class"] += " dropdown-toggle"
       buttonAttributes["data-toggle"] = "dropdown"
 
-      dropdownItems = _(config.dropdown).map (dropdownItem)=>
+      dropdownItems = for dropdownItem in config.dropdown
+        if _.isObject(dropdownItem)
+          dropdownItem = _.values(dropdownItem).reverse()
+
         link = make "a", {}, dropdownItem[1]
         make "li", {"data-eventId": dropdownItem[0]}, link
 

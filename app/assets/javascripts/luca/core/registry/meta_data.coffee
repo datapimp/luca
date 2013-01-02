@@ -22,6 +22,8 @@ class MetaDataProxy
       "class configuration" : []
       "class interface" : []
 
+  className: ()->
+    @meta["display name"]
   superClass: ()->
     Luca.util.resolve(@meta["super class name"])
 
