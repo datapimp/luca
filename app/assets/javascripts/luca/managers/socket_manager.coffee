@@ -1,7 +1,16 @@
 # The SocketManager provides communication between a Websocket / Pubsub
 # system and routes messages through the application to instances
-# of the 
-class Luca.SocketManager extends Backbone.Model
+# of a specific view, model, collection, or other Backbone.Events object. 
+socketManager = Luca.register "Luca.SocketManager"
+socketManager.extends         "Luca.Model"
+
+socketManager.defines
+  # The SocketManager can be configured with the following options:
+  #
+  # autoStart: default(true) immediately begins to load the provider
+  # script, setup the connection, etc
+  #
+  # provider: faye.js or socket.io
   defaults:
     autoStart: true  
     providerAvailable: false
@@ -9,26 +18,35 @@ class Luca.SocketManager extends Backbone.Model
     provider: "faye.js"
 
   initialize: (@attributes={})->
-    @loadProviderSource() unless @providerAvailable() is true
+    unless @providerLibraryIsAvailable()
+      @loadProviderSource() 
 
     Luca.Model::initialize?.apply(@, arguments)
 
     model = @
 
-    connectOnReady = ()=> @connect() if @isReady()
+    connectOnReady = ()=> 
+      @connect() if @isReady()
 
-    model.on "change", ()->
+    model.on "change:ready", ()->
       connectOnReady()
-      model.unbind("change", @)
+      model.unbind("change:ready", @)
+
+    model.on "change:providerAvailable", ()->
+      connectOnReady()
+      model.unbind("change:ready", @)
 
     @on "ready", _.once ()=> @set('ready', true)
 
     @trigger "change"
 
+  # The socket manager is ready once 'ready' event has been
+  # triggered on it.  ( usually by the application ). and once
+  # the provider client library as been loaded.
   isReady: ()->
     @get("ready") is true and @get("providerAvailable") is true
 
-  providerAvailable: ()->
+  providerLibraryIsAvailable: ()->
     providerTest = switch @get('provider')
       when "socket.io"
         "io"

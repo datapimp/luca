@@ -29,11 +29,11 @@ textField.defines
     @input_value ||= @value || "" 
     
     if @prepend
-      @$el.addClass('input-prepend')
+      @$el.addClass 'input-prepend'
       @addOn = @prepend
 
     if @append
-      @$el.addClass('input-append')
+      @$el.addClass 'input-append'
       @addOn = @append
 
     @placeHolder ||= ""

@@ -2,7 +2,7 @@
 #= require ./framework
 #= require ./config
 #= require ./util
-#= require ./managers
 #= require ./core
+#= require ./managers
 #= require ./containers
 #= require ./components
