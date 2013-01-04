@@ -37,6 +37,7 @@ selectField.defines
     if @collection?.data
       @valueField ||= "id"
       @displayField ||= "name"
+      @sortOptionsBy ||= @displayField
       @parseData()
 
     try
