@@ -24,7 +24,7 @@ selectField.defines
 
     if _.isArray(@collection)
       @collection = data: @collection
-      
+
     Luca.core.Field::initialize.apply @, arguments
 
     @input_id ||= _.uniqueId('field')
@@ -37,6 +37,7 @@ selectField.defines
     if @collection?.data
       @valueField ||= "id"
       @displayField ||= "name"
+      @sortOptionsBy ||= @displayField
       @parseData()
 
     try
@@ -91,7 +92,7 @@ selectField.defines
 
     if @collection?.length > 0
       if @sortOptionsBy?
-        models = @collection.sortBy (model)-> 
+        models = @collection.sortBy (model)=>
           if model.read?
             model.read( @sortOptionsBy )
           else
@@ -99,7 +100,7 @@ selectField.defines
       else
         models = @collection.models
 
-      for model in models 
+      for model in models
         v = model.read?( @valueField ) || model.get(@valueField)
         d = model.read?( @displayField ) || model.get(@displayField)
         selected = "selected" if @selected and v is @selected
