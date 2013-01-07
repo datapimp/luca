@@ -6,7 +6,7 @@ field.triggers                "before:validation",
                               "after:validation",
                               "on:change"
 
-field.publicConfiguration   
+field.publicConfiguration
   labelAlign: 'top'
   className: 'luca-ui-text-field luca-ui-field'
   statuses: [
@@ -23,15 +23,7 @@ field.publicInterface
     @getInputElement().attr('disabled', false)
 
   getValue: ()->
-    raw = @getInputElement()?.attr('value')
-
-    return raw if _.str.isBlank( raw )
-
-    switch @valueType
-      when "integer" then parseInt(raw)
-      when "string" then "#{ raw }"
-      when "float" then parseFloat(raw)
-      else raw
+    @getParsedValue(@getInputElement()?.attr('value'))
 
   setValue: (value)->
     @getInputElement()?.attr('value', value)
@@ -40,6 +32,16 @@ field.publicInterface
     _( @statuses ).each (cls)=>
       @$el.removeClass(cls)
       @$el.addClass(state)
+
+field.methods
+  getParsedValue: (raw)->
+    return raw if _.str.isBlank( raw )
+
+    switch @valueType
+      when "integer" then parseInt(raw)
+      when "string" then "#{ raw }"
+      when "float" then parseFloat(raw)
+      else raw
 
 field.privateConfiguration
   isField: true
