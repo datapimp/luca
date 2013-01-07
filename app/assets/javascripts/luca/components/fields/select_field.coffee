@@ -13,6 +13,8 @@ selectField.defines
 
   includeBlank: true
 
+  allowMultiple: false
+
   blankValue: ''
 
   blankText: 'Select One'
@@ -62,6 +64,15 @@ selectField.defines
 
       hash
 
+  getValue: ()->
+    raw = @getInputElement()?.val()
+
+    if @allowMultiple
+      _.map raw, (value)=>
+        @getParsedValue(value)
+    else
+      @getParsedValue(raw)
+
   getInputElement: ()->
     @input ||= @$('select').eq(0)
 
@@ -84,7 +95,9 @@ selectField.defines
   resetOptions: ()->
     @getInputElement().html('')
 
-    if @includeBlank
+    if @allowMultiple
+      @getInputElement().attr(multiple: true)
+    else if @includeBlank
       @getInputElement().append("<option value='#{ @blankValue }'>#{ @blankText }</option>")
 
   populateOptions: ()->
