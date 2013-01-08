@@ -5,6 +5,9 @@ selectField.extends           "Luca.core.Field"
 selectField.triggers          "after:select",
                               "on:change"
 
+selectField.publicConfiguration
+  allowMultiple: false
+
 selectField.defines
   events:
     "change select" : "change_handler"
@@ -12,8 +15,6 @@ selectField.defines
   template: "fields/select_field"
 
   includeBlank: true
-
-  allowMultiple: false
 
   blankValue: ''
 
