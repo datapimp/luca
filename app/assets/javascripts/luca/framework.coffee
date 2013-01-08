@@ -1,3 +1,4 @@
+
 lucaUtilityHelper = (payload, args...)->
   if arguments.length is 0 
     return _( Luca.Application.instances ).values()?[0]
