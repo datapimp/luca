@@ -60,7 +60,8 @@ socketManager.defines
       when "socket.io"
         @client = io.connect( @get('host') )
       when "faye.js"
-        @client = new Faye.Client( @get('host')  + ( @get('namespace')  || "") )
+        @client = new Faye.Client(@get('host'))
+        @set("client", @client)
 
   providerSourceLoaded: ()-> 
     @set "providerAvailable", true
