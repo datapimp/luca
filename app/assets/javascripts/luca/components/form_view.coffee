@@ -3,7 +3,7 @@
 #
 # The FormView component integrates well with Luca.Models and can control
 # the attributes on that model, respond to validations, and submit changes
-# to an API. 
+# to an API.
 formView = Luca.register        "Luca.components.FormView"
 
 formView.extends                "Luca.Container"
@@ -23,16 +23,16 @@ formView.triggers               "before:submit",
                                 "after:load:existing",
                                 "after:submit:success",
                                 "after:submit:fatal_error",
-                                "after:submit:error"
+                                "after:submit:error",
                                 "state:change:dirty"
 
 
 
 formView.publicConfiguration
   # track dirty state will bind to change events
-  # on all of the underlying fields, and set a 
-  # flag whenever one of them changes 
-  trackDirtyState: false 
+  # on all of the underlying fields, and set a
+  # flag whenever one of them changes
+  trackDirtyState: false
 
   # don't setup two way binding to the model
   trackModelChanges: false
@@ -72,7 +72,7 @@ formView.publicConfiguration
 
   # Applies the twitter bootstrap well class to this form.
   # @$el.addClass('well') if @well
-  well: false 
+  well: false
 
   # Applies the twitter bootstrap form-search class to this form.
   # @$el.addClass('form-search') if @searchForm
@@ -117,7 +117,7 @@ formView.privateMethods
     if @trackDirtyState is true
       @on "after:components", ()->
         for field in @getFields()
-          field.on "on:change", @onFieldChange, form 
+          field.on "on:change", @onFieldChange, form
       , form
 
     @setupHooks( @hooks )
@@ -163,7 +163,7 @@ formView.privateMethods
       result = @beforeSubmit()
       return if result is false
     else
-      @trigger "before:submit", @  
+      @trigger "before:submit", @
 
     @trigger "enable:loadmask", @ if @loadMask is true
     @submit() if @hasModel()
@@ -173,7 +173,7 @@ formView.privateMethods
 
     form = @
     @eachField (field)->
-      field.getForm = ()=> form 
+      field.getForm = ()=> form
       field.getModel = ()=> form.currentModel()
 
   eachField: (iterator)->

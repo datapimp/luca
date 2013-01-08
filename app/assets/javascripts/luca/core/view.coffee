@@ -10,7 +10,7 @@ view.includes           "Luca.Events",
 # which customize the components through the use of __initializer and
 # __included method names.  These will be called every time an instance
 # is created, and the first time the mixin is used to enhance a component.
-view.mixesIn            "DomHelpers", 
+view.mixesIn            "DomHelpers",
                         "Templating",
                         "EnhancedProperties",
                         "CollectionEventBindings",
@@ -18,10 +18,10 @@ view.mixesIn            "DomHelpers",
                         "StateModel"
 
 # Luca.View classes have the concept of special events called hooks
-# which allow you to tap into the lifecycle events of your view to 
+# which allow you to tap into the lifecycle events of your view to
 # customize their behavior.  This is especially useful in subclasses.
 #
-# You can utilize a @hook method by camelcasing the triggers defined below: 
+# You can utilize a @hook method by camelcasing the triggers defined below:
 view.triggers           "before:initialize",
                         "after:initialize",
                         "before:render",
@@ -41,12 +41,12 @@ view.defines
     _.extend @, @options
 
     if @autoBindEventHandlers is true or @bindAllEvents is true
-      bindAllEventHandlers.call(@) 
+      bindAllEventHandlers.call(@)
 
     @cid = _.uniqueId(@name) if @name?
 
     @$el.attr("data-luca-id", @name || @cid)
-    
+
     Luca.registry.cacheInstance( @cid, @ )
 
     @setupHooks _( Luca.View::hooks.concat( @hooks ) ).uniq()
@@ -54,7 +54,7 @@ view.defines
     Luca.concern.setup.call(@)
 
     @delegateEvents()
-        
+
     @trigger "after:initialize", @
 
     _.bindAll(@, @bindMethods...) if @bindMethods?.legth > 0
@@ -80,19 +80,19 @@ view.defines
 
     if _.isObject(selector)
       _.extend(@events, selector)
-      
+
     @delegateEvents()
 
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
 
-  _collections: ()-> 
+  _collections: ()->
     Luca.util.selectProperties( Luca.isBackboneCollection, @ )
 
-  _models: ()-> 
+  _models: ()->
     Luca.util.selectProperties( Luca.isBackboneModel, @ )
 
-  _views: ()-> 
+  _views: ()->
     Luca.util.selectProperties( Luca.isBackboneView, @ )
 
   debug: (args...)->
@@ -105,7 +105,6 @@ view.defines
       if Luca.developmentMode is true or @observeEvents is true
         Luca.ViewObserver ||= new Luca.Observer(type:"view")
         Luca.ViewObserver.relay @, arguments
-
     Backbone.View.prototype.trigger.apply @, arguments
 
 
@@ -115,12 +114,12 @@ Luca.View._originalExtend = Backbone.View.extend
 #
 # I will be removing this prior to 1.0.  Optimizing for collection based
 # views does not belong in here, so the deferrable / collection binding stuff
-# needs to go.  
+# needs to go.
 #
 # Being able to defer rendering until the firing of an event on another object
 # is something that does ask for some syntactic sugar though, so need to rethink.
 
-Luca.View.renderStrategies = 
+Luca.View.renderStrategies =
   legacy: ( _userSpecifiedMethod )->
     view = @
     # if a view has a deferrable property set
@@ -132,7 +131,7 @@ Luca.View.renderStrategies =
         @deferrable = @collection
 
       target ||= @deferrable
-      trigger = if @deferrable_event then @deferrable_event else Luca.View.deferrableEvent 
+      trigger = if @deferrable_event then @deferrable_event else Luca.View.deferrableEvent
 
       deferred = ()->
         _userSpecifiedMethod.call(view)
@@ -166,7 +165,7 @@ Luca.View.renderStrategies =
 
     deferred = ()=>
       _userSpecifiedMethod.apply(@, arguments)
-      @trigger "after:render", @            
+      @trigger "after:render", @
 
     console.log "doing the improved one", @deferrable
 
@@ -204,7 +203,7 @@ Luca.View.renderWrapper = (definition)->
 
 bindAllEventHandlers = ()->
   for config in [@events, @componentEvents, @collectionEvents, @applicationEvents] when not _.isEmpty(config)
-    bindEventHandlers.call(@, config)    
+    bindEventHandlers.call(@, config)
 
 bindEventHandlers = (events={})->
   for eventSignature, handler of events
