@@ -297,6 +297,13 @@ formView.privateMethods
 
     values
 
+  triggerValidationErrors: (errors)->
+    _(@getFields()).each (field)->
+      field.clearErrors()
+      _(errors).each (field_errors, field_name)->
+        if field.input_name == field_name
+          field.displayErrors(errors)
+
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
     @trigger "disable:loadmask", @ if @loadMask is true
@@ -309,6 +316,11 @@ formView.privateMethods
   submit_fatal_error_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
     @trigger "after:submit:fatal_error", @, model, response
+
+    try
+      json = $.parseJSON(response.responseText)
+      if !json.success && json.errors?
+        @triggerValidationErrors(json.errors)
 
   submit: (save=true, saveOptions={})->
     _.bindAll @, "submit_success_handler", "submit_fatal_error_handler"

@@ -33,6 +33,12 @@ field.publicInterface
       @$el.removeClass(cls)
       @$el.addClass(state)
 
+  clearErrors: ()->
+    @getInputElement().removeClass('error')
+
+  displayErrors: (errors)->
+    @getInputElement().addClass('error')
+
 field.methods
   getParsedValue: (raw)->
     return raw if _.str.isBlank( raw )
