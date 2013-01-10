@@ -298,11 +298,10 @@ formView.privateMethods
     values
 
   triggerValidationErrors: (errors)->
-    _(@getFields()).each (field)->
+    for field in @getFields()
       field.clearErrors()
-      _(errors).each (field_errors, field_name)->
-        if field.input_name == field_name
-          field.displayErrors(errors)
+      for field_name, field_errors of errors when field_name is field.input_name
+        field.displayErrors(field_errors)
 
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response

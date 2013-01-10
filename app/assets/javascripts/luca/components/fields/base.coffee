@@ -31,13 +31,13 @@ field.publicInterface
   updateState: (state)->
     _( @statuses ).each (cls)=>
       @$el.removeClass(cls)
-      @$el.addClass(state)
+    @$el.addClass(state)
 
   clearErrors: ()->
-    @getInputElement().removeClass('error')
+    @$el.removeClass('error')
 
   displayErrors: (errors)->
-    @getInputElement().addClass('error')
+    @updateState('error')
 
 field.methods
   getParsedValue: (raw)->
