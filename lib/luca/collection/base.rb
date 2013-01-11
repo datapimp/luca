@@ -6,6 +6,10 @@
 # It is used to make luca.collections persistent for
 # multiple users.  Not intended to be used in production or for any apps
 # which require data integrity. 
+
+require 'json'
+require 'redis'
+
 module Luca
   module Collection
     class Base
@@ -49,6 +53,11 @@ module Luca
       alias_method :backbone_sync, :sync  
 
       def validate_redis_connection
+        unless @redis
+          require 'redis'
+          @redis ||= Redis.new host: "localhost", port: 6379, db: 5
+        end
+
         unless @redis.respond_to?(:get) and @redis.respond_to?(:incr) and @redis.respond_to?(:mget)
           throw "Must specify a valid redis instance."      
         end

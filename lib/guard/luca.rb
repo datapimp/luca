@@ -2,10 +2,16 @@
 #
 # This is a WIP and does not provide much in the way of configuration at the moment.  It requires a running instance of 
 # Faye on port 9295.
-ENV['RAILS_ENV'] ||= 'development'
-require File.expand_path('../../../config/boot',  __FILE__)
-require File.expand_path('../../../config/environment',  __FILE__)
-Dir.glob("./app/models/**/*.rb").each {|f| require(f) }
+boot = File.join( Dir.pwd(), 'config', 'boot.rb' ) 
+environment = File.join( Dir.pwd(), 'config', 'environment.rb' ) 
+
+begin
+  ENV['RAILS_ENV'] ||= 'development'
+  require boot
+  require environment
+rescue
+  throw "Doesn't make sense using this outside of rails at the moment"
+end
 
 module Guard
   class Luca < Guard
@@ -15,7 +21,7 @@ module Guard
       super
       UI.info "Guard::Luca"
       @faye_notifier = FayeNotifier.new(url:"/faye")
-      @project = Project.find_by_path( Dir.pwd() )
+      @project = ::Luca::Project.find_by_path( Dir.pwd() )
     end
 
     def start
@@ -33,6 +39,8 @@ module Guard
     end
 
     def run_on_changes(paths)
+      # temp
+      paths.map(&:downcase!)
       notification_payload = generate_notification_payload_for(paths)
       UI.info notification_payload.to_json
       faye_notifier.publish("/changes", notification_payload )

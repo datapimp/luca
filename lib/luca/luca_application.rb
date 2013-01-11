@@ -71,7 +71,7 @@ module Luca
     end
 
     def templates
-      template_file_locations.map {|path| Template.new(path) }
+      template_file_locations.map {|path| TemplateAsset.new(path) }
     end
 
     def stylesheets
@@ -193,7 +193,7 @@ module Luca
       end
 
       def project_root
-        options[:root] || Rails.root
+        options[:root] || (::Rails.root rescue Dir.pwd())
       end
 
   end

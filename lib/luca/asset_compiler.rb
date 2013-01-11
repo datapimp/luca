@@ -30,7 +30,6 @@ module Luca
     protected
       def compile_file_manually
         return compile_file_using_sass if (type == "scss" or type == "sass")
-        return compile_file_using_less if (type == "less")
         return compile_file_using_coffeescript if (type == "coffeescript")
         return compile_file_using_markdown if (type == "markdown")
         return compile_template if template?
@@ -46,10 +45,6 @@ module Luca
 
       def compile_file_using_sass
         Sass.compile(input)
-      end
-
-      def compile_file_using_less
-        Less.compile(input)
       end
 
       def compile_file_using_coffeescript
@@ -79,8 +74,13 @@ module Luca
       def sprockets
         return @sprockets if @sprockets
 
-        @sprockets = Rails.application.assets
-        @sprockets.prepend_path( File.join(Rails.root,'tmp') )
+        begin 
+          @sprockets = ::Rails.application.assets
+        rescue
+          @sprockets = Sprockets::Environment.new(".")
+        end
+        
+        @sprockets.prepend_path( temporary_folder )
 
         @sprockets
       end
@@ -90,7 +90,7 @@ module Luca
       end
 
       def temporary_folder
-        File.join(Rails.root,"tmp")
+        File.join(::Rails.root,"tmp") rescue  "/tmp"
       end
 
 
