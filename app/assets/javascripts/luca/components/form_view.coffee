@@ -297,11 +297,25 @@ formView.privateMethods
 
     values
 
-  triggerValidationErrors: (errors)->
+  removeErrors: ()->
+    @$('.alert.alert-error').remove()
+    @$el.removeClass('error')
+
     for field in @getFields()
       field.clearErrors()
+
+  displayErrors: (errors)->
+    has_errors = false
+    for field in @getFields()
       for field_name, field_errors of errors when field_name is field.input_name
         field.displayErrors(field_errors)
+        has_errors = true
+
+    if has_errors
+      @$el.addClass('error')
+
+  displayValidationErrorsMessage: ()->
+    @errorMessage('Please fix the fields with errors')
 
   submit_success_handler: (model, response, xhr)->
     @trigger "after:submit", @, model, response
@@ -319,7 +333,8 @@ formView.privateMethods
     try
       json = $.parseJSON(response.responseText)
       if !json.success && json.errors?
-        @triggerValidationErrors(json.errors)
+        @displayValidationErrorsMessage()
+        @displayErrors(json.errors)
 
   submit: (save=true, saveOptions={})->
     _.bindAll @, "submit_success_handler", "submit_fatal_error_handler"
@@ -327,6 +342,7 @@ formView.privateMethods
     saveOptions.success ||= @submit_success_handler
     saveOptions.error ||= @submit_fatal_error_handler
 
+    @removeErrors()
     @applyFormValuesToModel()
     return unless save
     @currentModel()?.save( @currentModel().toJSON(), saveOptions )
