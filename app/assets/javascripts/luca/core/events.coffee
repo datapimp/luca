@@ -68,7 +68,7 @@ class Luca.EventRelayer
         trigger = _( [prefix,eventId] ).compact().join(':')
         args.unshift(trigger)
         @trigger.apply(@, args)
-      , target 
+      , target
 
 
 Luca.Events =
@@ -88,14 +88,14 @@ Luca.Events =
     @bind trigger, onceFn
 
 
-Luca.EventsExt = 
+Luca.EventsExt =
   waitUntil:(trigger, context)->
     @waitFor.call(@, trigger, context )
-    
+
   waitFor: (trigger, context)->
     self = @
-    proxy = 
-      on:(target)-> 
+    proxy =
+      on:(target)->
         target.waitFor.call(target,trigger,context)
       and:(runList...)->
         for fn in runList
