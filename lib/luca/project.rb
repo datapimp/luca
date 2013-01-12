@@ -8,28 +8,28 @@ module Luca
     attr_accessor :name, 
                   :path
 
-    def self.storage
+    def self.store
       self.storage ||= Luca::Collection::Base.new(namespace:"projects")
     end
 
     def self.create attributes={}
-      storage.create(attributes)
+      store.create(attributes)
     end
 
     def self.index
-      storage.index
+      store.index
     end
 
     def self.find_by_path path
-      data = storage.index.detect do |project_data|
+      data = index.detect do |project_data|
         project_data['path'] == path
       end
-      
+       
       new(path: data['path'], name: data['name'])    
     end
 
     def self.find_by_name name
-      data = storage.index.detect do |project_data|
+      data = index.detect do |project_data|
         project_data['name'] == name
       end
 
