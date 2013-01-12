@@ -78,22 +78,6 @@ To generate Luca application skeleton run:
 `rails generate luca:application <app_name>`  
 This will generate a controller, view, route, and the Luca application structure under assets/javascripts/<app_name>
 
-## Interactive Documentation and Examples
-
-[View the Sandbox](http://datapimp.com/luca)
 
 ## Thanks To
-
-@jashkenas for making coffeescript, underscore, backbone.js.
-
-@twitter for making bootstrap 2.0
-
-@davidtonge for making backbone-query
-
-@benchprep for giving me the freedom
-
-@luca. who i spent only two minutes making and am exponentially more proud to have created.
-
-## Contributing
-
-Please!
+@tjbladez, @grilix, @nick-desteffen 
