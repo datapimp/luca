@@ -30,7 +30,6 @@ Luca.registry.typeAliases =
   multi:        "collection_multi_view"
   table:        "table_view"
 
-
 # When you use _.def to define a component, you say
 # which class it extends() from, and with() which enhancements.
 # We register that component class for you:

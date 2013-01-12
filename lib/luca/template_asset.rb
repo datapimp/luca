@@ -1,5 +1,5 @@
 module Luca
-  class Template
+  class TemplateAsset
     attr_accessor :path, :compiler, :contents
 
     def initialize(path)  

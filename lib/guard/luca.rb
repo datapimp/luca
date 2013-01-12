@@ -20,7 +20,7 @@ module Guard
     def initialize(watchers=[],options={})
       super
       UI.info "Guard::Luca"
-      @faye_notifier = FayeNotifier.new(url:"/faye")
+      @faye_notifier = FayeNotifier.new(faye_url)
       @project = ::Luca::Project.find_by_path( Dir.pwd() )
     end
 
@@ -38,6 +38,10 @@ module Guard
       end      
     end
 
+    def faye_url
+      ENV['LUCA_CODE_SYNC_URL'] || "//localhost:9292/faye"
+    end
+
     def run_on_changes(paths)
       # temp
       paths.map(&:downcase!)
@@ -48,14 +52,14 @@ module Guard
   end
 
   class FayeNotifier
-    attr_reader :client
+    attr_reader :client, :url
 
-    def initialize options={}
-      @url = options[:url] 
+    def initialize url 
+      @url = url
     end
 
     def client
-      @client ||= ::Faye::Client.new("http://localhost:9295/faye")
+      @client ||= ::Faye::Client.new(url)
     end
 
     def shutdown
@@ -64,7 +68,8 @@ module Guard
 
     def publish channel, message
       EM.run do
-        client = ::Faye::Client.new("http://localhost:9295/faye")
+        UI.info "Publishing To #{ url }"
+        client = ::Faye::Client.new(url)
         pub    = client.publish( channel, message )
         pub.callback { EM.stop }
         pub.errback { EM.stop }
