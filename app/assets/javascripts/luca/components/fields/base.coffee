@@ -31,7 +31,13 @@ field.publicInterface
   updateState: (state)->
     _( @statuses ).each (cls)=>
       @$el.removeClass(cls)
-      @$el.addClass(state)
+    @$el.addClass(state)
+
+  clearErrors: ()->
+    @$el.removeClass('error')
+
+  displayErrors: (errors)->
+    @updateState('error')
 
 field.methods
   getParsedValue: (raw)->
