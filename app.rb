@@ -57,41 +57,4 @@ class App < Sinatra::Base
     erb :jasmine
   end
 
-  Luca::CodeBrowser.look_for_source_in( File.join(File.expand_path('../', __FILE__),'src') )
-
-  get "/luca/source-map.js" do
-    source_map = {}
-
-    files = (["src/**/*.coffee","assets/javascripts/sandbox/**/*.coffee"]).map do |location|
-      Dir.glob("#{ App.root }/#{ location }")
-    end
-
-    files.flatten.each do |file|
-      definitions = IO.read(file).lines.to_a.grep /_\.def/
-
-      definitions.each do |definition|
-        component = definition.match(/_\.def\(['"](.+)['"]\)\./)
-
-        if component and component[1]
-          componentId = component[1].gsub(/['"].*$/,'')
-          if componentId
-            source_map[ componentId ] = {className:componentId,file:file,source:IO.read(file)}
-          end
-        end
-      end      
-    end
-
-    JSON.generate source_map.values
-  end
-
-  get "/components" do
-    if params[:component]
-      component = params[:component]
-      source = Luca::CodeBrowser.get_source_for( component )
-      {className:component, source:source}.to_json
-    else
-      Luca::CodeBrowser.map_source
-    end
-  end
-
 end

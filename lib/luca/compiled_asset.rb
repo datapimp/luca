@@ -5,18 +5,27 @@ module Luca
                     :sass_assets,
                     :scss_assets,
                     :less_assets,
-                    :markdown_assets
+                    :markdown_assets,
+                    :asset_stores_setup
     end
 
-    self.coffeescript_assets  = Luca::Collection::Base.new(namespace:"coffeescripts")
-    self.sass_assets          = Luca::Collection::Base.new(namespace:"sass_stylesheets")
-    self.scss_assets          = Luca::Collection::Base.new(namespace:"scss_stylesheets")
-    self.less_assets          = Luca::Collection::Base.new(namespace:"less_stylesheets")
-    self.markdown_assets      = Luca::Collection::Base.new(namespace:"markdown_assets")
+    self.asset_stores_setup = false
+
+    def self.setup_asset_stores
+      return if self.asset_stores_setup == true
+      
+      self.coffeescript_assets  = Luca::Collection::Base.new(namespace:"coffeescripts")
+      self.sass_assets          = Luca::Collection::Base.new(namespace:"sass_stylesheets")
+      self.scss_assets          = Luca::Collection::Base.new(namespace:"scss_stylesheets")
+      self.less_assets          = Luca::Collection::Base.new(namespace:"less_stylesheets")
+      self.markdown_assets      = Luca::Collection::Base.new(namespace:"markdown_assets")
+      self.asset_stores_setup = true
+    end
 
     attr_accessor :type, :asset 
 
     def initialize type, asset 
+      CompiledAsset.setup_asset_stores
       @type = type
       @asset = asset
     end

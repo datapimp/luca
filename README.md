@@ -78,6 +78,8 @@ To generate Luca application skeleton run:
 `rails generate luca:application <app_name>`  
 This will generate a controller, view, route, and the Luca application structure under assets/javascripts/<app_name>
 
+## Contributing
+You will need to run 'rake release:all' to compile/minify the asset which gets released.
 
 ## Thanks To
 @tjbladez, @grilix, @nick-desteffen 

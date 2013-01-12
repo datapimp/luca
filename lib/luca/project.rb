@@ -4,10 +4,13 @@ module Luca
       attr_accessor :storage
     end
 
-    self.storage = Luca::Collection::Base.new(namespace:"projects")
 
     attr_accessor :name, 
                   :path
+
+    def self.storage
+      self.storage ||= Luca::Collection::Base.new(namespace:"projects")
+    end
 
     def self.create attributes={}
       storage.create(attributes)

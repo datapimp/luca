@@ -8,7 +8,6 @@
 # which require data integrity. 
 
 require 'json'
-require 'redis'
 
 module Luca
   module Collection
