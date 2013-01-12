@@ -23,7 +23,7 @@ lucaUtilityHelper = (payload, args...)->
 
 (window || global).Luca = ()-> lucaUtilityHelper.apply(@, arguments)
 
-Luca.VERSION = '0.9.83'
+Luca.VERSION = '0.9.85'
 
 _.extend Luca,
   core: {}
@@ -89,6 +89,7 @@ Luca.initialize = (namespace, options={})->
   _.extend(Luca.config, options)
   _.extend (window || global), object
 
+  Luca.lastNamespace = namespace
   Luca.concern.namespace "#{ namespace }.concerns"
   Luca.registry.namespace "#{ namespace }.views"
   Luca.Collection.namespace "#{ namespace }.collections"

@@ -1,3 +1,5 @@
+# DEPRECATED
+
 require 'tilt'
 
 module Luca

@@ -49,3 +49,4 @@ Luca.keyMap = Luca.config.keyMap = _( Luca.keys ).inject (memo, value, symbol)->
 , {}
 
 Luca.config.showWarnings = true
+Luca.config.default_socket_port = 9292

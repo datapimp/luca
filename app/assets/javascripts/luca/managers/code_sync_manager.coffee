@@ -2,13 +2,16 @@ codeManager = Luca.register     "Luca.CodeSyncManager"
 codeManager.extends             "Luca.SocketManager"
 
 codeManager.publicConfiguration
-  host:       "http://localhost:9295/faye"
+  host:       Luca.config.codeSyncHost || "http://localhost:9292/faye"
   namespace:  "luca"
-  channel:    "/changes"
+  channel:    Luca.config.codeSyncChannel || "/changes"
 
 codeManager.privateMethods
-  initialize: ()->
-    Luca.SocketManager::initialize.apply(@, arguments)
+  initialize: (@attributes={})->
+    unless @attributes.host?
+      _.extend(@attributes, host: (@host || Luca.config.codeSyncHost))
+
+    Luca.SocketManager::initialize.call(@, @attributes)
     @bindToChannel()
 
   bindToChannel: ()->
@@ -24,6 +27,7 @@ codeManager.privateMethods
   # whenever an asset that is being watched changes. 
   # it is different if the type of file is css or javascript.
   onChangesNotification: (changeData={}, applicationName)->
+    console.log changeData
     return if _.isEmpty(changeData)
     data = _( changeData ).values()[0] || {}
 
@@ -57,10 +61,11 @@ codeManager.privateMethods
 
   processComponentDefinitionChange: (change={})->
     return if _.isEmpty(change)
-    components = Tools().collection "components"
+    @components ||= Luca.collections.Components.generate() 
 
     if change.class_name? 
-      component = components.findByClassName( change.class_name )
+      component = @components.findByClassName( change.class_name )
+
       if component && change.source_file_contents?
         component.set(source_file_contents: change.source_file_contents )
 
@@ -81,13 +86,13 @@ codeManager.privateMethods
   processStylesheetChange: (change={})->
     return if _.isEmpty(change)
 
-    if change.path?.match(/syncpad/)
+    if change.path?.match(/syncpad/) or Luca.config.codeSyncStylesheetMode is "single"
       @syncStylesheet(change)
     else
       @replaceStylesheetAndEverythingAfter(change.path)
 
   replaceStylesheetAndEverythingAfter: (path)->
-    stylesheet  = path.replace('./app/assets/stylesheets','/assets')
+    stylesheet  = path.replace('./app/assets/stylesheets', Luca.config.assetsUrlPrefix )
     stylesheet  = stylesheet.replace('.scss','')
     existing    = $("link[href*='#{ stylesheet }']")
     parent      = existing.parent()
