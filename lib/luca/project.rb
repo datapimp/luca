@@ -24,7 +24,9 @@ module Luca
       data = index.detect do |project_data|
         project_data['path'] == path
       end
-       
+      
+      return nil unless data 
+
       new(path: data['path'], name: data['name'])    
     end
 
