@@ -12,6 +12,12 @@ require 'json'
 module Luca
   module Collection
     class Base
+
+      def self.default_redis
+        require 'redis'
+        @default_redis ||= Redis.new host: "localhost", port: 6379, db: 5
+      end
+
       attr_accessor :namespace, 
                     :redis, 
                     :id_storage, 
@@ -20,7 +26,7 @@ module Luca
 
       def initialize options={}
         @namespace            = options[:namespace].to_s
-        @redis                = options[:redis] ||= $redis
+        @redis                = options[:redis] || Luca::Collection::Base.default_redis
         @id_storage           = options[:id_storage] ||= "#{ @namespace }:ids"
         @required_attributes  = options[:required_attributes] || []
 
@@ -53,8 +59,7 @@ module Luca
 
       def validate_redis_connection
         unless @redis
-          require 'redis'
-          @redis ||= Redis.new host: "localhost", port: 6379, db: 5
+
         end
 
         unless @redis.respond_to?(:get) and @redis.respond_to?(:incr) and @redis.respond_to?(:mget)

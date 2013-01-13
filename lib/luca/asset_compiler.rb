@@ -20,7 +20,7 @@ module Luca
     end
 
     def compiled
-      compile_file_manually
+      compile_file_using_sprockets rescue compile_file_manually
     end
     
     def filename

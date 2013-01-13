@@ -1,7 +1,8 @@
 # Note:
 #
 # This is a WIP and does not provide much in the way of configuration at the moment.  It requires a running instance of 
-# Faye on port 9295.
+# Faye on port 9295, and a connection to redis.  I plan to make the Luca::Collection backend work against a file store
+# in the most simple case
 boot = File.join( Dir.pwd(), 'config', 'boot.rb' ) 
 environment = File.join( Dir.pwd(), 'config', 'environment.rb' ) 
 
@@ -22,6 +23,8 @@ module Guard
       UI.info "Guard::Luca"
       @faye_notifier = FayeNotifier.new(faye_url)
       @project = ::Luca::Project.find_by_path( Dir.pwd() )
+
+      throw "Could not find a luca project in redis.  Create one for this path." unless @project
     end
 
     def start
