@@ -254,4 +254,11 @@
 
 0.9.84
   - Added Luca::Collection::Endpoint to provide cheap throwaway persistence 
-    
+
+0.9.85
+  - Documentation / Comments parser and generator.
+  - Luca.config.developmentMode revamp. 
+  - Added experimental Guard::Luca which uses Faye to send asset changes to the running Luca.Application()
+  - Added Luca.CodeSyncManager which keeps css, templates, and component definitions in sync as you change them on the file system.   
+  - Better refreshing of instantiated components with updated prototype code via CodeSyncManager
+  - Integrated Luca.FormView improvements from @grilix
