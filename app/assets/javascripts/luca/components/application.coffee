@@ -8,7 +8,7 @@ application.extends               "Luca.containers.Viewport"
 application.triggers              "controller:change",
                                   "action:change"
 
-application.publicInterface
+application.publicConfiguration
   name: "MyApp"
 
   # The Application uses a Backbone.Model as a state machine, which
@@ -53,6 +53,12 @@ application.publicInterface
   # with several 'pages' so to speak
   useController: true
 
+  # if you have special rendering requirements for
+  # the application's components, you can assign the
+  # specific element you want to render the container
+  # to inside of the #viewport
+  mainControllerContainer: undefined
+
   # Key Handler
   #
   # One responsibility of the application, since it is a viewport which monopolizes the entire screen
@@ -89,8 +95,14 @@ application.publicInterface
     templateContainer: "Luca.templates"
   ]
 
-  # DOCUMENT
+  # create getter methods for the various
+  # roles in the application's components on the
+  # application itself.  false by default.
   createRoleBasedGetters: false
+
+  # create an instance of Luca.SocketManager
+  # which is a Backbone.Events style abstraction that
+  # sits on top of services like faye, or socket.io 
   useSocketManager: false
   socketManagerOptions: {}
 
@@ -265,17 +277,21 @@ application.privateInterface
   setupMainController: ()->
     if @useController is true
       definedComponents = @components || []
-
-      @components = [
+      base =  
         type: 'controller'
         name: "main_controller"
         role: "main_controller"
         components: definedComponents
-      ]
-      
-      @getMainController = ()=> @findComponentByRole('main_controller')
 
-      @defer( @setupControllerBindings, false ).until("after:components")
+      if @mainControllerContainer?
+        _.extend(base, container: @mainControllerContainer)
+
+      @components = [base]
+    
+    @getMainController = ()=> 
+      @findComponentByRole('main_controller')
+
+    @defer( @setupControllerBindings, false ).until("after:components")
 
   setupCollectionManager: ()->
     return unless @useCollectionManager is true

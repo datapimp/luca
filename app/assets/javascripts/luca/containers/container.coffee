@@ -315,7 +315,7 @@ container.defines
   map: (fn)->
     @_().map(fn)
 
-  registerComponentEvents: (eventList)->
+  registerComponentEvents: (eventList, direction="on")->
     container = @
 
     for listener, handler of (eventList || @componentEvents||{})
@@ -334,7 +334,7 @@ container.defines
           console.log "Error registering component event", listener, componentNameOrRole, eventId
           throw "Invalid component event definition: #{ componentNameOrRole }"
 
-        component?.bind eventId, @[handler], container
+        component[direction](eventId, @[handler], container)
 
 
   subContainers: ()->

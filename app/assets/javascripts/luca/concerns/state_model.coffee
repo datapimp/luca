@@ -1,4 +1,10 @@
 Luca.concerns.StateModel =
+  __onModelChange: (args...)->
+    @trigger.call(statefulView, "state:change", args... )
+
+    for changed, value of state.changedAttributes()
+      @trigger.call statefulView, "state:change:#{ changed }", state, value, state.previous(changed)
+
   __initializer: ()->
     @stateful = @stateAttributes if @stateAttributes?
 
@@ -30,23 +36,20 @@ Luca.concerns.StateModel =
         # WE COULD AUTO BIND TO STATE CHANGE EVENTS HERE
 
     unless _.isEmpty(@stateChangeEvents)
-      for attribute, handler of @stateChangeEvents
-        fn = if _.isString(handler) then statefulView[handler] else handler 
-        
-        if attribute is "*"
-          statefulView.on "state:change", fn, statefulView 
-        else
-          statefulView.on "state:change:#{ attribute }", fn, statefulView 
+      Luca.concerns.StateModel.__setupModelBindings.call(@, "on")
+
+  __setupModelBindings: (direction="on")->
+    statefulView = @
+    for attribute, handler of @stateChangeEvents
+      fn = if _.isString(handler) then statefulView[handler] else handler 
+      
+      if attribute is "*"
+        statefulView[direction]("state:change", fn, statefulView)
+      else
+        statefulView[direction]("state:change:#{ attribute }", fn, statefulView)
 
     # Any time there is a model change event on the internal state machine
     # we will trigger a general state:change event on the component as well
     # as individual state:change:attribute events
-
     state = statefulView.state 
-    
-    statefulView.state.on "change", (args...)=>
-      @trigger.call(statefulView, "state:change", args... )
-
-      for changed, value of state.changedAttributes()
-        @trigger.call statefulView, "state:change:#{ changed }", state, value, state.previous(changed)
-
+    statefulView.state[direction]("change", Luca.concerns.StateModel.__onModelChange, statefulView)

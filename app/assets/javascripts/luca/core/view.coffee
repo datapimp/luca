@@ -4,7 +4,8 @@ view.extends            "Backbone.View"
 
 # includes are extensions to the prototype, and have no special behavior
 view.includes           "Luca.Events",
-                        "Luca.concerns.DomHelpers"
+                        "Luca.concerns.DomHelpers",
+                        "Luca.concerns.DevelopmentToolHelpers"
 
 # concerns are includes with special property / method conventions
 # which customize the components through the use of __initializer and

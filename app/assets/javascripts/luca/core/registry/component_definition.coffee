@@ -234,7 +234,8 @@ class ComponentDefinition
       componentType = "model" if Luca.isModelPrototype( definition )
 
       # automatically register this with the component registry
-      Luca.registerComponent( _.string.underscored(@componentId), @componentName, componentType)
+      type_alias = _.string.underscored(@componentId)
+      Luca.registerComponent( type_alias, @componentName, componentType)
 
     @defined = true
 

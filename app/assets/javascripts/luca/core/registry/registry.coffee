@@ -38,24 +38,23 @@ Luca.registerComponent = (component, prototypeName, componentType="view")->
 
   switch componentType
     when "model"
+      existing = registry.model_classes[ component ]
       registry.model_classes[ component ] = prototypeName
     when "collection"
+      existing = registry.collection_classes[ component ]
       registry.collection_classes[ component ] = prototypeName
+    when "view"
+      existing = registry.classes[ component ]
+      registry.classes[ component ] = prototypeName
     else
+      existing = registry.classes[ component ]
       registry.classes[ component ] = prototypeName
 
-Luca.development_mode_register = (component, prototypeName)->
-  existing = registry.classes[component]
-
-  if Luca.enableDevelopmentTools is true and existing?
-    prototypeDefinition = Luca.util.resolve( existing, window)
-
+  if existing? and Luca.config.developmentMode is true 
     liveInstances = Luca.registry.findInstancesByClassName( prototypeName )
+    if liveInstances.length > 0
+      existingInstance.refreshEventBindings?() for existingInstance in liveInstances
 
-    _( liveInstances ).each (instance)->
-      instance?.refreshCode?.call(instance, prototypeDefinition)
-
-  Luca.registerComponent( component, prototypeName )
 
 # We create a @ctype alias for this component definition, and register
 # the class in a registry.
