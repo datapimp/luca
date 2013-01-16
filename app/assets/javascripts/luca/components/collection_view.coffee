@@ -122,7 +122,7 @@ collectionView.defines
     @trigger("model:refreshed", index, model)
 
   refresh: ()->
-    query   = @getQuery()
+    query = @getLocalQuery()
     options = @getQueryOptions()
     models  = @getModels(query, options)
 
