@@ -1,16 +1,17 @@
-Luca.concerns.Filterable = 
+Luca.concerns.Filterable =
   classMethods:
     prepare: ()->
-      filter = _.clone( @getQuery() )
-      options = _.clone( @getQueryOptions() )
+      return unless @isRemote()
+
+      filter = _.clone(@getRemoteQuery())
+      options = _.clone(@getQueryOptions())
 
       prepared = @prepareRemoteFilter(filter, options)
 
-      if @isRemote()  
-        @collection.applyFilter(prepared, remote: true)
-      else
-        @trigger "data:refresh" 
-  
+      @collection.applyFilter(prepared, remote: true)
+
+      @trigger "data:refresh"
+
   __included: (component, module)->
     _.extend(Luca.Collection::, __filters:{})
 
@@ -74,7 +75,7 @@ Luca.concerns.Filterable =
   applyFilter: (query={}, options={})->
     options = _.defaults(options, @getQueryOptions())
     query = _.defaults(query, @getQuery())
-    @getFilterState().clear(silent:false)
+    @getFilterState().clear(silent: true)
     @getFilterState().set({query,options}, options)
 
 class FilterModel extends Backbone.Model
