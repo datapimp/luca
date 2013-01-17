@@ -6,6 +6,11 @@ codeManager.publicConfiguration
   namespace:  "luca"
   channel:    Luca.config.codeSyncChannel || "/changes"
 
+codeManager.classMethods
+  setup: (options={})->
+    @codeSyncManager = new Luca.CodeSyncManager(options) 
+    @codeSyncManager.trigger("ready")
+
 codeManager.privateMethods
   initialize: (@attributes={})->
     unless @attributes.host?

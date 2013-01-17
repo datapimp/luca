@@ -25,6 +25,8 @@ Luca.enableGlobalObserver = Luca.config.enableGlobalObserver = false
 # for what it is best at, and not try to solve this
 # problem on our own!
 Luca.config.enableBoostrap = Luca.config.enableBootstrap = true
+Luca.config.fluidWrapperClass = "container-fluid"
+Luca.config.wrapperClass = "container"
 
 Luca.config.enhancedViewProperties = true
 

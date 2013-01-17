@@ -12,15 +12,22 @@ navBar.defines
 
   beforeRender: ()->
     @$el.addClass "navbar-fixed-#{ @position }" if @fixed
+    @$el.addClass "navbar-inverse" if @inverse is true
 
     if @brand?
-      @content().append("<a class='brand' href='#'>#{ @brand }</a>")
+      @$('.brand').attr('href', @homeLink || '#')
+      @$('.brand').html(@brand)
 
     if @template
       @content().append Luca.template(@template, @)
+
+    if !!(@fluid || Luca.getApplication()?.fluid)
+      @content().addClass( Luca.config.fluidWrapperClass )
+    else
+      @content().addClass( Luca.config.wrapperClass )
 
   render: ()->
     @
 
   content: ()->
-    @$('.container').eq(0)
+    @$('.luca-ui-navbar-body').eq(0)
