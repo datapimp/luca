@@ -30,10 +30,21 @@ module Luca
       new(path: data['path'], name: data['name'])    
     end
 
+    def self.find_or_create_by_name(name, attributes={})
+      if existing = find_by_name(name)
+        return existing
+      else
+        attributes[:name] = name  
+        create(attributes)
+      end
+    end
+
     def self.find_by_name name
       data = index.detect do |project_data|
         project_data['name'] == name
       end
+
+      return nil unless data
 
       new(path: data['path'], name: data['name'])
     end

@@ -1,4 +1,11 @@
 namespace :luca do
+  desc "Create a Luca::Project for this app"
+  task :project => :environment do |t, args|
+    current_folder = Rails.root
+    name = ENV['name'] 
+    Luca::Project.find_or_create_by_name(name, :path => current_folder.to_s )
+  end
+
   desc "Download the vendor dependencies for a luca app"
   task :dependencies do
     base = 'https://raw.github.com/datapimp/luca/master/assets/javascripts/dependencies/'

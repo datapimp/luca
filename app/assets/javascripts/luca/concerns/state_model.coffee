@@ -1,5 +1,8 @@
 Luca.concerns.StateModel =
   __onModelChange: (args...)->
+    statefulView = @
+    state = statefulView.state
+
     @trigger.call(statefulView, "state:change", args... )
 
     for changed, value of state.changedAttributes()

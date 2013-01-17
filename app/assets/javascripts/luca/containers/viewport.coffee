@@ -81,5 +81,5 @@ viewport.defines
     # IMPLEMENT
 
 
-Luca.containers.Viewport.defaultWrapperClass  = 'container'
-Luca.containers.Viewport.fluidWrapperClass    = 'container-fluid'
+Luca.containers.Viewport.defaultWrapperClass  = Luca.config.wrapperClass || 'container'
+Luca.containers.Viewport.fluidWrapperClass    = Luca.config.fluidWrapperClass || 'container-fluid'
