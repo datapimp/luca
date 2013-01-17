@@ -262,3 +262,7 @@
   - Added Luca.CodeSyncManager which keeps css, templates, and component definitions in sync as you change them on the file system.   
   - Better refreshing of instantiated components with updated prototype code via CodeSyncManager
   - Integrated Luca.FormView improvements from @grilix
+
+0.9.86
+  - Introducing GridLayoutView component which is a CollectionView which uses bootstraps row and spans to form an even grid.
+  - Introducing SimpleCollectionView which is a CollectionView without any mixins applied
