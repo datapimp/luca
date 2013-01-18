@@ -21,6 +21,12 @@ Luca.concerns.QueryCollectionBindings =
           
     Luca.util.readAll(query)
 
+  getRemoteQuery: (options = {}) ->
+    @getQuery(options)
+
+  getLocalQuery: (options = {}) ->
+    @getQuery(options)
+
   # Private: returns the query that is applied to the underlying collection.
   # accepts the same options as Luca.Collection.query's initial query option.
   getQueryOptions: (options={})-> 
@@ -34,7 +40,7 @@ Luca.concerns.QueryCollectionBindings =
   # responds to @query() then it will use that interface. 
   getModels: (query,options)->
     if @collection?.query
-      query ||= @getQuery()
+      query ||= @getLocalQuery()
       options ||= @getQueryOptions()
       options.prepare ||= @prepareQuery
 
