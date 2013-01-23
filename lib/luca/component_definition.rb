@@ -147,13 +147,19 @@ module Luca
       match.strip
     end
 
-    def documentation_for method_or_property
+    def documentation_for method_or_property, compile=true
       comment_lines = find_comments_above(method_or_property).collect(&:line)
       comments = comment_lines.map do |comment_line|
         comment_line.gsub(/\A\s*\#/,'').strip
       end
 
-      comments.join("\n")
+      data = comments.reverse.join("\n")
+
+      docs = if compile == true
+        Redcarpet.new(data).to_html rescue data
+      end
+
+      docs
     end
 
     def find_comments_above method_or_property

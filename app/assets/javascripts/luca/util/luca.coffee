@@ -144,6 +144,10 @@ Luca.util.setupHooks = (set)->
     fn = Luca.util.hook( eventId )
 
     callback = ()->
+      #if @[fn]?
+      #  Luca.stats.increment("empty:hook")
+      #else
+      #  Luca.stats.increment("valid:hook")
       @[fn]?.apply @, arguments
 
     callback = _.once(callback) if eventId?.match(/once:/)

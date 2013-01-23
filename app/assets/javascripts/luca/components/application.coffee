@@ -255,7 +255,7 @@ application.privateInterface
 
     if keyEvent = source?[keyname]
       if @[keyEvent]? and _.isFunction(@[keyEvent])
-        @[keyEvent]?.call(@)
+        @[keyEvent]?.call(@, e, keyname, keyEvent)
       else
         @trigger(keyEvent, e, keyname)
 

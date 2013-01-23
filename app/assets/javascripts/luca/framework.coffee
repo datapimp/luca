@@ -63,6 +63,8 @@ Luca.setupCollectionSpace = (options={})->
 # Creates a basic Namespace for you to begin defining
 # your application and all of its components.
 Luca.initialize = (namespace, options={})->
+  Luca.namespace = namespace.toLowerCase()
+
   defaults = 
     views: {}
     collections: {}
