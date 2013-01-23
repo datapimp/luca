@@ -7,7 +7,6 @@
 # `backspace`, `tab`, `clear`, `enter`, `return`, `esc`, `escape`, `space`,
 # `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `del`, `delete`
 # and `f1` through `f19`.
-#
 Luca.util.setupKeymaster = Luca.util.setupKeyBindings = (config, keyScope="all")->
   unless _.isFunction(Luca.key)
     throw "Keymaster library has not been included."

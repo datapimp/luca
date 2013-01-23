@@ -11,10 +11,7 @@ viewport.defines
     _.extend @, @options
 
     if Luca.config.enableBoostrap is true and @applyWrapper is true
-      @wrapperClass = if @fluid is true 
-        Luca.config.fluidWrapperClass || Luca.containers.Viewport.fluidWrapperClass 
-      else 
-        Luca.containers.Viewport.defaultWrapperClass 
+      @wrapperClass = if @fluid is true then Luca.config.fluidWrapperClass else Luca.config.wrapperClass
 
     Luca.Container::initialize.apply(@, arguments)
 
