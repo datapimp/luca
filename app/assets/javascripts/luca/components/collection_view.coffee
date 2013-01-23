@@ -17,6 +17,17 @@ collectionView.triggers           "before:refresh",
                                   "refresh",
                                   "empty:results"
 
+# IDEA:
+# 
+# For validation of component configuration,
+# we could define a convention like:
+#
+# collectionView.validatesConfigurationWith
+#   requiresValidCollectionAt: "collection"
+#   requiresPresenceOf: 
+#     either: ["itemTemplate", "itemRenderer", "itemProperty"]
+#
+#
 collectionView.publicConfiguration
   tagName: "ol"
   bodyClassName: "collection-ui-panel"
@@ -31,7 +42,7 @@ collectionView.publicConfiguration
   # model changes?
   observeChanges: false
 
-collectionView.publicMethods
+collectionView.defines
   initialize: (@options={})->
     _.extend(@, @options)
     _.bindAll @, "refresh"
@@ -74,38 +85,9 @@ collectionView.publicMethods
         view.refresh()
         view.unbind "after:render", @
 
-  # Refresh applies the current query settings to the collection
-  # to arrive at a set of models.  It then renders each model
-  # into the view according to the settings.
-  refresh: ()->
-    query   = @getQuery()
-    options = @getQueryOptions()
-    models  = @getModels(query, options)
-
-    @$bodyEl().empty()
-
-    @trigger("before:refresh", models, query, options)
-
-    if models.length is 0
-      @trigger("empty:results", query, options)
-
-    @renderModels( models )
-
-    @trigger("after:refresh", models, query, options)
-
-    @
-
-collectionView.privateMethods
-  renderModels: (models)->
-    index = 0
-    for model in models
-      @$append @makeItem(model, index++)    
 
   attributesForItem: (item, model)->
-    attributes = 
-      class: @itemClassName
-      "data-index": item.index 
-      "data-model-id": item.model.get('id')
+    _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
 
   contentForItem: (item={})->
     if @itemTemplate? and templateFn = Luca.template(@itemTemplate)
@@ -139,6 +121,25 @@ collectionView.privateMethods
     @locateItemElement(model.get('id')).empty().append( @contentForItem({model,index}, model) )
     @trigger("model:refreshed", index, model)
 
+  refresh: ()->
+    query = @getLocalQuery()
+    options = @getQueryOptions()
+    models  = @getModels(query, options)
+
+    @$bodyEl().empty()
+
+    @trigger("before:refresh", models, query, options)
+
+    if models.length is 0
+      @trigger("empty:results", query, options)
+
+    index = 0
+    for model in models
+      @$append @makeItem(model, index++)
+
+    @trigger("after:refresh", models, query, options)
+
+    @
 
   registerEvent: (domEvent, selector, handler)->
     if !handler? and _.isFunction(selector)
@@ -150,6 +151,5 @@ collectionView.privateMethods
 
 # Private Helpers
 
-collectionView.register()
 
 make = Luca.View::make
