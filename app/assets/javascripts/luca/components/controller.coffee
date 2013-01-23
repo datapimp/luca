@@ -21,6 +21,8 @@ controller.publicInterface
 
       @state.set(active_section: current.name )
 
+      Luca.key?.setScope( current.name )
+
       if _.isFunction( callback )
         callback.call(current)
 
@@ -28,6 +30,11 @@ controller.publicInterface
     @find(section)
 
 controller.classMethods
+  setupComponentKeyEvents: ()->
+    @_().each (component)->    
+      if _.isObject(component.keyEvents) and component.name?
+        Luca.util.setupKeymaster(component.keyEvents, component.name).on(component)    
+
   controllerPath: ()->
     component = @
     
@@ -66,6 +73,7 @@ controller.defines
       component.controllerPath = Luca.components.Controller.controllerPath
 
     @on "after:render", @default, @
+    @on "before:render", Luca.components.Controller.setupComponentKeyEvents, @
 
   each: (fn)->
     _( @components ).each (component)=> fn.call(@,component)

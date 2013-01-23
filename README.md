@@ -82,4 +82,7 @@ This will generate a controller, view, route, and the Luca application structure
 You will need to run 'rake release:all' to compile/minify the asset which gets released.
 
 ## Thanks To
-@tjbladez, @grilix, @nick-desteffen 
+@jashkenas, @davidgtonge, @twitter, @madrobby, et al.
+
+## Contributors
+@tjbladez, @grilix, @nick-desteffen

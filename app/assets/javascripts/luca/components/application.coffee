@@ -68,21 +68,23 @@ application.publicConfiguration
   useKeyHandler: false
 
   # You can configure key events by specifying them by their name, as it exists in Luca.keyMap. For example:
-  #
-  keyEvents: {}
 
-  # keyEvents
-  #   keyup: keyUpHandler
-  #   enter: enterHandler
-  #   meta:
-  #     up: metaUpHandler
-  #   control:
-  #     forwardslash: controlSlashHandler
-  #     keyup: controlUpHandler
-  #   control_meta:
-  #     keydown: metaControlKeyDownHandler
+  # keyEvents understands the following modifiers:
+  # `⇧`, `shift`, `option`, `⌥`, `alt`, `ctrl`, `control`, `command`, and `⌘`.
+
+  # The following special keys can be used for shortcuts:
+  # `backspace`, `tab`, `clear`, `enter`, `return`, `esc`, `escape`, `space`,
+  # `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `del`, `delete`
+  # and `f1` through `f19`.
   #
-  #
+  # Example:
+  # ```coffeescript
+  #   application.configuration
+  #     keyEvents:
+  #       '⌘+r, ctrl+r': "keyHandlerFunction"
+  #     keyHandlerFunction: -> alert 'something + r was pressed'
+  # ```
+  keyEvents: {}
 
   # applications have one component, the controller.
   # any components defined on the application class directly
@@ -398,6 +400,21 @@ application.classInterface
   registerInstance: (app)->
     Luca.Application.instances[ app.name ] = app
 
+  # Keymaster understands the following modifiers:
+  # `⇧`, `shift`, `option`, `⌥`, `alt`, `ctrl`, `control`, `command`, and `⌘`.
+
+  # The following special keys can be used for shortcuts:
+  # `backspace`, `tab`, `clear`, `enter`, `return`, `esc`, `escape`, `space`,
+  # `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `del`, `delete`
+  # and `f1` through `f19`.
+  checkForKeymaster: ()->
+    if window?.key?.noConflict
+      Luca.key = window.key.noConflict()
+
+      Luca.Application::setupKeyHandler = ()->
+        return unless @keyEvents
+        Luca.util.setupKeymaster(@keyEvents, "all").on(@)
+
   # Private: Recursively navigates down the controller page hierarchy
   # to the page you specify by name.  You can specify the 
   # method which is to be called at the end of the chain.
@@ -456,5 +473,7 @@ application.classInterface
 
 application.afterDefinition ()->
   Luca.routeHelper = Luca.Application.routeTo
+  Luca.Application.checkForKeymaster()
+
 
 application.register()
