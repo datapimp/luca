@@ -36,6 +36,11 @@ view.defines
   identifier: ()->
     (@displayName || @type ) + ":" + (@name || @role || @cid)
 
+  remove: ()->
+    @trigger("before:remove", @)
+    Luca.remove(@)
+    Backbone.View::remove.apply(@, arguments)
+
   initialize: (@options={})->
     @trigger "before:initialize", @, @options
 

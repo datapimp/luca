@@ -121,6 +121,11 @@ Luca.registry.classes = (toString=false)->
 Luca.registry.find = (search)->
   Luca.util.resolve(search) || Luca.define.findDefinition(search)
 
+Luca.remove = Luca.registry.removeInstance = (cacheKey)->
+  return unless cacheKey?
+  _( componentCacheStore.name_index ).delete( cacheKey )
+  _( componentCacheStore.cid_index ).delete( cacheKey )
+
 Luca.cache = Luca.registry.cacheInstance = (cacheKey, object)->
   return unless cacheKey?
   return object if object?.doNotCache is true

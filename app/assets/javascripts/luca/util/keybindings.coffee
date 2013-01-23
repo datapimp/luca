@@ -8,13 +8,14 @@
 # `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `del`, `delete`
 # and `f1` through `f19`.
 #
-Luca.util.setupKeymaster = (config, keyScope="all")->
+Luca.util.setupKeymaster = Luca.util.setupKeyBindings = (config, keyScope="all")->
   unless _.isFunction(Luca.key)
     throw "Keymaster library has not been included."
 
-  console.log "Setup Key Master Scope: #{ keyScope }", config
-
   on: (view)->
+    view.on "before:remove", ()->
+      Luca.key?.deleteScope(keyScope)
+
     for key, handler of config
       if _.isString(handler) and _.isFunction(view[handler])
         handler = view[handler]
