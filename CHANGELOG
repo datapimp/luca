@@ -266,3 +266,9 @@
 0.9.86
   - Introducing GridLayoutView component which is a CollectionView which uses bootstraps row and spans to form an even grid.
   - Introducing SimpleCollectionView which is a CollectionView without any mixins applied
+
+0.9.87
+  - Adds support for keymaster.js for keybinding config.  Thanks @madrobby.
+  - Adds ability for the Application, and components which belong sto Luca.components.Controller to define their own global keybindings
+  - Luca::ComponentDefinition renders comments as MarkDown
+  - Adds Luca.util.setupKeyBindings helper for views to instrument their own keybindings / scopes
