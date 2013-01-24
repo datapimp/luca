@@ -26,6 +26,11 @@ describe 'The State Model Concern', ->
     view = new Luca.components.StatefulView()
     expect( view.state.toJSON() ).toEqual key1:"val1", key2: "val2"
 
+  it "should define a get/set method on the view which effect state", ->
+    view = new Luca.components.StatefulView()
+    view.set('testsetter', 'works')
+    expect( view.get('testsetter') ).toEqual('works')
+
   describe 'State Change Event Bindings', ->
     it "should trigger state change events on the view", ->
       view = new Luca.components.StatefulView()

@@ -102,43 +102,6 @@ describe "Luca.View", ->
     view = new Luca.View(additionalClassNames:"yes-yes yall")
     expect( view.$el.is(".yes-yes.yall") ).toEqual true
 
-
-describe "Development Tool Helpers", ->
-  beforeEach ->
-    _.def("Luca.views.IntrospectionView").extends("Luca.View").with
-      include:["Luca.concerns.DevelopmentToolHelpers"]
-
-    @view = new Luca.views.IntrospectionView 
-      events:
-        "click .a" : "clickHandler"
-        "hover .a" : "hoverHandler"
-
-      clickHandler: ()-> "click"
-      hoverHandler: ()-> "hover"
-
-      collection_one: new Luca.Collection([],name:"collection_one")
-      collection_two: new Luca.Collection([],name:"collection_two")
-      view_one: new Luca.View(name:"view_one")
-      view_two: new Luca.View(name:"view_two")
-      model_one: new Luca.Model(name:"model_one")
-      model_two: new Luca.Model(name:"model_two")
-
-  it "should know the names of functions which are event handlers", ->
-    names = @view.eventHandlerProperties()
-    expect( names ).toEqual ["clickHandler","hoverHandler"]
-
-  it "should know which properties are other views", ->
-    viewNames = _( @view.views() ).pluck("name")
-    expect( viewNames ).toEqual ["view_one","view_two"]
-
-  it "should know which properties are other models", ->
-    modelNames = _( @view.models() ).map (m)-> m.get('name')
-    expect( modelNames ).toEqual ["model_one","model_two"]
-
-  it "should know which properties are other collections", ->
-    collectionNames = _( @view.collections() ).pluck("name")
-    expect( collectionNames ).toEqual ["collection_one","collection_two"]
-
 describe "DOM Helper Methods", ->
   it "should use the $html method to inject into the $el", ->
     view = new Luca.View()

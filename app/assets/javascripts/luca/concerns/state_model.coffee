@@ -1,5 +1,9 @@
+
+stateModel = Luca.register("Luca.ViewState").extends("Luca.Model")
+
 Luca.concerns.StateModel =
   __onModelChange: (args...)->
+    console.log "__onModelChange called"
     statefulView = @
     state = statefulView.state
 
@@ -12,34 +16,31 @@ Luca.concerns.StateModel =
     @stateful = @stateAttributes if @stateAttributes?
 
     return unless @stateful?
-    return if @state? 
     
     statefulView = @
 
     if _.isObject(@stateful) and not @defaultState?
       @defaultState = @stateful 
 
-    @state = new Backbone.Model(@defaultState || {})
-    @set = _.bind(@state.set, @state) 
-    @get = _.bind(@state.get, @state) 
+    @state ||= new Luca.ViewState(@defaultState || {})
+
+    view = @
+
+    @get = ()->
+      view.state.get.apply(view.state, arguments)
+
+    @set = ()->
+      view.state.set.apply(view.state, arguments)
 
     for key, value of @state.toJSON()
       hook = "on" + _.str.capitalize(key) + "Change"
       getter = "get" + _.str.capitalize(key) 
       unless _.isFunction(@[getter])
         1
-        #console.log("State Change Getter", getter)
-        # @[getter] = ()=> @state.get(key)
-        # WE COULD CREATE AUTO GETTERS HERE
-
       if _.isFunction(@[hook])
         1
-        #console.log("State Change Hook", hook)
-        # @stateChangeEvents[ key ] = hook
-        # WE COULD AUTO BIND TO STATE CHANGE EVENTS HERE
 
-    unless _.isEmpty(@stateChangeEvents)
-      Luca.concerns.StateModel.__setupModelBindings.call(@, "on")
+    Luca.concerns.StateModel.__setupModelBindings.call(@, "on")
 
   __setupModelBindings: (direction="on")->
     statefulView = @
