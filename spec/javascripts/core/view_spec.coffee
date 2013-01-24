@@ -231,7 +231,7 @@ describe "The Collection Events API", ->
     @manager ||= new SampleManager()
     @collection = @manager.getOrCreate("sample")
 
-  it "should call the resetHandler callback on the view", ->
+  xit "should call the resetHandler callback on the view", ->
     view = new SampleView()
     collection = @manager.get("sample")
     collection.reset([])

@@ -1,6 +1,7 @@
 Luca.concerns.Filterable =
   classMethods:
     prepare: ()->
+      @trigger "data:refresh"
       return unless @isRemote()
 
       filter = _.clone(@getRemoteQuery())
@@ -9,8 +10,6 @@ Luca.concerns.Filterable =
       prepared = @prepareRemoteFilter(filter, options)
 
       @collection.applyFilter(prepared, remote: true)
-
-      @trigger "data:refresh"
 
   __included: (component, module)->
     _.extend(Luca.Collection::, __filters:{})

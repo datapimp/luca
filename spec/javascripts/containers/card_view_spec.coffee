@@ -39,9 +39,14 @@ describe "The Card View", ->
 
   it "shouldn't fire first activation on a component", ->
     expect( @cardView.find("two")?.firstActivation ).not.toHaveBeenCalled()
+    expect( @cardView.find("two") ).not.toHaveTriggered("first:activation")
 
   it "should fire firstActivation on a component", ->
+    console.log "Card Viw", @cardView.find("two"), @cardView.find("two").previously_activated, @cardView.find("two").rendered
+    
+
     @cardView.activate("two")
+    expect( @cardView.find("two") ).toHaveTriggered("first:activation")
     expect( @cardView.find("two")?.firstActivation ).toHaveBeenCalled()
 
   it "should fire deactivation on a component", ->

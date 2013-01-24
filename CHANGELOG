@@ -272,3 +272,8 @@
   - Adds ability for the Application, and components which belong sto Luca.components.Controller to define their own global keybindings
   - Luca::ComponentDefinition renders comments as MarkDown
   - Adds Luca.util.setupKeyBindings helper for views to instrument their own keybindings / scopes
+
+0.9.88
+  - Fixed a bug in StateModel concern
+  - Luca.View which define an @_events property on their prototypes will have 
+    that event configuration persist into @events of views which extend from them

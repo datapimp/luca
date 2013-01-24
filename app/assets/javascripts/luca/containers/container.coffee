@@ -267,6 +267,7 @@ container.defines
 
         component.trigger "after:attach"
         component.render()
+        component.rendered = true
       catch e
         console.log "Error Rendering Component #{ component.name || component.cid }", component
 
