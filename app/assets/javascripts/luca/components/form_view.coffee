@@ -92,7 +92,11 @@ formView.publicConfiguration
 
 formView.privateConfiguration
   tagName: 'form'
-  events:
+
+  # These events will get registered on the component
+  # but still leave the @events property open to extend
+  # for any component which inherits from us.
+  _events:
     "click .submit-button" : "submitHandler"
     "click .reset-button" : "resetHandler"
 
@@ -113,6 +117,11 @@ formView.privateMethods
     @components ||= @fields
 
     _.bindAll @, "submitHandler", "resetHandler", "renderToolbars"
+
+    # have our events be internal to the view, and not
+    # part of the normal @events chain, so they can be inherited
+    for eventId, handler of @_events
+      @registerEvent(eventId, handler)
 
     if @trackDirtyState is true
       @on "after:components", ()->
