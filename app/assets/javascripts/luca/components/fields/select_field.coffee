@@ -155,3 +155,5 @@ selectField.privateMethods
 
     @trigger "after:populate:options", @
     @setValue( @currentValue )
+
+selectField.register()
