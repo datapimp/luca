@@ -4,5 +4,5 @@
 #= require ./util
 #= require ./managers
 #= require ./core
-#= require ./containers
+#= require ./containers/container
 #= require ./framework
