@@ -6,20 +6,61 @@ selectField.triggers          "after:select",
                               "on:change"
 
 selectField.publicConfiguration
+  # Enables multi-select UI element.
   allowMultiple: false
 
-selectField.defines
+  # Includes a blank option in addition to all of the items
+  # in the underlying collection.  Defaults to `true` 
+  includeBlank: true
+
+  # determines which value is sent when 
+  # the blank option is selected?
+  blankValue: ''
+
+  # Determines the text displayed when 
+  # the blank option is selected 
+  blankText: 'Select One'
+
+  # Specifying a value for maxDisplayLength will truncate
+  # values displayed in the select field when they reach 
+  # past a certain point, using the _.str truncate method.
+  # Leave at 0 if you want to keep this feature disabled.
+  maxDisplayLength: 0 
+
+  # When the underlying collection is reset and we re-render
+  # the options elements, should we keep the value that was set
+  # on this field prior to that? Defaults to `true` unless otherwise
+  # specified.
+  retainValue: undefined
+
+  # Determines which value is rendered in the label element that gets
+  # rendered along with this control group. 
+  label: undefined
+
+selectField.privateConfiguration
+  template: "fields/select_field"
   events:
     "change select" : "change_handler"
 
-  template: "fields/select_field"
+selectField.publicMethods
+  # sets the value of this select field.
+  setValue: (value)->
+    @currentValue = value
+    Luca.core.Field::setValue.apply @, arguments
 
-  includeBlank: true
+  # returns the value of the select field.  runs
+  # the value through the getParsedValue method which
+  # enforces the valueType type conversion.
+  getValue: ()->
+    raw = @getInputElement()?.val()
 
-  blankValue: ''
+    if @allowMultiple
+      _.map raw, (value)=>
+        @getParsedValue(value)
+    else
+      @getParsedValue(raw)
 
-  blankText: 'Select One'
-
+selectField.privateMethods
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.concerns.Deferrable
@@ -34,7 +75,7 @@ selectField.defines
     @input_name ||= @name
     @valueType ||= Luca.config.idAttributeType if @valueField is "id"
     @label ||= @name
-    @retainValue = true if _.isUndefined @retainValue
+    @retainValue = true unless @retainValue? 
 
   afterInitialize: ()->
     if @collection?.data
@@ -65,15 +106,6 @@ selectField.defines
 
       hash
 
-  getValue: ()->
-    raw = @getInputElement()?.val()
-
-    if @allowMultiple
-      _.map raw, (value)=>
-        @getParsedValue(value)
-    else
-      @getParsedValue(raw)
-
   getInputElement: ()->
     @input ||= @$('select').eq(0)
 
@@ -82,10 +114,6 @@ selectField.defines
       @populateOptions()
     else
       @collection?.trigger("reset")
-
-  setValue: (value)->
-    @currentValue = value
-    Luca.core.Field::setValue.apply @, arguments
 
   beforeFetch: ()->
     @resetOptions()
@@ -117,6 +145,10 @@ selectField.defines
       for model in models
         v = model.read?( @valueField ) || model.get(@valueField)
         d = model.read?( @displayField ) || model.get(@displayField)
+
+        if @maxDisplayLength and @maxDisplayLength > 0
+          d = _.str.truncate(d, @maxDisplayLength)
+
         selected = "selected" if @selected and v is @selected
         option = "<option #{ selected } value='#{ v }'>#{ d }</option>"
         @getInputElement().append( option )
