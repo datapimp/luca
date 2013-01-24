@@ -65,6 +65,11 @@ view.defines
 
     _.bindAll(@, @bindMethods...) if @bindMethods?.legth > 0
 
+    unless _.isEmpty(@_events)
+      for eventId, handler of @_events
+        @registerEvent(eventId, handler)
+
+
   #### Hooks or Auto Event Binding
   #
   # views which inherit from Luca.View can define hooks
@@ -82,10 +87,11 @@ view.defines
 
   registerEvent: (selector, handler)->
     @events ||= {}
-    @events[ selector ] = handler
 
     if _.isObject(selector)
-      _.extend(@events, selector)
+      @events = _.extend(@events, selector)
+    else
+      @events[selector] = handler
 
     @delegateEvents()
 

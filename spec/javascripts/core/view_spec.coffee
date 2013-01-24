@@ -1,10 +1,59 @@
+describe "Inheriting Events", ->
+  beforeEach ->
+    eventTester = Luca.register("Luca.EventTester").extends("Luca.View")
+    eventTester.defines
+      _events: 
+        "click input" : "clickHandler"  
+
+      bodyTemplate: ()->
+        "<input type='text' />"
+
+      clickHandler: ()->
+        @trigger("clicked:on:me")
+
+    inheritor = Luca.register("Luca.EventInheritor").extends("Luca.EventTester")
+    inheritor.defines
+      events:
+        "blur input": "blurHandler"
+
+      hmm: ()->
+        @trigger("hmm:what")
+
+      blurHandler: ()->
+        @trigger("blurred:me")    
+
+  it "should register event handlers", ->
+    view = new Luca.EventInheritor()
+    view.render()
+    view.registerEvent("keydown input", "hmm")
+    expect( view.events["keydown input"] ).toEqual "hmm"
+
+  it "should register event handlers", ->
+    view = new Luca.EventInheritor()
+    view.render()
+    expect( _(view.events).keys().length ).toEqual 2
+
+  it "should inherit dom events defined under _events", ->
+    view = new Luca.EventInheritor()
+    view.render()
+    view.$('input').trigger("click")
+    expect( view ).toHaveTriggered("clicked:on:me")
+
+  it "should rely on events as normal", ->
+    view = new Luca.EventInheritor()
+    view.render()
+    view.$('input').trigger("blur")
+    expect( view ).toHaveTriggered("blurred:me")
+
+
+
+
 # In order to maintain backward compatibility with older apps,
 # I feel compelled to keep around the old deferrable hack job that is in place.
 #
 # However, selectively, I will go through and upgrade the way 
 # render() gets wrapped on luca components, so that the API is easier 
 # to understand.
-
 describe 'Rendering Strategies', ->
   Luca.View.renderStrategies.spy = sinon.spy()
   Luca.View.renderStrategies.spec = (_userSpecified)->

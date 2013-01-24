@@ -3,7 +3,6 @@ stateModel = Luca.register("Luca.ViewState").extends("Luca.Model")
 
 Luca.concerns.StateModel =
   __onModelChange: (args...)->
-    console.log "__onModelChange called"
     statefulView = @
     state = statefulView.state
 
