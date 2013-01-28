@@ -41,7 +41,6 @@ application.publicConfiguration
   # just pass a reference to the class you would like to use.
   collectionManagerClass: "Luca.CollectionManager"
 
-
   # Luca plugin apps are apps which mount onto existing
   # luca apps, and will not have the behavior of a main
   # app which acts as a singleton
@@ -137,6 +136,7 @@ application.publicConfiguration
     # to a given page, or component, by its name.  The controller integrates
     # with the state machine of the application
     @setupMainController() if @useController is true 
+
     # we will render when all of the various components
     # which handle our data dependencies determine that
     # we are ready
@@ -176,11 +176,9 @@ application.publicConfiguration
     Luca.trigger "application:available", @
 
   # @activeView() returns a reference to the instance of the view
-  # which is currently monopolizing the viewport.
-  #
-  # this will be whicever component is active on the controllers
-  # nested within the main controller, if there are any, or the view
-  # itself which is active on the main controller.
+  # which is currently monopolizing the viewport.  In an application
+  # which uses a controller hierarchy, it will be the last controller
+  # has activated one of its pages.
   activeView: ()->
     if active = @activeSubSection()
       @view( active )
@@ -378,14 +376,15 @@ application.classInterface
   instances:{}
 
   # Public: For purely informational purposes, describes the structure
-  # of the Application's controller views, and their nested controllers views.
+  # of the Application's controller views, and any of their nested controllers views.
   pageHierarchy: ()->
-    app = Luca()
-    mainController = app.getMainController()
+    app             = Luca()
+    mainController  = app.getMainController()
 
     getTree = (node)->  
       return {} unless node.components? or node.pages?
 
+      # recursively walks the pages on a controller
       _( node.components || node.pages ).reduce (memo, page)->
         memo[ page.name ] = page.name
         memo[ page.name ] = getTree(page) if page.navigate_to?
@@ -396,7 +395,7 @@ application.classInterface
 
   # Private: registers the instance of the Luca.Appliction
   # so that it is available via the Luca() helper, or through
-  # a call to Luca.Application.get() or Luca.getAppliction()
+  # a call to Luca.Application.get()
   registerInstance: (app)->
     Luca.Application.instances[ app.name ] = app
 
@@ -469,11 +468,8 @@ application.classInterface
   startHistory: ()->
     Backbone.history.start()
 
-
-
 application.afterDefinition ()->
   Luca.routeHelper = Luca.Application.routeTo
   Luca.Application.checkForKeymaster()
-
 
 application.register()
