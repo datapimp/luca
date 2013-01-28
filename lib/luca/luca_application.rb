@@ -78,6 +78,21 @@ module Luca
       stylesheet_file_locations.map {|path| Stylesheet.new(path) }
     end
 
+    def find_stylesheet(params={})
+      if params[:component_class]
+      end
+
+      stylesheets.reject do |stylesheet|
+        match = false
+
+        if params[:css_class]
+          match = stylesheet.compiled.include?( params[:css_class] )
+        end
+
+        match
+      end
+    end
+
     def component_definitions(reject_invalid=true)
       list = component_file_locations.map do |path|
         ComponentDefinition.new(path)

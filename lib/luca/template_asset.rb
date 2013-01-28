@@ -12,14 +12,22 @@ module Luca
       as_json
     end
 
-    def as_json 
+    def as_json options={}
+      id = "#{ template_prefix }/#{ template_name }".gsub('/','__')
+
       {
         type:             type, 
         contents:         compiled,
-        template_name:    template_name,
+        name:             template_name,
+        id:               id, 
         template_prefix:  template_prefix,
-        defined_in_file:  source
+        defined_in_file:  source,
+        source_contents:  IO.read(source)
       }
+    end
+
+    def to_json
+      as_json.to_json
     end
 
     def type

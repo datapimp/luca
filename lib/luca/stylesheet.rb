@@ -20,13 +20,16 @@ module Luca
       @compiler.compiled rescue ""
     end
 
-    def as_json 
+    def as_json options={}
       {
         defined_in_file:  source, 
         type:             "stylesheet", 
         compiled:         compiled,
+        source_contents:  IO.read(source),
+        name:             File.basename(source),
         # temp
-        path:             source.gsub(::Rails.root.to_s, '.')
+        path:             source.gsub(::Rails.root.to_s, '.'),
+        id:               source.gsub(::Rails.root.to_s, '.').gsub('/','__')
       }
     end
   end  
