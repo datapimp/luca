@@ -11,13 +11,16 @@ container.triggers                "before:components",
 
 container.replaces                "Luca.Container"
 
-container.defines
+container.publicConfiguration
+  components:[]
+
+container.privateConfiguration
+  emptyContainerElements: false
   className: 'luca-ui-container'
   componentTag: 'div'
   componentClass: 'luca-ui-panel'
   isContainer: true
   rendered: false
-  components: []
 
   # @componentEvents provides declarative syntax for responding to events on
   # the components in this container.  the format of the syntax is very similar
@@ -55,6 +58,11 @@ container.defines
 
     Luca.View::initialize.apply @, arguments
 
+  remove: ()->
+    Luca.View::remove.apply(@, arguments)
+    @eachComponent (component)->
+      component.remove?()
+      
   # Rendering Pipeline
   #
   # A container has nested components.  these components
@@ -263,6 +271,9 @@ container.defines
           # so look into wtf is going on and which components are problematic
           containerElement = @$( component.container ).eq(0) if containerElement.length is 0
 
+        if @emptyContainerElements is true
+          containerElement.empty()
+
         containerElement.append( component.el )
 
         component.trigger "after:attach"
@@ -347,7 +358,10 @@ container.defines
 
   allChildren: ()->
     children = @components
-    grandchildren = _( @subContainers() ).invoke('allChildren')
+
+    grandchildren = _( @subContainers() ).map (component)->
+      component?.allChildren?()
+
     _([children,grandchildren]).chain().compact().flatten().value()
 
   findComponentForEventBinding: (nameRoleOrGetter, deep=true)->
@@ -355,11 +369,11 @@ container.defines
 
   findComponentByGetter: (getter, deep=false)->
     _( @allChildren() ).detect (component)->
-      component.getter is getter
+      component?.getter is getter
 
   findComponentByRole: (role,deep=false)->
     _( @allChildren() ).detect (component)->
-      component.role is role or component.type is role or component.ctype is role
+      component?.role is role or component?.type is role or component?.ctype is role
 
   findComponentByType: (desired,deep=false)->
     _( @allChildren() ).detect (component)->
@@ -433,6 +447,8 @@ container.defines
     _.flatten( components )
 
 
+container.register()
+
 # This is the method by which a container injects the rendered child views
 # into the DOM.  It will get passed the container object, and the component
 # that is being rendered.
@@ -472,17 +488,16 @@ createGetterMethods = ()->
   container = @
 
   childrenWithGetter = _( @allChildren() ).select (component)->
-    component.getter?
+    component?.getter?
 
   _( childrenWithGetter ).each (component)->
-    container[ component.getter ] ||= ()->
-      component
+    container[ component.getter ] ||= ()-> component
 
 createMethodsToGetComponentsByRole = ()->
   container = @
 
   childrenWithRole = _( @allChildren() ).select (component)->
-    component.role?
+    component?.role?
 
   _( childrenWithRole ).each (component)->
     getter = _.str.camelize( "get_" + component.role )
