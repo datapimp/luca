@@ -73,7 +73,6 @@ Luca.concerns.Filterable =
 
   applyFilter: (query={}, options={})->
     options = _.defaults(options, @getQueryOptions())
-    query = _.defaults(query, @getQuery())
     @getFilterState().clear(silent: true)
     @getFilterState().set({query,options}, options)
 
