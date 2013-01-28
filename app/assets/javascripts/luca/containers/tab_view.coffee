@@ -1,6 +1,6 @@
-_.def('Luca.containers.TabView').extends('Luca.containers.CardView').with
-
 tabView = Luca.register       "Luca.containers.TabView"
+tabView.extends               "Luca.containers.CardView"
+
 tabView.triggers              "before:select",
                               "after:select"
 
@@ -12,7 +12,8 @@ tabView.privateConfiguration
   additionalClassNames: 'tabbable'
   navClass: "nav-tabs"
   bodyTemplate: "containers/tab_view"
-  bodyEl: "div.tab-content"
+  bodyClassName: "tab-content"
+  skipGetterMethods: true
 
 tabView.defines
   initialize: (@options={})->
@@ -40,9 +41,9 @@ tabView.defines
   afterRender: ()->
     Luca.containers.CardView::afterRender?.apply @, arguments
     tabContainerId = @tabContainer().attr("id")
-    @registerEvent("click ##{ tabContainerId } li a", "select")
+    @registerEvent("click ##{ tabContainerId } li a", "tabSelectClickHandler")
 
-    if Luca.config.enableBoostrap and (@tab_position is "left" or @tab_position is "right")
+    if Luca.config.enableBootstrap and (@tab_position is "left" or @tab_position is "right")
       @tabContainerWrapper().addClass("span2")
       @tabContentWrapper().addClass("span9")
 
@@ -63,13 +64,17 @@ tabView.defines
     @tabSelectors().removeClass('active')
     @activeTabSelector().addClass('active')
 
-  select: (e)->
-    e.preventDefault()
-
+  tabSelectClickHandler: (e)->
+    e?.preventDefault()
     me = my = $( e.target )
+    me = my ||= @tabSelectors()[0]
+    tabName = my.parent().data('target')
 
+    @select(tabName)
+
+  select: (tabName=0)->
     @trigger "before:select", @
-    @activate my.parent().data('target')
+    @activate(tabName)
     @trigger "after:select", @
 
   componentElements: ()->
@@ -86,3 +91,7 @@ tabView.defines
 
   tabSelectors: ()->
     @$( 'li.tab-selector', @tabContainer() )
+
+  bodyTemplateVars: ()->
+    cid: @cid  
+    navClass: @navClass
