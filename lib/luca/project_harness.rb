@@ -38,6 +38,20 @@ module Luca
       template.to_json
     end
 
+  
+    post "/components/:application_name" do    
+      application_repository    = Luca::Project.find_by_name( params[:application_name] ).app
+      {success:true}.to_json
+    end
+
+    put "/components/:application_name/:class_name" do
+      application_repository    = Luca::Project.find_by_name( params[:application_name] ).app
+      class_name                =  params[:class_name].gsub('__','.')
+      component_definition      = application_repository.find_component_definition_for_class( class_name )          
+
+      {success: true}.to_json
+    end
+
     get "/components/:application_name/:class_name" do
       application_repository    = Luca::Project.find_by_name( params[:application_name] ).app
       class_name                =  params[:class_name].gsub('__','.')

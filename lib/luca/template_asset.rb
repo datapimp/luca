@@ -22,7 +22,7 @@ module Luca
         id:               id, 
         template_prefix:  template_prefix,
         defined_in_file:  source,
-        source_contents:  IO.read(source)
+        source_file_contents:  IO.read(source)
       }
     end
 

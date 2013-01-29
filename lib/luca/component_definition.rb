@@ -162,6 +162,27 @@ module Luca
       docs
     end
 
+    def header_documentation
+      header_comments(true)
+    end
+
+    def header_comments compile=true
+      comment_lines = lines[ (0..(definition_line.line_number || 0) ) ]
+      comment_lines.select!(&:comment?)
+      
+      comments = comment_lines.map do |line|
+        line.line.gsub(/\A\s*\#/,'').strip
+      end
+
+      docs = comments.join("\n")
+
+      docs = if compile == true
+        Redcarpet.new(docs).to_html rescue docs
+      end
+
+      docs      
+    end
+
     def find_comments_above method_or_property
       comment_lines = []
       if line = find_definition_of( method_or_property )

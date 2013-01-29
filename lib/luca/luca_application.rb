@@ -80,6 +80,11 @@ module Luca
 
     def find_stylesheet(params={})
       if params[:component_class]
+        parts = params[:component_class].split('.')
+        parts.map!(&:downcase)
+        parts.reject! {|p| p == "views" || p == "components" || p == "containers" || p == "pages" }
+        params[:css_class] = parts.join('_').dasherize
+
       end
 
       stylesheets.reject do |stylesheet|

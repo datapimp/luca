@@ -25,7 +25,7 @@ module Luca
         defined_in_file:  source, 
         type:             "stylesheet", 
         compiled:         compiled,
-        source_contents:  IO.read(source),
+        source_file_contents:  IO.read(source),
         name:             File.basename(source),
         # temp
         path:             source.gsub(::Rails.root.to_s, '.'),
