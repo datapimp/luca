@@ -24,6 +24,7 @@ module Luca
       if class_name.present?
         base.merge!({ :class_name           => class_name,
                       :defined_in_file      => source,
+                      :header_documentation => header_documentation,
                       :type_alias           => type_alias,
                       :type                 => "component_definition",
                       :css_class_identifier => css_class_identifier,
