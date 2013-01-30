@@ -22,6 +22,26 @@ module Luca
       backend.sync(method, hash, options)
     end
 
+    def index
+      backend.index
+    end
+
+    def create hash={}
+      backend.create(hash)
+    end
+
+    def update hash={}
+      backend.update(hash)
+    end
+
+    def show id
+      backend.show(id)
+    end
+    
+    def destroy id
+      backend.destroy(id)
+    end
+
     protected
       def setup_backend
         if backend.nil?
