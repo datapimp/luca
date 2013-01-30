@@ -7,7 +7,8 @@ module Luca
     require 'luca/collection/endpoint'
 
     attr_accessor :backend,
-                  :options
+                  :options,
+                  :namespace
 
     def initialize options={}
       @options    = options.dup
