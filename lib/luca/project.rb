@@ -9,7 +9,7 @@ module Luca
                   :path
 
     def self.store
-      self.storage ||= Luca::Collection::Base.new(namespace:"projects")
+      self.storage ||= Luca::Collection.new(namespace:"projects")
     end
 
     def self.create attributes={}
