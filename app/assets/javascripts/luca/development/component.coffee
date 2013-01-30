@@ -10,8 +10,14 @@ model.configuration
     defined_in_file: ""
 
 model.defines
+  idAttribute: "name"
+  
+  documentation: ()->
+    base = _( @toJSON() ).pick 'header_documentation', 'class_name' 
+    _.extend(base, @metaData())      
+    
   url: ()->
-    "/luca/components/#{ Luca.namespace }/#{ @classNameId() }"
+    "/project/components/#{ Luca.namespace }/#{ @classNameId() }"
 
   fileDescription: (shortest=true)->
     base = @get("defined_in_file").replace( ToolsBasePath, '.')
@@ -23,24 +29,9 @@ model.defines
   classNameId: ()->
     @get("class_name").replace(/\./g,'__')
 
-  initializeAsset: ()->
-    return @_definitionAsset if @_definitionAsset?
-
-    return unless @get("name")?
-
-    @assetCollection ||= Tools().collectionManager.get("coffeescripts")
-
-    unless @get("asset_id")?
-      @_definitionAsset = new @assetCollection.model
-        input: @get("source_file_contents")
-
-      @assetCollection.add(@_definitionAsset)
-
-      @_definitionAsset.save {}, success: (model, response, options={})=>
-        @save(asset_id: response.id)
-
-  definedIn: ()->
-    @initializeAsset()
+  componentGroup: ()->
+    parts = @get('name').split('.')
+    parts.slice(0,2).join('.')
 
   componentType: ()->
     parts = @get('name').split('.')

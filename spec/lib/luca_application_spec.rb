@@ -7,7 +7,7 @@ describe LucaApplication do
   it "should retrieve source code for a component" do
     source_length = repo.source_code_for_class("Tools.Application").length
     file_length = File.size( repo.find_definition_file_for_class('Tools.Application') )
-    file_length.should == source_length
+    file_length.should be_within(5).of( source_length ) 
   end
 
   it "should map all component definitions to their respective files" do

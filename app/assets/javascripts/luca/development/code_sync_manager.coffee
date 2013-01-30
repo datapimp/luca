@@ -32,7 +32,6 @@ codeManager.privateMethods
   # whenever an asset that is being watched changes. 
   # it is different if the type of file is css or javascript.
   onChangesNotification: (changeData={}, applicationName)->
-    console.log changeData
     return if _.isEmpty(changeData)
     data = _( changeData ).values()[0] || {}
 
