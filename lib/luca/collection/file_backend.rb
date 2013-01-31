@@ -19,6 +19,8 @@ module Luca
    
           flush_storage_to_disk
         end
+
+        read_storage_from_disk
       end
 
       def flush_storage_to_disk

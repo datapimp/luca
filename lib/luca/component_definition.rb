@@ -4,10 +4,18 @@ module Luca
 
     def initialize source 
       @source     = source
+      read_source()
+    end
+
+    def read_source
+      raise "Invalid source type" unless source.match(/.coffee|.js/)
       @contents   = IO.read(source)
     end
 
     def update contents
+    #  File.open(source,'w+') do |fh|
+    #    fh.puts(contents)
+    #  end
     end
 
     def to_change_notification
@@ -167,21 +175,33 @@ module Luca
       header_comments(true)
     end
 
-    def header_comments compile=true
-      comment_lines = lines[ (0..(definition_line.line_number || 0) ) ]
-      comment_lines.select!(&:comment?)
+    def header_lines convert=true
+      list = lines[ (0..(definition_line.line_number || 0) ) ]
       
-      comments = comment_lines.map do |line|
-        line.line.gsub(/\A\s*\#/,'').strip
+      if convert
+        list.map!(&:line) 
       end
 
-      docs = comments.join("\n")
+      list
+    end
 
-      docs = if compile == true
-        Redcarpet.new(docs).to_html rescue docs
+    def header_comment_lines
+      comments = header_lines(false).select(&:comment?)
+      
+      comments.map!(&:line)
+      comments.map! {|line| line.gsub(/\A\s*\#[\ |\n]/,'') }
+
+      comments
+    end
+
+    def header_comments compile=true
+      combined = header_comment_lines.join("")
+
+      if compile
+        compiled = Redcarpet.new(combined).to_html rescue combined
+      else
+        combined
       end
-
-      docs      
     end
 
     def find_comments_above method_or_property
@@ -273,7 +293,7 @@ module Luca
       end
 
       def comment?
-        line.match(/^(\s*)\#/)      
+        line.match(/^(\s*)\#/) or line == "#\n"
       end
 
       def defines_property?

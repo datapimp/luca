@@ -37,7 +37,7 @@ module Luca
     def show id
       backend.show(id)
     end
-    
+
     def destroy id
       backend.destroy(id)
     end
@@ -45,11 +45,11 @@ module Luca
     protected
       def setup_backend
         if backend.nil?
-          if options[:backend_type] == "file"
+          if options[:backend] == "file"
             self.backend = Luca::Collection::FileBackend.new(namespace: namespace)
           end
 
-          if options[:backend_type] == "redis"
+          if options[:backend] == "redis"
             self.backend = Luca::Collection::RedisBackend.new(namespace: namespace)
           end  
 
