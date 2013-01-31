@@ -13,15 +13,33 @@ model.defines
   idAttribute: "name"
   
   documentation: ()->
-    base = _( @toJSON() ).pick 'header_documentation', 'class_name' 
-    _.extend(base, @metaData())      
-    
+    base = _( @toJSON() ).pick 'header_documentation', 'class_name', 'defined_in_file'
+
+    _.extend base, @metaData(), 
+      componentGroup: @componentGroup() 
+      componentType: @componentType() 
+      componentTypeAlias: @componentTypeAlias()
+      details:
+        publicMethods:        @documentationFor("publicMethods")
+        privateMethods:       @documentationFor("privateMethods")
+        privateProperties:    @documentationFor("privateProperties")
+        publicProperties:     @documentationFor("publicProperties")
+
+  documentationFor: (methodOrPropertyGroup="publicMethods")->
+    documentationSource = _.extend({}, @get("defines_methods"), @get("defines_properties"))
+
+    result = {}
+
+    if list = @metaData()?[ methodOrPropertyGroup ]?()
+      _(list).reduce (memo, methodOrProperty)->
+        memo[ methodOrProperty ] = documentationSource[ methodOrProperty ]
+        memo
+      , result  
+
+    result
+
   url: ()->
     "/project/components/#{ Luca.namespace }/#{ @classNameId() }"
-
-  fileDescription: (shortest=true)->
-    base = @get("defined_in_file").replace( ToolsBasePath, '.')
-    if shortest then _(base.split('/')).last() else base
 
   metaData: ()->
     Luca( @get("class_name") ).prototype.componentMetaData()
@@ -34,6 +52,15 @@ model.defines
     parts.slice(0,2).join('.')
 
   componentType: ()->
+    type  = "view"
+    parts = @get('name').split('.')
+
+    switch group = parts[1]
+      when "collections" then "collection"
+      when "models" then "model"
+      else "view"
+
+  componentTypeAlias: ()->
     parts = @get('name').split('.')
     name = parts.pop()
     _.str.underscored( name )

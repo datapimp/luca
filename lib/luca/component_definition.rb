@@ -175,21 +175,12 @@ module Luca
       header_comments(true)
     end
 
-    def header_lines convert=true
-      list = lines[ (0..(definition_line.line_number || 0) ) ]
-      
-      if convert
-        list.map!(&:line) 
-      end
-
-      list
-    end
-
     def header_comment_lines
-      comments = header_lines(false).select(&:comment?)
+      header_lines  = lines[ (0..(definition_line.line_number || 0) ) ]
+      comments      = header_lines.select(&:comment?).map(&:line)
       
-      comments.map!(&:line)
       comments.map! {|line| line.gsub(/\A\s*\#[\ |\n]/,'') }
+      comments.reject! {|line| line.match(/\=\s*require/) }
 
       comments
     end
