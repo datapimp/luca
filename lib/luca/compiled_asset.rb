@@ -50,8 +50,9 @@ module Luca
 
     def self.find_by_type_and_id type, id
       if ["markdown", "haml","coffeescript","sass","scss","less"].include?(type)
-        asset = self.send("#{ type }_assets".to_sym).try(:show, id)
-        if asset.present?
+        asset = self.send("#{ type }_assets".to_sym)
+        asset = asset && asset.show(:id)
+        if !asset.nil?
           new(type, asset)
         end
       end

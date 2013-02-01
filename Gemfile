@@ -7,8 +7,11 @@ gem "sass", '>= 3.1.10'
 gem "sprockets", '>= 2.0.2'
 gem 'ejs'
 gem 'haml'
+gem 'redcarpet'
 gem 'rake'
 gem 'hogan_assets'
+gem 'haml_assets'
+gem 'active_support'
 
 group :test, :development do
   gem 'faker'

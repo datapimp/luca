@@ -48,7 +48,8 @@ module Luca
     end
 
     def find_definition_file_for_class needle
-      find_component_definition_for_class(needle).try(:source)
+      definition = find_component_definition_for_class(needle)
+      definition && definition.source
     end
 
     def find_component_definition_for_class needle
@@ -62,12 +63,17 @@ module Luca
         l.match(/Luca.initialize/)
       end
 
-      match = line && line.match(/Luca.initialize.+['|"](.+)['|"]/).try(:[], 1)
-      match || application_folder.capitalize
+      match = line.match(/Luca.initialize.+['|"](.+)['|"]/)
+
+      if match && match[1] 
+        match[1]
+      else
+        application_folder.capitalize
+      end
     end
 
     def valid?
-      initializer_file_location.present? and File.exists?(initializer_file_location)
+      !initializer_file_location.nil? and File.exists?(initializer_file_location)
     end
 
     def templates

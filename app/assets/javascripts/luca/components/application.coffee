@@ -1,7 +1,3 @@
-# Luca.Application
-#
-# The Application class is the global state tracking mechanism
-# for your single page application, as well as the entry point.
 application = Luca.register       "Luca.Application"
 application.extends               "Luca.containers.Viewport"
 

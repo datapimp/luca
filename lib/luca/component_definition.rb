@@ -2,6 +2,8 @@ module Luca
   class ComponentDefinition
     attr_accessor :source
 
+    ARGUMENTS_REGEX = /^\w+\:\s*\((.+)\)/
+
     def initialize source 
       @source     = source
       read_source()
@@ -29,7 +31,7 @@ module Luca
         type: "javascript"
       }
 
-      if class_name.present?
+      unless class_name.nil?
         base.merge!({ :class_name           => class_name,
                       :defined_in_file      => source,
                       :header_documentation => header_documentation,
@@ -76,12 +78,22 @@ module Luca
     end
 
     def argument_information_for method
-      definition = find_definition_of(method).line
-      {}
+      information = []
+      definition = find_definition_of(method).line.strip
+
+      if arguments  = definition.match(ARGUMENTS_REGEX)
+        arguments = arguments.to_a[1]
+        information = arguments.split(',').map(&:strip).inject(information) do |memo, argument|
+          parts = argument.split('=').map(&:strip)
+          memo << {:argument=>parts[0],:value=>parts[1]}
+        end
+      end
+
+      information
     end
 
     def valid?
-      class_name.present?
+      !class_name.nil?
     end
 
     def parse
@@ -134,7 +146,8 @@ module Luca
     end
 
     def class_name 
-      definition_line && definition_line.match(/register.*["|'](.*)["|']/).try(:[], 1)
+      match = definition_line && definition_line.match(/register.*["|'](.*)["|']/)
+      match && match[1]
     end
 
     def component_definition
@@ -153,7 +166,7 @@ module Luca
         line.component_extension?(definition_proxy_variable_name)
       end
 
-      match.strip
+      match && match.strip
     end
 
     def documentation_for method_or_property, compile=true
@@ -202,7 +215,7 @@ module Luca
         indentation_level = line.indentation_level        
 
         next_line = find_line_by_number( line_number -= 1)
-        while next_line.present? && next_line.indentation_level == indentation_level && next_line.comment?
+        while !next_line.nil? && next_line.indentation_level == indentation_level && next_line.comment?
           comment_lines << next_line
           next_line = find_line_by_number( line_number -= 1)
         end

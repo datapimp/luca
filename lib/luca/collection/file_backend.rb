@@ -44,7 +44,7 @@ module Luca
           return index()
         end
 
-        if method == "read" and hash[:id].present?
+        if method == "read" and !hash[:id].nil?
           return show( hash[:id] )
         end
 
@@ -75,7 +75,7 @@ module Luca
       end
 
       def records
-        Array(record_storage.try(:[], :records))
+        Array(record_storage[:records])
       end
 
       def index

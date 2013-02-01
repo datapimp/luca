@@ -34,11 +34,11 @@ module Luca
       end
 
       def sync method, hash={}, options={}
-        if method == "read" and hash[:id].nil?
+        if method == "read" and !hash[:id].nil?
           return index()
         end
 
-        if method == "read" and hash[:id].present?
+        if method == "read" and !hash[:id].nil?
           return show( hash[:id] )
         end
 

@@ -58,7 +58,17 @@ model.defines
     switch group = parts[1]
       when "collections" then "collection"
       when "models" then "model"
-      else "view"
+      when ("views" || "components" || "pages") then "view"
+
+    return if group?
+
+    if componentPrototype = Luca.util.resolve( @get("class_name") )
+      return "view" if Luca.isViewPrototype( componentPrototype:: )
+      return "collection" if Luca.isCollectionPrototype( componentPrototype:: )
+      return "model" if Luca.isModelProtoype( componentPrototype:: )
+
+    # meh, but what about Router?
+    "view"
 
   componentTypeAlias: ()->
     parts = @get('name').split('.')

@@ -1,6 +1,5 @@
 module Luca
   module Rails
-    VERSION = '0.9.88' 
+    VERSION = '0.9.89' 
   end
 end
-
