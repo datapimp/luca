@@ -19,7 +19,7 @@ module Luca
       # TODO
     end
 
-    def export_all_component_definintions
+    def export_all_component_definitions
       list = component_definitions.map do |cdef|
         cdef.as_json rescue nil
       end  
