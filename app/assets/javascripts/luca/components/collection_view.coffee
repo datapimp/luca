@@ -204,7 +204,4 @@ collectionView.privateMethods
     eventTrigger = _([domEvent,"#{ @itemTagName }.#{ @itemClassName }", selector]).compact().join(" ")
     Luca.View::registerEvent(eventTrigger,handler)
 
-# Private Helpers
-
-
-make = Luca.View::make
+collectionView.register()
