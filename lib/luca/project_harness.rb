@@ -2,15 +2,15 @@ module Luca
   # The Luca::ProjectHarness makes the source code browsing endpoints available
   class ProjectHarness < Sinatra::Base
     get "/framework/documentation" do
-      app = Luca::Application.new("Luca", root: Luca.base_path)
+      app = Luca::LucaApplication.new("Luca", root: Luca.base_path)
       app.export_all_component_definitions.to_json
     end
 
     get "/framework/documentation/:class_name" do
-      application_repository    = Luca::Application.new("Luca", root: Luca.base_path)
+      application_repository    = Luca::LucaApplication.new("Luca", root: Luca.base_path)
       class_name                =  params[:class_name].gsub('__','.')
       component_definition      = application_repository.find_component_definition_for_class( class_name )      
-      
+
       component_definition.as_json(:include_contents=>true).to_json      
     end
 
