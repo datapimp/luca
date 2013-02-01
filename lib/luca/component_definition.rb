@@ -234,7 +234,7 @@ module Luca
 
     def definition_line
       lines.detect do |line|
-        line.component_definition?
+        !line.comment? && line.component_definition?
       end
     end
 

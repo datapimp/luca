@@ -3,6 +3,8 @@ module Luca
     attr_accessor :application_name,
                   :options
 
+
+
     # Public: creates an instance of a luca application repository.
     # generally this will be a single folder inside of your asset pipeline
     #
@@ -11,6 +13,17 @@ module Luca
     def initialize application_name, options={}
       @application_name = application_name
       @options = options
+    end
+
+    def export_all
+      # TODO
+    end
+
+    def export_all_component_definintions
+      list = component_definitions.map do |cdef|
+        cdef.as_json rescue nil
+      end  
+      list.compact
     end
 
     def component_definition_filemap 

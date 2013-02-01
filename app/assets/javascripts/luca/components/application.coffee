@@ -1,3 +1,65 @@
+# The `Luca.Application` is the main entry point into your Application.
+# It acts as a global state machine, page controller, and router, in addition
+# to providing access to other singletons such as the CollectionManager, and SocketManager.
+# 
+# The structure of a common `Luca.Application` is that it contains one or many `Pages` which
+# themselves are made up of the components of your application.  One `Page` is visible at a time
+# and which page is displayed is managed by an instance of the `Luca.components.Controller` class.
+#
+# ### Example Configuration  
+#     application = Luca.register     "App.Application"
+#     application.extends             "Luca.Application"
+#
+#     application.defines
+#       name: "MyApplication"
+#       routes: 
+#         "" : "home"
+#         "standard/backbone/style/:route" : "name_of_page#name_of_method"
+#
+#       components:[
+#         name: "home"
+#       ,
+#         type: "your_view"
+#         name: "name_of_page"
+#         name_of_method: (routeParam)->
+#           @doSomethignToSetupYourPageWithThePassed(routeParam)  
+#       ]
+#
+#   App.onReady ()->
+#     window.MyApp = new App.Application();
+#     window.MyApp.boot() 
+#
+# #### @routes and pages
+#
+# In the above example, our application contains two pages, one with the name 'home'
+# and one with the name 'name_of_page'.  It also specifies a `@routes` property which
+# is identical to the configuration you would see in a standard `Backbone.Router`.
+#
+# Whenever the route matches 'standard/backbone/style/route' the `App.Application` instance
+# will send an instruction to the `Luca.components.Controller` to `activate` the page whose name
+# is passed in the `@routes` config.
+# 
+# If that page defines a method called `@routeHandler` it will be called with the parameters
+# from the route.  In the `@routes` config you can specify your own route handler method
+# by using the rails style `page_name#action` and it will call the `@action` method instead
+# on the view named `page_name`.
+#
+# The `App.Application` instance, also accessible by `window.MyApp`, or through the helper `App()`
+# or `Luca.getApplication()` maintains the state of which page is active.  You can access this
+# in your code by calling `App().activePage()`.
+#
+# #### Controllers
+# 
+# The `Luca.components.Controller` is a special type of component which contains 
+# other views, or `Pages` which only one will be visible at any given time.  It expects
+# that each page will have its own unique `@name` property.  A `Luca.components.Controller` can
+# contain other controllers, providing you with a way of structuring your application layout
+# in an organized, hierarchal fashion. 
+#
+# By default, any `Luca.Application` will have one `Luca.components.Controller` automatically
+# created named 'main_controller' which is accessible by `MyApp.getMainController()`.  Any
+# components you define on the `Luca.Application` instance will be wrapped by the main controller
+# automatically unless you specify `@useController = false` in your Application component definition.
 application = Luca.register       "Luca.Application"
 application.extends               "Luca.containers.Viewport"
 
@@ -328,7 +390,7 @@ application.privateInterface
     _.extend(@socketManagerOptions, autoStart: false)
 
     @socket = new Luca.SocketManager(@socketManagerOptions) 
-
+  
   setupRouter: ()->
     return if not @router? and not @routes?
 
@@ -341,7 +403,11 @@ application.privateInterface
 
     if _.isObject( @routes )
       for routePattern, endpoint of @routes
-        [page, action] = endpoint.split(' ')
+        if endpoint.match(/\ /)
+          [page, action] = endpoint.split(' ')
+        else if endpoint.match(/\#/)
+          [page, action] = endpoint.split('#')
+
         fn = _.uniqueId(page)
         routerConfig[fn] = Luca.Application.routeTo(page).action(action)
         routerConfig.routes[ routePattern ] = fn

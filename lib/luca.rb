@@ -1,4 +1,10 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+module Luca
+  def self.base_path
+    File.join(File.dirname(__FILE__), '..')
+  end
+end
+
 require 'luca/rails'
 require 'luca/collection'
 require 'luca/asset_compiler'
