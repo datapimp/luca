@@ -88,7 +88,6 @@ class Luca.CollectionManager
 
   collectionCountDidChange: ()->
     if @allCollectionsLoaded() 
-      # for backwards compat
       @trigger "all_collections_loaded" 
       @trigger "initial:load"
 
@@ -157,12 +156,12 @@ loadInitialCollections = ()->
 
 handleInitialCollections = ()->
   @state.set({loaded_collections_count: 0, collections_count: @initialCollections.length })
-  @state.bind "change:loaded_collections_count", ()=> @collectionCountDidChange()
+  @state.bind "change:loaded_collections_count", ()=> 
+    @collectionCountDidChange()
 
   if @useProgressLoader
     @loaderView ||= new Luca.components.CollectionLoaderView(manager: @,name:"collection_loader_view")
 
   loadInitialCollections.call(@)
 
-  @initialCollectionsLoadedu
   @

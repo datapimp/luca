@@ -1,3 +1,144 @@
+# The Luca.Container is the heart and soul of the Luca framework 
+# and the component driven design philosophy.  The central idea
+# is that every component should be designed as an isolated unit
+# which completely encapsulates its features.  It should not know about
+# other components outside of it.
+# 
+# It is the responsibility of a `Luca.Container` to define its 
+# child `@components`, render them, and broker communication between them
+# in response to events which occur in the user interface.  
+#
+# A common use case for this would be a page which has a filter form, and
+# a grid of search results.  The fields in the filter form are used to 
+# filter the table.  Neither the form or the table know about each other, 
+# since both can be used in other contexts.  A `Luca.Container` would be used
+# to relay events from the form to the table, and in doing so create a higher
+# level component which can be extended and re-used. 
+#
+# #### Using a container to combine a Filter View and Results Table 
+#
+#         form = Luca.register    "App.views.FilterForm"
+#         form.extends            "Luca.components.FormView"
+#
+#         form.contains
+#           type:   "text"
+#           label:  "Filter by"
+#           name:   "filter_text"
+#         ,
+#           type:   "button"
+#           className: "filter"
+#           value:  "Filter"          
+#
+#
+#         form.defines
+#           toolbar: false 
+# 
+# Elsewhere, we have a table that lists records in a collection:
+#         
+#         table = Luca.register     "App.views.ResultsTable"
+#         table.extends             "Luca.components.TableView"
+#         table.defines 
+#           striped: true
+#           collection: "components"
+#           columns:[
+#             header: "Component Class"
+#             reader: "class_name"
+#           ,
+#             header: "Component Type Alias"
+#             reader: "type_alias"
+#           ]
+#
+# We can join these two components together by declaring their relationship
+# in a `Luca.Container`.  Remember the components we defined above are just
+# prototypes.  We can override specific instance configuration and properties 
+# in our container.
+#
+# #### Container Example
+#
+#         container = Luca.register     "App.views.ComponentFinder"
+#         container.extends             "Luca.Container"
+#       
+#       # This is the same as defining a components property on the component.
+#       # The type alias is derived from the name of the component.  It is 
+#       # a short hand way of referencing a component you might reuse a lot.
+#       container.contains
+#         type: "filter_form"
+#         role: "filter"
+#       ,
+#         type: "results_table"
+#         # change the prototype's default 
+#         striped: false
+#         role: "results"
+#         filterable: true
+#
+#       # A Container will generally define some component event bindings
+#       # and handler methods to handle the communication between its sub
+#       # components.  By default a container is able to access events
+#       # from all of its descendants in the hierarchy. 
+#       container.defines
+#         # These will be applied to each of our components.
+#         defaults:
+#           attributes:
+#             "data-attribute": "whatever"
+#
+#         componentEvents:
+#           # Any time any of our child components emit
+#           # the on:change event, pass it to the filterTable method
+#           "* on:change" : "filterTable"
+#
+#         # Communicates between the filter and the table's
+#         # underlying collection.  NOtice the use of the @role
+#         # property.  It automatically creates getter helpers for us.
+#         filterTable: ()->
+#           filter = @getFilter()
+#           results = @getResults()
+#           # filter.getValues() is a hash of each field and its value
+#           results.applyFilter( filter.getValues() )
+#         
+# ### DOM Layout Configuration
+#
+# Another responsibility of the container is to structurally layout its
+# child components in the DOM.  There are a number of different 
+# options available depending on how you need to do this.  By default,
+# a `Luca.Container` will simply append the @$el of all of its views
+# to its own.
+#
+# The `Luca.components.Controller` is a container which hides every page
+# but the active page.  Similarly, there is the `Luca.containers.TabView`
+# which does the same thing, but renders a tab selector menu for you.  You
+# can create any type of interface you want using containers. 
+#
+# To make this easy for you, you can do a few different things:
+#
+# #### Use the Twitter Bootstrap Fluid Grid
+#
+#         container = Luca.register "App.views.ColumnLayout" 
+#         container.extends         "App.views.ComponentFinder"
+#
+#         container.contains
+#           span: 4
+#           type: "filter_form"
+#           role: "filter"
+#         ,
+#           span: 8
+#           type: "results_table"
+#           role: "results"
+#
+#         container.defines
+#           rowFluid: true
+#
+# #### Using a layout template with CSS Selectors
+#         ... 
+#         container.contains
+#           role: "filter"
+#           container: "#filter-wrapper-dom-selector"
+#         ,
+#           role: "results"
+#           container: "#results-wrapper-dom-selector"
+#         ...
+#         container.defines
+#           # assumes the template will provide the CSS selectors used above 
+#           bodyTemplate: "layouts/custom_template"
 container = Luca.register         "Luca.Container"
 
 container.extends                 "Luca.Panel"
@@ -63,52 +204,6 @@ container.privateConfiguration
     @eachComponent (component)->
       component.remove?()
       
-  # Rendering Pipeline
-  #
-  # A container has nested components.  these components
-  # are automatically rendered inside their own DOM element
-  # and then CSS configuration is generally applied to these
-  # DOM elements.  Each component is assigned to this DOM
-  # element by specifying a @container property on the component.
-  #
-  # Each component is instantiated by looking up its @ctype propery
-  # in the Luca Component Registry.  Then the components are rendered
-  # by having their @render() method called on them.
-  #
-  # Any class which extends Luca.View will have its defined render method
-  # wrapped in a method which triggers "before:render", and "after:render"
-  # before and after the defined render method.
-  #
-  # so you can expect the following, for any container or nested container
-  #
-  # DOM Element Manipulation:
-  #
-  # beforeRender()
-  # beforeLayout()
-  # prepareLayout()
-  # afterLayout()
-  #
-  # Luca / Backbone Component Manipulation
-  #
-  # beforeComponents()
-  # prepareComponents()
-  #   createComponents()
-  #   beforeRenderComponents()
-  #   renderComponents() ->
-  #     calls render() on each component, starting this whole cycle
-  #
-  # afterComponents()
-  #
-  # DOM Injection
-  #
-  # render()
-  # afterRender()
-  #
-  # For Components which are originally hidden
-  # ( card view, tab view, etc )
-  #
-  # firstActivation()
-  #
   beforeRender: ()->
     doLayout.call(@)
     doComponents.call(@)

@@ -4,6 +4,11 @@
 # in the `@layout` template which provide its 
 # internal dom structure.
 #
+# #### Example Template (haml):
+#       .page.layout.row-fluid{"data-layout"=>"layouts/left_nav_grid"}
+#         .span3.region{"data-region"=>"left"}
+#         .span9.region{"data-region"=>"right"}
+#
 # ### Example Page Configuration
 #     page = new Luca.components.Page
 #       layout: "layouts/left_nav_grid"
@@ -13,7 +18,7 @@
 #         right:
 #           type: "details"
 #
-page = Tools.register       "Luca.components.Page"
+page = Luca.register       "Luca.components.Page"
 page.extends                "Luca.Container"
 
 page.privateMethods
@@ -44,10 +49,7 @@ page.publicConfiguration
   # The `@layout` property is the equivalent to specifying @bodyTemplate
   # but more semantic.  A `@layout` template is expected to contain DOM 
   # elements with a data attribute named `region` on it.  
-  # #### Example Template (haml):
-  #       .page.layout.row-fluid
-  #         .span3.region{"data-region"=>"left"}
-  #         .span9.region{"data-region"=>"right"}
+
   layout: undefined
   # The @regions property assigns containers ( by their type alias )
   # to DOM elements identified as regions within a layout template.

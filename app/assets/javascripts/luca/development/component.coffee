@@ -10,7 +10,7 @@ model.configuration
     defined_in_file: ""
 
 model.defines
-  idAttribute: "name"
+  idAttribute: "class_name"
   
   documentation: ()->
     base = _( @toJSON() ).pick 'header_documentation', 'class_name', 'defined_in_file'
@@ -48,12 +48,12 @@ model.defines
     @get("class_name").replace(/\./g,'__')
 
   componentGroup: ()->
-    parts = @get('name').split('.')
+    parts = @get('class_name').split('.')
     parts.slice(0,2).join('.')
 
   componentType: ()->
     type  = "view"
-    parts = @get('name').split('.')
+    parts = @get('class_name').split('.')
 
     switch group = parts[1]
       when "collections" then "collection"
@@ -71,6 +71,6 @@ model.defines
     "view"
 
   componentTypeAlias: ()->
-    parts = @get('name').split('.')
+    parts = @get('class_name').split('.')
     name = parts.pop()
     _.str.underscored( name )

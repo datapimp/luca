@@ -3,7 +3,14 @@ module Luca
   class ProjectHarness < Sinatra::Base
     get "/framework/documentation" do
       app = Luca::LucaApplication.new("Luca", root: Luca.base_path)
-      app.export_all_component_definitions.to_json
+      
+      payload = if File.exists?( app.export_file_location ) 
+        IO.read( app.export_file_location )
+      else
+        app.export
+      end
+
+      payload
     end
 
     get "/framework/documentation/:class_name" do

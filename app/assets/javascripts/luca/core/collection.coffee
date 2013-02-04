@@ -248,7 +248,7 @@ collection.defines
       wrapped()
       @unbind "reset", @
 
-    unless @fetching or not options.autoFetch
+    unless @fetching or not !!options.autoFetch
       @fetch()
 
   # ifLoaded is equivalent to binding to the reset trigger with

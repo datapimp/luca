@@ -2,6 +2,7 @@ $LOAD_PATH.unshift( File.join(File.dirname(__FILE__),'lib') )
 require 'rubygems'
 require 'bundler'
 require 'luca'
+require 'redcarpet'
 require 'active_support/core_ext'
 Bundler.require(:default, :development)
 

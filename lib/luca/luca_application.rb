@@ -15,11 +15,19 @@ module Luca
       @options = options
     end
 
-    def export_all
-      # TODO
+    def export
+      contents = export_all_component_definitions.to_json
+      File.open(export_file_location, 'w+') do |fh|
+        fh.puts( contents ) 
+      end
+      contents
     end
 
-    def export_all_component_definitions
+    def export_file_location
+      File.join(Luca.base_path,"docs","framework.json")
+    end
+
+    def export_all_component_definitions 
       list = component_definitions.map do |cdef|
         cdef.as_json rescue nil
       end  

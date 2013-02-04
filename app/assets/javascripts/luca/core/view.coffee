@@ -1,5 +1,77 @@
+# `Luca.View` is an enhanced `Backbone.View` which provides common patterns for view components,
+# and various helper methods and configuration conventions.
+#
+# #### Instance caching / naming
+#
+# If you provide a `@name` property to your views, they will be accessible by that property
+# using the Application helper.    
+#
+#       view = new Luca.View(name:"my_view")
+#       Luca("my_view") === view
+#
+# #### CSS @className conventions
+#  
+# In order to make it easier to componentize your views, extending from `Luca.View` will
+# enable CSS class based inheritance based on the names of the view class.
+#
+# ##### For Example:
+#
+#       base = Luca.register  "App.views.BaseViewClass"
+#       base.extends          "Luca.View"
+#       base.defines
+#         className: "some-other-class"
+#
+#       child = Luca.register "App.views.ChildViewClass"
+#       child.extends         "App.views.BaseViewClass"
+#       child.defines
+#         myClasses: ()->
+#           @$el.attr('class') 
+#     
+#     view = new App.views.ChildViewClass()
+#     view.myClasses() #=> "app-base-view-class app-child-view-class some-other-class"
+#
+# This establishes a convention for css class names, and allows you to componetize your css
+# along with the component by joining them based on the name of your view class.  When using
+# Sass scoping / nesting it fits very nicely together.
+#
+# #### Internal state machine
+# 
+# Any `Luca.View` class which defines a `@stateful` property will automatically generate a
+# `@state` model that can be used to get/set attributes on the view as well as bind to change events on these attributes.  
+# 
+# This gives your views a dedicated place to store state, and you can bind to your data models separately
+# and update the DOM without confusing the two. 
+# 
+#       statefulView = Luca.register    "App.views.StatefulView"
+#       statefulView.extends            "Luca.View"
+#
+#       statefulView.defines
+#         # Passing an object allows you to set default values on the @state model.
+#         stateful:
+#           attribute: "value"
+#
+#         # Whenever the attribute specified changes, call the specified method.
+#         stateChangeEvents:
+#           "attribute" : "onAttributeChange"
+#         
+#         onAttributeChange: (stateMachine, attributeValue)->
+#           @doSomethingWhenAttributeChanges()
+#
+#  If this type of declarative style isn't your thing, you can still bind to events in code:
+#       
+#       view = new App.views.StatefulView()
+#       view.on "state:change:attribute", (stateMachine, attributeValue)=> @$el.html("New Attribute: #")
+#       view.set "attribute", "something"
+# 
+# #### Event binding helpers
+# 
+# In addition to the `@stateChangeEvent` bindings documented above, you have available
+# to you similar configuration helpers for binding to events emitted by the singletons:
+#
+# - `Luca.Application` via `@applicationEvents` 
+# - `Luca.CollectionManager` via `@collectionEvents`
+# - `Luca.SocketManager` via `@socketEvents`
 view = Luca.register    "Luca.View"
-
 view.extends            "Backbone.View"
 
 # includes are extensions to the prototype, and have no special behavior
@@ -31,11 +103,54 @@ view.triggers           "before:initialize",
                         "activation",
                         "deactivation"
 
+view.publicConfiguration
+  # Specifying a `@name` for your views is useful for views which
+  # there will only be one instance.  This allows you to reference
+  # the view instances by name using the application helper:
+  #       Luca("my_view_name")
+  name: undefined
+
+  # Setting this property to true will automatically bind the context
+  # of your event handler methods to the instance of this view.  This
+  # saves you from having to manually do:
+  #
+  #       Luca.View.extend
+  #         events:
+  #           "click .one" : "oneHandler"
+  #           "click .two" : "twoHandler"
+  #         initialize: ()->
+  #           _.bindAll(@, "oneHandler", "twoHandler")
+  #
+  #  Instead:
+  #
+  #       Luca.View.extend
+  #         autoBindEventHandlers: true
+  #         events: 
+  #           "click .one" : "oneHandler"
+  #
+  # Optionally, you can define an array of method names you want bound
+  # to this view:
+  #
+  #       Luca.View.extend
+  #         bindMethods:["oneHandler","twoHandler"]
+  #
+  autoBindEventHandlers: false
+
+  # Supplying configuration to `@_events` will ensure that this configuration
+  # is present on views which extend from this view.  In normal Backbone behavior
+  # the `@events` property can be overridden by views which extend, and this isn't
+  # always what you want from your component.   
+  _events: undefined
+
+
+
 # Luca.View decorates Backbone.View with some patterns and conventions.
-view.defines
+view.publicMethods
   identifier: ()->
     (@displayName || @type ) + ":" + (@name || @role || @cid)
 
+  # Calls Backbone.View::remove, and removes the view from the 
+  # instance cache.  Triggers a "before:remove" event.
   remove: ()->
     @trigger("before:remove", @)
     Luca.remove(@)
@@ -70,20 +185,20 @@ view.defines
         @registerEvent(eventId, handler)
 
 
-  #### Hooks or Auto Event Binding
-  #
-  # views which inherit from Luca.View can define hooks
-  # or events which can be emitted from them.  Automatically,
-  # any functions on the view which are named according to the
-  # convention will automatically get run.
-  #
-  # by default, all Luca.View classes come with the following:
-  #
-  # before:render     : beforeRender()
-  # after:render      : afterRender()
-  # after:initialize  : afterInitialize()
-  # first:activation  : firstActivation()
-  setupHooks: Luca.util.setupHooks
+  debug: (args...)->
+    if @debugMode is true or window.LucaDebugMode is true
+      args.unshift @identifier()
+      console.log args...
+
+  trigger: ()->
+    if Luca.enableGlobalObserver
+      if Luca.developmentMode is true or @observeEvents is true
+        Luca.ViewObserver ||= new Luca.Observer(type:"view")
+        Luca.ViewObserver.relay @, arguments
+
+    Backbone.View::trigger.apply @, arguments
+
+ 
 
   registerEvent: (selector, handler)->
     @events ||= {}
@@ -95,30 +210,37 @@ view.defines
 
     @delegateEvents()
 
+view.privateMethods
+  # Returns a reference to the class which this view is an instance of.
   definitionClass: ()->
     Luca.util.resolve(@displayName, window)?.prototype
 
+  # Returns a list of all of the collections which are properties on this view.
   _collections: ()->
     Luca.util.selectProperties( Luca.isBackboneCollection, @ )
 
+  # Returns a list of all of the models which are properties on this view.
   _models: ()->
     Luca.util.selectProperties( Luca.isBackboneModel, @ )
 
+  # Returns a list of all of the views which are properties on this view.
   _views: ()->
     Luca.util.selectProperties( Luca.isBackboneView, @ )
 
-  debug: (args...)->
-    if @debugMode is true or window.LucaDebugMode is true
-      args.unshift @identifier()
-      console.log args...
+  # views which inherit from Luca.View can define hooks
+  # or events which can be emitted from them.  Automatically,
+  # any functions on the view which are named according to the
+  # convention will automatically get run.
+  #
+  # by default, all Luca.View classes come with the following:
+  #
+  # - before:render     : beforeRender()
+  # - after:render      : afterRender()
+  # - after:initialize  : afterInitialize()
+  # - first:activation  : firstActivation()
+  setupHooks: Luca.util.setupHooks
 
-  trigger: ()->
-    if Luca.enableGlobalObserver
-      if Luca.developmentMode is true or @observeEvents is true
-        Luca.ViewObserver ||= new Luca.Observer(type:"view")
-        Luca.ViewObserver.relay @, arguments
-    Backbone.View.prototype.trigger.apply @, arguments
-
+view.register()
 
 Luca.View._originalExtend = Backbone.View.extend
 
