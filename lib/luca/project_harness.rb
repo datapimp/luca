@@ -21,7 +21,6 @@ module Luca
       component_definition.as_json(:include_contents=>true).to_json      
     end
 
-
     get "/compiled/assets/:type/:id.:extension" do
       asset = Luca::CompiledAsset.find_by_type_and_id( params[:type], params[:id] )
       content_type asset.mime_type
@@ -61,7 +60,7 @@ module Luca
   
     post "/components/:application_name" do    
       application_repository    = Luca::Project.find_by_name( params[:application_name] ).app
-      {success:true}.to_json
+      application
     end
 
     put "/components/:application_name/:class_name" do
@@ -70,6 +69,19 @@ module Luca
       component_definition      = application_repository.find_component_definition_for_class( class_name )          
 
       {success: true}.to_json
+    end
+
+    get "/components/:application_name" do
+      application_name          = params[:application_name].capitalize
+      application_repository    = Luca::LucaApplication.new(application_name, root: ::Rails.root) 
+
+      payload = if File.exists?( app.export_file_location ) 
+        IO.read( app.export_file_location )
+      else
+        app.export
+      end
+
+      payload      
     end
 
     get "/components/:application_name/:class_name" do
