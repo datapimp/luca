@@ -22,7 +22,7 @@ lucaUtilityHelper = (payload, args...)->
 
 (window || global).Luca = ()-> lucaUtilityHelper.apply(@, arguments)
 
-Luca.VERSION = '0.9.89'
+Luca.VERSION = '0.9.9'
 
 _.extend Luca,
   core: {}
@@ -85,7 +85,7 @@ Luca.initialize = (namespace, options={})->
 
 
   object = {}
-  object[ namespace ] = _.extend(Luca.getHelper(), defaults)
+  object[ namespace ] = _.defaults(Luca.getHelper(), defaults)
 
   _.extend(Luca.config, options)
   _.extend (window || global), object
