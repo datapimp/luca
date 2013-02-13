@@ -19,7 +19,7 @@
 #           type: "details"
 #
 page = Luca.register       "Luca.components.Page"
-page.extends                "Luca.Container"
+page.extends               "Luca.Container"
 
 page.privateMethods
   # `Page`s are typically instantiated by a `Luca.components.Controller`

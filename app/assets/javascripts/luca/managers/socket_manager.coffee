@@ -1,6 +1,10 @@
 # The SocketManager provides communication between a Websocket / Pubsub
 # system and routes messages through the application to instances
 # of a specific view, model, collection, or other Backbone.Events object. 
+#
+# You will need to create the socket manager specifying your provider and host:
+#       @socket = new Luca.SocketManager(host:"//localhost:9292/faye")
+#
 socketManager = Luca.register "Luca.SocketManager"
 socketManager.extends         "Luca.Model"
 

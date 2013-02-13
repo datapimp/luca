@@ -2,6 +2,8 @@ controller = Luca.register        "Luca.components.Controller"
 controller.extends                "Luca.containers.CardView"
 
 controller.publicInterface
+  tracker: "page"
+
   default: (callback)->
     @navigate_to(@defaultPage || @defaultCard, callback)
 
@@ -20,6 +22,9 @@ controller.publicInterface
         current.activatedByController = true
 
       @state.set(active_section: current.name )
+
+      if app = Luca.getApplication?()
+        app.state.set(@tracker, current.name)
 
       Luca.key?.setScope( current.name )
 

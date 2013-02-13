@@ -64,8 +64,9 @@ Luca.setupCollectionSpace = (options={})->
 # your application and all of its components.
 Luca.initialize = (namespace, options={})->
   Luca.namespace = namespace.toLowerCase()
+  existing       = Luca.util.resolve(namespace, window || global) || {}
 
-  defaults = 
+  _.defaults existing,
     views: {}
     collections: {}
     models: {}
@@ -85,7 +86,7 @@ Luca.initialize = (namespace, options={})->
 
 
   object = {}
-  object[ namespace ] = _.defaults(Luca.getHelper(), defaults)
+  object[ namespace ] = _.defaults(Luca.getHelper(), existing)
 
   _.extend(Luca.config, options)
   _.extend (window || global), object
