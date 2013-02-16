@@ -29,7 +29,7 @@ module Luca
     end
 
     def export_file_location
-      File.join(Luca.base_path,"docs","luca-framework-documentation.js")
+      File.join(Luca.base_path,"site","source", "javascripts", "luca-framework-documentation.js")
     end
 
     def export_all_component_definitions 
