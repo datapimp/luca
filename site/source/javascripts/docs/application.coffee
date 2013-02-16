@@ -7,7 +7,7 @@ app.configuration
   el: "#viewport"
 
 app.contains
-  bodyTemplate: "home"
+  component: "home"
 
 app.defines
   beforeRender: ()->
