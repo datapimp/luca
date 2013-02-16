@@ -1,3 +1,7 @@
+require 'rubygems'
+require 'redcarpet'
+require 'active_support/core_ext'
+
 module Luca
   class LucaApplication
     attr_accessor :application_name,

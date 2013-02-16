@@ -8,6 +8,15 @@ end
 stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
 scripts = ["dependencies.js","sandbox.js"]
 
+namespace :documentation do
+  desc "Export the project documentation"
+  task :export do
+    require "./app"
+    app = Luca::LucaApplication.new("Luca",root:Dir.pwd())
+    puts app.export
+  end
+end
+
 namespace :release do
   desc "Compile and Minify"
   task :all => [:assets,:minify]
