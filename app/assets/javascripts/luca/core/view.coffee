@@ -174,7 +174,7 @@ view.publicMethods
 
     Luca.concern.setup.call(@)
 
-    @delegateEvents()
+    @delegateEvents() unless _.isEmpty(@events)
 
     @trigger "after:initialize", @
 
@@ -206,7 +206,8 @@ view.publicMethods
     if _.isObject(selector)
       @events = _.extend(@events, selector)
     else
-      @events[selector] = handler
+      if _.isFunction(handler) || (_.isString(handler) && @[handler]?)
+        @events[selector] = handler 
 
     @delegateEvents()
 
