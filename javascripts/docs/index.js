@@ -1,0 +1,1 @@
+throw Error("Sprockets::ArgumentError: require_tree argument must be a directory\n  (in /Users/jonathan/Projects/luca/site/source/javascripts/docs/index.coffee:2)");
