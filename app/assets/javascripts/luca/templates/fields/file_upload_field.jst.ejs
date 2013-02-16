@@ -1,0 +1,10 @@
+<label for="<%= input_id %>">
+  <%= label %>
+  <input type="file" name="<%= input_name %>" value="<%= input_value %>" style="<%= inputStyles %>" />
+</label>
+
+<% if(helperText) { %>
+<p class="helper-text help-block">
+  <%= helperText %>
+</p>
+<% } %>

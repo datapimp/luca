@@ -1,0 +1,16 @@
+<% if(typeof(label)!=="undefined" && (typeof(hideLabel) !== "undefined" && !hideLabel) || (typeof(hideLabel)==="undefined")) {%>
+<label class="control-label" for="<%= input_id %>"><%= label %></label>
+<% } %>
+
+<div class="controls">
+<% if( typeof(addOn) !== "undefined" ) { %>
+  <span class="add-on"><%= addOn %></span>
+<% } %>
+<input type="text" placeholder="<%= placeHolder %>" name="<%= input_name %>" style="<%= inputStyles %>" value="<%= input_value %>" />
+<% if(helperText) { %>
+<p class="helper-text help-block">
+  <%= helperText %>
+</p>
+<% } %>
+
+</div>
