@@ -1,7 +1,6 @@
 #Markdown
 set :markdown_engine, :redcarpet
 
-#Livereload
 activate :livereload
 ### 
 # Compass
@@ -20,6 +19,7 @@ activate :livereload
 # Page options, layouts, aliases and proxies
 ###
 
+page "documentation.html", :layout => false
 # Per-page layout changes:
 # 
 # With no layout
@@ -67,7 +67,7 @@ configure :build do
   activate :minify_javascript
   
   # Create favicon/touch icon set from source/favicon_base.png
-  activate :favicon_maker
+  # activate :favicon_maker
   
   # Enable cache buster
   # activate :cache_buster

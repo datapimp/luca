@@ -1,17 +1,21 @@
 app = Docs.register       "Docs.Application"
 app.extends               "Luca.Application"
+app.configuration
+  el: "#viewport"
+  fluid: true
+  fullscreen: false
+  applyWrapper: false
+  name: "DocsApp"
 
 app.configuration
-  name: "DocsApp"
-  fluid: true
-  el: "#viewport"
+  router: "Docs.Router"
+  routes:
+    "":           "home"
+    "docs":       "documentation#index"
 
 app.contains
   component: "home"
-
-app.defines
-  beforeRender: ()->
-    @$el.append (new Docs.views.TopNavigation() ).render().el
-    Luca.Application::beforeRender?.apply(@, arguments)
+,
+  component: "documentation"
 
 app.register()

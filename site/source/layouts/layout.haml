@@ -18,8 +18,32 @@
     %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css"}
     = stylesheet_link_tag "site"
   %body
-    #viewport
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid 
+          %button.btn.btn-navbar{:type=>"button","data-toggle"=>"collapse","data-target"=>".nav-collapse"}
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.brand{:href=>"#"} Luca
+          .nav-collapse.collapse
+            %ul.nav
+              %li.active
+                %a.active{:href=>"#"} Home
+              %li
+                %a{:href=>"#docs"} Documentation
+              %li
+                %a{:href=>"#tutorials"} Tutorials
+              %li
+                %a{:href=>"#apps"} Sample Apps
+              %li
+                %a{:href=>"#components"} Component Library
+
+      .container-fluid
+        = yield                
+
     %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js"}
     %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js"}
+    = javascript_include_tag "luca-framework-documentation"    
     = javascript_include_tag "dependencies"
     = javascript_include_tag "site"

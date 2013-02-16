@@ -1,1 +1,3 @@
-Luca.initialize "Docs"
+Luca.initialize "Docs",
+  baseParams: false
+  modelBootstrap: false
