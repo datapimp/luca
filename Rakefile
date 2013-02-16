@@ -13,7 +13,7 @@ namespace :documentation do
   task :export do
     require "./app"
     app = Luca::LucaApplication.new("Luca",root:Dir.pwd())
-    puts app.export
+    app.export
   end
 end
 

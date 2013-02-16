@@ -22,13 +22,14 @@ module Luca
     def export
       contents = export_all_component_definitions.to_json
       File.open(export_file_location, 'w+') do |fh|
+        contents = "window.Luca ||= {}; window.Luca.documentation = #{ contents };"
         fh.puts( contents ) 
       end
       contents
     end
 
     def export_file_location
-      File.join(Luca.base_path,"docs","framework.json")
+      File.join(Luca.base_path,"docs","luca-framework-documentation.js")
     end
 
     def export_all_component_definitions 
