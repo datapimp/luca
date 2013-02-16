@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.views.TopNavigation"),e["extends"]("Luca.components.NavBar"),e.defines({brand:"Luca.js",inverse:!0,orientation:"top"})}).call(this);
