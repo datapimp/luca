@@ -7,13 +7,6 @@ module Luca
 
     ARGUMENTS_REGEX = /^\w+\:\s*\((.+)\)/
 
-    class << self
-      attr_accessor :markdown
-    end
-
-    self.markdown =  Redcarpet::Markdown.new(Redcarpet::Render::HTML,
-          :autolink => true, :space_after_headers => true)
-
     def initialize source 
       @source     = source
       read_source()
@@ -212,7 +205,7 @@ module Luca
       combined = header_comment_lines.join("")
 
       if compile
-        compiled = self.class.markdown.render(combined) rescue combined 
+        compiled = Redcarpet.new(combined).to_html rescue combined 
       else
         combined
       end
