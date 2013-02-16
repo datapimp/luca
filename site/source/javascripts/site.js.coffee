@@ -1,1 +1,1 @@
-#= require ./docs/index
+#= require ./docs
