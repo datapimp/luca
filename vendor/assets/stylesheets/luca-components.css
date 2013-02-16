@@ -1,0 +1,204 @@
+.luca-ui-checkbox-array input.array-checkbox, .luca-checkbox-array input.array-checkbox {
+  display: inline-block; }
+.luca-form-view.label-align-top .luca-ui-field label, .luca-form-view.label-align-top .luca-ui-field input, .luca-form-view.label-align-top .luca-ui-field select, .luca-form-view.label-align-top .luca-ui-field textarea {
+  display: block; }
+.scrollable-g-view {
+  /* define height and width of scrollable area. Add 16px to width for scrollbar          */
+  /* Reset overflow value to hidden for all non-IE browsers. */
+  /* define width of table. IE browsers only                 */
+  /* define width of table. Add 16px to width for scrollbar.           */
+  /* All other non-IE browsers.                                        */
+  /* set table header to a fixed position. WinIE 6.x only                                       */
+  /* In WinIE 6.x, any element with a position property set to relative and is a child of       */
+  /* an element that has an overflow property set, the relative value translates into fixed.    */
+  /* Ex: parent element DIV with a class of tableContainer has an overflow property set to auto */
+  /* set THEAD element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* make the TH elements pretty */
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* WARNING: swapping the background on hover may cause problems in WinIE 6.x   */
+  /* define the table content to be scrollable                                              */
+  /* set TBODY element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* induced side effect is that child TDs no longer accept width: auto                     */
+  /* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+  /* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+  /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
+  /* All other non-IE browsers.                                            */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */ }
+  .scrollable-g-view .luca-ui-g-view-body {
+    clear: both;
+    overflow: auto; }
+  .scrollable-g-view .luca-ui-g-view-body {
+    overflow: hidden; }
+  .scrollable-g-view .luca-ui-g-view-body .empty-text-wrapper {
+    display: block;
+    margin: 10px auto;
+    width: 30%;
+    padding: 50px;
+    text-align: center; }
+    .scrollable-g-view .luca-ui-g-view-body .empty-text-wrapper p {
+      color: #aaa; }
+  .scrollable-g-view thead.fixed tr {
+    position: relative; }
+  .scrollable-g-view thead.fixed tr {
+    display: block; }
+  .scrollable-g-view thead.fixed th {
+    font-weight: bold;
+    text-align: left; }
+  .scrollable-g-view thead.fixed a, .scrollable-g-view thead.fixed a:link, .scrollable-g-view thead.fixed a:visited {
+    color: #FFF;
+    display: block;
+    text-decoration: none;
+    width: 100%; }
+  .scrollable-g-view thead.fixed a:hover {
+    color: #FFF;
+    display: block;
+    text-decoration: underline;
+    width: 100%; }
+  .scrollable-g-view tbody.scrollable {
+    display: block;
+    overflow: auto;
+    width: 100%; }
+  .scrollable-g-view thead.fixed th {
+    padding: 5px; }
+  .scrollable-g-view tbody.scrollable td {
+    padding: 5px; }
+
+.luca-ui-g-view .toolbar-container {
+  float: left;
+  width: 100%;
+  clear: both;
+  display: block;
+  padding-right: 12px; }
+  .luca-ui-g-view .toolbar-container .luca-ui-toolbar {
+    padding: 2px 0px; }
+.with-mask {
+  position: relative; }
+  .with-mask .load-mask {
+    background-color: rgba(255, 255, 255, 0.6);
+    width: 100%;
+    height: 100%;
+    position: absolute; }
+    .with-mask .load-mask .progress {
+      margin: 50px auto;
+      width: 50%; }
+/* define height and width of scrollable area. Add 16px to width for scrollbar          */
+._scrollable-wrapper {
+  clear: both;
+  overflow: auto; }
+
+/* Reset overflow value to hidden for all non-IE browsers. */
+._scrollable-wrapper {
+  overflow: hidden; }
+
+/* define width of table. IE browsers only                 */
+/* define width of table. Add 16px to width for scrollbar.           */
+/* All other non-IE browsers.                                        */
+.luca-scrollable-table-view {
+  /* set table header to a fixed position. WinIE 6.x only                                       */
+  /* In WinIE 6.x, any element with a position property set to relative and is a child of       */
+  /* an element that has an overflow property set, the relative value translates into fixed.    */
+  /* Ex: parent element DIV with a class of tableContainer has an overflow property set to auto */
+  /* set THEAD element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* make the TH elements pretty */
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* WARNING: swapping the background on hover may cause problems in WinIE 6.x   */
+  /* define the table content to be scrollable                                              */
+  /* set TBODY element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* induced side effect is that child TDs no longer accept width: auto                     */
+  /* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+  /* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+  /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
+  /* All other non-IE browsers.                                            */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */ }
+  .luca-scrollable-table-view thead.fixed tr {
+    position: relative; }
+  .luca-scrollable-table-view thead.fixed tr {
+    display: block; }
+  .luca-scrollable-table-view thead.fixed th {
+    font-weight: bold;
+    text-align: left; }
+  .luca-scrollable-table-view thead.fixed a, .luca-scrollable-table-view thead.fixed a:link, .luca-scrollable-table-view thead.fixed a:visited {
+    color: #FFF;
+    display: block;
+    text-decoration: none;
+    width: 100%; }
+  .luca-scrollable-table-view thead.fixed a:hover {
+    color: #FFF;
+    display: block;
+    text-decoration: underline;
+    width: 100%; }
+  .luca-scrollable-table-view tbody.scrollable {
+    display: block;
+    overflow: auto;
+    width: 100%; }
+  .luca-scrollable-table-view thead.fixed th {
+    padding: 5px; }
+  .luca-scrollable-table-view tbody.scrollable td {
+    padding: 5px; }
+html.luca-ui-fullscreen, body.luca-ui-fullscreen {
+  height: 100%; }
+
+.luca-ui-fullscreen .fluid-viewport-wrapper {
+  padding-top: 40px; }
+.luca-ui-fullscreen .luca-viewport, .luca-ui-fullscreen .luca-ui-viewport, .luca-ui-fullscreen .fullscreen-container {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%; }
+.toolbar-container {
+  clear: both; }
+
+.toolbar-container.top {
+  height: 54px; }
+
+.toolbar-container.bottom {
+  margin-top: 0px; }
+
+.luca-ui-fullscreen .luca-application.fullscreen-enabled, .luca-ui-fullscreen .luca-controller, .luca-ui-fullscreen .luca-controller > .luca-ui-card {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%; }
+.luca-ui-toolbar {
+  float: left;
+  clear: both;
+  width: 100%;
+  padding: 5px; }
+  .luca-ui-toolbar .align-right {
+    float: right; }
+  .luca-ui-toolbar .btn-group {
+    margin: 0px 2px; }
+  .luca-ui-toolbar.toolbar-bottom {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px; }
+  .luca-ui-toolbar.toolbar-top {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px; }
+.luca-tab-view .luca-ui-card .luca-ui-grid-view, .luca-tab-view .luca-ui-card .luca-form-view, .luca-tab-view .luca-ui-card .luca-ui-card {
+  overflow: hidden; }
+
+.luca-tab-view.tabs-below .tab-selector-container, .luca-tab-view.tabs-right .tab-selector-container {
+  display: block;
+  clear: both; }
+
+.luca-tab-view.tabs-left .tab-selector-container {
+  float: left; }
+  .luca-tab-view.tabs-left .tab-selector-container ul.nav-tabs {
+    padding: 0px; }
+.luca-tab-view.tabs-left .tab-content {
+  float: left; }
+
+.luca-tab-view.tabs-right .tab-selector-container {
+  float: right; }
+.luca-tab-view.tabs-right .tab-content {
+  float: left; }
+/*
+
+
+*/
