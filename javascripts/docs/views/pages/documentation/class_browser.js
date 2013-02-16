@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.views.ClassBrowser"),e["extends"]("Luca.View"),e.register()}).call(this);
