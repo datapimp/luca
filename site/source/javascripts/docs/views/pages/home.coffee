@@ -5,5 +5,9 @@ page.configuration
   regions: 
     left: "left_navigation"
     right: "pages/home"
-    
+
+page.defines
+  index: ()->
+    @trigger "index"
+
 page.register()

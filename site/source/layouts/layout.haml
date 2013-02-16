@@ -15,6 +15,7 @@
     
     = javascript_include_tag "vendor/modernizr-2.6.1.min"
     %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css"}
+    %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css"}
     %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css"}
     = stylesheet_link_tag "site"
   %body
@@ -38,6 +39,8 @@
                 %a{:href=>"#apps"} Sample Apps
               %li
                 %a{:href=>"#components"} Component Library
+              %li
+                %a{:href=>"#source"} Browse Source
 
       .container-fluid
         = yield                
