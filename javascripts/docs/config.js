@@ -1,1 +1,0 @@
-(function(){Luca.initialize("Docs")}).call(this);
