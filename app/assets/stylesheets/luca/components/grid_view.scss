@@ -1,0 +1,107 @@
+
+.scrollable-g-view {
+  /* define height and width of scrollable area. Add 16px to width for scrollbar          */
+  .luca-ui-g-view-body {
+    clear: both;
+    overflow: auto;
+  }
+
+  /* Reset overflow value to hidden for all non-IE browsers. */
+  .luca-ui-g-view-body {
+    overflow: hidden;
+  }
+
+  .luca-ui-g-view-body .empty-text-wrapper {
+    display: block;
+    margin: 10px auto;
+    width: 30%;
+    padding: 50px;
+    text-align: center;
+    p {
+      color: #aaa;
+    }
+  }
+  /* define width of table. IE browsers only                 */
+  .luca-ui-g-view-body table {
+  }
+
+  /* define width of table. Add 16px to width for scrollbar.           */
+  /* All other non-IE browsers.                                        */
+  .luca-ui-g-view-body table {
+  }
+
+  /* set table header to a fixed position. WinIE 6.x only                                       */
+  /* In WinIE 6.x, any element with a position property set to relative and is a child of       */
+  /* an element that has an overflow property set, the relative value translates into fixed.    */
+  /* Ex: parent element DIV with a class of tableContainer has an overflow property set to auto */
+  thead.fixed tr {
+    position: relative
+  }
+
+  /* set THEAD element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  thead.fixed tr {
+    display: block
+  }
+
+  /* make the TH elements pretty */
+  thead.fixed th {
+    font-weight: bold;
+    text-align: left
+  }
+
+  /* make the A elements pretty. makes for nice clickable headers                */
+  thead.fixed a, thead.fixed a:link, thead.fixed a:visited {
+    color: #FFF;
+    display: block;
+    text-decoration: none;
+    width: 100%
+  }
+
+  /* make the A elements pretty. makes for nice clickable headers                */
+  /* WARNING: swapping the background on hover may cause problems in WinIE 6.x   */
+  thead.fixed a:hover {
+    color: #FFF;
+    display: block;
+    text-decoration: underline;
+    width: 100%
+  }
+
+  /* define the table content to be scrollable                                              */
+  /* set TBODY element to have block level attributes. All other non-IE browsers            */
+  /* this enables overflow to work on TBODY element. All other non-IE, non-Mozilla browsers */
+  /* induced side effect is that child TDs no longer accept width: auto                     */
+  tbody.scrollable {
+    display: block;
+    overflow: auto;
+    width: 100%
+  }
+
+  /* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+  /* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+  thead.fixed th {
+    padding: 5px;
+  }
+
+  /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
+  /* All other non-IE browsers.                                            */
+  /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+  tbody.scrollable td {
+    padding: 5px;
+  }
+
+}
+
+.luca-ui-g-view {
+  .toolbar-container {
+    float: left;
+    width: 100%;
+    clear: both;
+    display: block;
+    padding-right:12px;
+    .luca-ui-toolbar {
+      padding: 2px 0px;
+    }
+  }
+}

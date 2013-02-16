@@ -1,0 +1,37 @@
+.luca-tab-view {
+  .luca-ui-card {
+    .luca-ui-grid-view, .luca-form-view, .luca-ui-card {
+      overflow: hidden;
+    }
+  }
+}
+
+.luca-tab-view.tabs-below, .luca-tab-view.tabs-right {
+  .tab-selector-container {
+    display: block;
+    clear: both;
+  }
+}
+
+.luca-tab-view.tabs-left {
+  .tab-selector-container {
+    ul.nav-tabs {
+      padding: 0px;
+    }
+
+    float: left;
+  }
+  .tab-content {
+    float: left;
+  }
+}
+
+.luca-tab-view.tabs-right {
+  .tab-selector-container {
+    float: right;
+  }
+  .tab-content {
+    float: left;
+  }
+}
+
