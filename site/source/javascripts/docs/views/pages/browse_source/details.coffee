@@ -19,4 +19,4 @@ view.defines
   # the documentation and source panels
   load: (model)->
     @getDocumentation().$el.html( model.get("header_documentation") )
-    @getSource().$el.html( model.get(''))
+    @getSource().$el.html( model.get('source_file_contents'))
