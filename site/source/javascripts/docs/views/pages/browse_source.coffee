@@ -13,10 +13,17 @@ view.contains
   component: "component_details"
 
 view.privateMethods
+  index: ()->
+    @selectComponent(@getComponentList().getCollection().at(0))
+    
   selectComponent: (e)->
-    $target   = @$(e.target)
-    row       = $target.parents('tr').eq(0)
-    index     = row.data('index')
-    model     = @getComponentList().getCollection().at(index) 
+    if Luca.isBackboneModel(e) 
+      model = e
+    else
+      $target   = @$(e.target)
+      row       = $target.parents('tr').eq(0)
+      index     = row.data('index')
+      model     = @getComponentList().getCollection().at(index) 
+
     @getComponentDetails().load(model)
 

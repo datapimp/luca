@@ -17,6 +17,8 @@
     %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css"}
     %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css"}
     %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css"}
+    %link{:rel=>"stylesheet",:href=>"//google-code-prettify.googlecode.com/svn/trunk/src/prettify.css"}
+
     = stylesheet_link_tag "site"
   %body
     .navbar.navbar-inverse.navbar-fixed-top
@@ -42,11 +44,13 @@
               %li
                 %a{:href=>"#source"} Browse Source
 
-      .container-fluid
-        = yield                
+    .container-fluid{:style=>"padding-top:40px;"}
+      = yield                
 
     %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js"}
     %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js"}
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"}
+    
     = javascript_include_tag "luca-framework-documentation"    
     = javascript_include_tag "dependencies"
     = javascript_include_tag "site"
