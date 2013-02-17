@@ -140,7 +140,7 @@ view.publicConfiguration
   # is present on views which extend from this view.  In normal Backbone behavior
   # the `@events` property can be overridden by views which extend, and this isn't
   # always what you want from your component.   
-  _events: undefined
+  _inheritEvents: undefined
 
 
 
@@ -180,8 +180,8 @@ view.publicMethods
 
     _.bindAll(@, @bindMethods...) if @bindMethods?.legth > 0
 
-    unless _.isEmpty(@_events)
-      for eventId, handler of @_events
+    unless _.isEmpty(@_inheritEvents)
+      for eventId, handler of @_inheritEvents
         @registerEvent(eventId, handler)
 
 

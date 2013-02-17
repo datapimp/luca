@@ -2,7 +2,7 @@ describe "Inheriting Events", ->
   beforeEach ->
     eventTester = Luca.register("Luca.EventTester").extends("Luca.View")
     eventTester.defines
-      _events: 
+      _inheritEvents: 
         "click input" : "clickHandler"  
 
       bodyTemplate: ()->
@@ -33,7 +33,7 @@ describe "Inheriting Events", ->
     view.render()
     expect( _(view.events).keys().length ).toEqual 2
 
-  it "should inherit dom events defined under _events", ->
+  it "should inherit dom events defined under _inheritEvents", ->
     view = new Luca.EventInheritor()
     view.render()
     view.$('input').trigger("click")
