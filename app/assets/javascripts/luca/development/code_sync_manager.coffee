@@ -12,29 +12,32 @@
 # state exactly as you need it when you're making your css changes etc.
 #
 # - 0) You'll need to use the guard gem in your rails project.
+#
 # - 1) Add an entry to your Guardfile:
-#       guard 'luca' do
-#         watch(%r{^app/assets/stylesheets/(.+)}) do |match|
-#             path = match.last
-#         end 
+#         guard 'luca' do
+#           watch(%r{^app/assets/stylesheets/(.+)}) do |match|
+#               path = match.last
+#           end 
   
-#         watch(%r{^app/assets/javascripts/(.+)}) do |match|
-#           path = match.last
+#           watch(%r{^app/assets/javascripts/(.+)}) do |match|
+#             path = match.last
+#           end
 #         end
-#       end
+#
 # - 2) Add the `CodeSyncManager` to your development mode application. **Note:** This expect
 #      you to have a `Luca.SocketManager` capable backend such as faye or socket.io running. It
 #      handles the same configuration options as the `Luca.SocketManager` as well.
 #
-#             app = Luca()
-#             app.codeSyncManager = new Luca.CodeSyncManager
-#                host: "//localhost:9292/faye"
-#                channel: "/changes"
-#             app.codeSyncManager.trigger("ready")
+#               app = Luca()
+#               app.codeSyncManager = new Luca.CodeSyncManager
+#                 host: "//localhost:9292/faye"
+#                 channel: "/changes"
+#               app.codeSyncManager.trigger("ready")
 #
 # - 3) Run guard.  Edit your files, watch your changes appear.
 #
-# ### Using the `syncpad`
+# ### Using the Syncpad
+#
 # The syncpad is a special naming convention for development scratch paper in your editor.  A file
 # named syncpad.coffee, syncpad.css.scss, syncpad.jst.ejs.haml, etc will be evaluated live when you change
 # them in your editor.  I personally use this to experiment with code / css and get immediate results without
