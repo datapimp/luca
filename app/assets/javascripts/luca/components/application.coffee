@@ -86,6 +86,9 @@ application.publicConfiguration
   # listen for on this component before you start history
   autoStartHistory: "before:render"
 
+  # use Backbone.history push state?
+  pushState: false
+  
   # we will create a collection manager singleton
   # by default unless otherwise specified.
   useCollectionManager: true
@@ -528,7 +531,7 @@ application.classInterface
   # modify how Backbone.history.start is called.  This will get called
   # by the Application instance in response to the @autoStartHistory property.
   startHistory: ()->
-    Backbone.history.start()
+    Backbone.history.start(pushState: @pushState)
 
 application.afterDefinition ()->
   Luca.routeHelper = Luca.Application.routeTo
