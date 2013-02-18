@@ -1,20 +1,13 @@
 app = Docs.register       "Docs.Application"
 app.extends               "Luca.Application"
+app.configuration
+  el: "#viewport"
+  fluid: true
+  fullscreen: true
+  applyWrapper: false
+  name: "DocsApp"
 
 app.configuration
-<<<<<<< Updated upstream
-  name: "DocsApp"
-  fluid: true
-  el: "#viewport"
-
-app.contains
-  bodyTemplate: "home"
-
-app.defines
-  beforeRender: ()->
-    @$el.append (new Docs.views.TopNavigation() ).render().el
-    Luca.Application::beforeRender?.apply(@, arguments)
-=======
   collectionManager: 
     initialCollections:[
       "framework_documentation"
@@ -22,7 +15,7 @@ app.defines
   router: "Docs.Router"
   routes:
     "":                 "home#index"
-    "docs":           "browse_source#index"
+    "docs":             "browse_source#index"
     "get-started":      "getting_started#index"
 
 app.contains
@@ -38,6 +31,5 @@ app.contains
   index: _.once ()->
     @$('pre').addClass('prettyprint')
     window.prettyPrint() 
->>>>>>> Stashed changes
 
 app.register()
