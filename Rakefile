@@ -2,15 +2,12 @@
 task :environment do
   require './app'
   require 'pry'
+  require 'luca'
 end
 
 
 stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.css"]  
 scripts = ["dependencies.js","sandbox.js"]
-
-namespace :documentation do
-
-end
 
 namespace :release do
   desc "Export the project documentation"
@@ -19,8 +16,15 @@ namespace :release do
     app.export
   end  
 
+  desc "Zip up the assets"
+  task :zip => :environment do
+    `cp vendor/assets/javascripts/luca.min.js vendor/assets/javascripts/luca-dependencies.min.js vendor/assets/stylesheets/luca-ui.css .`  
+    `zip downloads/luca-#{ Luca::Version }.zip luca.min.js luca-dependencies.min.js luca-ui.css`
+    `rm luca-ui.css luca.min.js luca-dependencies.min.js`
+  end
+
   desc "Compile and Minify"
-  task :all => [:docs,:assets,:minify]
+  task :all => [:docs,:assets,:minify,:zip]
   desc "Compile all the assets"
   task :assets => :environment do
     File.open( File.join(App.root,'vendor','assets','stylesheets','luca-development.css'), 'w+' ) do |fh|

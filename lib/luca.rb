@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 module Luca
+  Version = '0.9.9'
   def self.base_path
     File.join(File.dirname(__FILE__), '..')
   end
