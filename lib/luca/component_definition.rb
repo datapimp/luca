@@ -42,7 +42,8 @@ module Luca
       base = {
         source: source,
         defined_in_file: source,
-        type: "javascript"
+        type: "javascript",
+        starts_on_line: definition_line.line_number
       }
 
       unless class_name.nil?
