@@ -9,17 +9,18 @@ stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.
 scripts = ["dependencies.js","sandbox.js"]
 
 namespace :documentation do
-  desc "Export the project documentation"
-  task :export do
-    require "./app"
-    app = Luca::LucaApplication.new("Luca",root:Dir.pwd())
-    app.export
-  end
+
 end
 
 namespace :release do
+  desc "Export the project documentation"
+  task :docs => :environment do
+    app = Luca::LucaApplication.new("Luca",root:Dir.pwd())
+    app.export
+  end  
+
   desc "Compile and Minify"
-  task :all => [:assets,:minify]
+  task :all => [:docs,:assets,:minify]
   desc "Compile all the assets"
   task :assets => :environment do
     File.open( File.join(App.root,'vendor','assets','stylesheets','luca-development.css'), 'w+' ) do |fh|
