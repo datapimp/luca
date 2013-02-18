@@ -1,3 +1,16 @@
 .docs-application {
   padding-top: 40px;
 }
+
+.docs-home {
+  .hero-unit {
+    .links {
+      margin-top: 25px;
+    }
+    .links li {
+      list-style-type:none;
+      display: inline;
+      padding-right: 25px;
+    }
+  }
+}
