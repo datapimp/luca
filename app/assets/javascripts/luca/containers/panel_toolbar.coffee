@@ -75,7 +75,7 @@ panelToolbar.defines
     @
 
 
-make = Backbone.View::make
+make = Luca.View::make
 
 buildButton = (config, wrap=true)->
   if config.ctype? or config.type?

@@ -178,14 +178,14 @@ collectionView.privateMethods
 
     ""
 
-  # Uses the various options passed to the `CollectionView` to assemble a call to `Backbone.View::make`.
+  # Uses the various options passed to the `CollectionView` to assemble a call to `Luca.View::make`.
   makeItem: (model, index)->
     item = if @prepareItem? then @prepareItem.call(@, model, index) else (model:model, index: index)
     attributes = @attributesForItem(item, model) 
     content = @contentForItem(item)
 
     try
-      Backbone.View::make(@itemTagName, attributes, content)
+      Luca.View::make(@itemTagName, attributes, content)
     catch e
       console.log "Error generating DOM element for CollectionView", @, model, index
 

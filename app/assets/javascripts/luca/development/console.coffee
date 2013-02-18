@@ -186,7 +186,7 @@ Luca.util.inspectComponent = (component)->
 
 Luca.util.launchers.developmentConsole = (name="luca-development-console")->
   @_lucaDevConsole = Luca name, ()=>
-    @$el.append Backbone.View::make("div", id: "#{ name }-wrapper", class: "modal fade large")
+    @$el.append Luca.View::make("div", id: "#{ name }-wrapper", class: "modal fade large")
 
     dconsole = new Luca.tools.DevelopmentConsole
       name: name

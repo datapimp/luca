@@ -198,7 +198,17 @@ view.publicMethods
 
     Backbone.View::trigger.apply @, arguments
 
- 
+  # Backbone.View.prototype.make is removed in 0.9.10.
+  # As we happen to rely on this little utility heavily,
+  # we add it to Luca.View
+  make: (tagName, attributes, content)->
+    el = document.createElement(tagName);
+    if (attributes) 
+      Backbone.$(el).attr(attributes)
+    if (content != null) 
+      Backbone.$(el).html(content)
+      
+    el    
 
   registerEvent: (selector, handler)->
     @events ||= {}
@@ -240,6 +250,14 @@ view.privateMethods
   # - after:initialize  : afterInitialize()
   # - first:activation  : firstActivation()
   setupHooks: Luca.util.setupHooks
+
+# In order to support some Luca apps which rely
+# on Backbone.View.make.  
+view.afterDefinition ()->
+  if not Backbone.View::make?
+    Backbone.View::make = ()->
+      console.log "Backbone.View::make has been removed from backbone.  You should use Luca.View::make instead."
+      Luca.View::make
 
 view.register()
 
