@@ -123,4 +123,4 @@ codeManager.privateMethods
       $('head').append( link )
 
 codeManager.defines
-  make: Backbone.View::make
+  make: Luca.View::make

@@ -67,7 +67,7 @@ tableView.classMethods
       content = column.header 
       content = "<a class='link'>#{ column.header }</a>" if column.sortable
 
-      @$(targetElement).find('tr').append( Backbone.View::make "th", attrs, content )
+      @$(targetElement).find('tr').append( Luca.View::make "th", attrs, content )
 
 
     index = 0
@@ -88,6 +88,6 @@ tableView.classMethods
     if _.isFunction( column.renderer )
       cellValue = column.renderer.call @, cellValue, model, column 
 
-    Backbone.View::make("td", {"data-col-index":index}, cellValue)
+    Luca.View::make("td", {"data-col-index":index}, cellValue)
 
 tableView.register()

@@ -112,7 +112,7 @@ Luca.util.loadScript = (url, callback) ->
   script.src = url
   document.body.appendChild(script)
 
-Luca.util.make = Backbone.View::make
+Luca.util.make = Luca.View::make
 
 Luca.util.list = (list,options={},ordered)->
   container = if ordered then "ol" else "ul"
