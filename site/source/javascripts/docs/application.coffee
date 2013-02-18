@@ -21,8 +21,6 @@ app.configuration
 app.contains
   component: "home"
 ,
-  component: "documentation"
-,
   component: "browse_source"
 ,
   name: "getting_started"

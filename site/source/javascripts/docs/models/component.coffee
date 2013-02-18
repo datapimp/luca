@@ -12,6 +12,16 @@ model.configuration
 model.defines
   idAttribute: "class_name"
   
+  contentsWithoutHeader: ()->
+    startsAt  = @get("starts_on_line") || 0
+    contents  = @get("source_file_contents").split("\n")
+    count     = contents.length 
+
+    if startsAt > 0
+      startsAt = startsAt - 1
+
+    contents.slice(startsAt, count).join("\n")
+
   documentation: ()->
     base = _( @toJSON() ).pick 'header_documentation', 'class_name', 'defined_in_file'
 
@@ -20,21 +30,34 @@ model.defines
       componentType: @componentType() 
       componentTypeAlias: @componentTypeAlias()
       details:
-        publicMethods:        @documentationFor("publicMethods")
-        privateMethods:       @documentationFor("privateMethods")
-        privateProperties:    @documentationFor("privateProperties")
-        publicProperties:     @documentationFor("publicProperties")
+        publicMethods:        @methodDocumentationFor("publicMethods")
+        privateMethods:       @methodDocumentationFor("privateMethods")
+        privateProperties:    @propertyDocumentationFor("privateProperties","privateConfiguration")
+        publicProperties:     @propertyDocumentationFor("publicProperties","publicConfiguration")
 
-  documentationFor: (methodOrPropertyGroup="publicMethods")->
-    documentationSource = _.extend({}, @get("defines_methods"), @get("defines_properties"))
-
+  methodDocumentationFor: (groups...)->
+    documentationSource = _.extend({}, @get("defines_methods"))
     result = {}
 
-    if list = @metaData()?[ methodOrPropertyGroup ]?()
-      _(list).reduce (memo, methodOrProperty)->
-        memo[ methodOrProperty ] = documentationSource[ methodOrProperty ]
-        memo
-      , result  
+    for group in groups
+      if list = @metaData()?[ group ]?()
+        _.extend result, _(list).reduce (memo, methodOrProperty)->
+          memo[ methodOrProperty ] = documentationSource[ methodOrProperty ]
+          memo
+        , {}  
+
+    result    
+
+  propertyDocumentationFor: (groups...)->
+    documentationSource = _.extend({}, @get("defines_properties"))
+    result = {}
+
+    for group in groups
+      if list = @metaData()?[ group ]?()
+        _.extend result, _(list).reduce (memo, methodOrProperty)->
+          memo[ methodOrProperty ] = documentationSource[ methodOrProperty ]
+          memo
+        , {}  
 
     result
 
@@ -42,7 +65,7 @@ model.defines
     "/project/components/#{ Luca.namespace }/#{ @classNameId() }"
 
   metaData: ()->
-    Luca( @get("class_name") ).prototype.componentMetaData()
+    Luca.util.resolve( @get("class_name") )?.prototype.componentMetaData()
 
   classNameId: ()->
     @get("class_name").replace(/\./g,'__')
