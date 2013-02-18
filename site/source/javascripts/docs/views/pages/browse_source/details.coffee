@@ -29,8 +29,8 @@ view.defines
     documentation.$el.append("<h2>#{ model.get('class_name') }</h2>")
     documentation.$el.append("<div class='header-documentation'>#{ model.get('header_documentation') }</div>")
 
-    source.$el.show()
-    source.$el.append("<h2>Source</h2>")
+    source.$el.empty().show()
+    source.$el.prepend("<h2>Source</h2>")
     source.$bodyEl().append( model.get("source_file_contents") )
     @prettyPrint()
 
