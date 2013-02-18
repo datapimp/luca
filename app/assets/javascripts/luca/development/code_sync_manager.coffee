@@ -11,9 +11,9 @@
 # with state heavy applications, since the browser reloading doesn't always construct application
 # state exactly as you need it when you're making your css changes etc.
 #
-# - 0) You'll need to use the guard gem in your rails project.
+# #### 0) You'll need to use the guard gem in your rails project.
 #
-# - 1) Add an entry to your Guardfile:
+# #### 1) Add an entry to your Guardfile:
 #         guard 'luca' do
 #           watch(%r{^app/assets/stylesheets/(.+)}) do |match|
 #               path = match.last
@@ -24,7 +24,7 @@
 #           end
 #         end
 #
-# - 2) Add the `CodeSyncManager` to your development mode application. **Note:** This expect
+# #### 2) Add the `CodeSyncManager` to your development mode application. **Note:** This expect
 #      you to have a `Luca.SocketManager` capable backend such as faye or socket.io running. It
 #      handles the same configuration options as the `Luca.SocketManager` as well.
 #
@@ -34,7 +34,7 @@
 #                 channel: "/changes"
 #               app.codeSyncManager.trigger("ready")
 #
-# - 3) Run guard.  Edit your files, watch your changes appear.
+# #### 3) Run guard.  Edit your files, watch your changes appear.
 #
 # ### Using the Syncpad
 #
