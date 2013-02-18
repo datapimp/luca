@@ -112,7 +112,8 @@ Luca.util.loadScript = (url, callback) ->
   script.src = url
   document.body.appendChild(script)
 
-Luca.util.make = Luca.View::make
+Luca.util.make = (tagName="div", attributes={}, contents="")->
+  Luca.View::make.apply(@, arguments)
 
 Luca.util.list = (list,options={},ordered)->
   container = if ordered then "ol" else "ul"
