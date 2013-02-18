@@ -1,0 +1,76 @@
+
+      <h2>1.) Include the libraries</h2>
+
+<h4>Include the files from the CDN</h4>
+
+<pre><code>&lt;html&gt;
+  &lt;head&gt;
+    ...
+    &lt;link rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" /&gt;
+    &lt;link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" /&gt;
+    &lt;link rel="stylesheet" href="//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css" /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    ...
+    &lt;script type="text/javascript" src="//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h4>Use the Ruby gem in your Rails app</h4>
+
+<pre><code># Gemfile.lock
+gem 'luca'
+gem 'bootstrap-rails'
+</code></pre>
+
+<p>Including the luca gem makes everything available via the asset pipeline. </p>
+
+<pre><code># application.coffee
+#= require luca-dependencies.min
+#= require luca.min
+</code></pre>
+
+<p>We depend on the bootstrap css externally.</p>
+
+<pre><code>/*
+ *= require twitter/bootstrap
+ *= require luca-ui.css
+ */
+</code></pre>
+
+<h2>2.) Generate your application</h2>
+
+<p>The luca gem ships with a rails generator to generate an application skeleton.  You can run it:
+    rails g luca:application sample    </p>
+
+<p>Doing this will generate an application skeleton for you:</p>
+
+<pre><code>- app/assets/javascripts/sample
+  - collections
+  - lib
+    - collection_manager.coffee
+    - router.coffee
+  - models
+  - views
+  - application.coffee
+  - config.coffee
+  - index.coffee
+</code></pre>
+
+<h2>3.) Start developing</h2>
+
+<p>The style we use to develop Luca applications is to develop all of our components and views as encpasulated modules.  We start with the smallest units, and then build them up into components using containers, and then build them into pages which are controlled by the main Application. </p>
+<ul class="nav">
+  <li>
+    <a href="#samples">View some examples</a>
+  </li>
+  <li>
+    <a href="#tutorials">Follow some tutorials</a>
+  </li>
+  <li>
+    <a href="#docs">Read the auto-generated documentation</a>
+  </li>
+</ul>
+</ul>
