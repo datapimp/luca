@@ -3,10 +3,7 @@ source :rubygems
 gem "middleman", "~>3.0.5"
 gem "middleman-favicon-maker"
 gem "middleman-livereload"
-gem "middleman-sprockets"
 gem "susy", "~>1.0.5"
 gem "redcarpet"
-gem 'haml_assets'
-gem 'haml'
 gem 'ejs'
 gem 'coffee-filter' # Coffeescript filter for HAML

@@ -29,9 +29,6 @@ GEM
     ffi (1.1.5)
     fssm (0.2.9)
     haml (3.1.7)
-    haml_assets (0.2.1)
-      haml
-      tilt
     hike (1.2.1)
     http_router (0.10.2)
       rack (>= 1.0.0)
@@ -133,11 +130,8 @@ PLATFORMS
 DEPENDENCIES
   coffee-filter
   ejs
-  haml
-  haml_assets
   middleman (~> 3.0.5)
   middleman-favicon-maker
   middleman-livereload
-  middleman-sprockets
   redcarpet
   susy (~> 1.0.5)
