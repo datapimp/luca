@@ -133,9 +133,11 @@ PLATFORMS
 DEPENDENCIES
   coffee-filter
   ejs
+  haml
   haml_assets
   middleman (~> 3.0.5)
   middleman-favicon-maker
   middleman-livereload
+  middleman-sprockets
   redcarpet
   susy (~> 1.0.5)

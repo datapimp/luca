@@ -1,7 +1,11 @@
+require 'haml'
+require 'ejs'
+require 'haml_assets'
+
+activate :sprockets
 #Markdown
 set :markdown_engine, :redcarpet
 
-activate :livereload
 ### 
 # Compass
 ###

@@ -1,0 +1,153 @@
+.component-details-wrapper{"data-component-details"=>"<%= class_name %>"}
+  %h2 <%= class_name %>
+  .component-info.row-fluid
+    .span11
+      %table.table.component-definition-details
+        %tbody
+          %tr
+            %th Defined In
+            %td.defined-in-file
+              %a.link
+                <%= defined_in_file %> 
+
+          <% if( componentType === "view") { %>
+          %tr
+            %th Type Alias
+            %td.component-type-alias
+              <%= componentTypeAlias %>
+          <% } %>
+
+  .header-documentation
+    .row-fluid
+      .span11
+        <%= header_documentation %>
+
+  .row-fluid
+    <% if( classHierarchy().length > 0 ) { %>
+    .span3
+      %h4 Class Hierarchy
+      %ul
+        <% _( classHierarchy().slice(1,1000) ).each(function(component){ %> 
+        %li
+          %a{:href=>"#docs/<%= component %>"} <%= component %> 
+        <% }) %>
+    <% } %>
+
+    <% if( componentType === "view" && classHierarchy().length > 0 ) { %>
+    .span3
+      %h4 Style Hierarchy
+      %ul
+        <% _( styleHierarchy() ).each(function(component){ %> 
+        %li
+          <%= component %>
+        <% }) %>
+    <% } %>    
+
+    <% if( descendants().length > 0 ) { %>
+    .span3
+      %h4 Descendants
+      %ul
+        <% _( descendants() ).each(function(component){ %> 
+        %li
+          %a{:href=>"#docs/<%= component %>"} <%= component %> 
+        <% }) %>
+    <% } %>
+
+  %section.documentation 
+    .public.row-fluid
+      .span11
+        %h3 Public Methods
+        <% if( !_.isEmpty( details.publicMethods) ) { %>
+        %table.table
+          %thead
+            %tr
+              %th.method Method
+              %th.arguments Arguments
+              %th.documentation Documentation
+          %tbody
+            <% for(var method in details.publicMethods) { %>
+            <%  var values = details.publicMethods[method] || {arguments:[]} %>
+            %tr
+              %td <%= method %> 
+              %td
+                .row-fluid
+                <% for(var i = 0; i < values.arguments.length; i++) { %>
+                <% var data = values.arguments[i] %> 
+                .span6.argument <%= data && data.argument %>
+                .span6.value <%= data && data.value %>
+                <% } %>
+              %td <%= values.documentation %>
+            <% } %>
+        <% } else { %>
+        .empty-text
+          This component does not define any public methods.
+        <% } %>
+
+    .public.row-fluid
+      .span11
+        %h3 Public Properties
+        <% if( !_.isEmpty( details.publicProperties ) ) { %>
+        %table.table
+          %thead
+            %tr
+              %th.property Property
+              %th.value Default Value
+              %th.documentation Documentation
+          %tbody
+            <% for(var property in details.publicProperties) { %>
+            <%  var values = details.publicProperties[method] || {arguments:[]} %>
+            %tr
+              %td <%= property %> 
+              %td <%= '' %>
+              %td <%= values.documentation %>
+            <% } %>
+        <% } else { %>
+        .empty-text
+          This component does not define any public properties.
+        <% } %>
+
+    .private.row-fluid
+      .span11
+        %h3 Private Methods
+        <% if( !_.isEmpty( details.privateMethods) ) { %>
+        %table.table
+          %thead
+            %tr
+              %th.method Method
+              %th.arguments Arguments
+              %th.documentation Documentation
+          %tbody
+            <% for(var method in details.privateMethods) { %>
+            <%  var values = details.privateMethods[method] || {arguments:[]} %>
+            %tr
+              %td <%= method %> 
+              %td <%= '' %>
+              %td <%= values.documentation %>
+            <% } %>
+        <% } else { %>
+        .empty-text
+          This component does not define any private methods.
+        <% } %>
+
+    .private.row-fluid
+      .span11
+        %h3 Private Properties
+        <% if( !_.isEmpty( details.privateProperties ) ) { %>
+        %table.table
+          %thead
+            %tr
+              %th.property Property
+              %th.value Default Value
+              %th.documentation Documentation
+          %tbody
+            <% for(var property in details.privateProperties) { %>
+            <%  var values = details.privateProperties[method] || {arguments:[]} %>
+            %tr
+              %td <%= property %> 
+              %td <%= '' %>
+              %td <%= values.documentation %>
+            <% } %>
+        <% } else { %>
+        .empty-text
+          This component does not define any private properties.
+        <% } %>
