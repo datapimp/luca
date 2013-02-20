@@ -316,7 +316,7 @@ module Luca
       end
 
       def defines_property?
-        !comment? && !defines_method? && indentation_level == 1 && line.match(/\s*\w+\:.*\w/)
+        !comment? && !defines_method? && indentation_level == 1 && line.match(/\s*\w+\:.*\w*/)
       end
 
       def body?
