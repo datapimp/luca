@@ -5,6 +5,5 @@ gem "middleman-favicon-maker"
 gem "middleman-livereload"
 gem "susy", "~>1.0.5"
 gem "redcarpet"
-gem 'haml_assets'
 gem 'ejs'
 gem 'coffee-filter' # Coffeescript filter for HAML

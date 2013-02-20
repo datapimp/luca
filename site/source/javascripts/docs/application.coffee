@@ -1,17 +1,33 @@
 app = Docs.register       "Docs.Application"
 app.extends               "Luca.Application"
+app.configuration
+  el: "#viewport"
+  fluid: true
+  fullscreen: true
+  applyWrapper: false
+  name: "DocsApp"
 
 app.configuration
-  name: "DocsApp"
-  fluid: true
-  el: "#viewport"
+  collectionManager: 
+    initialCollections:[
+      "framework_documentation"
+    ]
+  router: "Docs.Router"
+  routes:
+    "":                 "home#index"
+    "docs":             "browse_source#index"
+    "get-started":      "getting_started#index"
 
 app.contains
-  bodyTemplate: "home"
-
-app.defines
-  beforeRender: ()->
-    @$el.append (new Docs.views.TopNavigation() ).render().el
-    Luca.Application::beforeRender?.apply(@, arguments)
+  component: "home"
+,
+  component: "browse_source"
+,
+  name: "getting_started"
+  type: "page"
+  layout: "pages/getting_started"
+  index: _.once ()->
+    @$('pre').addClass('prettyprint')
+    window.prettyPrint() 
 
 app.register()

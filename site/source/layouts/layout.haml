@@ -15,12 +15,36 @@
     
     = javascript_include_tag "vendor/modernizr-2.6.1.min"
     %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css"}
-    %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/stylesheets/luca-ui.css"}
+    %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css"}
+    %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css"}
+    %link{:rel=>"stylesheet",:href=>"//google-code-prettify.googlecode.com/svn/trunk/src/prettify.css"}
+
     = stylesheet_link_tag "site"
   %body
-    #viewport
-    %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/javascripts/luca-dependencies.min.js"}
-    %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/javascripts/luca.min.js"}
-    = javascript_include_tag "vendor/luca-dependencies.min"
-    = javascript_include_tag "vendor/luca.min"
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid 
+          %button.btn.btn-navbar{:type=>"button","data-toggle"=>"collapse","data-target"=>".nav-collapse"}
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.brand{:href=>"#"} Luca
+          .nav-collapse.collapse
+            %ul.nav
+              %li.active
+                %a.active{:href=>"#"} Home
+              %li
+                %a{:href=>"#get-started"} Get Started
+              %li
+                %a{:href=>"#docs"} Documentation
+
+    .container-fluid{:style=>"padding-top:40px;"}
+      = yield                
+
+    %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js"}
+    %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js"}
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"}
+    
+    = javascript_include_tag "luca-framework-documentation"    
+    = javascript_include_tag "dependencies"
     = javascript_include_tag "site"

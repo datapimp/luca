@@ -8,5 +8,5 @@
 #= require_self
 
 Docs.onReady ()->
-  window.DocsApp = new Docs.Application()
+  DocsApp = new Docs.Application()
   DocsApp.boot()
