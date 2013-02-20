@@ -72,21 +72,30 @@ component.publicMethods
     nextIndex = if @atLast() then 0 else @activeCard + 1
     @activate( nextIndex )
 
+  # Find a direct component on this card by its name.
+  find: (name)-> 
+    _( @components ).detect (c)-> 
+      c.name is name
 
   # Activates the component at the specified index.  You may optionally specify
   # the name of the component you wish to activate.  You can pass false as your second
   # argument, to disable the event handling that occurs when you activate a card on this container.
   # If you pass a callback function to the activate method, that callback will be executed within
   # the context of the activated component. 
-  activate: (indexOrName, silent=false, callback)->
+  activate: (index, silent=false, callback)->
     if _.isFunction(silent)
       silent = false
       callback = silent
 
-    return if indexOrName is @activeCard
+    return if index is @activeCard
 
     previous = @activeComponent()
-    return unless current = @getComponent(indexOrName) || @find(indexOrName)
+
+    current = @getComponent(index)
+
+    if !current?
+      index = @indexOf(index) 
+      return unless current = @getComponent(index)
 
     unless silent is true
       @trigger "before:card:switch", previous, current
@@ -107,7 +116,7 @@ component.publicMethods
           current.trigger("first:activation")
       current.previously_activated = true
 
-    @activeCard = if indexOrName
+    @activeCard = index 
     @activeComponentElement().show()
 
     unless silent is true

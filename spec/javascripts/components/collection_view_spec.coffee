@@ -38,7 +38,7 @@ describe 'The Collection View', ->
     expect( query.filter ).toEqual 'value'
 
   it "should render the attributes in the specified list elements", ->
-    expect( @view.$html() ).toContain('value_one')
+    expect( @view.$html().match(/value_one/) ).toBeTruthy()
 
   it "should render each of the attributes", ->
     expect( @view.$('li.custom-class').length ).toEqual 2

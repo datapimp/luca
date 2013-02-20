@@ -178,7 +178,7 @@ container.publicConfiguration
   # on each child component.  Values explicitly defines in the components config will 
   # take precedence over the default.
   defaults: {}
-  
+
   # The `@extensions` property is useful when you are subclassing a container view
   # which already defines an array of components, and you want to specifically override
   # properties and settings on the children. The `@extensions` property expects either: 
@@ -579,9 +579,16 @@ container.publicMethods
       fn.call component, component, index
       component?.eachComponent?.apply component, [fn,deep] if deep
 
-  indexOf: (name)->
+  indexOfComponentName: (name)->
     names = _( @components ).pluck('name')
     _( names ).indexOf(name)
+
+  indexOf: (nameOrComponent)->
+    if _.isString(nameOrComponent)
+      return @indexOfComponentName(nameOrComponent)
+
+    if _.isObject(nameOrComponent)
+      _( @components ).indexOf( nameOrComponent )
 
   activeComponent: ()->
     return @ unless @activeItem
@@ -591,7 +598,7 @@ container.publicMethods
     @$("[data-luca-parent='#{ @name || @cid }']")
 
   getComponent: (needle)->
-    @components[ needle ] || @find(needle)
+    @components[ needle ]
 
   isRootComponent:()->
     @rootComponent is true || !@getParent?
