@@ -139,3 +139,5 @@ field.privateMethods
 
   getInputElement: ()->
     @input ||= @$('input').eq(0)
+
+field.register()

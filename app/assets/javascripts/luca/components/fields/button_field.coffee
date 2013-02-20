@@ -11,6 +11,13 @@ buttonField.extends                 "Luca.core.Field"
 buttonField.triggers                "button:click"
 
 buttonField.publicConfiguration
+  # Which size should this button be? Valid options are:
+  # - none ( default )
+  # - large
+  # - mini
+  # - small
+  buttonSize: undefined
+
   # Which bootstrap color class should we apply to this button?
   # Valid options are any css button class, or the defaults which
   # ship with bootstrap: 
@@ -70,6 +77,10 @@ buttonField.privateMethods
     @input_name ||= @name ||= @input_id
     @input_value ||= @label ||= @text
     @input_class ||= @class ||= @buttonClasses
+
+    if @buttonSize?.length > 0
+      @input_class += " #{ buttonSize.replace(/btn-/,'') }"
+
     @icon_class ||= ""
     @icon_class = "icon-#{ @icon_class }" if @icon_class.length and !@icon_class.match(/^icon-/)
     @icon_class += " icon-white" if @white
