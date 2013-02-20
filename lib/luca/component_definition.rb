@@ -86,10 +86,16 @@ module Luca
         memo[property] = {
           defined_on_line: definition_line.line_number,
           documentation: documentation_for(property),
-          default: ''
+          default: default_value_for(property) 
         }
         memo
       end
+    end
+
+    def default_value_for property
+      definition = find_definition_of(property).line.strip
+      property, value = definition.split(':')
+      value && value.strip
     end
 
     def argument_information_for method
