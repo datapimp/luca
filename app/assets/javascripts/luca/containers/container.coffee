@@ -153,33 +153,96 @@ container.triggers                "before:components",
 container.replaces                "Luca.Container"
 
 container.publicConfiguration
+  # @components should contain a list of object configurations for child view(s)
+  # of this container.  minimally, the object configuration should specify 
+  # a `@type` property which is a component definition shortcut that will
+  # resolve to a registered component definition.  For example, if you have
+  # a view class named 'Application.views.CustomView' then your type alias will be
+  # 'custom_view'.  The values specified in the configuration object will override the 
+  # values defined as properties and methods on your view prototypes.
+  #
+  # Additionally, there are a few custom attributes which you can specify on your config
+  # that will impact the container component itself.  the `@role` property specifies the
+  # child view's role in this container, and will define a getter method on the container
+  # that allows you to access the child view.  For example:
+  #       container = new Luca.Container 
+  #         components:[
+  #           role: "my_main_dude"
+  #           name: "soederpop"
+  #         ]
+  #
+  #       container.getMyMainDude().name #=> "soederpop"
   components:[]
 
-container.privateConfiguration
-  emptyContainerElements: false
-  className: 'luca-ui-container'
-  componentTag: 'div'
-  componentClass: 'luca-ui-panel'
-  isContainer: true
-  rendered: false
+  # The `@defaults` property is an object of configuration parameters which will be set
+  # on each child component.  Values explicitly defines in the components config will 
+  # take precedence over the default.
+  defaults: {}
+
+  # The `@extensions` property is useful when you are subclassing a container view
+  # which already defines an array of components, and you want to specifically override
+  # properties and settings on the children. The `@extensions` property expects either: 
+
+  # An object whose keys match the names of the `@role` property defined on the child components.
+  # The value should be an object which will override any values defined on the parent class.
+  #
+  # or:
+  # 
+  # An array of objects in the same array position / index as the target child view you wish to extend.
+  extensions: {}
 
   # @componentEvents provides declarative syntax for responding to events on
   # the components in this container.  the format of the syntax is very similar
   # to the other event binding helpers:
   #
-  #   component_accessor component:trigger
+  #       component_accessor component:trigger
   #
-  # where component_accessor is either the name of the role, or a method on the container
-  # which will find the component in question.
+  # where component_accessor is either the name of the component, or a the role 
+  # property on the component, component:trigger is the event that component fires.
+  # handler is a method on the container which will respond to the child component event.
   #
-  # myContainer = new Luca.Container
-  #   componentEvents:
-  #     "name component:trigger"    : "handler"
-  #     "role component:trigger"    : "handler"
-  #     "getter component:trigger"  : "handler"
+  #       myContainer = new Luca.Container
+  #         componentEvents:
+  #           "name component:trigger"    : "handler"
+  #           "role component:trigger"    : "handler"
+  #           "getter component:trigger"  : "handler"
+  #         components:[
+  #           name: "name"
+  #         ]
   #
   componentEvents: {}
 
+container.privateConfiguration
+  className: 'luca-ui-container'
+
+  # This is a convenience attribute for identifying
+  # views which are luca containers
+  isContainer: true
+
+  # if set to true, we will generate DOM elements
+  # to wrap each of our components in.  This should 
+  # generally be avoided IMO as it pollutes the DOM, 
+  # but is currently necessary for some container implementations
+  generateComponentElements: false
+
+  # if set to true, the DOM elements which wrap
+  # our components will be emptied prior to rendering
+  # the component inside this container.
+  emptyContainerElements: false
+
+  # if @generateComponentElements is true, which tag should this 
+  # container wrap our components in?
+  componentTag: 'div'
+
+  # if @generateComponentElements is true, which class should we 
+  # apply to the container elements which wrap our components?
+  componentClass: 'luca-ui-panel'
+
+  rendered: false
+
+
+
+container.privateMethods
   initialize: (@options={})->
     _.extend @, @options
 
@@ -199,6 +262,7 @@ container.privateConfiguration
 
     Luca.View::initialize.apply @, arguments
 
+  # Removing a container will call remove on all of the nested components as well.
   remove: ()->
     Luca.View::remove.apply(@, arguments)
     @eachComponent (component)->
@@ -344,8 +408,7 @@ container.privateConfiguration
 
     map
 
-  # Trigger the Rendering Pipeline process on all of the nested
-  # components
+  # Trigger the Rendering Pipeline process on all of the nested components
   renderComponents: (@debugMode="")->
     @debug "container render components"
 
@@ -383,8 +446,6 @@ container.privateConfiguration
 
         throw e unless Luca.silenceRenderErrors? is true
 
-  #### Container Activation
-  #
   # When a container is first activated is a good time to perform
   # operations which are not needed unless that component becomes
   # visible.  This first activation event should be relayed to all
@@ -400,27 +461,6 @@ container.privateConfiguration
       unless component?.previously_activated is true
         component?.trigger?.call component, "first:activation", component, activator
         component.previously_activated = true
-
-  #### Underscore Methods For Working with Components
-  _: ()-> _( @components )
-
-  pluck: (attribute)->
-    @_().pluck(attribute)
-
-  invoke: (method)->
-    @_().invoke(method)
-
-  select: (fn)->
-    @_().select(fn)
-
-  detect: (fn)->
-    @_().detect(attribute)
-
-  reject: (fn)->
-    @_().reject(fn)
-
-  map: (fn)->
-    @_().map(fn)
 
   registerComponentEvents: (eventList, direction="on")->
     container = @
@@ -443,13 +483,41 @@ container.privateConfiguration
 
         component[direction](eventId, @[handler], container)
 
+container.publicMethods
+  # Returns an underscore.js object that wraps the components array
+  _: ()-> _( @components )
 
+  # Return the value of attribute of each component 
+  pluck: (attribute)->
+    @_().pluck(attribute)
+
+  # Invoke the passed method name on each component
+  invoke: (method)->
+    @_().invoke(method)
+
+  # Select any component for which the passed iterator returns true
+  select: (iterator)->
+    @_().select(iterator)
+
+  # Find the first matching component for which the passed iterator returns true
+  detect: (iterator)->
+    @_().detect(iterator)
+
+  # Return a list of components without the components for which the passed iterator returns true 
+  reject: (iterator)->
+    @_().reject(iterator)
+
+  # Run the passed iterator over each component and return the result in an array
+  map: (fn)->
+    @_().map(fn)
+
+  # Returns a list of nested components which are also containers
   subContainers: ()->
     @select (component)->
       component.isContainer is true
 
   roles: ()->
-    _( @allChildren() ).pluck('role')
+    _( @allChildren() ).chain().pluck('role').compact().value()
 
   allChildren: ()->
     children = @components
@@ -458,6 +526,11 @@ container.privateConfiguration
       component?.allChildren?()
 
     _([children,grandchildren]).chain().compact().flatten().value()
+
+  # Find a direct component on this card by its name.
+  find: (name)-> 
+    _( @components ).detect (c)-> 
+      c.name is name    
 
   findComponentForEventBinding: (nameRoleOrGetter, deep=true)->
     @findComponentByName(nameRoleOrGetter, deep) || @findComponentByGetter( nameRoleOrGetter, deep ) || @findComponentByRole( nameRoleOrGetter, deep )
@@ -506,9 +579,16 @@ container.privateConfiguration
       fn.call component, component, index
       component?.eachComponent?.apply component, [fn,deep] if deep
 
-  indexOf: (name)->
+  indexOfComponentName: (name)->
     names = _( @components ).pluck('name')
     _( names ).indexOf(name)
+
+  indexOf: (nameOrComponent)->
+    if _.isString(nameOrComponent)
+      return @indexOfComponentName(nameOrComponent)
+
+    if _.isObject(nameOrComponent)
+      _( @components ).indexOf( nameOrComponent )
 
   activeComponent: ()->
     return @ unless @activeItem
@@ -617,8 +697,6 @@ doComponents = ()->
 validateContainerConfiguration = ()->
   true
 
-# Private Helpers
-#
 # indexComponent( component ).at( index ).in( componentsInternalIndexMap )
 indexComponent = (component)->
   at: (index)->
