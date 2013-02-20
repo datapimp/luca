@@ -164,15 +164,14 @@ container.publicConfiguration
   # There are special properties you can define in your components configuration items 
   # that will effect the container:
   #
-  # - role:       describe the child view's function in this container, will create a camelized getter
-  #               for you on the container.  e.g. when role is my_custom_role, the container will
-  #               have a method getMyCustomRole() that returns that child view. 
+  # - role:       will create a camelized getter for you on the container.  e.g. when role is `my_custom_role`, 
+  #               the container will have a method `getMyCustomRole()` that returns that child view.
   #
   # - name:       a name for the child view.  this allows you to access the component by name using 
   #               the find() method on the container.
   #
   # - type:       a type alias from the component registry.  type alias are underscore'd strings 
-  #               matching the component class name.  e.g. App.views.MyCustomView type alias is my_custom_view.
+  #               matching the component class name.  e.g. App.views.MyCustomView type alias is `my_custom_view`
   #
   # - component:  a convenience property for setting type, role, and name to be equal. 
   components:[]
@@ -203,8 +202,7 @@ container.publicConfiguration
   # where component_accessor is either the name of the component, or a the role 
   # property on the component, component:trigger is the event that component fires.
   # handler is a method on the container which will respond to the child component event.
-  #
-  # <pre><code>
+  # <pre>
   #       myContainer = new Luca.Container
   #         componentEvents:
   #           "name component:trigger"    : "handler"
@@ -213,7 +211,7 @@ container.publicConfiguration
   #         components:[
   #           name: "name"
   #         ]
-  # </code></pre>
+  # </pre>
   componentEvents: {}
 
 container.privateConfiguration
