@@ -88,6 +88,15 @@ application.publicConfiguration
 
   # use Backbone.history push state?
   pushState: false
+
+  # If the server renders the entire page
+  # first, then we should start history silently.
+  startHistorySilently: false
+
+  # In cases where we use pushState, we need to tell
+  # the application what the actual root url of our app
+  # is, since everything after would otherwise be a hashbang 
+  rootUrl: undefined
   
   # we will create a collection manager singleton
   # by default unless otherwise specified.
@@ -113,63 +122,42 @@ application.publicConfiguration
   # with several 'pages' so to speak
   useController: true
 
-  # if you have special rendering requirements for
-  # the application's components, you can assign the
-  # specific element you want to render the container
-  # to inside of the #viewport
+  # If your Application does not behave as a Viewport that monopolizes
+  # its entire element, but instead you wish to render the application
+  # controller to a specific element,  you can specify the css selector of that element.
   mainControllerContainer: undefined
 
-  # Key Handler
-  #
-  # One responsibility of the application, since it is a viewport which monopolizes the entire screen
-  # is to relay keypress events from the document, to whatever views are interested in responding to them.
-  #
-  # This functionality is disabled by default.
-  useKeyHandler: false
-
-  # You can configure key events by specifying them by their name, as it exists in Luca.keyMap. For example:
-
   # keyEvents understands the following modifiers:
-  # `⇧`, `shift`, `option`, `⌥`, `alt`, `ctrl`, `control`, `command`, and `⌘`.
-
+  # - `⇧`, `shift`, `option`, `⌥`, `alt`, `ctrl`, `control`, `command`, and `⌘`.
   # The following special keys can be used for shortcuts:
   # `backspace`, `tab`, `clear`, `enter`, `return`, `esc`, `escape`, `space`,
   # `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `del`, `delete`
   # and `f1` through `f19`.
   #
+  # **Note**: This requires the keymaster.js library to be loaded.  This library is included
+  # with the bundled dependencies that ship with Luca.
+  #
   # Example:
-  # ```coffeescript
-  #   application.configuration
-  #     keyEvents:
-  #       '⌘+r, ctrl+r': "keyHandlerFunction"
-  #     keyHandlerFunction: -> alert 'something + r was pressed'
-  # ```
+  #       application.configuration
+  #         keyEvents:
+  #           '⌘+r, ctrl+r': "keyHandlerFunction"
+  #         keyHandlerFunction: -> alert 'something + r was pressed'
   keyEvents: {}
 
-  # applications have one component, the controller.
-  # any components defined on the application class directly
-  # will get wrapped by the main controller unless you
-  # set useController = false
-  components:[
-    type: 'template'
-    name: 'welcome'
-    template: 'sample/welcome'
-    templateContainer: "Luca.templates"
-  ]
-
-  # create getter methods for the various
-  # roles in the application's components on the
-  # application itself.  false by default.
+  # create getter methods for the various roles in the application's components on the application itself.
   createRoleBasedGetters: false
 
-  # create an instance of Luca.SocketManager
-  # which is a Backbone.Events style abstraction that
+  # create an instance of Luca.SocketManager which is a Backbone.Events style abstraction that
   # sits on top of services like faye, or socket.io 
   useSocketManager: false
   socketManagerOptions: {}
 
-  # Don't create getters on this component
-  # for the nested components
+application.publicMethods
+  # Creating your Application and all of its components and pages is 
+  # generally as simple as creating an instance of your Application class:
+  #       Luca.onReady ()->
+  #         window.MyApp = new Luca.Application() 
+  #         window.MyApp.boot()
   initialize: (@options={})->
     app             = @
     appName         = @name
@@ -257,7 +245,8 @@ application.publicConfiguration
     @get("active_sub_section")
 
   activePages: ()->
-    @$('.luca-ui-controller').map (index,element)=> $(element).data('active-section')
+    console.log "This method will be getting removed in Luca 1.0"
+    @$('.luca-controller').map (index,element)=> $(element).data('active-section')
 
   # boot should trigger the ready event, which will call the initial call
   # to render() your application, which will have a cascading effect on every
@@ -277,47 +266,31 @@ application.publicConfiguration
   collection: ()->
     @collectionManager.getOrCreate.apply(@collectionManager, arguments)
 
+  # Get an attribute from our internal state machine
   get: (attribute)->
     @state.get(attribute)
 
+  # Set an attribute on our internal state machine
   set: (attribute, value, options)->
     @state.set.apply(@state, arguments)
 
+  # Access a named view by its @name property. 
   view: (name)->
     Luca.cache(name)
 
-  #### Navigation Hooks
-  #
   # delegate to the main controller so that we can switch the active section
+  # easily directly from the application.  If passed a callback, this function
+  # will get called in the context of the activated component.  This method is useful
+  # inside of custom route handlers if you are manually defining them on a `Backbone.Router`
+  # instead of using the built in `@routes` helper.
   navigate_to: (component_name, callback)->
     @getMainController().navigate_to(component_name, callback)
 
-application.privateInterface
-  keyHandler: (e)->
-    return unless e and @keyEvents
-
-    isInputEvent = $(e.target).is('input') || $(e.target).is('textarea')
-
-    return if isInputEvent
-
-    keyname = Luca.keyMap[ e.keyCode ]
-
-    return unless keyname
-
-    meta = e?.metaKey is true
-    control = e?.ctrlKey is true
-
-    source = @keyEvents
-    source = if meta then @keyEvents.meta else source
-    source = if control then @keyEvents.control else source
-    source = if meta and control then @keyEvents.meta_control else source
-
-    if keyEvent = source?[keyname]
-      if @[keyEvent]? and _.isFunction(@[keyEvent])
-        @[keyEvent]?.call(@, e, keyname, keyEvent)
-      else
-        @trigger(keyEvent, e, keyname)
-
+application.privateMethods
+  # Any time the Application's main controller changes its active page
+  # we track the name of that page ( aka section ) on our state machine.
+  # If the active page on the main controller is another controller component,
+  # then we will track that controller's active component as our active sub section.
   setupControllerBindings: ()->
     app = @
     # any time the main controller card switches we should track
@@ -335,6 +308,12 @@ application.privateInterface
           @state.set(active_sub_section:current.name)
           app.trigger "action:change", previous.name, current.name
 
+  # A typical structure for a Luca.Application is that it will act as a `Viewport` which
+  # monopolizes the entire top level element in your dom ( either the body tag, or a top 
+  # level element just underneath it)  This `Viewport` is an abstract element where we can
+  # setup global event bindings, like keyBindings and such.  The `Viewport` will generally
+  # contain a `Luca.components.Controller` instance called "main_controller" that is responsible
+  # for displaying the active page for a given route. 
   setupMainController: ()->
     if @useController is true
       definedComponents = @components || []
@@ -388,12 +367,18 @@ application.privateInterface
       collectionManagerOptions.autoStart = false
       @collectionManager = new @collectionManagerClass( collectionManagerOptions )
 
+  # If our application is configured with a `@socketManagerOptions` property,
+  # it will create a socket manager instance for us automatically.  It won't
+  # start the socket manager process until the `@boot()` method is called on the application. 
   setupSocketManager: ()->
     return if _.isEmpty(@socketManagerOptions)
     _.extend(@socketManagerOptions, autoStart: false)
 
     @socket = new Luca.SocketManager(@socketManagerOptions) 
-  
+ 
+  # Sets up an instance of the Backbone.Router, and sets up the
+  # call to start the history tracking API once the appropriate
+  # application events have been fired. 
   setupRouter: ()->
     return if not @router? and not @routes?
 
@@ -424,6 +409,9 @@ application.privateInterface
       @autoStartHistory = "before:render" if @autoStartHistory is true
       @defer( Luca.Application.startHistory, false).until(@, @autoStartHistory)
 
+  # The default implementation of setupKeyHandler is kept around for backward
+  # compatibility purposes.  In Luca 1.0 we will be using keymaster.js for our
+  # key binding setup. 
   setupKeyHandler: ()->
     return unless @keyEvents
 
@@ -437,11 +425,12 @@ application.privateInterface
     for keyEvent in (@keypressEvents || ["keydown"])
       $( document ).on( keyEvent, handler )
 
-application.classInterface
+application.classMethods
   instances:{}
 
-  # Public: For purely informational purposes, describes the structure
-  # of the Application's controller views, and any of their nested controllers views.
+  # An application inspection helper, it describes the structure of this application's
+  # controlled components.  For an application that consists of multiple nested controllers
+  # it will recursively walk each controller and build a tree of the various pages / controlers.
   pageHierarchy: ()->
     app             = Luca()
     mainController  = app.getMainController()
@@ -458,19 +447,15 @@ application.classInterface
 
     getTree( mainController )
 
-  # Private: registers the instance of the Luca.Appliction
+  # Registers this instance of the Luca.Appliction
   # so that it is available via the Luca() helper, or through
-  # a call to Luca.Application.get()
+  # a call to Luca.Application.get().
   registerInstance: (app)->
     Luca.Application.instances[ app.name ] = app
 
-  # Keymaster understands the following modifiers:
-  # `⇧`, `shift`, `option`, `⌥`, `alt`, `ctrl`, `control`, `command`, and `⌘`.
-
-  # The following special keys can be used for shortcuts:
-  # `backspace`, `tab`, `clear`, `enter`, `return`, `esc`, `escape`, `space`,
-  # `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown`, `del`, `delete`
-  # and `f1` through `f19`.
+  # If the keymaster library is present, swap out the 
+  # setupKeyHandler method with something which will enable 
+  # keymaster support instead of our legacy system.
   checkForKeymaster: ()->
     if window?.key?.noConflict
       Luca.key = window.key.noConflict()
@@ -479,13 +464,12 @@ application.classInterface
         return unless @keyEvents
         Luca.util.setupKeymaster(@keyEvents, "all").on(@)
 
-  # Private: Recursively navigates down the controller page hierarchy
-  # to the page you specify by name.  You can specify the 
-  # method which is to be called at the end of the chain.
-  # 
   # This is used internally by the Application as it sets up
   # the @routes property and uses it to configure the Luca.Router
-  # instance for your app.
+  # instance for your app.  It allows you to specify the page you want
+  # to monopolize the viewport in your application by name, and regardless
+  # of how deeply nested that page may be among your controllers, it will know 
+  # what to do.  
   routeTo: (pages...)->
     last = _( pages ).last()
     first = _( pages ).first()
@@ -497,7 +481,7 @@ application.classInterface
       path = @app || Luca()
       index = 0
 
-      # we can specify a page by name, and not have to know its full path
+      # we can specify a page by name, and not have to know its full path.
       if pages.length is 1 and target = Luca(first)
         pages = target.controllerPath()
 
@@ -507,6 +491,9 @@ application.classInterface
         target = Luca(page)
 
         if page is last 
+          if specifiedAction? and not target[specifiedAction]? and not target.routeHandler?
+            console.log "You specified a component action to call when a route matches, but it does not exist on the component"
+
           callback = if specifiedAction? and target[ specifiedAction ]?
             _.bind(target[ specifiedAction ], target)
           else if target.routeHandler?
@@ -531,7 +518,10 @@ application.classInterface
   # modify how Backbone.history.start is called.  This will get called
   # by the Application instance in response to the @autoStartHistory property.
   startHistory: ()->
-    Backbone.history.start(pushState: @pushState)
+    Backbone.history.start
+      pushState: @pushState
+      rootUrl: @rootUrl
+      silent: @startHistorySilently
 
 application.afterDefinition ()->
   Luca.routeHelper = Luca.Application.routeTo

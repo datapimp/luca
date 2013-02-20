@@ -1,29 +1,70 @@
+# The Controller is a special type of CardView that is used to provide structure to a Luca.Application.  Each
+# component in the controller is expected to have a unique `@name` property.  The Application's router configuration
+# will map URL / Hashbangs to the `@name`s of components that belong to the Application controller.  
+#
+# Applications which structure their 'pages' in controllers, or sections, will have the names of which
+# section or page is active inside of its state model.  One example / common application structure we see:
+#
+#       application:
+#         main_controller:
+#           controller / section_one:
+#             page_one
+#             page_two
+#             page_three
+#           controller / section_two
+#             page_alpha
+#             page_bravo
+#
+# In the above example, the Application would attempt to route to page_one, and the state 
+# of the application may look like:
+#
+#       application.activeSection() #=> 'section_one'
+#       application.activeSubSection() # => 'page_one'
+#       application.activePage() # => page_one
+#
 controller = Luca.register        "Luca.components.Controller"
 controller.extends                "Luca.containers.CardView"
 
-controller.publicInterface
+controller.publicConfiguration
+  # If there is an active application, we will attempt to 
+  # set the name of our currently activated page on the application's
+  # state machine.  The attribute we will set can be configured by setting this value.
   tracker: "page"
 
+  # We will set the name of the active page / section on our DOM element
+  # The attribute we will set can be configured by setting this.
+  activeAttribute: "active-section"
+  stateful: true
+  defaultPage: undefined
+  defaultCard: 0
+
+controller.publicMethods  
+  # Navigate to the default ( or first ) component on this controller.
+  # This will automatically get called upon rendering, so that it sets up
+  # the proper state tracking, event binding, etc.
   default: (callback)->
     @navigate_to(@defaultPage || @defaultCard, callback)
 
+  # Returns the name of the component which is currently active
+  # on this controller.
   activePage: ()-> 
     @activeSection()
 
-  navigate_to: (section, callback)->
-    section ||= @defaultCard
+  # Navigate to a page on this controller by name.  If passed an optional
+  # callback, the callback will be called within the context of the activated page.
+  navigate_to: (page, callback)->
+    page ||= @defaultCard
 
-    @activate section, false, (activator, previous,current)=>
+    @activate page, false, (activator, previous,current)=>
       if current.activatedByController is true
         current.trigger("on:controller:reactivation")
       else
-        current.trigger("on:controller:reactivation")
         current.trigger("on:controller:activation")
         current.activatedByController = true
 
       @state.set(active_section: current.name )
 
-      if app = Luca.getApplication?()
+      if @tracker? and app = @app || Luca.getApplication?()
         app.state.set(@tracker, current.name)
 
       Luca.key?.setScope( current.name )
@@ -31,15 +72,37 @@ controller.publicInterface
       if _.isFunction( callback )
         callback.call(current)
 
-    # return the section we are navigating to
-    @find(section)
+    # return the component we are navigating to
+    @find(page)
 
 controller.classMethods
+  # For each component we control, if there is a keyEvents property defined
+  # then we will define a keymaster scope for that component's name, and setup
+  # bindings as directed.  This is important because each time a controller 
+  # activates a component, that component will attempt to change the scope of
+  # the keymaster so that components becomes responsible for handling detected key events.
   setupComponentKeyEvents: ()->
     @_().each (component)->    
       if _.isObject(component.keyEvents) and component.name?
         Luca.util.setupKeymaster(component.keyEvents, component.name).on(component)    
 
+  # The Controller Path is an array of the names of the controllers
+  # a given component belongs to.  This method will get patched on to each
+  # component that belongs to a controller.  It will always be bound to the instance
+  # of the component itself.  Example:
+  # 
+  #       application.contains
+  #         name: "main_controller"
+  #         components: [
+  #           name: "sub_controller"
+  #           components:[
+  #             name: "page"
+  #           ]
+  #         ]
+  #
+  # The @controllerPath() method for the component named page would be ['sub_controller','page'].
+  # This will be used internally by the Application route builder, so that each of page's parent
+  # controllers are activated in the proper order needed to make page visible.
   controllerPath: ()->
     component = @
     
@@ -57,9 +120,6 @@ controller.afterDefinition ()->
   Luca.View::hooks.push "on:controller:activation"
 
 controller.defines
-  additionalClassNames: 'luca-ui-controller'
-  activeAttribute: "active-section"
-  stateful: true
 
   initialize: (@options)->
     # let's phase out the 'card' terminology 
@@ -98,6 +158,7 @@ controller.defines
     @availableSections.apply(@, arguments)    
 
   availableSections: ()->
+    console.log "The availableSections()/availablePages() method will be removed in 1.0"
     base = {}
     base[ @name ] = @sectionNames()
 
