@@ -88,3 +88,4 @@ buttonField.privateMethods
   setValue: ()-> 
     true
 
+buttonField.register()
