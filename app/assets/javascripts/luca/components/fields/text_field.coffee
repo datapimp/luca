@@ -2,7 +2,7 @@ textField = Luca.register     'Luca.fields.TextField'
 textField.extends             'Luca.core.Field'
 
 textField.defines
-  _events:
+  _inheritEvents:
     "blur input" : "blur_handler"
     "focus input" : "focus_handler"
     "change input" : "change_handler"

@@ -59,7 +59,7 @@ view.defines
         details ||= {}
         list.append "<tr><td>#{ method }</td><td></td><td>#{ details.documentation || "" }</td></tr>"
          
-    source.$('pre').html( model.contentsWithoutHeader() )
+    source.$('pre.source').html( model.contentsWithoutHeader() )
 
     @prettyPrint()
 
