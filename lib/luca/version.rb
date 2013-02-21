@@ -1,3 +1,3 @@
 module Luca
-  Version = '0.9.9-pre'
+  Version = '0.9.899'
 end
