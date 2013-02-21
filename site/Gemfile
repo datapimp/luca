@@ -6,4 +6,5 @@ gem "middleman-livereload"
 gem "susy", "~>1.0.5"
 gem "redcarpet"
 gem 'ejs'
+gem 'luca'
 gem 'coffee-filter' # Coffeescript filter for HAML
