@@ -36,7 +36,6 @@ gridView.privateMethods
       rowIndex = 0 if index > 0 and index % @itemsPerRow is 0
       row
 
-    console.log "Appending rows", rows
     for row in rows
       @$append(row) 
 

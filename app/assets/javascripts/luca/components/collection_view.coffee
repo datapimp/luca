@@ -151,15 +151,19 @@ collectionView.publicMethods
     if models.length is 0
       @trigger("empty:results", query, options)
 
-    index = 0
-    for model in models
-      @$append @makeItem(model, index++)
+    @renderModels(models, query, options)
 
     @trigger("after:refresh", models, query, options)
 
     @
 
+
 collectionView.privateMethods
+  renderModels: (models, query, options)->
+    index = 0
+    for model in models
+      @$append @makeItem(model, index++)
+
   # Determines which attributes should be set on the item DOM element. 
   attributesForItem: (item, model)->
     _.extend {}, class: @itemClassName, "data-index": item.index, "data-model-id": item.model.get('id')
