@@ -26,9 +26,12 @@ view.contains
   tagName: "pre"
   className: "prettyprint pre-scrollable"
   role: "output"
+  afterInitialize: ()->
+    @$el.html("Loading...")
 
 view.privateMethods
   runExample: ()->
+    console.log "Running example"
     @findComponentByName("endpoint_url", true).setValue("https://api.github.com/users/datapimp/gists")
     @loadUrl()
 

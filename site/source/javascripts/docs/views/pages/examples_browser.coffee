@@ -10,8 +10,12 @@ page.contains
   name: "api_browser"
 ,
   title: "Basic FormView"
-  type: "basic_form_view_example"
-  name: "basic_form_view_example"
+  type: "basic_form_view"
+  name: "basic_form_view"
+,
+  title: "Complex Layout FormView"
+  type: "complex_layout_form"
+  name: "complex_layout_form"
 
 page.privateConfiguration
   activeCard: 0
@@ -19,7 +23,9 @@ page.privateConfiguration
 
 page.privateMethods
   wrapExampleComponents: ()->
-    wrapped = for component, index in @components
+    wrapped = []
+
+    wrapped = _(@components).map (component,index)->
       title: component.title
       name: component.name
       components:[
@@ -30,6 +36,8 @@ page.privateMethods
         components:[
           type: component.type
           name: "component"
+          activation: ()->
+            @runExample?()
         ,
           type: "example_source"
           example: component.name
