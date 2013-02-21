@@ -63,11 +63,12 @@ field.publicMethods
 
   # Gets the value from the input element in this field control
   getValue: ()->
-    @getParsedValue(@getInputElement()?.attr('value'))
+    raw = @getInputElement()?.val()
+    @getParsedValue(raw)
 
   # Sets the value on the input element inside this field control
   setValue: (value)->
-    @getInputElement()?.attr('value', value)
+    @getInputElement()?.val(value)
 
   # Update the state of this field.  Valid options are defined on
   # this fields `@statuses` property
