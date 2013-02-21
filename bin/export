@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+git checkout master vendor/assets/javascripts site/source/javascripts/luca-framework-documentation.js
+cd site
+bundle exec middleman build
+cp -r build/* ../
+cd ..
+git add .
+git commit -m "Building documentation site" -a
+git push origin gh-pages

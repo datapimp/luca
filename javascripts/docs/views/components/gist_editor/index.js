@@ -1,1 +1,1 @@
-(function(){var e;e=Docs.register("Docs.components.GistEditor"),e["extends"]("Luca.Container"),e.contains({role:"browser"})}).call(this);
+(function(){var e;e=Docs.register("Docs.components.GistEditor"),e["extends"]("Luca.Container"),e.contains({role:"browser"}),e.register()}).call(this);
