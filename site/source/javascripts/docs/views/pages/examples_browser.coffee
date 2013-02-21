@@ -8,6 +8,10 @@ page.contains
   title: "API Browser"
   type: "api_browser"
   name: "api_browser"
+,
+  title: "Basic FormView"
+  type: "basic_form_view_example"
+  name: "basic_form_view_example"
 
 page.privateConfiguration
   activeCard: 0
