@@ -20,7 +20,7 @@ module Luca
     def export
       contents = export_all_component_definitions.to_json
       File.open(export_file_location, 'w+') do |fh|
-        contents = "window.Luca = window.Luca || {}; window.Luca.documentation = #{ contents };"
+        contents = "window.#{ namespace } = window.#{ namespace } || {}; window.#{ namespace }.documentation = #{ contents };"
         fh.puts( contents ) 
       end
       contents
@@ -83,7 +83,7 @@ module Luca
     end
 
     def namespace
-      return options[:application_name] if options[:appliction_name]
+      return options[:application_name].capitalize if options[:application_name]
 
       line = initializer_file_contents.lines.to_a.detect do |l|
         l.match(/Luca.initialize/)
