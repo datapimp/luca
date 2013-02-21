@@ -16,6 +16,14 @@ page.contains
   title: "Complex Layout FormView"
   type: "complex_layout_form"
   name: "complex_layout_form"
+,
+  title: "Scrollable Table"
+  type: "table_view_example"
+  name: "table_view_example"
+,
+  title: "Grid Layout CollectionView"
+  type: "grid_layout_view_example"
+  name: "grid_layout_view_example"
 
 page.privateConfiguration
   activeCard: 0
