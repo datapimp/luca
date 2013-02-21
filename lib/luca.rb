@@ -1,12 +1,16 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 module Luca
-  Version = '0.9.9'
   def self.base_path
     File.join(File.dirname(__FILE__), '..')
   end
 end
 
-require 'luca/rails'
+require 'luca/version'
+
+if defined?(Rails)
+  require 'luca/rails'
+end
+
 require 'luca/collection'
 require 'luca/asset_compiler'
 require 'luca/compiled_asset'

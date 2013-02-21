@@ -27,7 +27,7 @@ module Luca
     end
 
     def export_file_location
-      File.join(Luca.base_path,"site","source", "javascripts", "luca-framework-documentation.js")
+      options[:export_location] || File.join(Luca.base_path,"site","source", "javascripts", "#{ application_name }-documentation.js")
     end
 
     def export_all_component_definitions 
@@ -235,11 +235,15 @@ module Luca
       end
 
       def stylesheets_root
-        options[:stylesheets_root] || File.join(project_root, "app", "assets", "stylesheets")
+        options[:stylesheets_root] || File.join(assets_root,"stylesheets")
       end
 
       def javascripts_root
-        options[:javascripts_root] || File.join(project_root, "app", "assets", "javascripts")
+        options[:javascripts_root] || File.join(assets_root,"javascripts")
+      end
+
+      def assets_root
+        options[:assets_root] || File.join(project_root,"app","assets")
       end
 
       def project_root

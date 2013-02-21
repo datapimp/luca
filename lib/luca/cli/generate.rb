@@ -1,0 +1,26 @@
+module Luca
+  module Cli
+    class Generate < Thor
+      namespace :generate
+
+      desc "generate", "generate GENERATOR [options]"
+
+      method_options :name => :string
+      method_options :assets_root, :default => File.join(Dir.pwd(),"app","assets")
+      method_option :root, :default => Dir.pwd()
+      method_option :export_location, :default => Dir.pwd()
+
+      def generate generator
+        if generator == "docs"
+          documentation(options[:name], options)
+        end
+      end
+
+      no_tasks do
+        def documentation application_name, options={}
+          app = Luca::LucaApplication.new(application_name, options)
+        end
+      end
+    end
+  end
+end
