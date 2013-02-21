@@ -1,3 +1,6 @@
+# The `Docs.components.ApiBrowser` is an example of using
+# a `Luca.Container` with a `@componentEvents` configuration
+# to broker communication between two child components.
 view = Docs.register        "Docs.components.ApiBrowser"
 view.extends                "Luca.Container"
 

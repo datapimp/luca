@@ -3,7 +3,7 @@ view.extends              "Luca.components.ScrollableTable"
 view.defines
   paginatable: false
   maxHeight: 200
-  collection: "framework_documentation"
+  collection: "luca_documentation"
   columns:[
     reader: "class_name"
     width: "20%"

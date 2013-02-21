@@ -1,4 +1,4 @@
-#= require_tree .
+#= require_tree ./examples_browser
 #= require_self
 
 page = Docs.register "Docs.views.ExamplesBrowser"

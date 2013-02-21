@@ -10,7 +10,8 @@ app.configuration
 app.configuration
   collectionManager: 
     initialCollections:[
-      "framework_documentation"
+      "luca_documentation"
+      "docs_documentation"
     ]
 
   router: "Docs.Router"

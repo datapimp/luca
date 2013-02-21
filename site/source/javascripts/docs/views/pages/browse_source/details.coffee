@@ -7,69 +7,27 @@ view.configuration
 view.contains
   role: "documentation"
   span: 5
+  loadComponent: (model)->
+    @$el.empty()
+    @$el.append("<h2>#{ model.get('class_name') }</h2>")
+    @$el.append("<div class='header-documentation'>#{ model.get('header_documentation') }</div>")
 ,
-  role: "source"
-  type: "panel"
-  bodyTemplate: "component_documentation"
+  type: "component_documentation"
+  role: "details"
+  displaySource: true
   span: 7
 
 view.defines
   afterRender: ()->
-    @getSource().$el.hide()
+    @getDetails().$el.hide()
+    @getDocumentation().$el.hide()
 
-  # Loads a model from the FrameworkDocumentation 
-  # collection, and displays information about it in
-  # the documentation and source panels
   load: (model)->
-    source = @getSource()
-    documentation = @getDocumentation()
-    prototype = Luca.util.resolve( model.get("class_name") )?.prototype || {}
+    @getDetails().$el.show()
+    @getDocumentation().$el.show()
 
-    source.$('.table tbody').empty() 
-    documentation.$el.show().empty()
-    documentation.$el.append("<h2>#{ model.get('class_name') }</h2>")
-    documentation.$el.append("<div class='header-documentation'>#{ model.get('header_documentation') }</div>")
-
-    source.$el.show()
-    source.$('.methods, .properties').hide()
-
-    groups = model.documentation().details
-
-    unless _.isEmpty(groups?.publicProperties)
-      list = source.$('.public.properties').show().find('.table tbody')
-      for method, details of groups.publicProperties when not _.isFunction(prototype[method])
-        details ||= {}
-        list.append "<tr><td>#{ method }</td><td>#{ details.default || "" }</td><td>#{ details.documentation || "" }</td></tr>"
-
-    unless _.isEmpty(groups?.privateProperties)
-      list = source.$('.private.properties').show().find('.table tbody')
-      for method, details of groups.privateProperties when not _.isFunction(prototype[method])
-        details ||= {}
-        list.append "<tr><td>#{ method }</td><td>#{ details.default || "" }</td><td>#{ details.documentation || "" }</td></tr>"
-         
-    unless _.isEmpty(groups?.publicMethods)
-      list = source.$('.public.methods').show().find('.table tbody')
-      for method, details of groups.publicMethods when _.isFunction(prototype[method])
-        details ||= {}
-        arg_details = _( details.arguments ).reduce (memo,pair)->
-          memo += "#{ pair.argument }"
-          memo += "= #{ pair.value || 'undefined' }" if pair.value?
-          memo += "<br/>"
-        , ""
-        list.append "<tr><td>#{ method }</td><td>#{ arg_details }</td><td>#{ details.documentation || "" }</td></tr>"
-
-    unless _.isEmpty(groups?.privateMethods)
-      list = source.$('.private.methods').show().find('.table tbody')
-      for method, details of groups.privateMethods when _.isFunction(prototype[method])
-        details ||= {}
-        arg_details = _( details.arguments ).reduce (memo,pair)->
-          memo += "#{ pair.argument }"
-          memo += "= #{ pair.value || 'undefined' }" if pair.value?
-          memo += "<br/>"
-        , ""
-        list.append "<tr><td>#{ method }</td><td>#{ arg_details }</td><td>#{ details.documentation || "" }</td></tr>"
-         
-    source.$('pre.source').html( model.contentsWithoutHeader() )
+    @getDetails().loadComponent(model)
+    @getDocumentation().loadComponent(model)
 
     @prettyPrint()
 
