@@ -39,25 +39,35 @@ view.defines
       list = source.$('.public.properties').show().find('.table tbody')
       for method, details of groups.publicProperties when not _.isFunction(prototype[method])
         details ||= {}
-        list.append "<tr><td>#{ method }</td><td></td><td>#{ details.documentation || "" }</td></tr>"
+        list.append "<tr><td>#{ method }</td><td>#{ details.default || "" }</td><td>#{ details.documentation || "" }</td></tr>"
 
     unless _.isEmpty(groups?.privateProperties)
       list = source.$('.private.properties').show().find('.table tbody')
       for method, details of groups.privateProperties when not _.isFunction(prototype[method])
         details ||= {}
-        list.append "<tr><td>#{ method }</td><td></td><td>#{ details.documentation || "" }</td></tr>"
+        list.append "<tr><td>#{ method }</td><td>#{ details.default || "" }</td><td>#{ details.documentation || "" }</td></tr>"
          
     unless _.isEmpty(groups?.publicMethods)
       list = source.$('.public.methods').show().find('.table tbody')
       for method, details of groups.publicMethods when _.isFunction(prototype[method])
         details ||= {}
-        list.append "<tr><td>#{ method }</td><td></td><td>#{ details.documentation || "" }</td></tr>"
+        arg_details = _( details.arguments ).reduce (memo,pair)->
+          memo += "#{ pair.argument }"
+          memo += "= #{ pair.value || 'undefined' }" if pair.value?
+          memo += "<br/>"
+        , ""
+        list.append "<tr><td>#{ method }</td><td>#{ arg_details }</td><td>#{ details.documentation || "" }</td></tr>"
 
     unless _.isEmpty(groups?.privateMethods)
       list = source.$('.private.methods').show().find('.table tbody')
       for method, details of groups.privateMethods when _.isFunction(prototype[method])
         details ||= {}
-        list.append "<tr><td>#{ method }</td><td></td><td>#{ details.documentation || "" }</td></tr>"
+        arg_details = _( details.arguments ).reduce (memo,pair)->
+          memo += "#{ pair.argument }"
+          memo += "= #{ pair.value || 'undefined' }" if pair.value?
+          memo += "<br/>"
+        , ""
+        list.append "<tr><td>#{ method }</td><td>#{ arg_details }</td><td>#{ details.documentation || "" }</td></tr>"
          
     source.$('pre.source').html( model.contentsWithoutHeader() )
 

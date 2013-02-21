@@ -12,16 +12,24 @@ app.configuration
     initialCollections:[
       "framework_documentation"
     ]
+
   router: "Docs.Router"
+  
   routes:
-    "":                 "home#index"
-    "docs":             "browse_source#index"
-    "get-started":      "getting_started#index"
+    "":                                 "home#index"
+    "docs":                             "browse_source#index"
+    "docs/:component_name":             "browse_source#show"
+    "get-started":                      "getting_started#index"
+    "examples":                         "examples_browser#index"
+    "examples/:example_name/:section":  "examples_browser#show"
+    "examples/:example_name":           "examples_browser#show"
 
 app.contains
   component: "home"
 ,
   component: "browse_source"
+,
+  component: "examples_browser"
 ,
   name: "getting_started"
   type: "page"
