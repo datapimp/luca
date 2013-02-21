@@ -50,7 +50,6 @@ page.privateMethods
 page.publicMethods
   show: (exampleName=0, view="component")->
     @activate exampleName, false, ()->
-      console.log "Activation callback", @, exampleName, view
       @getViewSelector().activate(view)
       @$("li").removeClass("active")
       @$("li.#{view}").addClass("active")
