@@ -16,6 +16,14 @@ view.contains
 view.privateMethods
   index: ()->
     @selectComponent(@getComponentList().getCollection().at(0))
+
+  show: (componentName)-> 
+    component = @getComponentList().getCollection().detect (model)->
+      model.get("class_name") is componentName
+
+    return @index() unless component?
+
+    @selectComponent(component)
     
   selectComponent: (e)->
     list    = @getComponentList()

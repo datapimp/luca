@@ -5,3 +5,5 @@ editor.extends            "Luca.Container"
 
 editor.contains
   role: "browser"
+
+editor.register()
