@@ -31,7 +31,6 @@ view.privateMethods
 
   loadUrl: ()->
     url = @findComponentByName("endpoint_url", true).getValue()
-    console.log "Loading Url", url
     $.get url, (parsed, state, options)=>
       @getOutput().$html( options.responseText )
       window.prettyPrint()
