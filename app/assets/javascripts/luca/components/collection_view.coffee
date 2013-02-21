@@ -151,6 +151,9 @@ collectionView.publicMethods
     if models.length is 0
       @trigger("empty:results", query, options)
 
+    @renderModels(models, query, options)
+
+  renderModels: (models, query, options)->
     index = 0
     for model in models
       @$append @makeItem(model, index++)

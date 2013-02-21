@@ -26,7 +26,7 @@ gridView.privateMethods
 
   # wraps every N number of rows, where N = @itemsPerRow
   # in a row-fluid wrapper, and appends it to the view
-  renderModels: (models)->
+  renderModels: (models, query, options)->
     index = 0
     rowIndex = 0
 
