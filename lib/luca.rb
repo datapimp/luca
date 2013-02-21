@@ -7,7 +7,7 @@ end
 
 require 'luca/version'
 
-if defined?(Rails)
+if defined?(::Rails)
   require 'luca/rails'
 end
 

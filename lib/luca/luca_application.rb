@@ -29,7 +29,7 @@ module Luca
     def export_file_location
       loc = options[:export_location] || File.join(Luca.base_path,"site","source", "javascripts")
 
-      File.join(loc, "#{ application_name }.docs.js")
+      File.join(loc, "#{ application_name.downcase }-docs.js")
     end
 
     def export_all_component_definitions 

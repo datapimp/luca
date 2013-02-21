@@ -1,3 +1,4 @@
+require 'sinatra/base'
 module Luca
   class Collection
     class Endpoint < Sinatra::Base

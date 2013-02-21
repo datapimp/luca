@@ -54,7 +54,7 @@ namespace :release do
   end
 
   desc "Build the gem"
-  task :gem => [:assets,:minify] do
+  task :gem => [:assets,:minify,:zip,:doc] do
     `gem build luca.gemspec`
   end
 
