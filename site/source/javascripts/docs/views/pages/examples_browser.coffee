@@ -22,6 +22,11 @@ page.privateConfiguration
   tab_position: "left"
 
 page.privateMethods
+  # Hack
+  afterSelect: _.debounce ()->
+    @activeComponent()?.findComponentByName?("component")?.runExample?()
+  , 10
+
   wrapExampleComponents: ()->
     wrapped = []
 
