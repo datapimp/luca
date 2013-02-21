@@ -1,9 +1,9 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    active_support (3.0.0)
-      activesupport (= 3.0.0)
-    activesupport (3.0.0)
+    activesupport (3.2.12)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
     childprocess (0.3.8)
       ffi (~> 1.0, >= 1.0.11)
     coderay (1.0.9)
@@ -100,7 +100,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  active_support
+  activesupport (>= 3.2.12)
   coffee-script (>= 2.2.0)
   ejs
   faker
@@ -116,5 +116,5 @@ DEPENDENCIES
   redcarpet
   sass (>= 3.1.10)
   sinatra
-  sprockets (>= 2.0.2)
+  sprockets (>= 2.4.5)
   uglifier (>= 1.0.3)
