@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.collections.GithubRepositories"),e["extends"]("Luca.Collection"),e.defines({model:Docs.models.GithubRepository,url:function(){return"https://api.github.com/users/datapimp/repos"}})}).call(this);
