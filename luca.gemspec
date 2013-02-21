@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rails",   "~> 3.1"
 
   s.files        = `git ls-files`.split("\n")
-  s.executables  = `git ls-files`.split("\n").select{|f| f =~ /^bin/}
+  s.executable = "luca"
   s.require_paths = ['lib']
 end
 
