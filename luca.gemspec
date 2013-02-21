@@ -19,6 +19,9 @@ Gem::Specification.new do |s|
   s.add_dependency "ejs"
   s.add_dependency "hogan_assets"
   s.add_dependency "redcarpet", "~> 2.2.2"
+  s.add_dependency "activesupport", ">= 3.2.12"
+  s.add_dependency "sprockets", ">= 2.4.5"
+
   s.add_development_dependency "bundler", "~> 1.0.0"
   s.add_development_dependency "rails",   ">= 3.2"
 
