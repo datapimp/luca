@@ -1,6 +1,7 @@
 app = Docs.register       "Docs.Application"
 app.extends               "Luca.Application"
 app.configuration
+  version: 1
   el: "#viewport"
   fluid: true
   fullscreen: true
