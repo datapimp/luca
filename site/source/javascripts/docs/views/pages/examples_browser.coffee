@@ -30,7 +30,7 @@ page.privateConfiguration
   tab_position: "left"
   defaults:
     activation: ()->
-      Docs().router.navigate("#examples/#{ @name }/source", false)
+      Docs().router.navigate("#examples/#{ @name }/component", false)
 
 page.privateMethods
   # Hack
@@ -45,6 +45,19 @@ page.privateMethods
     wrapped = _(@components).map (component,index)->
       title: component.title
       name: component.name
+      autoBindEventHandlers: true
+      events:
+        "click a.link[data-navigate-to]" : "selectPanel"
+
+      selectPanel: (e)->
+        $target = @$(e.target)
+        link = $target.data("navigate-to")
+        index = $target.data("index")
+        @$('.panel-selector li').removeClass("active")
+        $target.parent('li').addClass("active")
+        @getViewSelector().activate(index)
+        Docs().router.navigate(link, false)
+
       components:[
         type: "card"
         role: "view_selector"
