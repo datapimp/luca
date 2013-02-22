@@ -18,7 +18,7 @@
 #   cardView.activeComponent().name # => "one"
 #   cardView.activate('two')
 #   cardView.activeComponent().name # => "two"
-component = Luca.define         "Luca.containers.CardView"
+component = Luca.register       "Luca.containers.CardView"
 component.extends               "Luca.Container"
 
 component.publicConfiguration

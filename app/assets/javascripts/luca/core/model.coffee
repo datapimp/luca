@@ -1,4 +1,4 @@
-model = Luca.define       'Luca.Model'
+model = Luca.register     'Luca.Model'
 
 model.extends             'Backbone.Model'
 

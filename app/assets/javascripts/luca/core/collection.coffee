@@ -1,4 +1,4 @@
-collection = Luca.define            'Luca.Collection'
+collection = Luca.register          'Luca.Collection'
 collection.extends                  'Backbone.QueryCollection'
 collection.includes                 'Luca.Events'
 
