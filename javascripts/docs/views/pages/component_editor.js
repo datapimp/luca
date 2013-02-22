@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.views.ComponentEditor"),e["extends"]("Luca.Container"),e.contains({type:"code_editor"}),e.defines({index:function(){return!0}})}).call(this);
