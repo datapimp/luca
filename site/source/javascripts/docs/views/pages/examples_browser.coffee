@@ -28,11 +28,15 @@ page.contains
 page.privateConfiguration
   activeCard: 0
   tab_position: "left"
+  defaults:
+    activation: ()->
+      Docs().router.navigate("#examples/#{ @name }/source", false)
 
 page.privateMethods
   # Hack
   afterSelect: _.debounce ()->
-    @activeComponent()?.findComponentByName?("component")?.runExample?()
+    if active = @activeComponent()
+      active.findComponentByName?("component")?.runExample?()
   , 10
 
   wrapExampleComponents: ()->
