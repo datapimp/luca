@@ -6,13 +6,13 @@ collection.triggers                 "after:initialize",
                                     "before:fetch",
                                     "after:response"
 
-collection.defines    
+collection.publicConfiguration    
   model: Luca.Model
   # cachedMethods refers to a list of methods on the collection
   # whose value gets cached once it is ran.  the collection then
   # binds to change, add, remove, and reset events and then expires
   # the cached value once these events are fired.
-
+  #
   # cachedMethods expects an array of strings representing the method name
   # or objects containing @method and @resetEvents properties.  by default
   # @resetEvents are 'add','remove',reset' and 'change'.
@@ -21,6 +21,17 @@ collection.defines
   # if filtering a collection should handle via a call to a REST API
   # and return the filtered results that way, then set this to true
   remoteFilter: false
+
+  # setting a cache key to a string, or to a function which returns
+  # a string, will determine where the collections' models are pulled
+  # from if they are available on page load.  also known as "bootstrapping"
+  # your collections with data.  The cache key will look in whatever object
+  # is set in Luca.config.modelBootstrap for its models.
+  cache_key: undefined
+
+  # Which CollectionManager should we register with? Expects either a string
+  # which will get resolved into a global variable, or a 
+  manager: undefined
 
   initialize: (models=[], @options)->
     _.extend @, @options
@@ -44,7 +55,7 @@ collection.defines
     @name ||= @registerAs
     @manager ||= @registerWith
 
-    @manager = if _.isFunction(@manager) then @manager() else @manager
+    @manager = Luca.util.read(@manager) if @manager? 
 
     # if they specify a
     if @name and not @manager
@@ -345,6 +356,9 @@ collection.defines
       return Backbone.QueryCollection::query.call(@, filter, options)
     else
       @models
+
+collection.register()
+
 
 # Global Collection Observer
 _.extend Luca.Collection.prototype,
