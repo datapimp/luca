@@ -201,7 +201,7 @@ describe "Registering with the collection manager", ->
 
     registerSpy = sinon.spy()
 
-    private = new Luca.Collection [],
+    privateCollection = new Luca.Collection [],
       name: "private"
       manager: manager
       private: true

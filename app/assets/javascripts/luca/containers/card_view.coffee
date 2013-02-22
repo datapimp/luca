@@ -144,7 +144,7 @@ component.privateMethods
   simulateActivationEvent: ()->
     c = @activeComponent()
 
-    if c? and @$el.is(":visible")
+    if c? and (@visible || @$el.is(":visible"))
       c?.trigger "activation", @, c, c 
       if !c.previously_activated
         c.trigger "first:activation"
