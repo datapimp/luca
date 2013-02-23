@@ -36,9 +36,9 @@ app.privateMethods
 
   afterRender: ()->
     Luca.Application::afterRender?.apply(@, arguments)
-
-    @codeSyncManager = new Luca.CodeSyncManager(host:"//localhost:9292/faye", channel:"/luca-code-sync")
-    @codeSyncManager.trigger("ready")
+    if window.location.host.match /localhost/
+      @codeSyncManager = new Luca.CodeSyncManager({}, host:"//localhost:9292/faye", channel:"/luca-code-sync")
+      @codeSyncManager.trigger("ready")
 
   _onPageChange: _.debounce (state, newPage)->
     $('li', @mainNavElement()).removeClass 'active'
