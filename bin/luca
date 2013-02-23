@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 
 $:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
-
-require 'luca/luca_application'
-require 'luca/component_definition'
+require 'rubygems'
+require 'faye'
+require 'listen'
+require 'luca'
 require 'luca/cli'
 
 Luca::Cli::Base.start

@@ -12,6 +12,9 @@ gem 'rake'
 gem 'hogan_assets'
 gem 'haml_assets'
 gem 'activesupport', '>= 3.2.12'
+gem 'listen'
+gem 'faye'
+gem 'thin'
 
 group :test, :development do
   gem 'faker'

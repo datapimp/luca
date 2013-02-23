@@ -142,6 +142,10 @@ module Luca
       end
     end  
 
+    def assets_root
+      options[:assets_root] || File.join(project_root,"app","assets")
+    end
+   
     protected
       def template_extensions
         options[:template_extensions] || ['jst.ejs.haml','mustache'] 
@@ -244,9 +248,7 @@ module Luca
         options[:javascripts_root] || File.join(assets_root,"javascripts")
       end
 
-      def assets_root
-        options[:assets_root] || File.join(project_root,"app","assets")
-      end
+
 
       def project_root
         options[:root] || (::Rails.root rescue Dir.pwd())
