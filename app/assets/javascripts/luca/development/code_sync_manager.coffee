@@ -53,7 +53,7 @@ codeManager.publicConfiguration
 codeManager.classMethods
   setup: (options={})->
     @codeSyncManager = new Luca.CodeSyncManager(options) 
-    @codeSyncManager.trigger("ready")
+    @codeSyncManager.trigger "ready"
 
 codeManager.privateMethods
   initialize: (@attributes={})->
@@ -62,6 +62,9 @@ codeManager.privateMethods
 
     Luca.SocketManager::initialize.call(@, @attributes)
     @bindToChannel()
+
+  start: ()->
+    @trigger "ready"
 
   bindToChannel: ()->
     if @client?
