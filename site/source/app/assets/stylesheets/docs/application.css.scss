@@ -1,4 +1,24 @@
-.docs-application {
+.docs-application > .luca-controller {
+  padding-top: 20px;
+}
+
+.docs-browse-source {
+  line-height: 2;
+}
+
+.docs-examples-browser {
+  .panel-selector {
+    padding-top: 5px;
+  }  
+}
+
+.hero-unit {
+  ul.links {
+    margin-left: 0px;
+  }
+  h1 {
+    margin-bottom: 30px;
+  }
 }
 
 .docs-home {
