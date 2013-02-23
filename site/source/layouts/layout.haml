@@ -1,0 +1,54 @@
+!!!5
+/[if lt IE 7] <html class="no-js lt-ie9 lt-ie8 lt-ie7">
+/[if IE 7] <html class="no-js lt-ie9 lt-ie8">
+/[if IE 8] <html class="no-js lt-ie9">
+%html.no-js
+  %head
+    %meta{:charset => "utf-8"}
+    %meta{:content => "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible"}
+    
+    -# To set titles and descriptions globally and for each individual page, see /DOCS.md
+    %title Better Backbone.js Apps with Luca 
+    %meta{:content => page_description, :name => "description"}
+    
+    %meta{:content => "width=device-width", :name => "viewport"}
+    
+    = javascript_include_tag "vendor/modernizr-2.6.1.min"
+    %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css"}
+    %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css"}
+    %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css"}
+
+    = stylesheet_link_tag "site"
+  %body
+    #main-nav.navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid 
+          %button.btn.btn-navbar{:type=>"button","data-toggle"=>"collapse","data-target"=>".nav-collapse"}
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+          %a.brand{:href=>"#"} Luca
+          .nav-collapse.collapse
+            %ul.nav
+              %li{"data-page"=>"home"}
+                %a.active{:href=>"#"} Home
+              %li{"data-page"=>"getting_started"}
+                %a{:href=>"#get-started"} Get Started
+              %li{"data-page"=>"browse_source"}
+                %a{:href=>"#docs"} Documentation
+              %li{"data-page"=>"examples_browser"}
+                %a{:href=>"#examples"} Examples
+              %li{"data-page"=>"component_editor"}
+                %a{:href=>"#component_editor"} Component Editor
+
+    .container-fluid{:style=>"padding-top:40px;"}
+      = yield                
+
+    %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js"}
+    %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js"}
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"}
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/coffee-script/1.4.0/coffee-script.min.js"}
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/less.js/1.3.3/less.min.js"}
+        
+    = javascript_include_tag "dependencies"
+    = javascript_include_tag "site"
