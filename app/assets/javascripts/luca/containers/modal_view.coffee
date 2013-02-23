@@ -1,13 +1,13 @@
-_.def("Luca.ModalView").extends("Luca.Container").with
+view = Luca.register      "Luca.containers.ModalView"
+view.extends              "Luca.Container"
 
+view.publicConfiguration
   closeOnEscape: true
-
   showOnInitialize: false
-
   backdrop: false
+  className: "modal"
 
-  className: "luca-ui-container modal"
-
+view.publicMethods
   container: ()->
     $('body')
 
@@ -27,10 +27,10 @@ _.def("Luca.ModalView").extends("Luca.Container").with
     $('body').append( @$el )
     
     @$el.modal
-      backdrop: @backdrop is true
-      keyboard: @closeOnEscape is true
-      show: @showOnInitialize is true
+      backdrop: !!(@backdrop is true)
+      keyboard: !!(@closeOnEscape is true)
+      show: !!(@showOnInitialize is true)
 
     @
 
-_.def("Luca.containers.ModalView").extends("Luca.ModalView").with()
+view.register()
