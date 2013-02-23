@@ -27,9 +27,8 @@ module Luca
         compiled:         compiled,
         source_file_contents:  IO.read(source),
         name:             File.basename(source),
-        # temp
-        path:             source.gsub(::Rails.root.to_s, '.'),
-        id:               source.gsub(::Rails.root.to_s, '.').gsub('/','__')
+        path:             source, 
+        id:               source.gsub('/','__')
       }
     end
   end  

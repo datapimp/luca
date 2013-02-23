@@ -5,9 +5,9 @@ module Luca
 
       desc "watch", "watch APPLICATION_NAME [options]"
       method_options :name => :string
-      method_option :assets_root, :default => File.join(Dir.pwd(),"app","assets")
+      method_option :root, :default => Dir.pwd()
 
-      def watch application_name, options={}
+      def watch application_name
         watcher = Luca::Watcher.new(application_name, options)
         watcher.start
       end

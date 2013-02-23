@@ -17,14 +17,17 @@ module Luca
 
     def notify modified, added, removed
       puts "Detected changes in #{ (modified + added).inspect }"
-      payload = change_payload_for(modified + added)
-      notifier.publish("/luca-code-sync", payload)
+      begin 
+        payload = change_payload_for(modified + added)
+        notifier.publish("/luca-code-sync", payload)
+      rescue e
+        puts "Error publishing payload: #{ $! }"
+      end
     end
 
     def change_payload_for paths     
       paths.inject({}) do |memo, path| 
         file = path.gsub( app.assets_root, '')
-
         if file && asset = app.find_asset_wrapper_for(file)
           memo[path] = asset.to_change_notification
         end  
