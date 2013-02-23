@@ -51,11 +51,11 @@ page "documentation.html", :layout => false
 #   end
 # end
 
-set :css_dir, 'stylesheets'
+set :css_dir, 'app/assets/stylesheets'
 
-set :js_dir, 'javascripts'
+set :js_dir, 'app/assets/javascripts'
 
-set :images_dir, 'images'
+set :images_dir, 'app/assets/images'
 
 # Build-specific configuration
 configure :build do
