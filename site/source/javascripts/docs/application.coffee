@@ -1,6 +1,7 @@
 app = Docs.register       "Docs.Application"
 app.extends               "Luca.Application"
 app.configuration
+  version: 1
   el: "#viewport"
   fluid: true
   fullscreen: true
@@ -10,7 +11,8 @@ app.configuration
 app.configuration
   collectionManager: 
     initialCollections:[
-      "framework_documentation"
+      "luca_documentation"
+      "docs_documentation"
     ]
 
   router: "Docs.Router"
@@ -23,6 +25,19 @@ app.configuration
     "examples":                         "examples_browser#index"
     "examples/:example_name/:section":  "examples_browser#show"
     "examples/:example_name":           "examples_browser#show"
+    "component_editor":                 "component_editor#index"
+
+  stateChangeEvents:
+    "page": "onPageChange"
+
+app.privateMethods
+  mainNavElement: ()->
+    @_mainNavEl ||= $('#main-nav ul.nav')
+
+  onPageChange: _.debounce (state, newPage)->
+    $('li', @mainNavElement()).removeClass 'active'
+    $("li[data-page='#{ newPage }']", @mainNavElement()).addClass 'active'
+  , 10
 
 app.contains
   component: "home"
@@ -30,6 +45,8 @@ app.contains
   component: "browse_source"
 ,
   component: "examples_browser"
+,
+  component: "component_editor"
 ,
   name: "getting_started"
   type: "page"

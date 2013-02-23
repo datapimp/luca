@@ -20,7 +20,7 @@
 
     = stylesheet_link_tag "site"
   %body
-    .navbar.navbar-inverse.navbar-fixed-top
+    #main-nav.navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
         .container-fluid 
           %button.btn.btn-navbar{:type=>"button","data-toggle"=>"collapse","data-target"=>".nav-collapse"}
@@ -30,14 +30,16 @@
           %a.brand{:href=>"#"} Luca
           .nav-collapse.collapse
             %ul.nav
-              %li.active
+              %li{"data-page"=>"home"}
                 %a.active{:href=>"#"} Home
-              %li
+              %li{"data-page"=>"getting_started"}
                 %a{:href=>"#get-started"} Get Started
-              %li
+              %li{"data-page"=>"browse_source"}
                 %a{:href=>"#docs"} Documentation
-              %li
+              %li{"data-page"=>"examples_browser"}
                 %a{:href=>"#examples"} Examples
+              %li{"data-page"=>"component_editor"}
+                %a{:href=>"#component_editor"} Component Editor
 
     .container-fluid{:style=>"padding-top:40px;"}
       = yield                
@@ -45,7 +47,8 @@
     %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js"}
     %script{:type=>"text/javascript",:src=>"//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js"}
     %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"}
-    
-    = javascript_include_tag "luca-framework-documentation"    
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/coffee-script/1.4.0/coffee-script.min.js"}
+    %script{:type=>"text/javascript",:src=>"//cdnjs.cloudflare.com/ajax/libs/less.js/1.3.3/less.min.js"}
+        
     = javascript_include_tag "dependencies"
     = javascript_include_tag "site"

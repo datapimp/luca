@@ -14,6 +14,7 @@ view.contains
   component: "component_details"
 
 view.privateMethods
+
   index: ()->
     @selectComponent(@getComponentList().getCollection().at(0))
 
