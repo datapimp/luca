@@ -128,6 +128,10 @@
 #           rowFluid: true
 #
 # #### Using a layout template with CSS Selectors
+# If you find yourself needing a container view with a complicated
+# visual layout, you can provide your own DOM template as a `@bodyTemplate`
+# and assign each child view in `@components` to its own specific CSS selector.
+#
 #         ... 
 #         container.contains
 #           role: "filter"
@@ -154,24 +158,22 @@ container.replaces                "Luca.Container"
 
 container.publicConfiguration
   # @components should contain a list of object configurations for child view(s)
-  # of this container.  minimally, the object configuration should specify 
-  # a `@type` property which is a component definition shortcut that will
-  # resolve to a registered component definition.  For example, if you have
-  # a view class named 'Application.views.CustomView' then your type alias will be
-  # 'custom_view'.  The values specified in the configuration object will override the 
+  # of this container.  The values specified in the configuration object will override the 
   # values defined as properties and methods on your view prototypes.
   #
-  # Additionally, there are a few custom attributes which you can specify on your config
-  # that will impact the container component itself.  the `@role` property specifies the
-  # child view's role in this container, and will define a getter method on the container
-  # that allows you to access the child view.  For example:
-  #       container = new Luca.Container 
-  #         components:[
-  #           role: "my_main_dude"
-  #           name: "soederpop"
-  #         ]
+  # There are special properties you can define in your components configuration items 
+  # that will effect the container:
   #
-  #       container.getMyMainDude().name #=> "soederpop"
+  # - role:       will create a camelized getter for you on the container.  e.g. when role is `my_custom_role`, 
+  #               the container will have a method `getMyCustomRole()` that returns that child view.
+  #
+  # - name:       a name for the child view.  this allows you to access the component by name using 
+  #               the find() method on the container.
+  #
+  # - type:       a type alias from the component registry.  type alias are underscore'd strings 
+  #               matching the component class name.  e.g. App.views.MyCustomView type alias is `my_custom_view`
+  #
+  # - component:  a convenience property for setting type, role, and name to be equal. 
   components:[]
 
   # The `@defaults` property is an object of configuration parameters which will be set
@@ -182,7 +184,7 @@ container.publicConfiguration
   # The `@extensions` property is useful when you are subclassing a container view
   # which already defines an array of components, and you want to specifically override
   # properties and settings on the children. The `@extensions` property expects either: 
-
+  #
   # An object whose keys match the names of the `@role` property defined on the child components.
   # The value should be an object which will override any values defined on the parent class.
   #
@@ -195,12 +197,12 @@ container.publicConfiguration
   # the components in this container.  the format of the syntax is very similar
   # to the other event binding helpers:
   #
-  #       component_accessor component:trigger
+  # `component_accessor component:trigger`
   #
   # where component_accessor is either the name of the component, or a the role 
   # property on the component, component:trigger is the event that component fires.
   # handler is a method on the container which will respond to the child component event.
-  #
+  # <pre>
   #       myContainer = new Luca.Container
   #         componentEvents:
   #           "name component:trigger"    : "handler"
@@ -209,7 +211,7 @@ container.publicConfiguration
   #         components:[
   #           name: "name"
   #         ]
-  #
+  # </pre>
   componentEvents: {}
 
 container.privateConfiguration

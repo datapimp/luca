@@ -54,7 +54,7 @@ panel.publicMethods
     @$bodyEl().empty()
     
   $html: (content)->
-    @$bodyEl().html( content )
+    if content? then @$bodyEl().html( content ) else @$bodyEl().html()
 
   $append: (content)->
     @$bodyEl().append(content)

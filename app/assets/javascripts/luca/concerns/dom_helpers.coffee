@@ -46,10 +46,10 @@ Luca.concerns.DomHelpers =
       console.log "Error in $template: #{ template } #{ @identifier?() ? @name || @cid }"
 
   $html: (content)->
-    @$el.html( content )
+    if content? then @$el.html(content) else @$el.html()
 
   $append: (content)->
-    @$el.append( content )
+    @$el.append(content)
 
   $attach: ()->
     @$container().append( @el )

@@ -26,6 +26,7 @@ page.privateMethods
   initialize: (@options={})->
     @assignComponentsToRegions()
     @bodyTemplate = @options.layout || @layout
+    @bodyTemplate ||= @options.template || @template
     Luca.Container::initialize.apply(@, arguments)
 
   # Takes the configuration specified in @regions

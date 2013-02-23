@@ -39,10 +39,7 @@ viewport.defines
     @$el.removeClass('fullscreen-enabled')
 
   beforeRender: ()->
-    Luca.containers.CardView::beforeRender?.apply(@, arguments)
-
-    #if Luca.config.enableBoostrap and @topNav and @fullscreen
-    #  $('body').css('padding','40px')
+    Luca.Container::beforeRender?.apply(@, arguments)
 
     @renderTopNavigation() if @topNav?
     @renderBottomNavigation() if @bottomNav?
@@ -54,7 +51,7 @@ viewport.defines
     @$el.width()
 
   afterRender: ()->
-    Luca.containers.CardView::after?.apply(@, arguments)
+    Luca.Container::afterRender?.apply(@, arguments)
 
     if Luca.config.enableBoostrap is true and @containerClassName
       @$el.children().wrap('<div class="#{ containerClassName }" />')

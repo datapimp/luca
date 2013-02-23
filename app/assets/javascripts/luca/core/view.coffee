@@ -136,7 +136,7 @@ view.publicConfiguration
   #
   autoBindEventHandlers: false
 
-  # Supplying configuration to `@_events` will ensure that this configuration
+  # Supplying configuration to `@_inheritEvents` will ensure that this configuration
   # is present on views which extend from this view.  In normal Backbone behavior
   # the `@events` property can be overridden by views which extend, and this isn't
   # always what you want from your component.   

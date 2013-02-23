@@ -1,10 +1,54 @@
+# The `Luca.CodeSyncManager` works along with the Guard adapter that ships with 
+# the ruby gem.  This is still an experimental option at this point, but I use
+# it regularly on all of my Luca projects and it allows me to develop my applications
+# directly from my editor and rarely have the need to refresth the browser to work with
+# javascript and css changes.
+#
+# #### Similar to LiveReload
+# It is similar to projects like LiveReload, except that it knows a lot about the luca
+# framework and application conventions and uses this knowledge to optimize live reloading
+# behavior, avoiding the need to do full browser reloads.  This typically doesn't work well
+# with state heavy applications, since the browser reloading doesn't always construct application
+# state exactly as you need it when you're making your css changes etc.
+#
+# #### 1) Add an entry to your Guardfile:
+#         guard 'luca' do
+#           watch(%r{^app/assets/stylesheets/(.+)}) do |match|
+#               path = match.last
+#           end 
+  
+#           watch(%r{^app/assets/javascripts/(.+)}) do |match|
+#             path = match.last
+#           end
+#         end
+#
+# #### 2) Add the `CodeSyncManager` to your development mode application. 
+# **Note:** This expect
+# you to have a `Luca.SocketManager` capable backend such as faye or socket.io running. It
+# handles the same configuration options as the `Luca.SocketManager` as well.
+#
+#               app = Luca()
+#               app.codeSyncManager = new Luca.CodeSyncManager
+#                 host: "//localhost:9292/faye"
+#                 channel: "/changes"
+#               app.codeSyncManager.trigger("ready")
+#
+# #### 3) Run guard.  
+# Edit your files, watch your changes appear.
+#
+# ### Using the Syncpad
+#
+# The syncpad is a special naming convention for development scratch paper in your editor.  A file
+# named syncpad.coffee, syncpad.css.scss, syncpad.jst.ejs.haml, etc will be evaluated live when you change
+# them in your editor.  I personally use this to experiment with code / css and get immediate results without
+# needing to refresh the browser.
 codeManager = Luca.register     "Luca.CodeSyncManager"
 codeManager.extends             "Luca.SocketManager"
 
 codeManager.publicConfiguration
-  host:       Luca.config.codeSyncHost || "http://localhost:9292/faye"
+  host:       Luca.config.codeSyncHost || "//localhost:9292/faye"
   namespace:  "luca"
-  channel:    Luca.config.codeSyncChannel || "/changes"
+  channel:    Luca.config.codeSyncChannel || "/luca-code-sync"
 
 codeManager.classMethods
   setup: (options={})->

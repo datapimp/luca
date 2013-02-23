@@ -1,11 +1,10 @@
-make = Luca.View::make
-
+# The `Luca.fields.CheckboxArray` renders an array of values 
+# into checkbox controls.  This is for fields which can have
+# a list of values associated with them.
 checkboxArray = Luca.register     "Luca.fields.CheckboxArray"
 checkboxArray.extends             "Luca.core.Field"
 
-checkboxArray.defines
-  version: 2
-
+checkboxArray.privateConfiguration
   template: "fields/checkbox_array"
 
   className: "luca-ui-checkbox-array"
@@ -15,6 +14,7 @@ checkboxArray.defines
 
   selectedItems: []
 
+checkboxArray.privateMethods
   initialize: (@options={})->
     _.extend @, @options
     _.extend @, Luca.concerns.Deferrable
@@ -65,8 +65,8 @@ checkboxArray.defines
       label = model.get(@displayField)
       input_id = _.uniqueId("#{ @cid }_checkbox")
 
-      inputElement = make("input",type:"checkbox",class:"array-checkbox",name:@input_name,value:value,id: input_id)
-      element = make("label", {for:input_id}, inputElement)
+      inputElement = @make("input",type:"checkbox",class:"array-checkbox",name:@input_name,value:value,id: input_id)
+      element = @make("label", {for:input_id}, inputElement)
 
       $( element ).append(" #{ label }")
       @controls().append( element )
@@ -80,6 +80,9 @@ checkboxArray.defines
   allFields: ()->
     @controls().find("input[type='checkbox']")
 
+checkboxArray.publicMethods
+  # Check the selected items.  Expects an array of values 
+  # for boxes you would like to see checked.
   checkSelected: (items)->
     @selectedItems = items if items?
 
@@ -91,6 +94,8 @@ checkboxArray.defines
 
     @selectedItems
 
+  # Gets an array of values for the checkboxes in this array
+  # which are checked.
   getValue: ()->
     @$(field).val() for field in @allFields() when @$(field).prop('checked')
 

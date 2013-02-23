@@ -26,7 +26,7 @@ gridView.privateMethods
 
   # wraps every N number of rows, where N = @itemsPerRow
   # in a row-fluid wrapper, and appends it to the view
-  renderModels: (models, query, options)->
+  renderModels: (models)->
     index = 0
     rowIndex = 0
 
@@ -36,7 +36,6 @@ gridView.privateMethods
       rowIndex = 0 if index > 0 and index % @itemsPerRow is 0
       row
 
-    console.log "Appending rows", rows
     for row in rows
       @$append(row) 
 
