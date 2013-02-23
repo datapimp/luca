@@ -34,7 +34,13 @@ app.privateMethods
   mainNavElement: ()->
     @_mainNavEl ||= $('#main-nav ul.nav')
 
-  onPageChange: _.debounce (state, newPage)->
+  afterRender: ()->
+    Luca.Application::afterRender?.apply(@, arguments)
+
+    @codeSyncManager = new Luca.CodeSyncManager(host:"//localhost:9292/faye", channel:"/luca-code-sync")
+    @codeSyncManager.trigger("ready")
+
+  _onPageChange: _.debounce (state, newPage)->
     $('li', @mainNavElement()).removeClass 'active'
     $("li[data-page='#{ newPage }']", @mainNavElement()).addClass 'active'
   , 10

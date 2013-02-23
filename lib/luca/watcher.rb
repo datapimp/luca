@@ -16,6 +16,7 @@ module Luca
     end
 
     def notify modified, added, removed
+      puts "Detected changes in #{ (modified + added).inspect }"
       payload = change_payload_for(modified + added)
       notifier.publish("/luca-code-sync", payload)
     end

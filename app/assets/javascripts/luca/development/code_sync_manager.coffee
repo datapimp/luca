@@ -46,9 +46,9 @@ codeManager = Luca.register     "Luca.CodeSyncManager"
 codeManager.extends             "Luca.SocketManager"
 
 codeManager.publicConfiguration
-  host:       Luca.config.codeSyncHost || "http://localhost:9292/faye"
+  host:       Luca.config.codeSyncHost || "//localhost:9292/faye"
   namespace:  "luca"
-  channel:    Luca.config.codeSyncChannel || "/changes"
+  channel:    Luca.config.codeSyncChannel || "/luca-code-sync"
 
 codeManager.classMethods
   setup: (options={})->

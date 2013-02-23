@@ -1,5 +1,3 @@
-#= require_tree ./component_editor
-#= require_self
 view = Docs.register    "Docs.views.ComponentEditor"
 view.extends            "Luca.Container"
 
@@ -8,5 +6,5 @@ view.contains
 
 view.defines
   index: ()->
-    true
+    1
 

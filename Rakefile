@@ -10,12 +10,6 @@ stylesheets = ["luca-ui-bootstrap.css","luca-ui-development-tools.css","sandbox.
 scripts = ["dependencies.js","sandbox.js"]
 
 namespace :release do
-  desc "Export the project documentation"
-  task :docs => :environment do
-    app = Luca::LucaApplication.new("Luca",root:Dir.pwd())
-    app.export
-  end  
-
   desc "Zip up the assets"
   task :zip => :environment do
     `cp vendor/assets/javascripts/luca.min.js vendor/assets/javascripts/luca-dependencies.min.js vendor/assets/stylesheets/luca-ui.css .`  
@@ -24,7 +18,7 @@ namespace :release do
   end
 
   desc "Compile and Minify"
-  task :all => [:docs,:assets,:minify,:zip]
+  task :all => [:assets,:minify,:zip]
   desc "Compile all the assets"
   task :assets => :environment do
     File.open( File.join(App.root,'vendor','assets','stylesheets','luca-development.css'), 'w+' ) do |fh|
@@ -54,7 +48,7 @@ namespace :release do
   end
 
   desc "Build the gem"
-  task :gem => [:docs,:assets,:minify,:zip] do
+  task :gem => [:assets,:minify,:zip] do
     `gem build luca.gemspec`
   end
 
