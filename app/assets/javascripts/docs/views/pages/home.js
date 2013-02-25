@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.views.Home"),e["extends"]("Luca.components.Page"),e.configuration({template:"pages/home"}),e.defines({index:function(){return this.trigger("index")}}),e.register()}).call(this);

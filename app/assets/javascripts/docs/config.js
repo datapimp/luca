@@ -1,0 +1,1 @@
+(function(){Luca.initialize("Docs",{baseParams:!1,modelBootstrap:!1,codeSyncChannel:"/luca-code-sync",codeSyncHost:"//localhost:9292/faye",codeSyncStylesheetMode:"single"})}).call(this);

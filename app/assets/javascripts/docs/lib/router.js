@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.Router"),e["extends"]("Luca.Router"),e.defines()}).call(this);

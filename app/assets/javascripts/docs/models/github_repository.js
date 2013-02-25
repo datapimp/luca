@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.models.GithubRepository"),e["extends"]("Luca.Model"),e.register()}).call(this);

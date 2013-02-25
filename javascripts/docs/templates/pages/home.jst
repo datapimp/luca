@@ -1,4 +1,58 @@
-(function() {
-  this.JST || (this.JST = {});
-  this.JST["docs/templates/pages/home"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="hero-unit">\n  <h1>Luca</h1>\n  <p>A framework and tools for building well architected client side applications.</p>\n  <p>Based on <a href="http://backbonejs.org">Backbone.js</a> and <a href="http://twitter.github.com/bootstrap">Twitter Bootstrap</a>.</p>\n  <a class="btn btn-large btn-primary" href="//datapimp.gitub.com/luca/downloads/luca-latest.zip">Download</a>\n\n  <ul class="links">\n    <li>\n      <i class="icon icon-github" />\n      <a href="https://github.com/datapimp/luca">Github Project</a>\n    </li>\n    <li>\n      <a href="#examples">Examples</a>\n    </li>\n    <li>\n      <a href="#contribute">Contribute</a>\n    </li>\n    <li>\n      Version ',  Luca.VERSION ,'\n    </li>\n  </ul>\n\n</div>\n\n<div id="features" class="row-fluid">\n  <div class="span4">\n    <h3><i class="icon icon-coffee" /> Coffeescript, player.</h3>\n    <p>\n      Luca allows you to write most of your app in Coffeescript.  Most of the structural markup is taken care of for you, and Bootstrap handles a lot of CSS styling for you already. We find that this allows us to develop apps and focus primarily on their functionality and interaction first.  \n    </p>\n\n    <p>This also makes it very easy to render your app on the client and on the server.</p> \n  </div>\n  <div class="span4">\n    <h3><i class="icon icon-sitemap" /> Component Driven Design</h3>\n    <p>Luca encourages you to design your app as a library of components: re-usable, well encapsulated interface elements with their own concerns.  Luca provides ways of joining components together to form more complex pieces which get integrated into the pages of your application.</p> \n    <p>As your app grows to a certain level, you will find that you have built up a large library of patterns and tools that you can begin to develop new features very quickly without having to solve the same design problems over and over.</p>\n  </div>\n  <div class="span4">\n    <h3><i class="icon icon-wrench" /> Developer Tools</h3>\n    <p>Luca comes with a variety of tools that make developing large browser applications much easier. </p>\n    <ul class="nav">\n      <li><a href="#">Code Sync</a></li>\n      <li><a href="#">Generated Documentation</a></li>\n      <li><a href="#">In browser prototype</a></li>\n    </ul> \n  </div>\n</div>\n\n<div>\n  A labor of love by <a href="http://twitter.com/soederpop">@soederpop</a> for my son and my comrades at <a href="https://benchprep.com">@benchprep</a>. MIT Licensed.\n</div>\n\n<div>\n  <a href="https://github.com/datapimp/luca/issues">Issues</a>\n  <a href="https://github.com/datapimp/luca/blob/master/CHANGELOG">Changelog</a>\n</div>\n');}return __p.join('');};
-}).call(this);
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]> <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]> <html class="no-js lt-ie9"> <![endif]-->
+<html class='no-js'>
+  <head>
+    <meta charset='utf-8'>
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible'>
+    <title>Better Backbone.js Apps with Luca</title>
+    <meta content='Set your site description in /helpers/site_helpers.rb' name='description'>
+    <meta content='width=device-width' name='viewport'>
+    <script src="../../../../app/assets/javascripts/vendor/modernizr-2.6.1.min.js" type="text/javascript"></script>
+    <link href='//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css' rel='stylesheet'>
+    <link href='//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css' rel='stylesheet'>
+    <link href='//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css' rel='stylesheet'>
+    <link href="../../../../app/assets/stylesheets/site.css" media="screen" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class='navbar navbar-inverse navbar-fixed-top' id='main-nav'>
+      <div class='navbar-inner'>
+        <div class='container-fluid'>
+          <button class='btn btn-navbar' data-target='.nav-collapse' data-toggle='collapse' type='button'>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+          </button>
+          <a class='brand' href='#'>Luca</a>
+          <div class='nav-collapse collapse'>
+            <ul class='nav'>
+              <li data-page='home'>
+                <a class='active' href='#'>Home</a>
+              </li>
+              <li data-page='getting_started'>
+                <a href='#get-started'>Get Started</a>
+              </li>
+              <li data-page='browse_source'>
+                <a href='#docs'>Documentation</a>
+              </li>
+              <li data-page='examples_browser'>
+                <a href='#examples'>Examples</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='container-fluid' style='padding-top:40px;'>
+      function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="hero-unit">\n  <h1>Luca</h1>\n  <p>A framework and tools for building well architected client side applications.</p>\n  <p>Based on <a href="http://backbonejs.org">Backbone.js</a> and <a href="http://twitter.github.com/bootstrap">Twitter Bootstrap</a>.</p>\n  <a class="btn btn-large btn-primary" href="//datapimp.gitub.com/luca/downloads/luca-latest.zip">Download</a>\n\n  <ul class="links">\n    <li>\n      <i class="icon icon-github" />\n      <a href="https://github.com/datapimp/luca">Github Project</a>\n    </li>\n    <li>\n      <a href="#examples">Examples</a>\n    </li>\n    <li>\n      <a href="#contribute">Contribute</a>\n    </li>\n    <li>\n      Version ',  Luca.VERSION ,'\n    </li>\n  </ul>\n\n</div>\n\n<div id="features" class="row-fluid">\n  <div class="span4">\n    <h3><i class="icon icon-coffee" /> Coffeescript, player.</h3>\n    <p>\n      Luca allows you to write most of your app in Coffeescript.  Most of the structural markup is taken care of for you, and Bootstrap handles a lot of CSS styling for you already. We find that this allows us to develop apps and focus primarily on their functionality and interaction first.  \n    </p>\n\n    <p>This also makes it very easy to render your app on the client and on the server.</p> \n  </div>\n  <div class="span4">\n    <h3><i class="icon icon-sitemap" /> Component Driven Design</h3>\n    <p>Luca encourages you to design your app as a library of components: re-usable, well encapsulated interface elements with their own concerns.  Luca provides ways of joining components together to form more complex pieces which get integrated into the pages of your application.</p> \n    <p>As your app grows to a certain level, you will find that you have built up a large library of patterns and tools that you can begin to develop new features very quickly without having to solve the same design problems over and over.</p>\n  </div>\n  <div class="span4">\n    <h3><i class="icon icon-wrench" /> Developer Tools</h3>\n    <p>Luca comes with a variety of tools that make developing large browser applications much easier. </p>\n    <ul class="nav">\n      <li><a href="#">Code Sync</a></li>\n      <li><a href="#">Generated Documentation</a></li>\n      <li><a href="#">In browser prototype</a></li>\n    </ul> \n  </div>\n</div>\n\n<div>\n  A labor of love by <a href="http://twitter.com/soederpop">@soederpop</a> for my son and my comrades at <a href="https://benchprep.com">@benchprep</a>. MIT Licensed.\n</div>\n\n<div>\n  <a href="https://github.com/datapimp/luca/issues">Issues</a>\n  <a href="https://github.com/datapimp/luca/blob/master/CHANGELOG">Changelog</a>\n</div>');}return __p.join('');}
+    </div>
+    <script src='//datapimp.github.com/luca/vendor/assets/javascripts/luca-dependencies.min.js' type='text/javascript'></script>
+    <script src='//datapimp.github.com/luca/vendor/assets/javascripts/luca.min.js' type='text/javascript'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js' type='text/javascript'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/coffee-script/1.4.0/coffee-script.min.js' type='text/javascript'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/less.js/1.3.3/less.min.js' type='text/javascript'></script>
+    <script src="../../../../app/assets/javascripts/dependencies.js" type="text/javascript"></script>
+    <script src="../../../../app/assets/javascripts/site.js" type="text/javascript"></script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.views.ExampleDocs"),e["extends"]("Docs.views.ComponentDocumentation"),e.defines({collection:"docs_documentation",displayHeader:!0,beforeRender:function(){var e,t=this;e=this.collection.detect(function(e){return e.get("type_alias")===t.example});if(e!=null)return this.loadComponent(e)}})}).call(this);

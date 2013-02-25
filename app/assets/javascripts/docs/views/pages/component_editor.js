@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.views.ComponentEditor"),e["extends"]("Luca.Container"),e.privateConfiguration({rowFluid:!0}),e.contains({span:4,name:"templates",type:"code_editor"},{span:4,name:"styles",type:"code_editor"},{span:4,name:"coffeescripts",type:"code_editor"}),e.defines({index:function(){return 1}})}).call(this);

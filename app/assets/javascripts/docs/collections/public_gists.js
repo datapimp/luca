@@ -1,0 +1,1 @@
+(function(){var e;e=Docs.register("Docs.collections.PublicGists"),e["extends"]("Luca.Collection"),e.defines({fetch:Backbone.Collection.prototype.fetch})}).call(this);
