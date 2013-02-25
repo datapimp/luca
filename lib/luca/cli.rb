@@ -65,3 +65,4 @@ end
 require "luca/cli/generate"
 require "luca/cli/watch"
 require "luca/cli/server"
+require "luca/cli/sync"
