@@ -42,7 +42,7 @@
 # named syncpad.coffee, syncpad.css.scss, syncpad.jst.ejs.haml, etc will be evaluated live when you change
 # them in your editor.  I personally use this to experiment with code / css and get immediate results without
 # needing to refresh the browser.
-codeManager = Luca.register     "Luca.CodeSyncManager"
+codeManager = Luca.register     "Docs.CodeSyncManager"
 codeManager.extends             "Luca.SocketManager"
 
 codeManager.publicConfiguration

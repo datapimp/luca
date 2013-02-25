@@ -1,8 +1,13 @@
 view = Luca.register      "Docs.views.CodeEditor"
 view.extends              "Luca.View"
 
-view.privateConfiguration
-  tagName: "textarea"
+view.publicMethods
+  # gets the value of the code mirror instance 
+  getValue: ()->
+
+  # runs the value of the editor through the appropriate
+  # compiler for the current mode of the editor
+  getCompiledValue: ()->
 
 view.publicConfiguration
   # CodeMirror option.  This will control which theme is applied
@@ -25,7 +30,16 @@ view.publicConfiguration
   # whether or not to wrap lines when they reach past the set limit
   lineWrapping: false
 
+  # display the line numbers in the gutter
+  lineNumbers: true
+
 view.privateConfiguration
+  # used to debounce the editor change event.  ensures that the callback
+  # will only be called once every N milliseconds.
+  changeThrottle: 250
+  bindMethods:[
+    "onEditorChange"
+  ]
   codeMirrorOptions: {}
   codeMirrorConfigKeys:[
     "theme"
@@ -37,9 +51,15 @@ view.privateConfiguration
   ]
 
 view.privateMethods  
+  onEditorChange: ()->
+
   afterRender: ()->
+    @$el.append("<div class'editor-toolbar'>#{@name}</div>")
+    @$el.append("<div class'editor-el' />")    
     defaults = _(@).pick( @codeMirrorConfigKeys... )
     options = _(@codeMirrorOptions).defaults(defaults)
-    @codeMirror = window.CodeMirror.fromTextArea( @$el[0], options)
+    replacementEl = @$('div').eq(1)[0]
+    @codeMirror = window.CodeMirror(replacementEl, options)
+    @codeMirror.on "change", _.debounce(@onEditorChange, @changeThrottle)
 
 view.register()
