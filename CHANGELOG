@@ -275,5 +275,15 @@
 
 0.9.88
   - Fixed a bug in StateModel concern
-  - Luca.View which define an @_events property on their prototypes will have 
+  - Luca.View which define an @_inheritEvents property on their prototypes will have 
     that event configuration persist into @events of views which extend from them
+
+0.9.9
+  - Added luca executable which includes:
+    - documentation generator
+    - sync command for running Luca.CodeSyncManager in development
+  - Removes some unused components
+  - API changes for Luca.components.Controller
+  - Removing rails dependencies
+  - Middleman site for documentation and examples 
+  - Improving documentation for core components

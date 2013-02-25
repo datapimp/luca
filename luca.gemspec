@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Jonathan Soeder"]
   s.email       = ["jonathan.soeder@gmail.com"]
   s.homepage    = "http://datapimp.github.com/luca"
-  s.summary     = "A Backbone.JS Component Framework"
-  s.description = "This gem allows you to use the luca-ui backbone.js component framework easily with the assets pipeline"
+  s.summary     = "Component framework based on backbone.js and twitter boostrap"
+  s.description = "This gem allows you to use the luca framework easily with the assets pipeline in rails"
 
   s.required_rubygems_version = ">= 1.3.6"
 
