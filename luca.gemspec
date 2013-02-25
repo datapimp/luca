@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency "redcarpet", "~> 2.2.2"
   s.add_dependency "activesupport", ">= 3.2.12"
   s.add_dependency "sprockets", ">= 2.4.5"
-  s.add_dependency "listen", ">= 2.4.5"
+  s.add_dependency "listen", ">= 0.7.3"
   s.add_dependency "faye", ">= 0.8.8"
   s.add_dependency "thin"
 
