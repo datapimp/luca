@@ -4,7 +4,7 @@ gem "sinatra", :require => "sinatra/base"
 gem 'coffee-script', '>= 2.2.0'
 gem "uglifier", '>= 1.0.3'
 gem "sass", '>= 3.1.10'
-gem "sprockets", ">= 2.4.5"
+gem "sprockets", '>= 2.2.2'
 gem 'ejs'
 gem 'haml'
 gem 'redcarpet'

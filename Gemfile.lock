@@ -145,6 +145,6 @@ DEPENDENCIES
   redcarpet
   sass (>= 3.1.10)
   sinatra
-  sprockets (>= 2.4.5)
+  sprockets (>= 2.2.2)
   thin
   uglifier (>= 1.0.3)
