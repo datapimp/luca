@@ -28,7 +28,7 @@ namespace :release do
       fh.puts(App.sprockets["luca.css"].to_s)
     end
     File.open( File.join(App.root,'tmp','luca.js'), 'w+' ) do |fh|
-      fh.puts(App.sprockets["luca.js"].to_s)
+      fh.puts(App.sprockets["luca.js"].to_s + "\n\n\nLuca.VERSION='#{ Luca::Version }';")
     end
     File.open( File.join(App.root,'tmp','luca-development.js'), 'w+' ) do |fh|
       fh.puts(App.sprockets["luca/development.js"].to_s)
