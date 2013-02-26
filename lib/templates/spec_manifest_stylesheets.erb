@@ -1,0 +1,11 @@
+<% for stylesheet in @stylesheets %>
+<% if File.directory?(stylesheet) %>
+/*
+ * require_tree <%= stylesheet %>
+*/
+<% else %>
+/*
+ * require <%= stylesheet %>
+*/
+<% end %>
+<% end %>

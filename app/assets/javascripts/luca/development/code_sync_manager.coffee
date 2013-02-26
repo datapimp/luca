@@ -1,59 +1,69 @@
-# The `Luca.CodeSyncManager` works along with the Guard adapter that ships with 
-# the ruby gem.  This is still an experimental option at this point, but I use
-# it regularly on all of my Luca projects and it allows me to develop my applications
-# directly from my editor and rarely have the need to refresth the browser to work with
-# javascript and css changes.
+# The `Luca.CodeSyncManager` is a client side component that works with the luca
+# executable that ships with the gem.  It listens for notifications of asset changes
+# (scss,coffeescript,templates,etc) in your development directory, and applies them to the running session.
 #
-# #### Similar to LiveReload
-# It is similar to projects like LiveReload, except that it knows a lot about the luca
-# framework and application conventions and uses this knowledge to optimize live reloading
-# behavior, avoiding the need to do full browser reloads.  This typically doesn't work well
-# with state heavy applications, since the browser reloading doesn't always construct application
-# state exactly as you need it when you're making your css changes etc.
+# It works similar to tools like 'LiveReload' but without refreshing the entire page, and with direct integration
+# with your asset pipeline / sprockets configuration.  For Luca apps specifically, it also handles changes to
+# component definitions more elegantly by updating live instances of your component prototypes and event handlers
+# so that you don't have to refresh so often.
 #
-# #### 1) Add an entry to your Guardfile:
-#         guard 'luca' do
-#           watch(%r{^app/assets/stylesheets/(.+)}) do |match|
-#               path = match.last
-#           end 
-  
-#           watch(%r{^app/assets/javascripts/(.+)}) do |match|
-#             path = match.last
-#           end
-#         end
 #
-# #### 2) Add the `CodeSyncManager` to your development mode application. 
-# **Note:** This expect
-# you to have a `Luca.SocketManager` capable backend such as faye or socket.io running. It
-# handles the same configuration options as the `Luca.SocketManager` as well.
+# #### Setup
 #
-#               app = Luca()
-#               app.codeSyncManager = new Luca.CodeSyncManager
-#                 host: "//localhost:9292/faye"
-#                 channel: "/changes"
-#               app.codeSyncManager.trigger("ready")
+# Run the luca command from your project root, and specify the name of the application you are watching:
+#       
+#       bundle exec luca sync app_name
+#       
+# The sync server runs a faye process on port 9295.  You can specify options on the command line.
 #
-# #### 3) Run guard.  
-# Edit your files, watch your changes appear.
+# In your browser, you can control various settings by setting the `Luca.config` values.         
 #
-# ### Using the Syncpad
+# - Luca.config.codeSyncHost
+# - Luca.config.codeSyncChannel
+# - Luca.config.codeSyncStylesheetMode
 #
-# The syncpad is a special naming convention for development scratch paper in your editor.  A file
-# named syncpad.coffee, syncpad.css.scss, syncpad.jst.ejs.haml, etc will be evaluated live when you change
-# them in your editor.  I personally use this to experiment with code / css and get immediate results without
-# needing to refresh the browser.
+# #### Including in your Development Application 
+#
+# After your Luca.Application renders, just call the Luca.CodeSyncManager.setup method
+# in the context of your application.
+# 
+#     app = Luca.getApplication()
+#     app.on "after:render", Luca.CodeSyncManager.setup, app
+#
+# Or in the initialize method of your application:
+#     ... 
+#     initialize: ()->
+#       @on "after:render", Luca.CodeSyncManager.setup, @ 
+#     ...
+#
+# #### Syncpad
+#
+# Any assets named syncpad: syncpad.coffee, syncpad.css.css, syncpad.jst.ejs, etc are treated specially by the
+# code sync utility.  The syncpad assets are used to provide a scratch pad / test environment for your application.
+# You can write coffeescript or sass and have them live evaluated in your running browser.  
 codeManager = Luca.register     "Luca.CodeSyncManager"
 codeManager.extends             "Luca.SocketManager"
 
 codeManager.publicConfiguration
-  host:       Luca.config.codeSyncHost || "//localhost:9292/faye"
-  namespace:  "luca"
-  channel:    Luca.config.codeSyncChannel || "/luca-code-sync"
+  # What URL will the faye server be available at?
+  host:             (Luca.config.codeSyncHost ||= "//localhost:9295/luca")
+
+  # Which channel does the server side process publish changes to? You shouldn't need
+  # to change this ever unless you are using your own faye server.
+  channel:          (Luca.config.codeSyncChannel ||= "/code-sync")
+
+  # Available options are single, and intelligent.  
+  #   - single: loads the stylesheet independently
+  #   - intelligent:  loads the stylesheet, and then finds where in the DOM that stylesheet
+  #                   was loaded and attempts to reload any styles that came after so that
+  #                   rules get set appropriately.
+  styleSheetMode:   (Luca.config.codeSyncStylesheetMode ||= "single")
 
 codeManager.classMethods
+  # The preferred way of including code sync functionality into your application.
   setup: (options={})->
-    @codeSyncManager = new Luca.CodeSyncManager(options) 
-    @codeSyncManager.trigger "ready"
+    @codeSync = new Luca.CodeSyncManager(options) 
+    @codeSync.trigger "ready"
 
 codeManager.privateMethods
   initialize: (@attributes={})->
@@ -137,7 +147,7 @@ codeManager.privateMethods
   processStylesheetChange: (change={})->
     return if _.isEmpty(change)
 
-    if change.path?.match(/syncpad/) or Luca.config.codeSyncStylesheetMode is "single"
+    if change.path?.match(/syncpad/) or @styleSheetMode is "single"
       @syncStylesheet(change)
     else
       @replaceStylesheetAndEverythingAfter(change.path)
