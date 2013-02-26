@@ -22,12 +22,15 @@ app.configuration
     "":                                 "home#index"
     "docs":                             "browse_source#index"
     "docs/:component_name":             "browse_source#show"
-    "get-started":                      "getting_started#index"
     "examples":                         "examples_browser#index"
     "examples/:example_name/:section":  "examples_browser#show"
     "examples/:example_name":           "examples_browser#show"
     "component_editor":                 "component_editor#index"
 
+    "get-started":                      "getting_started#index"
+    "code-sync":                        "code_sync#index"
+    "documentation-generator":          "documentation_generator#index"
+    "free-persistence":                 "free_persistence#index"
   stateChangeEvents:
     "page": "onPageChange"
 
@@ -53,13 +56,26 @@ app.contains
 ,
   component: "examples_browser"
 ,
-  component: "component_editor"
-,
-  name: "getting_started"
-  type: "page"
-  layout: "pages/getting_started"
-  index: _.once ()->
-    @$('pre').addClass('prettyprint')
-    window.prettyPrint() 
+  name: "pages"
+  type: "controller"
+  defaults:
+    type: "page"
+    index: _.once ()->
+      @$('pre').addClass('prettyprint')
+      window.prettyPrint()  
+  components:[
+    name: "getting_started"
+    layout: "pages/getting_started"
+  ,
+    name: "code_sync"
+    layout: "pages/code_sync"
+  ,
+    name: "documentation_generator"
+    layout: "pages/documentation_generator"
+  ,
+    name: "free_persistence"
+    layout: "pages/free_persistence"
+  ]
+
 
 app.register()
