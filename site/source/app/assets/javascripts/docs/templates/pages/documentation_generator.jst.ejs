@@ -1,2 +1,89 @@
-<h2>Documentation as a first class citizen</h2>
+<h2>Component Definitions with a literate style</h2>
+<h3>Documentation as a first class citizen</h3>
 <p>Your luca components are your documentation.</p>
+<p>For an example of what i'm talking about, check out <a href="#docs">our documentation</a> or the <a href="#examples">Examples Browser</a> which shows the component documentation and source side by side.</p>
+<p>The gem ships with a command line interface which allows you to generate a documentation source file that you can load into a special viewer component.  This site is an example of the documentation generator in action.</p>
+<pre>bundle exec luca generate docs --name=application_name --export-location=./path/to/javascripts</pre> 
+<p>The header for a Luca component provides you with a very readable description of what the component is, what it extends from, any custom mixins that it relies on, as well as special header comments which get rendered through markdown to generate documentation for you.</p>
+<pre>
+# The header comments in your Luca components get rendered as
+# markdown by the Luca documentation tool that ships with the gem.
+# #### Any type of Markdown is valid here
+# Here is an code example:
+#
+#         view = new MyApp.views.CustomComponent()
+#
+# We start by creating a `Luca.ComponentDefinition` object, and 
+# assigning it to the local variable 'view':
+view = MyApp.register        "MyApp.views.CustomComponent"
+
+# We specify which component this view extends from.  The default
+# component is `Luca.View`.  When all is said and done, the
+# object we build will be passed to MyApp.views.BaseView.extend
+view.extends                 "MyApp.views.BaseView"
+
+# Mixins / Concerns are special objects which are used to decorate
+# your components with functionality.  They provide an alternative to
+# inheritance. We can specify which mixins our component uses this way, 
+# which places them at the top of the definition file and makes it very 
+# easy to read and understand the behavior of this component.
+view.mixesIn                 "ViewConcernOne",
+                             "ViewConcernTwo",
+                             "SomeOtherViewConcern"
+</pre>
+<p>Rather than having a single large Backbone.View.extend call which passes all properties, methods, etc in one go, the Luca component definition offers you more fine grained control over definining your prototype so that you can specify the intent of each property or method.  Is it public or private?  This makes extending from your component or modifying them in the future much easier, as they are truly self documenting.</p>
+<pre>
+view.publicConfiguration
+  # Documentation for this property is also markdown
+  # Acceptable values are:
+  # - this
+  # - that
+  # - something else
+  someProperty: "value"
+
+  # I love it.
+  someOtherProperty: "value"
+
+view.publicMethods
+  # The comments that exist above a method definition are also used by 
+  # the documentation generator to provide documentation for your methods.
+  someMethod: ()->
+    @doSomething()
+</pre>
+<p>Private methods and properties are the same as everything else, but this lets the developer know that these are not necessarily meant to be modified or used by components which extend from this.</p>
+<pre>
+view.privateMethods
+  somePrivateMethod: ()->
+    console.log "hi."
+</pre>
+<p>It is generally a good practice to finish off the component definition, by registering it with the component registry:</p>
+<pre>view.register()</pre>
+<p><strong>Note:</strong>The final call to <code>register()</code> is required.  It is what ultimately makes the call to <code>Backbone.View.extend</code> when all is said and done.</p>
+
+<p>Each of these methods allow you to gradually build an object which gets passed to your extend call</p>
+<ul>
+  <li>methods</li>
+  <li>publicMethods</li>
+  <li>privateMethods</li>
+  <li>configuration</li>
+  <li>publicConfiguration</li>
+  <li>privateConfiguration</li>
+  <li>classMethods</li>
+</ul>
+
+<h3>Class methods</h3>
+<p>In addition to specifying instance properties and methods, you can define class methods as well:</p>
+<pre>
+view.classMethods
+  # This method will be available as MyApp.views.CustomComponent.customClassMethod()
+  customClassMethod: ()->
+    console.log "Called MyApp.views.CustomComponent.customClassMethod()"
+</pre>
+<h3>afterDefinition, beforeDefinition hooks</h3>
+<pre>
+view.beforeDefinition (componentDefinitionProxy)->
+  console.log "This method will be called before the component is defined."
+
+view.afterDefinition (componentDefinitionProxy)->
+  console.log "This method will be called after the component is defined."
+</pre>
