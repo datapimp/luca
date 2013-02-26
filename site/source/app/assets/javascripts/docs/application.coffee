@@ -1,3 +1,4 @@
+
 app = Docs.register       "Docs.Application"
 app.extends               "Luca.Application"
 app.configuration
@@ -37,8 +38,8 @@ app.privateMethods
   afterRender: ()->
     Luca.Application::afterRender?.apply(@, arguments)
     if window.location.host.match /localhost/
-      @codeSyncManager = new Docs.CodeSyncManager({}, host:"//localhost:9292/faye", channel:"/luca-code-sync")
-      @codeSyncManager.trigger("ready")
+      @codeSync = new Docs.CodeSyncManager({}, host:"//localhost:9295/faye", channel:"/luca-code-sync")
+      @codeSync.trigger("ready")
 
   _onPageChange: _.debounce (state, newPage)->
     $('li', @mainNavElement()).removeClass 'active'

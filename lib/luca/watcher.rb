@@ -2,11 +2,13 @@ module Luca
   class Watcher
     attr_reader :app,
                 :listener,
-                :notifier
+                :notifier,
+                :id
 
     def initialize(name, options={})
       @app      = Luca::LucaApplication.new(name, options)
       @notifier = FayeNotifier.new(options[:url] || "//localhost:9292/faye")
+      @id       = rand(36**36).to_s(36).slice(0,8)
       @listener = Listen.to(app.assets_root)
                     .filter(options[:filter] || /(\.coffee|\.css|\.jst|\.mustache)/)
                     .latency(options[:latency] || 1)
@@ -15,8 +17,17 @@ module Luca
                     end
     end
 
+    def throttle?
+      !@last_change_detected_at.nil? && seconds_since_last_change < 5
+    end
+
+    def seconds_since_last_change
+      Time.now.to_i - (@last_change_detected_at || 0).to_i
+    end
+
     def notify modified, added, removed
-      puts "Detected changes in #{ (modified + added).inspect }"
+      return if throttle?
+      @last_change_detected_at = Time.now.to_i 
       begin 
         payload = change_payload_for(modified + added)
         notifier.publish("/luca-code-sync", payload)
@@ -37,7 +48,6 @@ module Luca
     end
 
     def start
-      puts "Looking for changes in #{ app.application_name }: #{ app.assets_root }"
       @listener.start
     end
   end
