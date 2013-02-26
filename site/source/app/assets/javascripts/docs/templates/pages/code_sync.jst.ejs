@@ -1,0 +1,44 @@
+<h2>Say goodbye to browser refreshing...</h2>
+<p>One very painful aspect of developing single page applications is having to refresh the browser all the time, and then restore the state of your application to where it was when you were testing a particular feature.</p>
+<p>Tools like LiveReload exist, and they're great, except they don't always work well with the asset pipeline.</p>
+<p>The Luca gem ships with a <a href="#docs/Luca.CodeSyncManager">Luca.CodeSyncManager</a> and an easy command line utility which keeps your application code and stylehseets in sync with the running browser session.</p>
+
+<p>The <code>Luca.CodeSyncManager</code> is a client side component that works with the luca
+executable that ships with the gem.  It listens for notifications of asset changes
+(scss,coffeescript,templates,etc) in your development directory, and applies them to the running session.
+It works similar to tools like 'LiveReload' but without refreshing the entire page, and with direct integration
+with your asset pipeline / sprockets configuration.  For Luca apps specifically, it also handles changes to
+component definitions more elegantly by updating live instances of your component prototypes and event handlers
+so that you don't have to refresh so often.</p>
+
+<h4>Setup</h4>
+
+<p>Run the luca command from your project root, and specify the name of the application you are watching:</p>
+
+<pre class="prettyprint"><code><span class="pln">  bundle </span><span class="kwd">exec</span><span class="pln"> luca sync app_name</span></code></pre>
+
+<p>The sync server runs a faye process on port 9295.  You can specify options on the command line.
+In your browser, you can control various settings by setting the <code>Luca.config</code> values.<br>
+- Luca.config.codeSyncHost
+- Luca.config.codeSyncChannel
+- Luca.config.codeSyncStylesheetMode</p>
+
+<h4>Including in your Development Application</h4>
+
+<p>After your Luca.Application renders, just call the Luca.CodeSyncManager.setup method
+in the context of your application.</p>
+
+<pre class="prettyprint"><code><span class="pln">app </span><span class="pun">=</span><span class="pln"> </span><span class="typ">Luca</span><span class="pun">.</span><span class="pln">getApplication</span><span class="pun">()</span><span class="pln">
+app</span><span class="pun">.</span><span class="pln">on </span><span class="str">"after:render"</span><span class="pun">,</span><span class="pln"> </span><span class="typ">Luca</span><span class="pun">.</span><span class="typ">CodeSyncManager</span><span class="pun">.</span><span class="pln">setup</span><span class="pun">,</span><span class="pln"> app</span></code></pre>
+
+<p>Or in the initialize method of your application:
+    ... 
+    initialize: ()-&gt;
+      @on "after:render", Luca.CodeSyncManager.setup, @ 
+    ...</p>
+
+<h4>Syncpad</h4>
+
+<p>Any assets named syncpad: syncpad.coffee, syncpad.css.css, syncpad.jst.ejs, etc are treated specially by the
+code sync utility.  The syncpad assets are used to provide a scratch pad / test environment for your application.
+You can write coffeescript or sass and have them live evaluated in your running browser.  </p>

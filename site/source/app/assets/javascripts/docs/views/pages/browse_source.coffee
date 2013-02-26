@@ -44,3 +44,5 @@ view.privateMethods
     row.addClass('info')
     details.load(model)
 
+    Docs().router.navigate("#docs/#{ model.get('class_name') }", false)
+

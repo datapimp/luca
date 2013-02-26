@@ -287,3 +287,7 @@
   - Removing rails dependencies
   - Middleman site for documentation and examples 
   - Improving documentation for core components
+
+0.9.91
+  - Removed code mirror from development file
+  - Updated defaults for code sync
