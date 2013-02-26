@@ -1,9 +1,0 @@
-#= require ./vendor/js-beautify.js
-#= require ./vendor/codemirror.js
-#= require ./vendor/coffeescript.js
-#= require ./vendor/css.js
-#= require ./vendor/htmlmixed.js
-#= require ./vendor/javascript.js
-#= require ./docs-docs.js
-#= require ./luca-docs.js
-#= require ./docs
