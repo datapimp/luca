@@ -14,7 +14,9 @@ namespace :release do
   task :zip => :environment do
     `cp vendor/assets/javascripts/luca-development.min.js vendor/assets/javascripts/luca.min.js vendor/assets/javascripts/luca-dependencies.min.js vendor/assets/stylesheets/luca-ui.css .`  
     `zip downloads/luca-#{ Luca::Version }.zip luca.min.js luca-dependencies.min.js luca-development.min.js luca-ui.css`
-    `mv luca-development.min.js luca-ui.css luca.min.js luca-dependencies.min.js downloads`
+    `cp luca-development.min.js luca-ui.css luca.min.js luca-dependencies.min.js downloads`
+    `mv luca-development.min.js luca.min.js luca-dependencies.min.js site/source/app/assets/javascripts/vendor`
+    `rm -f luca-ui.css`
   end
 
   desc "Compile and Minify"

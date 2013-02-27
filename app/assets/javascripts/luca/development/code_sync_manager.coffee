@@ -46,7 +46,7 @@ codeManager.extends             "Luca.SocketManager"
 
 codeManager.publicConfiguration
   # What URL will the faye server be available at?
-  host:             (Luca.config.codeSyncHost ||= "//localhost:9295/luca")
+  host:             (Luca.config.codeSyncHost ||= "//localhost:9295/faye")
 
   # Which channel does the server side process publish changes to? You shouldn't need
   # to change this ever unless you are using your own faye server.
