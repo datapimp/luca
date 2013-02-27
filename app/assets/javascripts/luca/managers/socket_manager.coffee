@@ -71,19 +71,10 @@ socketManager.defines
     @set "providerAvailable", true
 
   providerSourceUrl: ()->
+    return Luca.config.socketManagerProviderScript if Luca.config.socketManagerProviderScript?
+    
     switch @get('provider')
       when "socket.io" then "#{  @get('host')  }/socket.io/socket.io.js"
       when "faye.js" then "#{  @get('host')  }/faye.js"
 
   loadProviderSource: ()->
-    script = document.createElement 'script'
-    script.setAttribute "type", "text/javascript"
-    script.setAttribute "src", @providerSourceUrl()
-    script.onload = _.bind(@providerSourceLoaded,@)
-
-    if Luca.util.isIE()
-      script.onreadystatechange = ()=>
-        if script.readyState is "loaded"
-          @providerSourceLoaded()
-
-    document.getElementsByTagName('head')[0].appendChild script
