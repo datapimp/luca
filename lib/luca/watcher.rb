@@ -7,7 +7,7 @@ module Luca
 
     def initialize(name, options={})
       @app      = Luca::LucaApplication.new(name, options)
-      @notifier = FayeNotifier.new(options[:url] || "//localhost:9295/luca")
+      @notifier = FayeNotifier.new(options[:url] || "//localhost:9295/faye")
       @id       = rand(36**36).to_s(36).slice(0,8)
       @listener = Listen.to(app.assets_root)
                     .filter(options[:filter] || /(\.coffee|\.css|\.jst|\.mustache)/)

@@ -78,4 +78,5 @@ socketManager.defines
       when "faye.js" then "#{  @get('host')  }/faye.js"
 
   loadProviderSource: ()->
-    Luca.util.loadScript(@providerSourceUrl, _.bind(@,@providerSourceLoaded) )
+    Luca.util.loadScript @providerSourceUrl(), ()=>
+      @providerSourceLoaded()
