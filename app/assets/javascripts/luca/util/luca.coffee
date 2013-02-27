@@ -96,21 +96,48 @@ Luca.util.selectProperties = (iterator, object, context)->
   values = _( object ).values()
   _( values ).select( iterator )
 
-Luca.util.loadScript = (url, callback) ->
+Luca.util.loadScript = (url, options={}, callback) ->
+  loaded = Luca.util.__loadedScripts ||= {}
+  timers = Luca.util.__scriptTimers ||= {}
+
+  if _.isFunction(options) and !callback?
+    callback = options
+    options = {}
+
+  head= document.getElementsByTagName('head')[0];
   script = document.createElement("script")
+  script.url = url
   script.type = "text/javascript"
 
-  if (script.readyState)
-    script.onreadystatechange = ()->
-      if script.readyState == "loaded" || script.readyState == "complete"
-        script.onreadystatechange = null
-        callback()
-      else
-        script.onload = ()->
-          callback()
+  that = @
+  onLoad = ()->
+    if _.isFunction(callback)
+      callback.call(that, url, options, script) 
 
-  script.src = url
-  document.body.appendChild(script)
+    head.removeChild(script)
+    loaded[url] = true
+
+  if options.once is true && loaded[url]
+    return false
+
+  head.appendChild(script)
+
+  script.onreadystatechange = ()->
+    if script.readyState is "loaded" or script.readyState is "complete"
+      onLoad()
+
+  script.onload = onLoad
+
+  if navigator?.userAgent.match(/WebKit/)
+    timers[url] = setInterval ()->
+      onLoad()
+      clearInterval(timers[url])
+    , 10
+
+
+
+
+
 
 Luca.util.make = (tagName="div", attributes={}, contents="")->
   Luca.View::make.apply(@, arguments)

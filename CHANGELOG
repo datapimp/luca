@@ -291,3 +291,4 @@
 0.9.91
   - Removed code mirror from development file
   - Updated defaults for code sync
+  - Updated Luca.util.loadScript for browser compatability

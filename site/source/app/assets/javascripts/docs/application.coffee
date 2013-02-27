@@ -40,10 +40,12 @@ app.privateMethods
 
   afterRender: ()->
     Luca.Application::afterRender?.apply(@, arguments)
-
+    app = @
     if window.location.host.match(/localhost/)
-      Luca.CodeSyncManager.setup.call(@)
-
+      console.log "loading...", "/app/assets/javascripts/vendor/luca-development.min.js"
+      Luca.util.loadScript "/app/assets/javascripts/vendor/luca-development.min.js", _.delay ()->
+        Luca.CodeSyncManager.setup.call(app)
+      , 20
 
   _onPageChange: _.debounce (state, newPage)->
     $('li', @mainNavElement()).removeClass 'active'
