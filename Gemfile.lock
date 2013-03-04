@@ -138,7 +138,7 @@ DEPENDENCIES
   haml_assets
   hogan_assets
   jasmine
-  listen
+  listen (>= 0.7.2)
   pry
   rake
   rb-fsevent (>= 0.9.1)

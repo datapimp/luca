@@ -12,7 +12,7 @@ gem 'rake'
 gem 'hogan_assets'
 gem 'haml_assets'
 gem 'activesupport', '>= 3.2.12'
-gem 'listen'
+gem 'listen', '>= 0.7.2'
 gem 'faye'
 gem 'thin'
 
