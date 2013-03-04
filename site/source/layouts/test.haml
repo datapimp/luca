@@ -1,0 +1,28 @@
+!!!5
+/[if lt IE 7] <html class="no-js lt-ie9 lt-ie8 lt-ie7">
+/[if IE 7] <html class="no-js lt-ie9 lt-ie8">
+/[if IE 8] <html class="no-js lt-ie9">
+%html.no-js
+  %head
+    %meta{:charset => "utf-8"}
+    %meta{:content => "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible"}
+    
+    -# To set titles and descriptions globally and for each individual page, see /DOCS.md
+    %title Better Backbone.js Apps with Luca 
+    %meta{:content => page_description, :name => "description"}
+    
+    %meta{:content => "width=device-width", :name => "viewport"}
+    
+    = javascript_include_tag "vendor/modernizr-2.6.1.min"
+    %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css"}
+    %link{:rel=>"stylesheet",:href=>"//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css"}
+    %link{:rel=>"stylesheet",:href=>"//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css"}
+
+  %body
+    = yield
+    %script{:type=>"text/javascript",:src=>"//localhost:9295/faye/faye.js"}
+    %script{:type=>"text/javascript",:src=>"/app/assets/javascripts/vendor/luca-dependencies.min.js"}
+    %script{:type=>"text/javascript",:src=>"http://searls.github.com/jasmine-all/jasmine-all-min.js"}
+    = javascript_include_tag "luca"
+    = javascript_include_tag "luca/development"
+    = javascript_include_tag "test"

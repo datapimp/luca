@@ -18,9 +18,9 @@ set :markdown_engine, :redcarpet
 # Page options, layouts, aliases and proxies
 ###
 
-page "documentation.html", :layout => false
 # Per-page layout changes:
-# 
+
+page "/test.html", :layout => :test 
 # With no layout
 # page "/path/to/file.html", :layout => false
 # 

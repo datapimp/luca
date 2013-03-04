@@ -22,8 +22,11 @@ socketManager.defines
     provider: "faye.js"
 
   initialize: (@attributes={})->
-    unless @providerLibraryIsAvailable()
+    if @providerLibraryIsAvailable()
       @loadProviderSource() 
+    else
+      @providerSourceLoaded()
+
 
     Luca.Model::initialize?.apply(@, arguments)
 

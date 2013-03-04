@@ -146,7 +146,7 @@ module Luca
       options[:assets_root] || File.join(project_root,"app","assets")
     end
    
-    protected
+    #protected
       def template_extensions
         options[:template_extensions] || ['jst.ejs.haml','mustache'] 
       end  

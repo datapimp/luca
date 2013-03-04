@@ -16,6 +16,10 @@ module Luca
         end
 
         fork do
+          listen(application_name)
+        end
+
+        fork do
           server(application_name)
         end
 
@@ -25,15 +29,24 @@ module Luca
       no_tasks do
         def watch application_name
           puts "Watching application assets for changes..."
-          watcher = Luca::Watcher.new(application_name, options)
+          watcher = Luca::CodeSync::Watcher.new(application_name, options)
+          puts "Directories:"
+          puts "- #{ watcher.app.coffeescripts_location }"
+          puts "- #{ watcher.app.stylesheets_location }"
           watcher.start
         end        
 
         def server application_name
           puts "Running code sync faye process on channel #{ options[:channel] } port #{ options[:port] }"
-          process = Luca::Server.new(:mount=>"/#{ options[:channel] }",:timeout=>options[:timeout])
-          process.listen(options[:port])
+          process = Luca::CodeSync::Server.new(:mount=>"/#{ options[:channel] }",:timeout=>options[:timeout])
+          process.start(options[:port])
         end      
+
+        def listener application_name
+          puts "Listening for writes from the client..."
+          listener = Luca::CodeSync::Listener.new(application_name, port: options[:port])
+          listener.start(options[:channel])
+        end
       end
     end
   end

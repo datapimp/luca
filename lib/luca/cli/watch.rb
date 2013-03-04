@@ -8,7 +8,7 @@ module Luca
       method_option :root, :default => Dir.pwd()
 
       def watch application_name
-        watcher = Luca::Watcher.new(application_name, options)
+        watcher = Luca::CodeSync::Watcher.new(application_name, options)
         watcher.start
       end
     end
