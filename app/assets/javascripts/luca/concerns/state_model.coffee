@@ -1,5 +1,6 @@
 
-stateModel = Luca.register("Luca.ViewState").extends("Luca.Model")
+stateModel = Luca.register("Luca.ViewState").extends("Backbone.Model")
+stateModel.register()
 
 Luca.concerns.StateModel =
   __onModelChange: (args...)->
@@ -15,11 +16,11 @@ Luca.concerns.StateModel =
     @stateful = @stateAttributes if @stateAttributes?
 
     return unless @stateful?
-    
+
     statefulView = @
 
     if _.isObject(@stateful) and not @defaultState?
-      @defaultState = @stateful 
+      @defaultState = @stateful
 
     @state ||= new Luca.ViewState(@defaultState || {})
 
@@ -33,7 +34,7 @@ Luca.concerns.StateModel =
 
     for key, value of @state.toJSON()
       hook = "on" + _.str.capitalize(key) + "Change"
-      getter = "get" + _.str.capitalize(key) 
+      getter = "get" + _.str.capitalize(key)
       unless _.isFunction(@[getter])
         1
       if _.isFunction(@[hook])
@@ -44,8 +45,8 @@ Luca.concerns.StateModel =
   __setupModelBindings: (direction="on")->
     statefulView = @
     for attribute, handler of @stateChangeEvents
-      fn = if _.isString(handler) then statefulView[handler] else handler 
-      
+      fn = if _.isString(handler) then statefulView[handler] else handler
+
       if attribute is "*"
         statefulView[direction]("state:change", fn, statefulView)
       else
@@ -54,5 +55,5 @@ Luca.concerns.StateModel =
     # Any time there is a model change event on the internal state machine
     # we will trigger a general state:change event on the component as well
     # as individual state:change:attribute events
-    state = statefulView.state 
+    state = statefulView.state
     statefulView.state[direction]("change", Luca.concerns.StateModel.__onModelChange, statefulView)
