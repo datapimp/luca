@@ -7,11 +7,38 @@ and clean single page applications.
 It uses twitter bootstrap compatible markup and css naming conventions, 
 making it possible to generate completely styled user interfaces with JSON alone.
 
+### Documentation Site and Examples
+
+[API Documentation](http://datapimp.github.io/luca#docs) 
+
+[Component Examples](http://datapimp.github.io/luca#examples)
+
+This is the app that runs the documentation site:
+
+[Sample App](https://github.com/datapimp/luca/tree/master/site/source/app/assets/javascripts)
+
+### Using the Library from CDN
+
+Include the Javascripts:
+
+```html
+<script type='text/javascript' src='//datapimp.github.io/luca/vendor/assets/javascripts/luca-dependencies.min.js'></script>
+<script type='text/javascript' src='//datapimp.github.io/luca/vendor/assets/javascripts/luca.min.js'></script>
+```
+
+Include the CSS:
+
+```html
+<link href='//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css' rel='stylesheet'>
+<link href='//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css' rel='stylesheet'>
+<link href='//datapimp.github.com/luca/vendor/assets/stylesheets/luca-ui.css' rel='stylesheet'>
+```
+
 ### Using With Rails Asset Pipeline
 
 ```ruby
   # Gemfile
-  gem 'luca', '>= 0.9.2', :git => "git@github.com:datapimp/luca.git" 
+  gem 'luca', :git => "git@github.com:datapimp/luca.git" 
 ```
 
 In your css manifest:
